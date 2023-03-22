@@ -6,6 +6,7 @@ using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles;
+using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.Victory.Conditions;
@@ -122,6 +123,10 @@ class ControllerManagerUpdatePatch
         //--以下ホスト専用コマンド--//
         if (!AmongUsClient.Instance.AmHost) return;
         //廃村
+        if (GetKeysDown(KeyCode.Return, KeyCode.D, KeyCode.LeftShift) && GameStates.IsInGame)
+        {
+            PlayerControl.LocalPlayer.InteractWith(PlayerControl.LocalPlayer, new UnblockedInteraction(new FatalIntent(), PlayerControl.LocalPlayer.GetCustomRole()));
+        }
         if (GetKeysDown(KeyCode.Return, KeyCode.L, KeyCode.LeftShift) && GameStates.IsInGame)
         {
             ManualWin manualWin = new(new List<PlayerControl>(), WinReason.HostForceEnd);
@@ -172,7 +177,7 @@ class ControllerManagerUpdatePatch
         }
         //自分自身を追放
         //--以下フリープレイ用コマンド--//
-        if (!GameStates.IsFreePlay) return;
+        if (!StaticOptions.NoGameEnd || Game.State is GameState.InLobby) return;
         //キルクールを0秒に設定
         if (Input.GetKeyDown(KeyCode.X))
         {

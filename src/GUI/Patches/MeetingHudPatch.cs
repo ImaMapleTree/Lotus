@@ -1,14 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
-using TOHTOR.Roles;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.RPC;
@@ -171,14 +169,14 @@ class MeetingHudStartPatch
                 Utils.SendMessage(message, p.PlayerId);
         });
         Game.GameStates.MeetingCalled++;
-        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.GetRawName()), NetUtils.DeriveDelay(0f));
-        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.GetRawName()), NetUtils.DeriveDelay(0.1f));
-        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.GetRawName()), NetUtils.DeriveDelay(0.2f));
-        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.GetRawName()), NetUtils.DeriveDelay(0.3f));
-        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.GetRawName()), NetUtils.DeriveDelay(0.4f));
-        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.GetRawName()), NetUtils.DeriveDelay(0.5f));
-        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.GetRawName()), NetUtils.DeriveDelay(0.6f));
-        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.GetRawName()), NetUtils.DeriveDelay(0.7f));
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.UnalteredName()), NetUtils.DeriveDelay(0f));
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.UnalteredName()), NetUtils.DeriveDelay(0.1f));
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.UnalteredName()), NetUtils.DeriveDelay(0.2f));
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.UnalteredName()), NetUtils.DeriveDelay(0.3f));
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.UnalteredName()), NetUtils.DeriveDelay(0.4f));
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.UnalteredName()), NetUtils.DeriveDelay(0.5f));
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.UnalteredName()), NetUtils.DeriveDelay(0.6f));
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcSetName(PlayerControl.LocalPlayer.UnalteredName()), NetUtils.DeriveDelay(0.7f));
     }
     public static void Postfix(MeetingHud __instance)
     {
@@ -218,7 +216,7 @@ public class HostMeetingPatch
     public static void Prefix(ShipStatus __instance, [HarmonyArgument(0)] PlayerControl reporter)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        reporter.GetDynamicName().RenderFor(PlayerControl.LocalPlayer);
+        reporter.NameModel().RenderFor(PlayerControl.LocalPlayer);
     }
 }
 

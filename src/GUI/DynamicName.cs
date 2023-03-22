@@ -1,4 +1,4 @@
-#nullable enable
+/*#nullable enable
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -90,12 +90,14 @@ public class DynamicName
         { UI.Misc, true }
     };
 
+    private Dictionary<byte, bool> hideAllDictionary = new();
+
     public DynamicName()
     {
         valueDictionary[UI.Name] = new DynamicString(DataManager.Player.Customization.Name);
         CustomRole role = CustomRoleManager.AllRoles.GetRandom();
         valueDictionary[UI.Role] = new DynamicString(role.RoleColor.Colorize(role.RoleName));
-        valueDictionary[UI.Subrole] = new DynamicString(/*CustomRoleManager.Static.Lovers.RoleColor*/Color.magenta.Colorize("♡"));
+        valueDictionary[UI.Subrole] = new DynamicString(/*CustomRoleManager.Static.Lovers.RoleColor#1#Color.magenta.Colorize("♡"));
         valueDictionary[UI.Counter] = new DynamicString("(" + Color.yellow.Colorize("3/16") + ")");
         valueDictionary[UI.Cooldown] = new DynamicString("<color=#ed9247>CD: </color>" + "15s");
         valueDictionary[UI.Misc] = new DynamicString(" Misc");
@@ -261,6 +263,16 @@ public class DynamicName
         overrides.RemoveAll(c => c.Item1 == component);
     }
 
+    public void HideAll(PlayerControl player)
+    {
+        hideAllDictionary[player.PlayerId] = true;
+    }
+
+    public void ShowAll(PlayerControl player)
+    {
+        hideAllDictionary[player.PlayerId] = false;
+    }
+
     private void SetupComponentOrder()
     {
         while (componentOrder.Count < 3)
@@ -387,7 +399,7 @@ public class DynamicName
         foreach (List<UI> components in componentOrder)
         {
             bool rendered = false;
-            foreach (UI component in components)
+            foreach (UI component in components.Where(c => !hideAllDictionary.GetValueOrDefault(player.PlayerId, false) || c is UI.Name))
             {
                 Tuple<UI, DynamicString>? specificOverride = allowedComponents?.FirstOrDefault(p => p.Item1 == component);
                 if (specificOverride == null && player.PlayerId != myPlayer.PlayerId) continue;
@@ -443,5 +455,7 @@ public enum UI
     Subrole,
     Cooldown,
     Counter,
+    Indicator,
+    Text,
     Misc
-}
+}*/

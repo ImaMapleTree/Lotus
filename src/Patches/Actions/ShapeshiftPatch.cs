@@ -13,7 +13,7 @@ using Priority = HarmonyLib.Priority;
 namespace TOHTOR.Patches.Actions;
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Shapeshift))]
-public class ShapeshiftPatch
+public static class ShapeshiftPatch
 {
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
     {
@@ -25,7 +25,6 @@ public class ShapeshiftPatch
 
         var shapeshifter = __instance;
         var shapeshifting = shapeshifter.PlayerId != target.PlayerId;
-
 
 
         ActionHandle handle = ActionHandle.NoInit();

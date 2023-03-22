@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
+using TOHTOR.Factions.Impostors;
 using TOHTOR.Managers;
 using TOHTOR.Roles;
 using VentLib.Utilities.Extensions;
@@ -13,7 +13,7 @@ public static class RoleDistributor
 {
     public static void DistributeImpostors(Queue<CustomRole> roles, int impostors)
     {
-        List<CustomRole> enabledImpostorRoles = CustomRoleManager.AllRoles.Where(r => r.IsEnabled() && r.Factions.IsImpostor()).ToList();
+        List<CustomRole> enabledImpostorRoles = CustomRoleManager.AllRoles.Where(r => r.IsEnabled() && r.Faction is ImpostorFaction).ToList();
         List<CustomRole> eir2 = enabledImpostorRoles.ToList();
         eir2.Do(r => {
             if (r.AdditionalChance != 100) return;
@@ -34,7 +34,7 @@ public static class RoleDistributor
 
     public static void DistributeNonImpostors(Queue<CustomRole> roles, int players)
     {
-        List<CustomRole> enabledOtherRoles = CustomRoleManager.AllRoles.Where(r => r.IsEnabled() && !r.Factions.IsImpostor()).ToList();
+        List<CustomRole> enabledOtherRoles = CustomRoleManager.AllRoles.Where(r => r.IsEnabled() && r.Faction is not ImpostorFaction).ToList();
         List<CustomRole> eor2 = enabledOtherRoles.ToList();
         eor2.Do(r => {
             if (r.AdditionalChance != 100) return;

@@ -13,6 +13,6 @@ class TaskCompletePatch
     {
         VentLogger.Info($"TaskComplete:{__instance.GetNameWithRole()}", "CompleteTask");
         ActionHandle handle = ActionHandle.NoInit();
-        __instance.GetCustomRole().Trigger(RoleActionType.TaskComplete, ref handle, __instance);
+        __instance.Trigger(RoleActionType.TaskComplete, ref handle, __instance);
     }
 }

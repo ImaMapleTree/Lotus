@@ -1,6 +1,7 @@
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.Roles.Legacy;
 using VentLib.Logging;
 using VentLib.Utilities;
@@ -35,21 +36,21 @@ public static class AntiBlackoutLogic
             if (playerRole.IsDesyncRole() && playerRole.RealRole.IsImpostor())
                 localImpostors = Math.Max(localImpostors, playerRole.Factions.GetAllies().Count);*/
             ReviveEveryone();
-            VentLogger.Trace($"Patching for {player.GetRawName()}");
+            VentLogger.Trace($"Patching for {player.UnalteredName()}");
             foreach (var info in allPlayers.Where(p => AntiBlackout.FakeExiled != p).Sorted(p => p.Object.IsHost()))
             {
                 if (localImpostors < aliveCrew) continue;
                 if (player.PlayerId == info.PlayerId) continue;
 
-                if (info.Object.GetCustomRole().RealRole.IsCrewmate() || !info.Object.GetCustomRole().IsAllied(player)) continue;
+                if (info.Object.GetCustomRole().RealRole.IsCrewmate() || info.Object.Relationship(player) is Relation.FullAllies) continue;
                 if (info.Object.IsHost())
                 {
-                    VentLogger.Trace($"Set {info.Object.GetRawName()} => isDead = true");
+                    VentLogger.Trace($"Set {info.Object.UnalteredName()} => isDead = true");
                     info.IsDead = true;
                 }
                 else
                 {
-                    VentLogger.Trace($"Set {info.Object.GetRawName()} => Disconnected = true");
+                    VentLogger.Trace($"Set {info.Object.UnalteredName()} => Disconnected = true");
                     info.Disconnected = true;
                 }
                 VentLogger.Trace($"Local Impostors {localImpostors} => {localImpostors - 1}");

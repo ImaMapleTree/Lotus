@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Options.Game;
@@ -34,7 +36,7 @@ public class Grenadier : Vanilla.Impostor
             ? RoleUtils.GetPlayersWithinDistance(MyPlayer, blindDistance).ToList()
             : MyPlayer.GetPlayersInAbilityRangeSorted();
 
-        playersInDistance.Where(p => canBlindAllies || !p.GetCustomRole().IsAllied(MyPlayer))
+        playersInDistance.Where(p => canBlindAllies || p.Relationship(MyPlayer) is not Relation.FullAllies)
             .Do(p =>
             {
                 p.GetCustomRole().SyncOptions(overrides);

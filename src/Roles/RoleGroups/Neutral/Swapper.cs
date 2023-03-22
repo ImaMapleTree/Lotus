@@ -1,8 +1,11 @@
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
+using TOHTOR.Factions.Impostors;
+using TOHTOR.Factions.Interfaces;
+using TOHTOR.Factions.Neutrals;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -20,8 +23,8 @@ public class Swapper : CustomRole
 
     private PlayerControl? target;
 
-    [DynElement(UI.Misc)]
-    private string TargetDisplay() => target == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(target.GetRawName());
+    /*[DynElement(UI.Misc)]
+    private string TargetDisplay() => target == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(target.UnalteredName());
 
     [RoleAction(RoleActionType.RoundStart)]
     public void RoundStart()
@@ -29,9 +32,9 @@ public class Swapper : CustomRole
         target = Game.GetAllPlayers().Where(p =>
         {
             if (p.PlayerId == MyPlayer.PlayerId) return false;
-            Faction[] factions = p.GetCustomRole().Factions;
-            if (!canTargetImpostors && factions.IsImpostor()) return false;
-            return canTargetNeutrals || !factions.Contains(Faction.Solo);
+            IFaction faction = p.GetCustomRole().Faction;
+            if (!canTargetImpostors && faction is ImpostorFaction) return false;
+            return canTargetNeutrals || faction is not Solo;
         }).ToList().GetRandom();
     }
 
@@ -50,7 +53,7 @@ public class Swapper : CustomRole
         if (target == null || target.PlayerId != dead.PlayerId) return;
         target = null;
         MyPlayer.GetDynamicName().Render();
-    }
+    }*/
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)

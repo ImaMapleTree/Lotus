@@ -1,7 +1,8 @@
-using System.Linq;
+/*using System.Linq;
 using AmongUs.GameOptions;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -110,4 +111,4 @@ public class Striker: Impostor
 
     protected override RoleModifier Modify(RoleModifier modifier) =>
         base.Modify(modifier).VanillaRole(RoleTypes.Impostor);
-}
+}*/

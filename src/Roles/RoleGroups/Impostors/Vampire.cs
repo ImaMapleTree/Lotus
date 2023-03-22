@@ -6,7 +6,6 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Crew;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 

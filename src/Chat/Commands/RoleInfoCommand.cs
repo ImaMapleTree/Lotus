@@ -8,7 +8,6 @@ using VentLib.Commands.Interfaces;
 using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Utilities;
-using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Chat.Commands;
 
@@ -32,7 +31,7 @@ public class RoleInfoCommand: ICommandReceiver
     private void ShowRoleDescription(PlayerControl source)
     {
         CustomRole role = source.GetCustomRole();
-        string output = $"{role} {role.Factions.StrJoin()}:";
+        string output = $"{role} {role.Faction}:";
         output += $"\n{role.Description}";
         Utils.SendMessage(output, source.PlayerId);
     }
@@ -40,7 +39,7 @@ public class RoleInfoCommand: ICommandReceiver
     private void ShowRoleOptions(PlayerControl source, int page)
     {
         CustomRole role = source.GetCustomRole();
-        string output = $"{role} {role.Factions.StrJoin()}:";
+        string output = $"{role} {role.Faction}:";
 
         Option? optionMatch = OptionManager.GetManager(file: "role_options.txt").GetOptions().FirstOrDefault(h => h.Name().RemoveHtmlTags() == role.RoleName);
         if (optionMatch == null) { ShowRoleDescription(source); return; }

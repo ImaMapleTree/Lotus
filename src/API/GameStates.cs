@@ -6,6 +6,8 @@ namespace TOHTOR.API;
 
 public class GameStates
 {
+    public static GameState[] IgnStates = { GameState.InMeeting, GameState.Roaming };
+
     public static bool InGame = false;
     public static bool IsLobby => AmongUsClient.Instance.GameState == AmongUsClient.GameStates.Joined;
     public static bool IsInGame => InGame;

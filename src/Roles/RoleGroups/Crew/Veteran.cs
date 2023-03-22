@@ -3,6 +3,7 @@ using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interactions.Interfaces;
@@ -46,7 +47,6 @@ public class Veteran : Crewmate
         veteranCooldown.Start();
         veteranDuration.Start();
         remainingAlerts--;
-        MyPlayer.GetDynamicName().Render();
     }
 
     [RoleAction(RoleActionType.Interaction)]
@@ -62,7 +62,7 @@ public class Veteran : Crewmate
                 return;
         }
 
-        if (actor.GetCustomRole().Factions.IsAllied(this.Factions) && !canKillCrewmates) return;
+        if (actor.GetCustomRole().Faction.Relationship(this.Faction) is Relation.FullAllies && !canKillCrewmates) return;
         handle.Cancel();
         Game.GameHistory.AddEvent(new VettedEvent(MyPlayer, actor));
         MyPlayer.InteractWith(actor, new SimpleInteraction(new FatalIntent(interaction is IRangedInteraction), this));

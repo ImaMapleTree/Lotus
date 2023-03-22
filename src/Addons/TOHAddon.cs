@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
+using TOHTOR.Factions.Interfaces;
 using TOHTOR.Roles;
 using VentLib.Options.Announcement;
 
@@ -11,7 +11,7 @@ namespace TOHTOR.Addons;
 public abstract class TOHAddon
 {
     internal readonly List<CustomRole> CustomRoles = new();
-    internal readonly List<Faction> Factions = new();
+    internal readonly List<IFaction> Factions = new();
     internal readonly List<Type> Gamemodes = new();
 
     internal readonly Assembly BundledAssembly = Assembly.GetCallingAssembly();
@@ -38,7 +38,7 @@ public abstract class TOHAddon
 
     public void RegisterGamemode(Type gamemode) => Gamemodes.Add(gamemode);
 
-    public void RegisterFaction(Faction faction) => Factions.Add(faction);
+    public void RegisterFaction(IFaction factionOld) => Factions.Add(factionOld);
 
     public override string ToString() => GetName(true);
 }

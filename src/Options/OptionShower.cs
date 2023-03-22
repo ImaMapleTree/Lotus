@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using VentLib.Localization.Attributes;
-using VentLib.Logging;
 using VentLib.Options;
-using VentLib.Options.Events;
 using VentLib.Options.Interfaces;
 using VentLib.Utilities.Optionals;
 

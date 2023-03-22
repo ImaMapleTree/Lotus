@@ -1,6 +1,5 @@
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
-using TOHTOR.Roles;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Localization.Attributes;
@@ -76,6 +75,8 @@ public static class StaticOptions
     public static int MinMadmates = 0;
     public static int MaxMadmates = 4;
     public static bool CustomServerMode = false;
+
+    public static bool ForceNoVenting = true;
 
     //////////////////////////////////////
 

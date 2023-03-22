@@ -2,7 +2,6 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -82,7 +81,7 @@ public class Medic: Crewmate
         Game.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, killer));
     }
 
-    private static Optional<string> GetPlayerName(byte b) => Game.GetAlivePlayers().FirstOrOptional(p => p.PlayerId == b).Map(p => p.GetRawName());
+    private static Optional<string> GetPlayerName(byte b) => Game.GetAlivePlayers().FirstOrOptional(p => p.PlayerId == b).Map(p => p.UnalteredName());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0f, 0.4f, 0f));
 

@@ -2,11 +2,10 @@ using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
+using TOHTOR.Factions.Neutrals;
 using TOHTOR.Managers;
-using TOHTOR.Roles;
 using TOHTOR.Roles.Legacy;
-using TOHTOR.Roles.Subrole;
+using TOHTOR.Roles.Subroles;
 using TOHTOR.Victory.Conditions;
 
 namespace TOHTOR.Gamemodes.Standard;
@@ -22,7 +21,7 @@ public static class StandardWinConditions
             if (allPlayers.Count != 1) return false;
 
             PlayerControl lastPlayer = allPlayers[0];
-            return lastPlayer.GetCustomRole().Factions.IsSolo();
+            return lastPlayer.GetCustomRole().Faction is Solo;
         }
 
         public WinReason GetWinReason() => Victory.Conditions.WinReason.FactionLastStanding;
@@ -37,7 +36,7 @@ public static class StandardWinConditions
             if (alivePlayers.Count > 2 || GameStates.CountAliveImpostors() > 0) return false;
 
             // Maybe add a setting for crewmate killing to be able to duel neutral killing :thinking:
-            List<PlayerControl> soloKilling = alivePlayers.Where(p => p.GetCustomRole().Factions.IsSolo() && p.GetCustomRole().IsNeutralKilling()).ToList();
+            List<PlayerControl> soloKilling = alivePlayers.Where(p => p.GetCustomRole().Faction is Solo && p.GetCustomRole().IsNeutralKilling()).ToList();
             if (soloKilling.Count != 1) return false;
             winners = new List<PlayerControl> { soloKilling[0] };
             return true;
@@ -59,7 +58,7 @@ public static class StandardWinConditions
             return loversRole.Partner != null && loversRole.Partner.PlayerId == lovers[1].PlayerId;
         }
 
-        public WinReason GetWinReason() => Victory.Conditions.WinReason.RoleSpecificWin;
+        public WinReason GetWinReason() => WinReason.RoleSpecificWin;
 
         public int Priority() => 100;
     }

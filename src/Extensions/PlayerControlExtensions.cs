@@ -19,7 +19,7 @@ using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.Impostors;
 using TOHTOR.Roles.RoleGroups.Neutral;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Roles.Subrole;
+using TOHTOR.Roles.Subroles;
 using TOHTOR.RPC;
 using VentLib;
 using VentLib.Utilities.Extensions;
@@ -35,17 +35,6 @@ public static class PlayerControlExtensions
     public static bool IsHost(this PlayerControl player) =>
         AmongUsClient.Instance.AmHost && PlayerControl.LocalPlayer != null && PlayerControl.LocalPlayer.PlayerId == player.PlayerId;
 
-    public static void RpcSetCustomRole(this PlayerControl player, CustomRole role)
-    {
-        player.GetPlayerPlus().DynamicName = DynamicName.For(player);
-        CustomRoleManager.PlayersCustomRolesRedux[player.PlayerId] = role.Instantiate(player);
-        // TODO: eventually add back subrole logic
-        /*RpcV2.Immediate(PlayerControl.LocalPlayer.NetId, (byte)CustomRPCOLD.SetCustomRole)
-            .Write(player.PlayerId)
-            .WritePacked(CustomRoleManager.GetRoleId(role.GetType()))
-            .Send();*/
-    }
-
     public static ClientData? GetClient(this PlayerControl player)
     {
         var client = AmongUsClient.Instance.allClients.ToArray().FirstOrDefault(cd => cd.Character.PlayerId == player.PlayerId);
@@ -55,10 +44,10 @@ public static class PlayerControlExtensions
     public static void Trigger(this PlayerControl player, RoleActionType action, ref ActionHandle handle, params object[] parameters)
     {
         CustomRole role = player.GetCustomRole();
-        List<Subrole> subroles = player.GetSubroles();
+        List<CustomRole> subroles = player.GetSubroles();
         role.Trigger(action, ref handle, parameters);
         if (handle is { IsCanceled: true }) return;
-        foreach (Subrole subrole in subroles)
+        foreach (CustomRole subrole in subroles)
         {
             subrole.Trigger(action, ref handle, parameters);
             if (handle is { IsCanceled: true }) return;
@@ -93,9 +82,9 @@ public static class PlayerControlExtensions
 
     public static Subrole? GetSubrole(this PlayerControl player)
     {
-        List<Subrole>? role = CustomRoleManager.PlayerSubroles.GetValueOrDefault(player.PlayerId);
+        List<CustomRole>? role = CustomRoleManager.PlayerSubroles.GetValueOrDefault(player.PlayerId);
         if (role == null || role.Count == 0) return null;
-        return role[0];
+        return role[0] as Subrole;
     }
 
     public static T? GetSubrole<T>(this PlayerControl player) where T : Subrole
@@ -103,9 +92,9 @@ public static class PlayerControlExtensions
         return (T?)player.GetSubrole()!;
     }
 
-    public static List<Subrole> GetSubroles(this PlayerControl player)
+    public static List<CustomRole> GetSubroles(this PlayerControl player)
     {
-        return CustomRoleManager.PlayerSubroles.GetValueOrDefault(player.PlayerId, new List<Subrole>());
+        return CustomRoleManager.PlayerSubroles.GetValueOrDefault(player.PlayerId, new List<CustomRole>());
     }
 
     public static List<CustomRole> GetCustomSubRoles(this PlayerControl player)
@@ -121,12 +110,12 @@ public static class PlayerControlExtensions
 
     public static string GetRoleName(this PlayerControl player) => player.GetCustomRole().RoleName;
 
-    public static string GetRawName(this PlayerControl? player)
+    public static string UnalteredName(this PlayerControl? player)
     {
         try { player = Utils.GetPlayerById(player!.PlayerId); }
         catch { /* ignored */ }
 
-        try { return player != null ? player.GetDynamicName().RawName : "Unknown"; }
+        try { return player != null ? player.NameModel().Unaltered() : "Unknown"; }
         catch { return player != null ? player.Data.PlayerName : "Unknown"; }
     }
 
@@ -234,7 +223,7 @@ public static class PlayerControlExtensions
     {
         if (!player) return null;
         var text = Utils.GetRoleName(player.GetCustomRole());
-        List<Subrole> subroles = player.GetSubroles();
+        List<CustomRole> subroles = player.GetSubroles();
         if (subroles.Count == 0) return text;
 
         text += subroles.StrJoin().Replace("[", " (").Replace("]", ")");
@@ -243,7 +232,7 @@ public static class PlayerControlExtensions
 
     public static string GetNameWithRole(this PlayerControl? player)
     {
-        return $"{player.GetRawName()}" + (GameStates.IsInGame ? $"({player?.GetAllRoleName()})" : "");
+        return $"{player.UnalteredName()}" + (GameStates.IsInGame ? $"({player?.GetAllRoleName()})" : "");
     }
 
     public static Color GetRoleColor(this PlayerControl player)

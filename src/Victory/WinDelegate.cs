@@ -34,7 +34,7 @@ public class WinDelegate
             if (!isWin) continue;
             winReason = winCondition.GetWinReason();
             if (!StaticOptions.NoGameEnd)
-                VentLogger.Info($"Triggering Win by \"{winCondition.GetType()}\", winners={winners.Select(p => p.GetRawName()).StrJoin()}, reason={winReason}", "WinCondition");
+                VentLogger.Info($"Triggering Win by \"{winCondition.GetType()}\", winners={winners.Select(p => p.UnalteredName()).StrJoin()}, reason={winReason}", "WinCondition");
             break;
         }
 

@@ -11,10 +11,13 @@ using Hazel;
 using TOHTOR.API;
 using TOHTOR.Chat.Patches;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles.Extra;
 using TOHTOR.Roles.Legacy;
+using TOHTOR.Roles.Subroles;
 using VentLib.Localization;
 using VentLib.Logging;
 using VentLib.Utilities;
@@ -182,7 +185,8 @@ public static class Utils
 
     public static string GetSubRolesText(byte id, bool disableColor = false)
     {
-        return GetPlayerById(id).GetDynamicName().GetComponentValue(UI.Subrole);
+        PlayerControl player = GetPlayerById(id)!;
+        return player.NameModel().GetComponentHolder<SubroleHolder>().Render(player, GameState.Roaming);
     }
 
     /*public static void ShowHelp()

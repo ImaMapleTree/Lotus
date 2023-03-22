@@ -10,13 +10,17 @@ using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Counters;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
+using TOHTOR.GUI.Name.Impl;
+using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Managers;
 using TOHTOR.Options;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.RoleGroups.Vanilla;
-using UnityEngine;
+using TOHTOR.Roles.Subroles;
 using VentLib.Logging;
 using VentLib.Networking.Interfaces;
 using VentLib.Networking.Managers;
@@ -36,10 +40,9 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
     public virtual bool CanVent() => BaseCanVent || StaticOptions.AllRolesCanVent;
     public virtual bool CanBeKilled() => !Invincible;
-    public virtual bool CanBeKilledBySheriff() => this.VirtualRole is RoleTypes.Impostor or RoleTypes.Shapeshifter;
     public virtual bool HasTasks() => this is Crewmate;
     public bool IsDesyncRole() => this.DesyncRole != null;
-    public virtual bool IsAllied(PlayerControl player) => this.Factions.Any(f => f.IsAllied(player.GetCustomRole().Factions)) && player.GetCustomRole().Factions.Any(f => f.IsAllied(this.Factions));
+    public virtual Relation Relationship(PlayerControl player) => this.Relationship(player.GetCustomRole());
 
     public bool Invincible;
 
@@ -60,10 +63,12 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
             cloned.Editor = cloned.Editor.Instantiate(cloned, player);
 
         cloned.Setup(player);
-        cloned.SetupUI(player.GetDynamicName());
-        player.GetDynamicName().Render();
+        cloned.SetupUI2(player.NameModel());
+        player.NameModel().Render();
         if (StaticOptions.AllRolesCanVent && cloned.VirtualRole == RoleTypes.Crewmate)
             cloned.VirtualRole = RoleTypes.Engineer;
+
+        cloned.PostSetup();
         return cloned;
     }
 
@@ -77,13 +82,6 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     }
 
     public bool IsEnabled() => this.Chance > 0 && this.Count > 0;
-
-    public virtual void OnGameStart() { }
-
-    public virtual void HandleInteraction(Interaction interaction)
-    {
-
-    }
 
     /// <summary>
     /// Adds a GameOverride that continuously modifies this instances game options until removed
@@ -121,7 +119,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     public void Assign(bool desync = false)
     {
         // Here we do a "lazy" check for (all?) conditions that'd cause a role to need to be desync
-        if (this.DesyncRole != null || this is RoleGroups.Vanilla.Impostor)
+        if (this.DesyncRole != null || this is Impostor)
         {
 
             // Get the ACTUAL role to assign the player
@@ -134,15 +132,15 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
             else
             {
                 // Send information to client about their new role
-                VentLogger.Old($"Sending role ({assignedType}) information to {MyPlayer.GetRawName()}", "");
+                VentLogger.Old($"Sending role ({assignedType}) information to {MyPlayer.UnalteredName()}", "");
                 RpcV2.Immediate(MyPlayer.NetId, (byte)RpcCalls.SetRole).Write((ushort)assignedType).Send(MyPlayer.GetClientId());
             }
 
             // Determine roles that are "allied" with this one(based on method overrides)
-            PlayerControl[] allies = Game.GetAllPlayers().Where(p => IsAllied(p) || p.PlayerId == MyPlayer.PlayerId).ToArray();
+            PlayerControl[] allies = Game.GetAllPlayers().Where(p => Relationship(p) is Relation.FullAllies || p.PlayerId == MyPlayer.PlayerId).ToArray();
             int[] alliesCID = allies.Select(p => p.GetClientId()).ToArray();
 
-            allies.Select(player => player.GetRawName()).StrJoin().DebugLog($"{this.RoleName}'s allies are: ");
+            allies.Select(player => player.UnalteredName()).StrJoin().DebugLog($"{this.RoleName}'s allies are: ");
 
             int[] crewmateReceivers = Game.GetAllPlayers()
                 .Where(p => p.GetCustomRole().RealRole.IsCrewmate())
@@ -172,17 +170,103 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     private void ShowRoleToTeammates(IEnumerable<PlayerControl> allies)
     {
         // Currently only impostors can show each other their roles
-        if (!this.Factions.IsImpostor()) return;
-        DynamicName myName = MyPlayer.GetDynamicName();
-        allies.Where(ally => ally.PlayerId != MyPlayer.PlayerId).Do(ally=>
-        {
-            myName.AddRule(GameState.InIntro, UI.Role, playerId: ally.PlayerId);
-            myName.AddRule(GameState.InMeeting, UI.Role, playerId: ally.PlayerId);
-            myName.AddRule(GameState.Roaming, UI.Role, playerId: ally.PlayerId);
-        });
+        if (!this.Faction.AlliesSeeRole()) return;
+        List<PlayerControl> viewers = allies.ToList();
+        MyPlayer.NameModel().GetComponentHolder<RoleHolder>()[0].SetViewerSupplier(() => viewers);
     }
 
-    private void SetupUI(DynamicName name)
+    private void SetupUI2(INameModel nameModel)
+    {
+        GameState[] gameStates = { GameState.InIntro, GameState.Roaming, GameState.InMeeting };
+
+        if (this is Subrole subrole) nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(subrole, gameStates, viewers: MyPlayer));
+        nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(this, gameStates, ViewMode.Replace, MyPlayer));
+        CreateInstanceBasedVariables();
+        SetupUiFields(nameModel);
+        //SetupUiMethods(nameModel);
+    }
+
+    private void SetupUiFields(INameModel nameModel)
+    {
+        GameState[] gameStates = { GameState.InIntro, GameState.Roaming, GameState.InMeeting };
+        this.GetType().GetFields(AccessFlags.InstanceAccessFlags)
+            .Where(f => f.GetCustomAttribute<DynElement>() != null)
+            .ForEach(f =>
+            {
+                DynElement dynElement = f.GetCustomAttribute<DynElement>()!;
+                object? value = f.GetValue(this);
+                switch (dynElement.Component)
+                {
+                    case UI.Name:
+                        if (value is not string s) throw new ArgumentException($"Values for \"{nameof(UI.Name)}\" must be string. (Got: {value?.GetType()})");
+                        nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(s, gameStates, viewers: MyPlayer));
+                        break;
+                    case UI.Role:
+                        if (value is not CustomRole cr) throw new ArgumentException($"Values for \"{nameof(UI.Role)}\" must be {nameof(CustomRole)}. (Got: {value?.GetType()})");
+                        nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(cr, gameStates, viewers: MyPlayer));
+                        break;
+                    case UI.Subrole:
+                        if (value is not Subrole sr) throw new ArgumentException($"Values for \"{nameof(UI.Subrole)}\" must be {nameof(Subrole)}. (Got: {value?.GetType()})");
+                        nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(sr, gameStates, viewers: MyPlayer));
+                        break;
+                    case UI.Cooldown:
+                        if (value is not Cooldown cd) throw new ArgumentException($"Values for \"{nameof(UI.Cooldown)}\" must be {nameof(Cooldown)}. (Got: {value?.GetType()})");
+                        VentLogger.Fatal($"Loading Cooldown Field: {cd} for {this}");
+                        nameModel.GetComponentHolder<CooldownHolder>().Add(new CooldownComponent(cd, gameStates, viewers: MyPlayer));
+                        break;
+                    case UI.Counter:
+                        if (value is not ICounter counter) throw new ArgumentException($"Values for \"{nameof(UI.Counter)}\" must be {nameof(ICounter)}. (Got: {value?.GetType()})");
+                        nameModel.GetComponentHolder<CounterHolder>().Add(new CounterComponent(counter, gameStates, viewers: MyPlayer));
+                        break;
+                    case UI.Indicator:
+                        if (value is not string ind) throw new ArgumentException($"Values for \"{nameof(UI.Indicator)}\" must be string. (Got: {value?.GetType()})");
+                        nameModel.GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(ind, gameStates, viewers: MyPlayer));
+                        break;
+                    case UI.Text:
+                        if (value is not string txt) throw new ArgumentException($"Values for \"{nameof(UI.Indicator)}\" must be string. (Got: {value?.GetType()})");
+                        nameModel.GetComponentHolder<TextHolder>().Add(new TextComponent(txt, gameStates, viewers: MyPlayer));
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException($"Component: {dynElement.Component} is not a valid component");
+                }
+            });
+    }
+
+    private void SetupUiMethods(INameModel nameModel)
+    {
+        GameState[] gameStates = { GameState.InIntro, GameState.Roaming, GameState.InMeeting };
+        this.GetType().GetMethods(AccessFlags.InstanceAccessFlags)
+            .Where(m => m.GetCustomAttribute<DynElement>() != null)
+            .ForEach(m =>
+            {
+                DynElement dynElement = m.GetCustomAttribute<DynElement>()!;
+                if (m.GetParameters().Length > 0) throw new ConstraintException("Methods marked by DynElement must have no parameters");
+
+                Func<string> supplier = () => m.Invoke(this, null)?.ToString() ?? "N/A";
+                switch (dynElement.Component)
+                {
+                    case UI.Name:
+                        nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(new LiveString(supplier), gameStates, viewers: MyPlayer));
+                        break;
+                    case UI.Indicator:
+                        nameModel.GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString(supplier), gameStates, viewers: MyPlayer));
+                        break;
+                    case UI.Text:
+                        nameModel.GetComponentHolder<TextHolder>().Add(new TextComponent(new LiveString(supplier), gameStates, viewers: MyPlayer));
+                        break;
+                    case UI.Role:
+                    case UI.Subrole:
+                    case UI.Cooldown:
+                    case UI.Counter:
+                        throw new ArgumentException($"{dynElement.Component} is not valid compatible on methods. To use this component annotate a field instead.");
+                    default:
+                        throw new ArgumentOutOfRangeException($"Component: {dynElement.Component} is not a valid component");
+                }
+            });
+    }
+
+
+    /*private void SetupUI(DynamicName name)
     {
         Dictionary<UI, Type> declaringComponents = new();
 
@@ -194,7 +278,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
                 DynElement dynElement = f.GetCustomAttribute<DynElement>();
                 bool isCooldown = false;
                 try { isCooldown = f.GetValue(this) is Cooldown; }
-                catch { /*ignored*/ }
+                catch { /*ignored#1# }
                 if (declaringComponents.TryGetValue(dynElement.Component, out Type type))
                     if (type.IsAssignableTo(f.DeclaringType)) return;
 
@@ -220,7 +304,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
                 declaringComponents.Add(dynElement.Component, m.DeclaringType);
                 name.SetComponentValue(dynElement.Component, new DynamicString(() => m.Invoke(this, null)?.ToString() ?? "N/A"));
             });
-    }
+    }*/
 
     public CustomRole Read(MessageReader reader)
     {

@@ -1,48 +1,45 @@
-using System.Collections.Generic;
-using System.Linq;
-using TOHTOR.API;
-using TOHTOR.Extensions;
+using TOHTOR.Factions.Interfaces;
+using VentLib.Logging;
 
 namespace TOHTOR.Factions;
 
-public enum Faction: ulong
+public abstract class Faction<T> : IFaction<T> where T: IFaction<T>
 {
-    Crewmates = 0,
-    Solo = 1,
-    Impostors = 2,
-    Coven = 3
-}
+    public virtual string Name() => GetType().Name;
 
-public static class FactionMethods
-{
-    public static bool IsAllied(this Faction faction, Faction[] factions)
+    public abstract Relation Relationship(T sameFaction);
+
+    public Relation Relationship(IFaction other)
     {
-        if (faction is Faction.Solo) return false;
-        return !factions.Contains(Faction.Solo) && factions.Contains(faction);
+        if (other is not T self)
+        {
+            //VentLogger.Info($"Other is not Self ({other} | {typeof(T)}");
+            return RelationshipOther(other);
+        }
+
+        //VentLogger.Info($"Other is self : {self}");
+
+        if (other is not ISubFaction<T> subFaction2)
+        {
+            //VentLogger.Info($"Other is not subfaction {other}");
+            if (this is ISubFaction<T> subFaction3) return subFaction3.MainFactionRelationship();
+            return Relationship(self);
+        }
+
+        //VentLogger.Info($"Other is subfaction: {subFaction2}");
+        if (this is ISubFaction<T> subFaction)
+        {
+            //VentLogger.Info($"This is sub faction: {subFaction}");
+            return subFaction.Relationship(subFaction2);
+        }
+
+        //VentLogger.Info($"this is not subfaction: {this}");
+        return subFaction2.MainFactionRelationship();
     }
 
-    public static bool IsAllied(this Faction faction, Faction otherFaction)
-    {
-        if (faction is Faction.Solo || otherFaction is Faction.Solo) return false;
-        return faction == otherFaction;
-    }
+    public abstract bool AlliesSeeRole();
 
-    public static bool IsAllied(this IEnumerable<Faction> factions, Faction other)
-    {
-        IEnumerable<Faction> enumerable = factions as Faction[] ?? factions.ToArray();
-        return other != Faction.Solo && !enumerable.Contains(Faction.Solo) && enumerable.Contains(other);
-    }
+    public abstract Relation RelationshipOther(IFaction other);
 
-    public static bool IsAllied(this IEnumerable<Faction> factions, IEnumerable<Faction> others)
-    {
-        IEnumerable<Faction> enumerableThis = factions as Faction[] ?? factions.ToArray();
-        IEnumerable<Faction> enumerableOthers = factions as Faction[] ?? others.ToArray();
-        return !enumerableThis.Contains(Faction.Solo) && !enumerableOthers.Contains(Faction.Solo) && (enumerableThis.Any(f => enumerableOthers.Contains(f) || enumerableOthers.Any(f => enumerableThis.Contains(f))));
-    }
-
-    public static bool IsSolo(this IEnumerable<Faction> factions) => factions.Contains(Faction.Solo);
-    public static bool IsImpostor(this IEnumerable<Faction> factions) => factions.Contains(Faction.Impostors);
-    public static bool IsCrewmate(this IEnumerable<Faction> factions) => factions.Contains(Faction.Crewmates);
-
-    public static List<PlayerControl> GetAllies(this IEnumerable<Faction> factions) => Game.GetAllPlayers().Where(p => factions.IsAllied(p.GetCustomRole().Factions)).ToList();
+    public override string ToString() => Name();
 }

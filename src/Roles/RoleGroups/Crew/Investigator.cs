@@ -3,12 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
+using TOHTOR.Factions.Impostors;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
+using TOHTOR.GUI.Name.Impl;
+using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Coven;
 using TOHTOR.Roles.RoleGroups.Impostors;
+using TOHTOR.Roles.RoleGroups.Madmates.Roles;
 using TOHTOR.Roles.RoleGroups.Neutral;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -107,7 +113,7 @@ public class Investigator : Crewmate
         bool roleIsInRoles = redRoles.Contains(categoryIndex);
         Color color = (category) switch
         {
-            InvestOptCategory.None => role.Factions.IsImpostor() ? bad : good,
+            InvestOptCategory.None => role.Faction is ImpostorFaction ? bad : good,
             InvestOptCategory.NeutralPassive => neutralPassiveRed is NIOpt.All ? bad : neutralPassiveRed is NIOpt.None ? good : roleIsInRoles ? bad : good,
             InvestOptCategory.NeutralKilling => neutralKillingRed is NIOpt.All ? bad : neutralKillingRed is NIOpt.None ? good : roleIsInRoles ? bad : good,
             InvestOptCategory.CrewmateKilling => crewmateKillingRed is NIOpt.All ? bad : crewmateKillingRed is NIOpt.None ? good : roleIsInRoles ? bad : good,
@@ -117,9 +123,8 @@ public class Investigator : Crewmate
         };
         VentLogger.Old($"{player.GetNameWithRole()} is type {role.GetType()} and falls under category \"{category}\". Player is in redRoles list? {roleIsInRoles}. Player's name should be color: {color.ToTextColor()}", "InvestigateInfo");
 
-        player.GetDynamicName().AddRule(GameState.Roaming, UI.Name, new DynamicString(color.Colorize("{0}")), MyPlayer.PlayerId);
-        player.GetDynamicName().AddRule(GameState.InMeeting, UI.Name, new DynamicString(color.Colorize("{0}")), MyPlayer.PlayerId);
-        player.GetDynamicName().RenderFor(MyPlayer);
+        NameComponent nameComponent = new(new LiveString(player.UnalteredName, color), GameStates.IgnStates, ViewMode.Replace, MyPlayer);
+        player.NameModel().GetComponentHolder<NameHolder>().Add(nameComponent);
     }
 
     // This is the most complicated options because of all the individual settings

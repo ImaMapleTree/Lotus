@@ -11,7 +11,7 @@ namespace TOHTOR.Gamemodes.CaptureTheFlag;
 
 public class CTFAssignRoles
 {
-    public static void AssignRoles(List<PlayerControl> players)
+    /*public static void AssignRoles(List<PlayerControl> players)
     {
         List<PlayerControl> mutablePlayers = new(players);
         List<List<PlayerControl>> teams = new() { new List<PlayerControl>(), new List<PlayerControl>() };
@@ -46,5 +46,5 @@ public class CTFAssignRoles
 
         byte[] hostTeam = teams.FirstOrDefault(team => team.Any(p => p.PlayerId == localPlayer.PlayerId))!.Select(p => p.PlayerId).ToArray();
         players.Where(p => p.PlayerId != localPlayer.PlayerId).Do(p => p.SetRole(hostTeam.Contains(p.PlayerId) ? RoleTypes.Impostor : RoleTypes.Crewmate));
-    }
+    }*/
 }

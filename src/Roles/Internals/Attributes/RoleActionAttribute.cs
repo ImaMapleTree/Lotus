@@ -22,7 +22,7 @@ public class RoleActionAttribute: Attribute
     public RoleActionAttribute(RoleActionType actionType, bool worksAfterDeath = false, Priority priority = Priority.NoPriority)
     {
         this.ActionType = actionType;
-        this.WorksAfterDeath = worksAfterDeath;
+        this.WorksAfterDeath = worksAfterDeath || actionType is RoleActionType.MyDeath;
         this.Priority = priority;
         this.Blockable = actionType is not RoleActionType.AnyDeath or RoleActionType.FixedUpdate or RoleActionType.Unshapeshift or RoleActionType.RoundStart or RoleActionType.RoundEnd;
     }

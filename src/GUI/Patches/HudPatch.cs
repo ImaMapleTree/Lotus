@@ -8,6 +8,7 @@ using TOHTOR.Roles;
 using TOHTOR.Roles.Legacy;
 using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.Impostors;
+using TOHTOR.Roles.RoleGroups.Madmates.Roles;
 using TOHTOR.Roles.RoleGroups.Neutral;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using UnityEngine;
@@ -129,7 +130,6 @@ class HudManagerPatch
             switch (player.GetCustomRole())
             {
                 case Madmate:
-                case SKMadmate:
                 case Jester:
                     TaskTextPrefix += FakeTasksText;
                     break;

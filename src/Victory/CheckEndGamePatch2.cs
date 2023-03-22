@@ -13,9 +13,12 @@ namespace TOHTOR.Victory;
 public class CheckEndGamePatch2
 {
     private static bool _deferred;
+    private static DateTime slowDown = DateTime.Now;
 
     public static bool Prefix()
     {
+        if (DateTime.Now.Subtract(slowDown).TotalSeconds < 0.1f) return false;
+        slowDown = DateTime.Now;
         if (!AmongUsClient.Instance.AmHost) return true;
         if (_deferred) return false;
         WinDelegate winDelegate = Game.GetWinDelegate();
@@ -38,6 +41,7 @@ public class CheckEndGamePatch2
             WinReason.NoWinCondition => GameOverReason.ImpostorDisconnect,
             WinReason.HostForceEnd => GameOverReason.ImpostorDisconnect,
             WinReason.GamemodeSpecificWin => GameOverReason.ImpostorByKill,
+            WinReason.SoloWinner => GameOverReason.ImpostorByKill,
             _ => throw new ArgumentOutOfRangeException()
         };
 

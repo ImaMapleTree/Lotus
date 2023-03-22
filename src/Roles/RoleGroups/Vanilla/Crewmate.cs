@@ -1,10 +1,14 @@
 using System;
 using AmongUs.GameOptions;
 using TOHTOR.API;
+using TOHTOR.Extensions;
 using TOHTOR.Factions;
+using TOHTOR.FactionsOLD;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Internals.Attributes;
+using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Vanilla;
 
@@ -46,7 +50,32 @@ public class Crewmate : CustomRole
     /// </summary>
     protected virtual void OnTaskComplete() { }
 
+    protected GameOptionBuilder AddTaskOverrideOptions(GameOptionBuilder builder)
+    {
+        return builder.SubOption(sub => sub
+            .Name($"Override {RoleName}'s Tasks")
+            .Bind(v => HasOverridenTasks = (bool)v)
+            .ShowSubOptionPredicate(v => (bool)v)
+            .AddOnOffValues(false)
+            .SubOption(sub2 => sub2
+                .Name("Allow Common Tasks")
+                .Bind(v => HasCommonTasks = (bool)v)
+                .AddOnOffValues()
+                .Build())
+            .SubOption(sub2 => sub2
+                .Name($"{RoleName} Long Tasks")
+                .Bind(v => LongTasks = (int)v)
+                .AddIntRange(0, 20, 1, 5)
+                .Build())
+            .SubOption(sub2 => sub2
+                .Name($"{RoleName} Short Tasks")
+                .Bind(v => ShortTasks = (int)v)
+                .AddIntRange(1, 20, 1, 5)
+                .Build())
+            .Build());
+    }
+
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.VanillaRole(RoleTypes.Crewmate).Factions(Faction.Crewmates).RoleColor("#b6f0ff");
+        roleModifier.VanillaRole(RoleTypes.Crewmate).Faction(FactionInstances.Crewmates).RoleColor("#b6f0ff");
 }
 

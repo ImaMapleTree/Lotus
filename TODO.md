@@ -15,7 +15,7 @@ NEW BUGS AFTER FIRST TESTING SESSION:
 - [ ] Donks in discussions skin when voted out
 - [ ] Host skin doesnt change when voted out and is desynced
 
-
+- [ ] Investigate sniper shapeshift seeing name
 
 
 

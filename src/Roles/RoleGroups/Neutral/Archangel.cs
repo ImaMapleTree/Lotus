@@ -4,6 +4,9 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
@@ -27,8 +30,8 @@ public class Archangel : CustomRole
     private GARoleChange roleChangeWhenTargetDies;
     private PlayerControl? target;
 
-    [DynElement(UI.Misc)]
-    private string TargetDisplay() => target == null ? "" : RoleColor.Colorize("Target: ") + Color.white.Colorize(target.GetRawName());
+    [DynElement(UI.Text)]
+    private string TargetDisplay() => target == null ? "" : RoleColor.Colorize("Target: ") + Color.white.Colorize(target.UnalteredName());
 
     protected override void Setup(PlayerControl player)
     {
@@ -37,11 +40,9 @@ public class Archangel : CustomRole
         if (eligiblePlayers.Any())
             target = eligiblePlayers.GetRandom();
         protectCooldown.Start(10f);
-        // Dynamic Name rules are a bit confusing but they're the way I display specific information to specific players
-        // Here we add a rule for when the target is in "roaming" aka during normal game play, and we set their Cooldown component to the string value of our protection duration
-        // Lastly we're only showing this rule to the player for this role
-        DynamicString protectDurationHud = new(() => protectDuration.ToString() == "0" ? "" : Color.white.Colorize(protectDuration + "s"));
-        target.GetDynamicName().AddRule(GameState.Roaming, UI.Cooldown, protectDurationHud, MyPlayer.PlayerId);
+
+        if (target == null) return;
+        target.NameModel().GetComponentHolder<CooldownHolder>().Add(new CooldownComponent(protectDuration, GameState.Roaming, viewers: MyPlayer));
     }
 
     [RoleAction(RoleActionType.RoundStart)]
@@ -88,13 +89,12 @@ public class Archangel : CustomRole
             default:
                 break;
         }
-
-        MyPlayer.GetDynamicName().Render();
     }
 
     private void SendProtection()
     {
         GameOptionOverride[] overrides = { new(Override.GuardianAngelDuration, protectDuration.Duration) };
+        if (target == null) return;
         target.GetCustomRole().SyncOptions(overrides);
         target.RpcProtectPlayer(target, 0);
     }

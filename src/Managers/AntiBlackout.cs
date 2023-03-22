@@ -48,10 +48,10 @@ public static class AntiBlackout
         if (realPlayer == null) return null;
         GameData.PlayerInfo? deadPlayer = GameData.Instance.AllPlayers.ToArray().Where(p => p.Disconnected || p.IsDead).FirstOrDefault(AntiBlackoutLogic.IsFakeable);
         if (deadPlayer == null) return null;
-        VentLogger.Info($"Created Fake Player Using: {deadPlayer.Object.GetRawName()} => {realPlayer.Object.GetRawName()}");
+        VentLogger.Info($"Created Fake Player Using: {deadPlayer.Object.UnalteredName()} => {realPlayer.Object.UnalteredName()}");
 
         GameData.PlayerOutfit outfit = realPlayer.Outfits[PlayerOutfitType.Default].Clone();
-        outfit.PlayerName = deadPlayer.PlayerName = "Modified " + realPlayer.Object.GetRawName();
+        outfit.PlayerName = deadPlayer.PlayerName = "Modified " + realPlayer.Object.UnalteredName();
 
         deadPlayer.Outfits[PlayerOutfitType.Default] = outfit;
         FakeExiled = deadPlayer;

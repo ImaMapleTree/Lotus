@@ -4,7 +4,6 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
-using TOHTOR.Options;
 using VentLib.Options;
 using TOHTOR.Roles;
 using TOHTOR.Victory;
@@ -29,7 +28,7 @@ public class DebugGamemode: Gamemode
     {
         players.Do(p =>
         {
-            VentLogger.Debug($"Assigning {p.GetRawName()} => {_roleAssignments.GetValueOrDefault(p.PlayerId)}");
+            VentLogger.Debug($"Assigning {p.UnalteredName()} => {_roleAssignments.GetValueOrDefault(p.PlayerId)}");
             CustomRole? role = CustomRoleManager.AllRoles.FirstOrDefault(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(_roleAssignments.GetValueOrDefault(p.PlayerId)?.ToLower() ?? "HEHEXD"));
             Game.AssignRole(p, role ?? CustomRoleManager.Special.Debugger, true);
         });
@@ -45,7 +44,7 @@ public class DebugGamemode: Gamemode
         foreach (PlayerControl player in PlayerControl.AllPlayerControls)
         {
             Option option = new GameOptionBuilder()
-                .Name(player.GetRawName())
+                .Name(player.UnalteredName())
                 .IsHeader(true)
                 .Bind(v => _roleAssignments[player.PlayerId] = ((string)v).RemoveHtmlTags())
                 .Values(CustomRoleManager.AllRoles.Select(s => s.RoleColor.Colorize(s.RoleName)))

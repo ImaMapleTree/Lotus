@@ -1,16 +1,18 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Patches.Systems;
-using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
@@ -21,12 +23,13 @@ public static class RoleUtils
 {
     public static string Arrows = "→↗↑↖←↙↓↘・";
 
-    public static char CalculateArrow(PlayerControl source, PlayerControl target, Color color = default)
+    public static string CalculateArrow(PlayerControl source, PlayerControl target, Color? color = null)
     {
+        if (!target.IsAlive()) return "";
         Vector2 sourcePosition = source.GetTruePosition();
         Vector2 targetPosition = target.GetTruePosition();
         float distance = Vector2.Distance(sourcePosition, targetPosition);
-        if (distance < ModConstants.ArrowActivationMin) return Arrows[8];
+        if (distance < ModConstants.ArrowActivationMin) return Arrows[8].ToString();
 
         float deltaX = targetPosition.x - sourcePosition.x;
         float deltaY = targetPosition.y - sourcePosition.y;
@@ -36,7 +39,7 @@ public static class RoleUtils
             angle = 360 + angle;
 
         int arrow = Mathf.RoundToInt(angle / 45);
-        return Arrows[arrow < 8 ?  arrow : 0];
+        return color == null ? Arrows[arrow < 8 ?  arrow : 0].ToString() : color.Value.Colorize(Arrows[arrow < 8 ? arrow : 0].ToString());
     }
 
     public static IEnumerable<PlayerControl> GetPlayersWithinDistance(PlayerControl source, float distance)
@@ -58,7 +61,7 @@ public static class RoleUtils
 
     public static void PlayReactorsForPlayer(PlayerControl player)
     {
-        if (SabotagePatch.CurrentSabotage is SabotageType.Reactor) return;
+        if (SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Reactor) return;
         byte reactorId = GameOptionsManager.Instance.CurrentGameOptions.MapId == 2 ? (byte)21 : (byte)3;
         RpcV2.Immediate(ShipStatus.Instance.NetId, RpcCalls.RepairSystem).Write(reactorId)
             .Write(player).Write((byte)128).Send(player.GetClientId());
@@ -66,7 +69,7 @@ public static class RoleUtils
 
     public static void EndReactorsForPlayer(PlayerControl player)
     {
-        if (SabotagePatch.CurrentSabotage is SabotageType.Reactor) return;
+        if (SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Reactor) return;
         byte reactorId = GameOptionsManager.Instance.CurrentGameOptions.MapId == 2 ? (byte)21 : (byte)3;
         RpcV2.Immediate(ShipStatus.Instance.NetId, RpcCalls.RepairSystem).Write(reactorId)
             .Write(player).Write((byte)16).Send(player.GetClientId());
@@ -119,9 +122,15 @@ public static class RoleUtils
 
     public static InteractionResult InteractWith(this PlayerControl player, PlayerControl target, Interaction interaction)
     {
+        if (++Game.RecursiveCallCheck > ModConstants.RecursiveDepthLimit)
+        {
+            VentLogger.Warn($"Infinite Recursion detected during interaction: {interaction}", "InfiniteRecursionDetection");
+            VentLogger.Trace($"Infinite Recursion Stack: {new StackTrace()}", "InfiniteRecursionDetection");
+            return InteractionResult.Halt;
+        }
         ActionHandle handle = ActionHandle.NoInit();
         PlayerControl.AllPlayerControls.ToArray().Where(p => p.PlayerId != interaction.Emitter().MyPlayer.PlayerId).Trigger(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
-        if (player.PlayerId != target.PlayerId) target.GetCustomRole().Trigger(RoleActionType.Interaction, ref handle, player, interaction);
+        if (player.PlayerId != target.PlayerId) target.Trigger(RoleActionType.Interaction, ref handle, player, interaction);
         if (!handle.IsCanceled || interaction is IUnblockedInteraction) interaction.Intent().Action(player, target);
         if (handle.IsCanceled) interaction.Intent().Halted(player, target);
         return handle.IsCanceled ? InteractionResult.Halt : InteractionResult.Proceed;

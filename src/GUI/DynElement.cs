@@ -1,4 +1,5 @@
 using System;
+using TOHTOR.GUI.Name;
 
 namespace TOHTOR.GUI;
 

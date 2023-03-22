@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using UnityEngine;
 
 namespace TOHTOR.GUI;
@@ -23,6 +24,11 @@ public class Cooldown
     {
         remaining = duration == float.MinValue ? Duration : duration;
         lastTick = DateTime.Now;
+    }
+
+    public void Finish()
+    {
+        remaining = 0.01f;
     }
 
     public void StartThenRun(Action action, float duration = float.MinValue)
@@ -55,4 +61,6 @@ public class Cooldown
 
     public Cooldown Clone() => (Cooldown)this.MemberwiseClone();
     public override string ToString() => Mathf.CeilToInt(TimeRemaining()).ToString();
+
+    public string ToString(int decimals) => Math.Round((decimal)TimeRemaining(), decimals).ToString(CultureInfo.CurrentCulture);
 }

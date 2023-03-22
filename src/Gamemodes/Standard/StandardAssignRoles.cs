@@ -6,7 +6,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using TOHTOR.Roles;
 using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Roles.Subrole;
+using TOHTOR.Roles.Subroles;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Gamemodes.Standard;
@@ -27,7 +27,7 @@ class StandardAssignRoles
         while (i < unassignedPlayers.Count)
         {
             PlayerControl player = unassignedPlayers[i];
-            CustomRole? role = CustomRoleManager.AllRoles.FirstOrDefault(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(player.GetRawName()?.ToLower() ?? "HEHXD"));
+            CustomRole? role = CustomRoleManager.AllRoles.FirstOrDefault(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(player.UnalteredName()?.ToLower() ?? "HEHXD"));
             if (role != null && role.GetType() != typeof(Crewmate))
             {
                 role = CustomRoleManager.PlayersCustomRolesRedux[player.PlayerId] = role.Instantiate(player);
@@ -37,6 +37,7 @@ class StandardAssignRoles
             else i++;
         }
 
+        unassignedPlayers = unassignedPlayers.Sorted(p => p.IsHost() ? 1 : 0).ToList();
         while (unassignedPlayers.Count > 0 && roles.Count > 0)
         {
             PlayerControl assignedPlayer = unassignedPlayers.PopRandom();
@@ -49,7 +50,7 @@ class StandardAssignRoles
 
         while (unassignedPlayers.Count > 0)
         {
-            PlayerControl unassigned = unassignedPlayers.Pop(0);
+            PlayerControl unassigned = unassignedPlayers.Pop();
             CustomRole crewmate = CustomRoleManager.Default;
             Game.AssignRole(unassigned, crewmate);
             crewmate.SyncOptions();

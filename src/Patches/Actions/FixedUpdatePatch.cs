@@ -8,10 +8,11 @@ using TOHTOR.Roles.Internals.Attributes;
 namespace TOHTOR.Patches.Actions;
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.FixedUpdate))]
-public static class FixedUpdatePatch
+static class FixedUpdatePatch
 {
-    public static void Postfix(PlayerControl __instance)
+    private static void Postfix(PlayerControl __instance)
     {
+        Game.RecursiveCallCheck = 0;
         DisplayModVersion(__instance);
         if (!AmongUsClient.Instance.AmHost || Game.State is not GameState.Roaming) return;
 

@@ -1,4 +1,5 @@
 using TOHTOR.Extensions;
+using TOHTOR.Roles.Interactions.Interfaces;
 
 namespace TOHTOR.Roles.Interactions;
 

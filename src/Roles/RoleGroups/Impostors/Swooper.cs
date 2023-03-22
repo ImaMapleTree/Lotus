@@ -6,6 +6,10 @@ using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
+using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -28,13 +32,23 @@ public class Swooper: Impostor
     private Optional<Vent> initialVent = null!;
 
     [DynElement(UI.Cooldown)]
-    private Cooldown swooperCooldown = null!;
     private Cooldown swoopingDuration = null!;
+
+    [DynElement(UI.Cooldown)]
+    private Cooldown swooperCooldown = null!;
 
     private DateTime lastEntered = DateTime.Now;
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target) => base.TryKill(target);
+
+    protected override void PostSetup()
+    {
+        MyPlayer.NameModel().GetComponentHolder<CooldownHolder>()[0].SetTextColor(new Color(0.2f, 0.63f, 0.29f));
+        LiveString swoopingString = new(() => swoopingDuration.NotReady() ? "Swooping" : "", Color.red);
+        MyPlayer.NameModel().GetComponentHolder<TextHolder>().Add(new TextComponent(swoopingString, new[]{ GameState.Roaming }, viewers: GetUnaffected));
+        MyPlayer.NameModel().GetComponentHolder<TextHolder>().Add(new TextComponent(LiveString.Empty, GameState.Roaming, ViewMode.Replace, MyPlayer));
+    }
 
     [RoleAction(RoleActionType.MyEnterVent)]
     private void SwooperInvisible(Vent vent, ActionHandle handle)
@@ -46,18 +60,11 @@ public class Swooper: Impostor
             return;
         }
 
-        PlayerControl[] unaffected = GetUnaffected().ToArray();
-        unaffected.Where(p => p.PlayerId != MyPlayer.PlayerId).ForEach(p =>
-        {
-            MyPlayer.GetDynamicName().AddRule(GameState.Roaming, UI.Misc, new DynamicString(() => swoopingDuration.NotReady() ? $"{{0}} {Color.red.Colorize("Swooping")}" : ""), p.PlayerId);
-        });
-
-        MyPlayer.GetDynamicName().SetComponentValue(UI.Cooldown, new DynamicString(() => RoleUtils.Cooldown(swoopingDuration, new Color(0.2f, 0.63f, 0.29f))));
-
+        List<PlayerControl> unaffected = GetUnaffected();
         initialVent = Optional<Vent>.Of(vent);
 
         swoopingDuration.Start();
-        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{MyPlayer.GetRawName()} began swooping."));
+        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{MyPlayer.UnalteredName()} began swooping."));
         lastEntered = DateTime.Now;
         Async.Schedule(() => RpcV2.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive(unaffected.Select(p => p.GetClientId()).ToArray()), 0.4f);
         Async.Schedule(EndSwooping, swoopingDuration.Duration);
@@ -88,11 +95,10 @@ public class Swooper: Impostor
             MyPlayer.MyPhysics.RpcBootFromVent(ventId);
         }, 0.4f);
 
-        MyPlayer.GetDynamicName().SetComponentValue(UI.Cooldown, new DynamicString(() => RoleUtils.Cooldown(swooperCooldown)));
         swooperCooldown.Start();
     }
 
-    private IEnumerable<PlayerControl> GetUnaffected() => Game.GetAllPlayers().Where(p => !p.IsAlive() || canBeSeenByAllied && p.GetCustomRole().Factions.IsImpostor()).AddItem(MyPlayer);
+    private List<PlayerControl> GetUnaffected() => Game.GetAllPlayers().Where(p => !p.IsAlive() || canBeSeenByAllied && p.Relationship(MyPlayer) is Relation.FullAllies).AddItem(MyPlayer).ToList();
 
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => base.RegisterOptions(optionStream)

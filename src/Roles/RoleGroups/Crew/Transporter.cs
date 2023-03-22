@@ -4,11 +4,14 @@ using AmongUs.GameOptions;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
+using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -23,6 +26,7 @@ public class Transporter : Morphling
 {
     private int totalTransports;
     private int transportsRemaining;
+    private TextComponent textComponent;
 
     [DynElement(UI.Cooldown)]
     private Cooldown transportCooldown;
@@ -49,7 +53,8 @@ public class Transporter : Morphling
         handle.Cancel();
         if (this.transportsRemaining == 0 || !transportCooldown.IsReady()) return;
         transportList.Add(target);
-        target.GetDynamicName().AddRule(GameState.Roaming, UI.Misc, new DynamicString(Color.red.Colorize("Selected")), MyPlayer.PlayerId);
+        textComponent = new TextComponent(new LiveString("Selected", Color.red), GameState.Roaming, viewers: MyPlayer);
+        target.NameModel().GetComponentHolder<TextHolder>().Add(textComponent);
         Async.Schedule(() => Deselect(target), 8f);
 
         VentLogger.Trace($"{MyPlayer.GetNameWithRole()} => Selected ({target.GetNameWithRole()})", "Transporter");
@@ -96,7 +101,7 @@ public class Transporter : Morphling
     private void Deselect(PlayerControl target)
     {
         transportList.RemoveAll(p => p.PlayerId == target.PlayerId);
-        target.GetDynamicName().RemoveRule(GameState.Roaming, UI.Misc, MyPlayer.PlayerId);
+        target.NameModel().GetComponentHolder<TextHolder>().Remove(textComponent);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

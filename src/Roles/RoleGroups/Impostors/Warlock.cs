@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
@@ -43,7 +44,7 @@ public class Warlock : Morphling
                 cursedPlayers.Remove(player);
                 continue;
             }
-            List<PlayerControl> inRangePlayers = player.GetPlayersInAbilityRangeSorted().Where(p => !p.GetCustomRole().IsAllied(MyPlayer) && p.GetCustomRole().CanBeKilled()).ToList();
+            List<PlayerControl> inRangePlayers = player.GetPlayersInAbilityRangeSorted().Where(p => p.Relationship(MyPlayer) is not Relation.FullAllies && p.GetCustomRole().CanBeKilled()).ToList();
             if (inRangePlayers.Count == 0) continue;
             PlayerControl target = inRangePlayers.GetRandom();
             ManipulatedPlayerDeathEvent playerDeathEvent = new(target, player);

@@ -3,22 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
+using TOHTOR.Factions.Impostors;
 using TOHTOR.Gamemodes;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Menus;
+using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Managers;
 using TOHTOR.Managers.History;
 using TOHTOR.Options;
+using TOHTOR.Patches.Actions;
 using TOHTOR.Player;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Subrole;
+using TOHTOR.Roles.Subroles;
 using TOHTOR.RPC;
 using TOHTOR.Victory;
+using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Networking.RPC.Attributes;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.API;
@@ -30,6 +35,7 @@ public static class Game
     public static GameHistory GameHistory = null!;
     public static GameStates GameStates = null!;
     public static RandomSpawn RandomSpawn = null!;
+    public static int RecursiveCallCheck;
     private static Dictionary<byte, string> playerNames = new();
 
     [ModRPC((uint) ModCalls.SetCustomRole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
@@ -42,30 +48,44 @@ public static class Game
     [ModRPC((uint) ModCalls.SetSubrole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
     public static void AssignSubrole(PlayerControl player, Subrole role, bool sendToClient = false)
     {
-        Dictionary<byte, List<Subrole>> playerSubroles = CustomRoleManager.PlayerSubroles;
+        Dictionary<byte, List<CustomRole>> playerSubroles = CustomRoleManager.PlayerSubroles;
         byte playerId = player.PlayerId;
 
-        if (!playerSubroles.ContainsKey(playerId)) playerSubroles[playerId] = new List<Subrole>();
+        if (!playerSubroles.ContainsKey(playerId)) playerSubroles[playerId] = new List<CustomRole>();
         playerSubroles[playerId].Add((Subrole)role.Instantiate(player));
         if (sendToClient) role.Assign();
     }
 
-    public static DynamicName GetDynamicName(this PlayerControl playerControl) => Players[playerControl.PlayerId].DynamicName;
+    public static INameModel NameModel(this PlayerControl playerControl) => Players[playerControl.PlayerId].NameModel;
     public static PlayerPlus GetPlayerPlus(this PlayerControl playerControl) => Players[playerControl.PlayerId];
 
-    public static void RenderAllNames() => Players.Values.Select(p => p.DynamicName).Do(name => name.Render());
-    public static void RenderAllForAll(GameState? state = null, bool force = false) => Players.Values.Select(p => p.DynamicName).Do(name => Players.Values.Do(p => name.RenderFor(p.MyPlayer, state, force)));
+    public static void RenderAllNames() => Players.Values.Select(p => p.NameModel).Do(name => name.Render());
+    //public static void RenderAllForAll(GameState? state = null, bool force = false) => Players.Values.Select(p => p.DynamicName).Do(name => Players.Values.Do(p => name.RenderFor(p.MyPlayer, state, force)));
+
+
+    public static void RenderAllForAll(GameState? state = null, bool force = false) => Players.Values
+        .Select(p => p.NameModel)
+        .ForEach(n => Players.Values.ForEach(pp => n.RenderFor(pp.MyPlayer, state, true, force)));
+
     public static IEnumerable<PlayerControl> GetAllPlayers() => PlayerControl.AllPlayerControls.ToArray();
     public static IEnumerable<PlayerControl> GetAlivePlayers() => GetAllPlayers().Where(p => !p.Data.IsDead && !p.Data.Disconnected);
     public static IEnumerable<PlayerControl> GetDeadPlayers(bool disconnected = false) => GetAllPlayers().Where(p => p.Data.IsDead || (disconnected && p.Data.Disconnected));
-    public static List<PlayerControl> GetAliveImpostors() => GetAlivePlayers().Where(p => p.GetCustomRole().Factions.IsImpostor()).ToList();
+    public static List<PlayerControl> GetAliveImpostors()
+    {
+        return GetAlivePlayers().Where(p => p.GetCustomRole().Faction is ImpostorFaction).ToList();
+    }
+
     public static PlayerControl GetHost() => GetAllPlayers().FirstOrDefault(p => p.NetId == RpcV2.GetHostNetId());
 
     public static IEnumerable<PlayerControl> FindAlivePlayersWithRole(params CustomRole[] roles) =>
         GetAllPlayers()
             .Where(p => roles.Any(r => r.Is(p.GetCustomRole()) || p.GetSubroles().Any(s => s.Is(r))));
 
-    public static string GetName(PlayerControl player) => playerNames.GetValueOrDefault(player.PlayerId, "Unknown");
+    public static string GetName(PlayerControl player, Color? color = null)
+    {
+        string name = playerNames.GetValueOrDefault(player.PlayerId, "Unknown");
+        return color == null ? name : color.Value.Colorize(name);
+    }
 
     public static void SyncAll() => GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
     public static void TriggerForAll(RoleActionType action, ref ActionHandle handle, params object[] parameters)
@@ -82,7 +102,6 @@ public static class Game
             actionList.Sort((a1, a2) => a1.Item1.Priority.CompareTo(a2.Item1.Priority));
             foreach ((RoleAction roleAction, AbstractBaseRole role) in actionList)
             {
-                VentLogger.Fatal($"Role Action: {roleAction}, {role}");
                 bool inBlockList = role.MyPlayer != null && CustomRoleManager.RoleBlockedPlayers.Contains(role.MyPlayer.PlayerId);
                 if (StaticOptions.LogAllActions)
                 {
@@ -138,11 +157,12 @@ public static class Game
         RandomSpawn = new RandomSpawn();
         StartTime = DateTime.Now;
         GameHistory = new();
+        HistoryMenuIntermediate.StoreOutfits();
         GameStates = new();
         Players.Clear();
         GetAllPlayers().Do(p => Players.Add(p.PlayerId, new PlayerPlus(p)));
         playerNames.Clear();
-        PlayerControl.AllPlayerControls.ToArray().ForEach(p => playerNames[p.PlayerId] = p.GetRawName());
+        PlayerControl.AllPlayerControls.ToArray().ForEach(p => playerNames[p.PlayerId] = p.UnalteredName());
         _winDelegate = new WinDelegate();
         CurrentGamemode.SetupWinConditions(_winDelegate);
     }
@@ -151,6 +171,7 @@ public static class Game
     {
         Players.Clear();
         CustomRoleManager.PlayersCustomRolesRedux.Clear();
+        CustomRoleManager.PlayerSubroles.Clear();
     }
 }
 

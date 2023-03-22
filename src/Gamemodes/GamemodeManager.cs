@@ -32,7 +32,7 @@ public class GamemodeManager
 
     private IGamemode _currentGamemode;
     private Option gamemodeOption = null!;
-    internal readonly List<Type> GamemodeTypes = new() { typeof(StandardGamemode), typeof(TestHnsGamemode), typeof(ColorwarsGamemode), typeof(DebugGamemode), typeof(CTFGamemode)};
+    internal readonly List<Type> GamemodeTypes = new() { typeof(StandardGamemode), typeof(TestHnsGamemode), typeof(ColorwarsGamemode), typeof(DebugGamemode)/*, typeof(CTFGamemode)*/};
 
     public void SetGamemode(int id)
     {

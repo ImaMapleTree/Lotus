@@ -1,3 +1,4 @@
+using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals;
@@ -26,7 +27,7 @@ public class Mystic : Crewmate
         }
 
         bool didReactorAlert = false;
-        if (sendAudioAlert && SabotagePatch.CurrentSabotage is not SabotageType.Reactor)
+        if (sendAudioAlert && SabotagePatch.CurrentSabotage?.SabotageType() is not SabotageType.Reactor)
         {
             RoleUtils.PlayReactorsForPlayer(MyPlayer);
             didReactorAlert = true;

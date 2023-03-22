@@ -3,22 +3,25 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
+using TOHTOR.Factions.Crew;
+using TOHTOR.Factions.Interfaces;
+using TOHTOR.FactionsOLD;
 using TOHTOR.Roles;
 
 namespace TOHTOR.Victory.Conditions;
 
 public class VanillaCrewmateWin: IFactionWinCondition
 {
-    private static readonly List<Faction> CrewmateFaction = new() { Faction.Crewmates };
+    private static readonly List<IFaction> CrewmateFaction = new() { FactionInstances.Crewmates };
     private WinReason winReason = WinReason.TasksComplete;
 
-    public bool IsConditionMet(out List<Faction> factions)
+    public bool IsConditionMet(out List<IFaction> factions)
     {
         factions = CrewmateFaction;
         winReason = WinReason.TasksComplete;
 
         // Any player that is really an impostor but is also not allied to the crewmates
-        if (Game.GetAlivePlayers().Any(p => { CustomRole role = p.GetCustomRole(); return !role.Factions.IsAllied(Faction.Crewmates) && role.RealRole.IsImpostor(); }))
+        if (Game.GetAlivePlayers().Any(p => { CustomRole role = p.GetCustomRole(); return role.Faction is not Crewmates && role.RealRole.IsImpostor(); }))
             return GameData.Instance.TotalTasks == GameData.Instance.CompletedTasks;
 
         winReason = WinReason.FactionLastStanding;

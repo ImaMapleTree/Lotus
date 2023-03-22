@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using HarmonyLib;
-using TOHTOR.Options;
 using TOHTOR.Victory;
 using VentLib.Options.Game;
 using VentLib.Options.Game.Tabs;

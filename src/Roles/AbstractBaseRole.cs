@@ -5,15 +5,19 @@ using System.Linq;
 using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Il2CppSystem.Text.Json;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
+using TOHTOR.Factions.Crew;
+using TOHTOR.Factions.Impostors;
+using TOHTOR.Factions.Interfaces;
+using TOHTOR.Factions.Undead;
 using TOHTOR.GUI;
 using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles.Extra;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Subroles;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Localization.Attributes;
@@ -58,20 +62,20 @@ public abstract class AbstractBaseRole
     public RoleTypes RealRole => DesyncRole ?? VirtualRole;
     public RoleTypes? DesyncRole;
     public RoleTypes VirtualRole;
-    public Faction[] Factions { get; private set; } = { Faction.Crewmates };
+    public IFaction Faction { get; set; } = FactionInstances.Crewmates;
+    /*public FactionOld[] FactionsOld { get; set; } = { FactionOld.Crewmates };*/
     public SpecialType SpecialType = SpecialType.None;
     public Color RoleColor = Color.white;
     public bool IsSubrole { get; private set; }
     public int Chance { get; private set;  }
     public int Count { get; private set; }
     public int AdditionalChance { get; private set; }
-    protected bool BaseCanVent;
+    public bool BaseCanVent;
 
     internal GameOption Options;
 
     public string EnglishRoleName { get; private set; }
     private readonly Dictionary<Type, List<MethodInfo>> roleInteractions = new();
-    private readonly Dictionary<Faction, List<MethodInfo>> factionInteractions = new();
     private readonly Dictionary<RoleActionType, List<RoleAction>> roleActions = new();
 
     protected List<GameOptionOverride> roleSpecificGameOptionOverrides = new();
@@ -102,12 +106,14 @@ public abstract class AbstractBaseRole
             if (Options.Tab == null)
             {
                 if (this is GM) { /*ignored*/ }
-                if (this is Subrole.Subrole)
+                if (this is Subrole)
                     Options.Tab = DefaultTabs.MiscTab;
-                else if (this.Factions.IsImpostor())
+                else if (this.Faction is ImpostorFaction)
                     Options.Tab = DefaultTabs.ImpostorsTab;
-                else if (this.Factions.IsCrewmate())
+                else if (this.Faction is Crewmates)
                     Options.Tab = DefaultTabs.CrewmateTab;
+                else if (this.Faction is TheUndead)
+                    Options.Tab = DefaultTabs.NeutralTab;
                 else if (this.SpecialType is SpecialType.NeutralKilling or SpecialType.Neutral)
                     Options.Tab = DefaultTabs.NeutralTab;
                 else
@@ -191,10 +197,11 @@ public abstract class AbstractBaseRole
     // Currently role interaction >> faction interaction and I do not trigger faction interaction if role interaction was triggered
     // This is because in some scenarios the "default" faction interaction is not what is wanted when the role is targeted
     // Maybe revisit TODO
+    [Obsolete("Use PlayerControl.InteractWith()")]
     protected InteractionResult CheckInteractions(CustomRole role, params object[] parameters)
     {
-        List<MethodInfo> interactionsWithRole = roleInteractions.GetValueOrDefault(role.GetType());
-        IEnumerable<MethodInfo> interactionsWithFaction = role.Factions
+        /*List<MethodInfo> interactionsWithRole = roleInteractions.GetValueOrDefault(role.GetType());
+        IEnumerable<MethodInfo> interactionsWithFaction = role.FactionsOld
             .SelectMany(f => factionInteractions.GetValueOrDefault(f, new List<MethodInfo>()));
 
         if (interactionsWithRole == null && interactionsWithFaction == null) return InteractionResult.Proceed;
@@ -207,7 +214,8 @@ public abstract class AbstractBaseRole
         return interactionsWithFaction.All(interaction =>
             (InteractionResult) interaction.InvokeAligned(this, parameters) == InteractionResult.Proceed)
             ? InteractionResult.Proceed
-            : InteractionResult.Halt;
+            : InteractionResult.Halt;*/
+        return InteractionResult.Halt;
     }
 
     protected void CreateInstanceBasedVariables()
@@ -225,6 +233,7 @@ public abstract class AbstractBaseRole
 
     private void CreateCooldown(FieldInfo fieldInfo)
     {
+        VentLogger.Fatal("Hi HI hi hi I am creating a cooldown");
         Cooldown? value = (Cooldown)fieldInfo.GetValue(this);
         Cooldown setValue = value == null ? new Cooldown() : value.Clone();
         value?.TimeRemaining();
@@ -255,6 +264,8 @@ public abstract class AbstractBaseRole
     /// </summary>
     /// <param name="player">The player assigned to this role</param>
     protected virtual void Setup(PlayerControl player) { }
+
+    protected virtual void PostSetup() {}
 
     /// <summary>
     /// Forced method that allows CustomRoles to provide unique definitions for themselves
@@ -320,9 +331,9 @@ public abstract class AbstractBaseRole
             return this;
         }
 
-        public RoleModifier Factions(params Faction[] faction)
+        public RoleModifier Faction(IFaction factions)
         {
-            myRole.Factions = faction;
+            myRole.Faction = factions;
             return this;
         }
 

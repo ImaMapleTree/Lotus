@@ -5,5 +5,7 @@ public enum SpecialType
     Neutral,
     NeutralKilling,
     Coven,
-    None
+    Undead,
+    None,
+    Madmate
 }

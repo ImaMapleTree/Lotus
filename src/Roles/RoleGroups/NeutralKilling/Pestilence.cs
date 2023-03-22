@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
-using TOHTOR.Extensions;
+using TOHTOR.API;
+using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
+using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
@@ -40,8 +41,10 @@ public class Pestilence: NeutralKillingBase
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        VentLogger.Fatal("Triggering Role Action: Attack");
-        return base.TryKill(target);
+        if (!UnblockableAttacks) return base.TryKill(target);
+        MyPlayer.InteractWith(target, new UnblockedInteraction(new FatalIntent(), this));
+        Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
+        return true;
     }
 
     [RoleAction(RoleActionType.Interaction)]
@@ -53,16 +56,20 @@ public class Pestilence: NeutralKillingBase
         bool canceled = false;
         switch (interaction)
         {
-            case IManipulatedInteraction when ImmuneToManipulated:
+
+            case IUnblockedInteraction: return;
             case IDelayedInteraction when ImmuneToDelayedAttacks:
             case IRangedInteraction when ImmuneToRangedAttacks:
                 canceled = true;
                 break;
             case IIndirectInteraction indirectInteraction:
+                if (indirectInteraction.Emitter() is AgiTater) canceled = true;
                 if (indirectInteraction.Emitter() is Arsonist && ImmuneToArsonist) canceled = true;
                 break;
+            case IManipulatedInteraction when ImmuneToManipulated:
             default:
                 canceled = true;
+                TryKill(actor);
                 break;
         }
 

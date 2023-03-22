@@ -36,6 +36,6 @@ public class AssignRoleOnDeathPatch
                 return;
         }
 
-        VentLogger.Debug($"Dead Player {player.GetRawName()} => {player.Data.Role.Role}");
+        VentLogger.Debug($"Dead Player {player.UnalteredName()} => {player.Data.Role.Role}");
     }
 }

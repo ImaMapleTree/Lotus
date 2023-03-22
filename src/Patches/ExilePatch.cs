@@ -1,12 +1,15 @@
+using System.Linq;
 using AmongUs.Data;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
+using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches;
 
@@ -76,6 +79,7 @@ static class ExileControllerWrapUpPatch
         AntiBlackout.FakeExiled = null;
 
         Game.State = GameState.Roaming;
+        if (StaticOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
         Async.Schedule(() =>
         {
             ActionHandle handle = ActionHandle.NoInit();

@@ -5,12 +5,11 @@ using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Neutral;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -64,7 +63,7 @@ public class Sheriff : Crewmate
         shotsRemaining--;
         shootCooldown.Start();
 
-        if (target.GetCustomRole().IsAllied(MyPlayer)) Suicide(target);
+        if (target.Relationship(MyPlayer) is Relation.FullAllies) Suicide(target);
         return MyPlayer.InteractWith(target, SimpleInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
     }
 
@@ -119,7 +118,6 @@ public class Sheriff : Crewmate
         roleModifier
             .VanillaRole(RoleTypes.Crewmate)
             .DesyncRole(!isSheriffDesync ? null : RoleTypes.Impostor)
-            .Factions(Faction.Crewmates)
             .CanVent(false)
             .RoleColor(new Color(0.97f, 0.8f, 0.27f));
 }

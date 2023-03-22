@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
+using TOHTOR.Factions.Impostors;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -23,8 +24,8 @@ public class BountyHunter: Vanilla.Impostor
     private float bountyKillCoolDown;
     private float punishKillCoolDown;
 
-    [DynElement(UI.Misc)]
-    private string ShowTarget() => bhTarget == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(bhTarget.GetDynamicName().RawName);
+    [DynElement(UI.Text)]
+    private string ShowTarget() => bhTarget == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(bhTarget.UnalteredName());
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
@@ -49,7 +50,7 @@ public class BountyHunter: Vanilla.Impostor
     private void BountyHunterAcquireTarget()
     {
         List<PlayerControl> eligiblePlayers = Game.GetAlivePlayers()
-            .Where(p => !p.GetCustomRole().Factions.IsImpostor())
+            .Where(p => p.GetCustomRole().Faction is not ImpostorFaction)
             .ToList();
         if (eligiblePlayers.Count == 0) return;
 

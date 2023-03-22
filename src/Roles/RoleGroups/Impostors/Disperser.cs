@@ -3,6 +3,7 @@ using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;

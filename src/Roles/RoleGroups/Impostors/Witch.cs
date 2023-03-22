@@ -4,12 +4,16 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Collections;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
@@ -17,10 +21,12 @@ public class Witch: Vanilla.Impostor
 {
     private bool canSwitchWithButton;
 
+    private Dictionary<byte, Remote<IndicatorComponent>> remotes;
     private List<PlayerControl> cursedPlayers;
     private WitchMode mode = WitchMode.Killing;
 
     protected override void Setup(PlayerControl player) => cursedPlayers = new List<PlayerControl>();
+    protected override void PostSetup() => remotes = new Dictionary<byte, Remote<IndicatorComponent>>();
 
     [DynElement(UI.Misc)]
     private string WitchModeDisplay() =>
@@ -45,8 +51,9 @@ public class Witch: Vanilla.Impostor
 
         Game.GameHistory.AddEvent(new CursedEvent(MyPlayer, target));
         cursedPlayers.Add(target);
-        target.GetDynamicName().AddRule(GameState.InMeeting, UI.Name, new DynamicString("{0}" + Color.red.Colorize("†")));
-
+        remotes.GetValueOrDefault(target.PlayerId)?.Delete();
+        IndicatorComponent component = new(new LiveString("†", Color.red), GameState.InMeeting);
+        remotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
 
         MyPlayer.RpcGuardAndKill(target);
         return true;
@@ -58,7 +65,7 @@ public class Witch: Vanilla.Impostor
         cursedPlayers.Where(p => !p.Data.IsDead).Do(p =>
         {
             p.Attack(p, () => new CursedDeathEvent(p, MyPlayer));
-            p.GetDynamicName().RemoveRule(GameState.InMeeting, UI.Name);
+            remotes.GetValueOrDefault(p.PlayerId)?.Delete();
         });
         cursedPlayers.Clear();
     }

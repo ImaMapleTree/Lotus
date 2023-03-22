@@ -1,6 +1,10 @@
+using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Holders;
+using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -40,7 +44,7 @@ public class Oracle: Crewmate
             return;
         }
         selectedPlayer = target.Map(p => p.PlayerId);
-        Utils.SendMessage($"{selectRoleMsg} {target.Get().GetRawName()}\n{skipMsg}");
+        Utils.SendMessage($"{selectRoleMsg} {target.Get().UnalteredName()}\n{skipMsg}");
     }
 
     [RoleAction(RoleActionType.MyDeath)]
@@ -48,9 +52,7 @@ public class Oracle: Crewmate
     {
         if (!selectedPlayer.Exists()) return;
         PlayerControl target = Utils.GetPlayerById(selectedPlayer.Get())!;
-        DynamicName name = target.GetDynamicName();
-        name.AddRule(GameState.Roaming, UI.Role, new DynamicString("{0}"));
-        name.AddRule(GameState.InMeeting, UI.Role, new DynamicString("{0}"));
+        target.NameModel().GetComponentHolder<RoleHolder>().Last(c => c.ViewMode() is ViewMode.Replace).SetViewerSupplier(() => Game.GetAllPlayers().ToList());
     }
 
 

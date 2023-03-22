@@ -4,12 +4,17 @@ using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
@@ -18,12 +23,14 @@ public class YingYanger : Vanilla.Impostor
 {
     private DateTime lastCheck = DateTime.Now;
     private List<PlayerControl> cursedPlayers;
+    private Dictionary<byte, Remote<IndicatorComponent>> remotes;
 
     private float YingYangCD;
     private bool ResetToYingYang;
     private bool InYingMode;
 
     protected override void Setup(PlayerControl player) => cursedPlayers = new List<PlayerControl>();
+    protected override void PostSetup() => remotes = new Dictionary<byte, Remote<IndicatorComponent>>();
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
@@ -33,8 +40,9 @@ public class YingYanger : Vanilla.Impostor
         if (!InYingMode) return false;
 
         cursedPlayers.Add(target);
-        target.GetDynamicName().AddRule(GameState.Roaming, UI.Misc, new DynamicString(new Color(0.36f, 0f, 0.58f).Colorize("◆")), MyPlayer.PlayerId);
-        target.GetDynamicName().RenderFor(MyPlayer);
+        remotes.GetValueOrDefault(target.PlayerId)?.Delete();
+        IndicatorComponent component = new(new LiveString("◆", new Color(0.36f, 0f, 0.58f)), GameState.Roaming, viewers: MyPlayer);
+        remotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
         MyPlayer.RpcGuardAndKill(target);
 
         if (cursedPlayers.Count >= 2) InYingMode = false;
@@ -55,12 +63,12 @@ public class YingYanger : Vanilla.Impostor
         lastCheck = DateTime.Now;
         foreach (PlayerControl player in new List<PlayerControl>(cursedPlayers))
         {
-            if (player.Data.IsDead)
+            if (!player.IsAlive())
             {
                 RemovePuppet(player);
                 continue;
             }
-            List<PlayerControl> inRangePlayers = player.GetPlayersInAbilityRangeSorted().Where(p => !p.GetCustomRole().IsAllied(MyPlayer) && cursedPlayers.Contains(p)).ToList();
+            List<PlayerControl> inRangePlayers = player.GetPlayersInAbilityRangeSorted().Where(p => p.Relationship(MyPlayer) is not Relation.FullAllies && cursedPlayers.Contains(p)).ToList();
             if (inRangePlayers.Count == 0) continue;
             player.RpcMurderPlayer(inRangePlayers.GetRandom());
             RemovePuppet(player);
@@ -71,8 +79,7 @@ public class YingYanger : Vanilla.Impostor
 
     private void RemovePuppet(PlayerControl puppet)
     {
-        puppet.GetDynamicName().RemoveRule(GameState.Roaming, UI.Role, MyPlayer.PlayerId);
-        puppet.GetDynamicName().RenderFor(MyPlayer);
+        remotes.GetValueOrDefault(puppet.PlayerId)?.Delete();
         cursedPlayers.Remove(puppet);
     }
 

@@ -3,15 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
+using TOHTOR.Factions.Impostors;
+using TOHTOR.Factions.Interfaces;
+using TOHTOR.Factions.Neutrals;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Victory.Conditions;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
-using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Neutral;
@@ -24,21 +27,20 @@ public class Executioner : CustomRole
 
     private PlayerControl? target;
 
-    /*[DynElement(UI.Misc)]
-    private string TargetDisplay() => target == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(target.GetRawName());*/
-
-    public override void OnGameStart()
+    [RoleAction(RoleActionType.RoundStart)]
+    private void OnGameStart(bool gameStart)
     {
+        if (!gameStart) return;
         target = Game.GetAllPlayers().Where(p =>
         {
             if (p.PlayerId == MyPlayer.PlayerId) return false;
-            Faction[] factions = p.GetCustomRole().Factions;
-            if (!canTargetImpostors && factions.IsImpostor()) return false;
-            return canTargetNeutrals || !factions.Contains(Faction.Solo);
+            IFaction faction = p.GetCustomRole().Faction;
+            if (!canTargetImpostors && faction is ImpostorFaction) return false;
+            return canTargetNeutrals || faction is not Solo;
         }).ToList().GetRandom();
-        DynamicName targetName = target.GetDynamicName();
-        targetName.AddRule(GameState.Roaming, UI.Name, new DynamicString(RoleColor.Colorize("{0}")), MyPlayer.PlayerId);
-        targetName.AddRule(GameState.InMeeting, UI.Name, new DynamicString(RoleColor.Colorize("{0}")), MyPlayer.PlayerId);
+        VentLogger.Trace($"Executioner ({MyPlayer.UnalteredName()}) Target: {target}");
+
+        target.NameModel().GetComponentHolder<NameHolder>().Add(new ColoredNameComponent(target, RoleColor, GameStates.IgnStates, MyPlayer));
     }
 
     [RoleAction(RoleActionType.OtherExiled)]
@@ -58,16 +60,16 @@ public class Executioner : CustomRole
         switch ((ExeRoleChange)roleChangeWhenTargetDies)
         {
             case ExeRoleChange.Jester:
-                MyPlayer.RpcSetCustomRole(CustomRoleManager.Static.Jester);
+                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
                 break;
             case ExeRoleChange.Opportunist:
-                MyPlayer.RpcSetCustomRole(CustomRoleManager.Static.Opportunist);
+                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
             case ExeRoleChange.SchrodingerCat:
-                MyPlayer.RpcSetCustomRole(CustomRoleManager.Static.SchrodingerCat);
+                Game.AssignRole(MyPlayer, CustomRoleManager.Static.SchrodingerCat);
                 break;
             case ExeRoleChange.Crewmate:
-                MyPlayer.RpcSetCustomRole(CustomRoleManager.Static.Crewmate);
+                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
                 break;
             case ExeRoleChange.None:
             default:
@@ -75,7 +77,6 @@ public class Executioner : CustomRole
         }
 
         target = null;
-        MyPlayer.GetDynamicName().Render();
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

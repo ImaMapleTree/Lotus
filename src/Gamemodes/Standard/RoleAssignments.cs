@@ -38,7 +38,7 @@ public static class RoleAssignments
     public static List<CustomRole> DebugRoles(PlayerControl host)
     {
         List<CustomRole> debugRoles = new();
-        string name = host.GetRawName().ToLower();
+        string name = host.UnalteredName().ToLower();
 
         name.DebugLog("REAL NAME: ");
         CustomRole matchingRole =

@@ -1,8 +1,12 @@
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
-using TOHTOR.Patches.Systems;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
+using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
@@ -22,22 +26,23 @@ public class Mare: Vanilla.Impostor
     private SabotageType activationSabo;
     private bool abilityEnabled;
     private bool abilityLightsOnly;
+    private NameComponent coloredName;
 
-    protected override void Setup(PlayerControl player) => activationSabo = abilityLightsOnly ? SabotageType.Lights : activationSabo;
+    protected override void Setup(PlayerControl player)
+    {
+        activationSabo = abilityLightsOnly ? SabotageType.Lights : activationSabo;
+        coloredName = new NameComponent(new LiveString(MyPlayer.UnalteredName, new Color(0.36f, 0f, 0.58f)), GameState.Roaming, ViewMode.Absolute);
+    }
 
     [RoleAction(RoleActionType.Attack)]
     public new bool TryKill(PlayerControl target) => CanKill() && base.TryKill(target);
 
     [RoleAction(RoleActionType.SabotageStarted, priority: Priority.Last)]
-    private void MareSabotageCheck(SabotageType sabotageType, ActionHandle handle)
+    private void MareSabotageCheck(ISabotage sabotage, ActionHandle handle)
     {
-        if (!activationSabo.HasFlag(sabotageType) || handle.IsCanceled) return;
+        if (!activationSabo.HasFlag(sabotage.SabotageType()) || handle.IsCanceled) return;
         abilityEnabled = true;
-        if (redNameDuringSabotage)
-        {
-            DynamicName myName = MyPlayer.GetDynamicName();
-            Game.GetAlivePlayers().Do(p => myName.RenderFor(p));
-        }
+        if (redNameDuringSabotage) MyPlayer.NameModel().GetComponentHolder<NameHolder>().Add(coloredName);
         SyncOptions();
     }
 
@@ -45,19 +50,8 @@ public class Mare: Vanilla.Impostor
     private void MareSabotageFix()
     {
         abilityEnabled = false;
-        if (redNameDuringSabotage)
-        {
-            DynamicName myName = MyPlayer.GetDynamicName();
-            Game.GetAlivePlayers().Do(p => myName.RenderFor(p));
-        }
+        if (redNameDuringSabotage) MyPlayer.NameModel().GetComponentHolder<NameHolder>().Remove(coloredName);
         SyncOptions();
-    }
-
-    public override void OnGameStart()
-    {
-        DynamicName myName = MyPlayer.GetDynamicName();
-        DynamicString coloredName = new(() => abilityEnabled && redNameDuringSabotage ? new Color(0.36f, 0f, 0.58f).Colorize("{0}") : "");
-        myName.AddRule(GameState.Roaming, UI.Name, coloredName);
     }
 
     public override bool CanKill() => canKillWithoutSabotage || abilityEnabled;

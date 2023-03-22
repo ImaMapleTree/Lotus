@@ -6,7 +6,6 @@ using TOHTOR.Extensions;
 using TOHTOR.GUI.Patches;
 using TOHTOR.Managers;
 using TOHTOR.Options;
-using TOHTOR.Roles;
 using TOHTOR.Roles.Legacy;
 using UnityEngine;
 using VentLib.Logging;

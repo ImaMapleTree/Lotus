@@ -1,12 +1,11 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Managers;
-using TOHTOR.Managers.Date;
-using TOHTOR.Options;
 using TOHTOR.Roles;
 using TOHTOR.Victory;
 using UnityEngine;
@@ -108,7 +107,7 @@ public class CTFGamemode: Gamemode
         Carriers[myTeam] = grabber.PlayerId;
 
         string team = myTeam == 0 ? "Red" : "Blue";
-        VentLogger.Info($"{grabber.GetRawName()} (Team: {team}) Has stolen the flag");
+        VentLogger.Info($"{grabber.UnalteredName()} (Team: {team}) Has stolen the flag");
     }
 
     public override void SetupWinConditions(WinDelegate winDelegate)
@@ -150,5 +149,5 @@ public class CTFGamemode: Gamemode
         PlayerControl? bluePlayerOntop = RoleUtils.GetPlayersWithinDistance(BodyLocations[1], 0.5f).FirstOrDefault(p => Carriers[1] == 255 && p.cosmetics.bodyMatProperties.ColorId != 1);
         if (blueCarrier != null) TeamScoredPoint(1);
         if (bluePlayerOntop != null) GrabFlag(bluePlayerOntop);
-    }*/
-}
+    }#1#
+}*/

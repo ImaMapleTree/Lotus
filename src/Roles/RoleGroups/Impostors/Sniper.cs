@@ -2,14 +2,16 @@ using System.Linq;
 using AmongUs.GameOptions;
 using TOHTOR.API;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Options;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -17,6 +19,7 @@ using Convert = System.Convert;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
+// TODO: Redo Sniper
 public class Sniper: Morphling
 {
     private bool preciseShooting = true;
@@ -77,6 +80,7 @@ public class Sniper: Morphling
     [RoleAction(RoleActionType.Shapeshift)]
     private bool FireBullet(ActionHandle handle)
     {
+        VentLogger.Trace("Firing Bullet");
         handle.Cancel();
         if (sniperMode == 1)
         {
@@ -92,7 +96,7 @@ public class Sniper: Morphling
         Vector2 dir = lastDirection != null ? lastDirection : MyPlayer.MyPhysics.Velocity;
         bool killed = false;
 
-        foreach (PlayerControl target in Game.GetAllPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && !p.GetCustomRole().IsAllied(MyPlayer)))
+        foreach (PlayerControl target in Game.GetAllPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && p.Relationship(MyPlayer) is not Relation.FullAllies))
         {
             Vector3 targetPos = target.transform.position - MyPlayer.transform.position;
             Vector3 targetDirection = targetPos.normalized;

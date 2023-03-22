@@ -1,7 +1,9 @@
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Options;
+using TOHTOR.Roles.Interactions.Interfaces;
+using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -16,17 +18,13 @@ public class BloodKnight : NeutralKillingBase
     private bool isProtected;
 
     public override bool CanSabotage() => false;
-    public override bool CanBeKilled() => !isProtected;
 
     // Usually I use Misc but because the Blood Knight's color is hard to see I'm displaying this next to the player's name which requires a bit more hacky code
-    [DynElement(UI.Name)]
-    private string ProtectedIndicator() => Color.white.Colorize(isProtected ? MyPlayer.GetRawName() + RoleColor.Colorize("•") : MyPlayer.GetRawName());
+    [DynElement(UI.Counter)]
+    private string ProtectedIndicator() => isProtected ? RoleColor.Colorize("•") : "";
 
     [RoleAction(RoleActionType.RoundStart)]
-    public void Reset()
-    {
-        isProtected = false;
-    }
+    public void Reset() => isProtected = false;
 
     [RoleAction(RoleActionType.Attack)]
     public new bool TryKill(PlayerControl target)
@@ -39,6 +37,14 @@ public class BloodKnight : NeutralKillingBase
         isProtected = true;
         Async.Schedule(() => isProtected = false, protectionAmt);
         return killed;
+    }
+
+    [RoleAction(RoleActionType.Interaction)]
+    private void InteractedWith(Interaction interaction, ActionHandle handle)
+    {
+        if (!isProtected) return;
+        if (interaction.Intent() is not IFatalIntent) return;
+        handle.Cancel();
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -66,7 +72,6 @@ public class BloodKnight : NeutralKillingBase
     {
         return base.Modify(roleModifier) // call base because we're utilizing some settings setup by NeutralKillingBase
             .RoleName("Blood Knight")
-            .Factions(Faction.Solo)
             .RoleColor(new Color(0.47f, 0f, 0f)) // Using Color() because it's easier to edit and get an idea for actual color
             .CanVent(canVent);
     }

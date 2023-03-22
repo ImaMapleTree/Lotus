@@ -1,4 +1,5 @@
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Logging;

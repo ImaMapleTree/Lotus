@@ -1,18 +1,25 @@
+using UnityEngine;
+
 namespace TOHTOR;
 
 public static class ModConstants
 {
+    public static Color HColor1 = new Color(0.03f, 0.53f, 0.01f);
+    public static Color HColor2 = new Color(0.71f, 0.33f, 0f);
+
     public const int MaxPlayers = 15;
 
     // Minimum distance for arrow to show (versus dot)
     public const float ArrowActivationMin = 3;
 
-    public const float DynamicNameTimeBetweenRenders = 0.15f;
+    public const float DynamicNameTimeBetweenRenders = 0.25f;
 
     public const double RoleFixedUpdateCooldown = 0.25;
 
     public const float DeriveDelayMultiplier = 0.0003f;
     public const float DeriveDelayFlatValue = 0.4f;
+
+    public const int RecursiveDepthLimit = 200;
 
     public static string[] ColorNames = new[]
     {

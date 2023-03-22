@@ -5,7 +5,7 @@ using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Managers.History.Events;
 
-public class KillEvent : ITargetedEvent
+public class KillEvent : IKillEvent
 {
     private PlayerControl killer;
     private Optional<CustomRole> killerRole;

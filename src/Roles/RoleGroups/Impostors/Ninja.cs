@@ -3,6 +3,7 @@ using System.Linq;
 using AmongUs.GameOptions;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Options.Game;

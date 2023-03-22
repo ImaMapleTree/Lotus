@@ -9,15 +9,18 @@ using TOHTOR.Roles.RoleGroups.Coven;
 using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.Crew.Snitch;
 using TOHTOR.Roles.RoleGroups.Impostors;
+using TOHTOR.Roles.RoleGroups.Madmates.Roles;
 using TOHTOR.Roles.RoleGroups.Neutral;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
+using TOHTOR.Roles.RoleGroups.Undead.Roles;
 using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Roles.Subrole;
+using TOHTOR.Roles.Subroles;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using static TOHTOR.Roles.AbstractBaseRole;
 using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
 using Medium = TOHTOR.Roles.RoleGroups.Crew.Medium;
+using Necromancer = TOHTOR.Roles.RoleGroups.Undead.Roles.Necromancer;
 using SerialKiller = TOHTOR.Roles.RoleGroups.Impostors.SerialKiller;
 
 namespace TOHTOR.Managers;
@@ -28,7 +31,7 @@ public static class CustomRoleManager
     public static Dictionary<byte, CustomRole> PlayersCustomRolesRedux = new();
     public static Dictionary<byte, CustomRole> LastRoundCustomRoles = new();
 
-    public static Dictionary<byte, List<Subrole>> PlayerSubroles = new();
+    public static Dictionary<byte, List<CustomRole>> PlayerSubroles = new();
 
     public static List<byte> RoleBlockedPlayers = new();
     public static StaticRoles Static = new();
@@ -72,7 +75,13 @@ public static class CustomRoleManager
 
     public static void AddPlayerSubrole(byte playerId, Subrole subrole)
     {
-        if (!PlayerSubroles.ContainsKey(playerId)) PlayerSubroles[playerId] = new List<Subrole>();
+        if (!PlayerSubroles.ContainsKey(playerId)) PlayerSubroles[playerId] = new List<CustomRole>();
+        PlayerSubroles[playerId].Add(subrole);
+    }
+
+    public static void AddPlayerSubrole(byte playerId, CustomRole subrole)
+    {
+        if (!PlayerSubroles.ContainsKey(playerId)) PlayerSubroles[playerId] = new List<CustomRole>();
         PlayerSubroles[playerId].Add(subrole);
     }
 
@@ -131,7 +140,6 @@ public static class CustomRoleManager
 
         public Impostor Impostor = new Impostor();
         public Morphling Morphling = new Morphling();
-        public Madmate Madmate = new Madmate();
         public Miner Miner = new Miner();
         public Mafia Mafia = new Mafia();
         public Sniper Sniper = new Sniper();
@@ -180,6 +188,7 @@ public static class CustomRoleManager
         public CrewPostor CrewPostor = new CrewPostor();
         public Opportunist Opportunist = new Opportunist();
         public Medium Medium = new Medium();
+        public SabotageMaster SabotageMaster = new SabotageMaster();
 
 
         public Glitch Glitch = new Glitch();
@@ -189,8 +198,8 @@ public static class CustomRoleManager
         public Executioner Executioner = new Executioner();
         public PlagueBearer PlagueBearer = new PlagueBearer();
         public Pestilence Pestilence = new Pestilence();
-
-
+        public AgiTater AgiTater = new AgiTater();
+        public Retributionist Retributionist = new Retributionist();
 
         public GuardianAngel GuardianAngel = new GuardianAngel();
         public Archangel Archangel = new Archangel();
@@ -208,8 +217,17 @@ public static class CustomRoleManager
         public Speedrunner Speedrunner = new Speedrunner();
         public Trapper Trapper = new Trapper();
         public Phantom Phantom = new Phantom();
+        public Hacker Hacker = new Hacker();
 
         public Egoist Egoist = new Egoist();
+
+        public Necromancer Necromancer = new Necromancer();
+        public Deathknight Deathknight = new Deathknight();
+
+        public Madmate Madmate = new Madmate();
+        public MadGuardian MadGuardian = new MadGuardian();
+        public MadSnitch MadSnitch = new MadSnitch();
+        public Parasite Parasite = new Parasite();
     }
 
     public class ExtraRoles

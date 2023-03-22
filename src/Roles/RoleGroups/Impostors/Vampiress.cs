@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;

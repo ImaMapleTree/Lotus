@@ -6,7 +6,6 @@ using Hazel;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
-using VentLib.Logging;
 
 namespace TOHTOR.Options;
 

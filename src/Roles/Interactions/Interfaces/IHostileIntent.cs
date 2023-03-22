@@ -1,6 +1,4 @@
-using TOHTOR.Roles.Interactions.Interfaces;
-
-namespace TOHTOR.Roles.Interactions;
+namespace TOHTOR.Roles.Interactions.Interfaces;
 
 public interface IHostileIntent : Intent
 {

@@ -1,5 +1,6 @@
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
+using TOHTOR.FactionsOLD;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -63,5 +64,5 @@ public class Terrorist : Crewmate
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier).RoleColor(Color.green).Factions(Faction.Solo);
+        base.Modify(roleModifier).RoleColor(Color.green).Faction(FactionInstances.Solo);
 }

@@ -20,6 +20,7 @@ using VentLib.Anticheat;
 using VentLib.Localization;
 using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
 
 namespace TOHTOR.Patches;
@@ -94,6 +95,7 @@ class CoBeginPatch
 
     public static void Postfix()
     {
+        if (StaticOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.RoundStart, ref handle, true);
     }
@@ -287,6 +289,7 @@ class IntroCutsceneDestroyPatch
         if (StaticOptions.RandomSpawn) Game.GetAllPlayers().Do(p => Game.RandomSpawn.Spawn(p));
 
         Async.Schedule(() => PlayerControl.AllPlayerControls.ToArray().Do(pc => pc.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3)), NetUtils.DeriveDelay(0.15f));
+        Async.Schedule(() => GameData.Instance.AllPlayers.ToArray().ForEach(pd => pd.PlayerName = pd.Object.NameModel().Unaltered()), NetUtils.DeriveDelay(0.25f));
         Async.Schedule(() => PlayerControl.AllPlayerControls.ToArray().Do(pc => PetBypass.SetPet(pc, "pet_Doggy", true)), NetUtils.DeriveDelay(0.3f));
         Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.6f));
         VentLogger.Trace("Intro Scene Ending", "IntroCutscene");

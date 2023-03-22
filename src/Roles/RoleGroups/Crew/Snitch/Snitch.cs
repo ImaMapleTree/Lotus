@@ -34,7 +34,7 @@ public class Snitch: CustomRole
         tasksComplete++;
     }
 
-    [RoleAction(RoleActionType.FixedUpdate)]
+    /*[RoleAction(RoleActionType.FixedUpdate)]
     public void SnitchFixedUpdate()
     {
         DynamicName dynamicName = MyPlayer.GetDynamicName();
@@ -52,7 +52,7 @@ public class Snitch: CustomRole
                 arrowComponents[playerId][1]?.Destroy();
                 arrowComponents.Remove(playerId);
             }
-        }*/
+        }#1#
 
         foreach (PlayerControl player in Game.GetAllPlayers())
         {
@@ -91,10 +91,11 @@ public class Snitch: CustomRole
                 Helpers.ColorString(
                     arrowIsColored ? RoleColor : Color.white ,
                     RoleUtils.CalculateArrow(player, MyPlayer).ToString()
-                ));*/
+                ));#1#
         }
         dynamicName.Render();
     }
+    */
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.RoleColor("#b8fb4f");

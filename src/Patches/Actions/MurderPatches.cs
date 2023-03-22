@@ -2,7 +2,6 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Gamemodes;
-using TOHTOR.Managers.History;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -64,7 +63,6 @@ public static class MurderPatches
         {
             if (!target.Data.IsDead) return;
 
-            VentLogger.Info($"Murder Patch: {Game.GameHistory.GetCauseOfDeath(target.PlayerId)}");
             IDeathEvent deathEvent = Game.GameHistory.GetCauseOfDeath(target.PlayerId)
                 .OrElseGet(() => __instance.PlayerId == target.PlayerId
                     ? new SuicideEvent(__instance)

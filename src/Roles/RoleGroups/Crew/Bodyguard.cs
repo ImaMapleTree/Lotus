@@ -95,15 +95,17 @@ public class Bodyguard: Crewmate
         InteractionResult result = MyPlayer.InteractWith(actor, SimpleInteraction.FatalInteraction.Create(this));
 
         if (result is InteractionResult.Proceed) Game.GameHistory.AddEvent(new KillEvent(MyPlayer, actor));
-        if (actor.GetCustomRole() is Impostor imp) imp.TryKill(MyPlayer);
-        else
-        {
-            if (actor.InteractWith(MyPlayer, SimpleInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed)
-                Game.GameHistory.AddEvent(new KillEvent(actor, MyPlayer));
-        }
+        actor.GetCustomRole().GetActions(RoleActionType.Attack)
+            .FirstOrOptional()
+            .Handle(t => t.Item1.Execute(t.Item2, new object[] { MyPlayer} ),
+            () =>
+            {
+                if (actor.InteractWith(MyPlayer, SimpleInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed)
+                    Game.GameHistory.AddEvent(new KillEvent(actor, MyPlayer));
+            });
     }
 
-    private static Optional<string> GetPlayerName(byte b) => Game.GetAlivePlayers().FirstOrOptional(p => p.PlayerId == b).Map(p => p.GetRawName());
+    private static Optional<string> GetPlayerName(byte b) => Game.GetAlivePlayers().FirstOrOptional(p => p.PlayerId == b).Map(p => p.UnalteredName());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(0.36f, 0.36f, 0.36f));

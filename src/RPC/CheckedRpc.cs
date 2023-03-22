@@ -16,7 +16,7 @@ public static class CheckedRpc
     {
         VentLogger.Trace("CRevertShapeshift");
         if (!player.IsAlive()) return;
-        player.SetName(player.GetRawName());
+        player.SetName(player.UnalteredName());
         player.RpcRevertShapeshift(animate);
     }
 

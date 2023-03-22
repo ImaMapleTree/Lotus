@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Victory;
 using VentLib.Options;

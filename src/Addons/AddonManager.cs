@@ -6,9 +6,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
 using TOHTOR.Managers;
-using TOHTOR.Roles;
 using TOHTOR.RPC;
 using VentLib;
 using VentLib.Logging;
@@ -46,7 +44,7 @@ public class AddonManager
             MethodInfo initialize = tohType.GetMethod("Initialize");
             initialize!.Invoke(addon, null);
 
-            addon.Factions.Do(f => FactionConstraintValidator.ValidateAndAdd(f, file.Name));
+            //addon.Factions.Do(f => FactionConstraintValidator.ValidateAndAdd(f, file.Name));
             CustomRoleManager.AllRoles.AddRange(addon.CustomRoles);
             TOHPlugin.GamemodeManager.GamemodeTypes.AddRange(addon.Gamemodes);
 

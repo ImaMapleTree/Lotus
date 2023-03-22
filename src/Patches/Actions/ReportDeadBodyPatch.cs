@@ -34,10 +34,10 @@ public class ReportDeadBodyPatch
         Game.TriggerForAll(RoleActionType.AnyReportedBody, ref handle, __instance, target);
         if (handle.IsCanceled) return false;
 
-        target.PlayerName = Utils.GetPlayerById(target.PlayerId)!.GetDynamicName().GetName(state: GameState.InIntro);
+        target.PlayerName = Utils.GetPlayerById(target.PlayerId)!.NameModel().Render(state: GameState.InIntro);
         Game.State = GameState.InMeeting;
         Game.RenderAllForAll(state: GameState.InMeeting, force: true);
-        Game.GetAllPlayers().Do(p => p.GetDynamicName().RenderFor(PlayerControl.LocalPlayer, state: GameState.InMeeting, force: true));
+        Game.GetAllPlayers().Do(p => p.NameModel().RenderFor(PlayerControl.LocalPlayer, state: GameState.InMeeting, force: true));
 
         Async.Schedule(() => __instance.CmdReportDeadBody(target), 0.3f);
 

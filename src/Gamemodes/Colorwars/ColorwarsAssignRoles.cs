@@ -6,7 +6,6 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
-using TOHTOR.Roles;
 using VentLib.Networking.RPC;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities;

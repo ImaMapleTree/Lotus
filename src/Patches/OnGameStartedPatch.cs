@@ -52,7 +52,7 @@ namespace TOHTOR.Patches
             Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
 
             List<Tuple<string, CustomRole>> debugList = CustomRoleManager.PlayersCustomRolesRedux
-                .Select(kvp => new Tuple<string, CustomRole>(Utils.GetPlayerById(kvp.Key).GetRawName(), kvp.Value))
+                .Select(kvp => new Tuple<string, CustomRole>(Utils.GetPlayerById(kvp.Key).UnalteredName(), kvp.Value))
                 .ToList();
 
             VentLogger.Old($"Assignments: {String.Join(", ", debugList)}", "");

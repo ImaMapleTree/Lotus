@@ -5,6 +5,7 @@ using AmongUs.GameOptions;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
+using TOHTOR.FactionsOLD;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -23,7 +24,7 @@ public class Glitch: Morphling
 
     protected override void Setup(PlayerControl player)
     {
-        $"Setting up {RoleName} with player: {player.GetRawName()}".DebugLog();
+        $"Setting up {RoleName} with player: {player.UnalteredName()}".DebugLog();
         GameObject gameObject = GameObject.FindObjectsOfType<GameObject>().ToArray().ToList()
             .FirstOrDefault(obj => obj.GetComponent<HnSImpostorScreamSfx>() != null);
         if (gameObject != null)
@@ -148,7 +149,7 @@ public class Glitch: Morphling
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier
             .RoleName("The Glitch")
-            .Factions(Faction.Solo)
+            .Faction(FactionInstances.Solo)
             .VanillaRole(RoleTypes.Shapeshifter)
             .SpecialType(SpecialType.NeutralKilling)
             .RoleColor(Color.green);

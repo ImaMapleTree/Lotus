@@ -3,6 +3,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.RoleGroups.Impostors;
+using TOHTOR.Roles.RoleGroups.Madmates.Roles;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 
 namespace TOHTOR.Roles.Legacy;
@@ -13,7 +14,7 @@ public static class OldRoleSystemBridge
     {
         if (customRole.SpecialType is SpecialType.Coven) return RoleType.Coven;
         if (customRole.SpecialType is SpecialType.Neutral or SpecialType.NeutralKilling) return RoleType.Neutral;
-        if (customRole is Madmate) return RoleType.Madmate;
+        if (customRole.SpecialType is SpecialType.Madmate) return RoleType.Madmate;
         return customRole.VirtualRole
             is RoleTypes.Impostor
             or RoleTypes.ImpostorGhost

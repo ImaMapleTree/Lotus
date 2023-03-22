@@ -1,6 +1,7 @@
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;

@@ -3,12 +3,10 @@ using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Options;
 using VentLib.Options;
 using TOHTOR.Victory;
 using UnityEngine;
 using VentLib.Localization.Attributes;
-using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Options.Game.Tabs;
 using VentLib.Ranges;
@@ -103,7 +101,7 @@ public class ColorwarsGamemode: Gamemode
         allPlayers.Do(p =>
         {
             var newOption = new GameOptionBuilder()
-                .Name(p.GetRawName())
+                .Name(p.UnalteredName())
                 .Tab(ColorwarsTab)
                 .Color(_colors[p.cosmetics.bodyMatProperties.ColorId])
                 .Values(teamOptions)
@@ -182,7 +180,7 @@ public class ColorwarsGamemode: Gamemode
             {
                 GameOptionBuilder builder = new GameOptionBuilder().Name($"Player {j + 1}");
                 foreach (PlayerControl player in PlayerControl.AllPlayerControls)
-                    builder.Value(v => v.Text(player.GetRawName()).Value((int)player.PlayerId).Build());
+                    builder.Value(v => v.Text(player.UnalteredName()).Value((int)player.PlayerId).Build());
                 option = builder.Build();
                 //manualTeamsOption.SubOptions.Add(option);
                 //_tempOption.Add(option);

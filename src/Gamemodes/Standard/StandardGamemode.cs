@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TOHTOR.Options;
+using TOHTOR.Roles.RoleGroups.Undead;
 using TOHTOR.Victory;
 using TOHTOR.Victory.Conditions;
 using VentLib.Options.Game.Tabs;
@@ -25,5 +26,6 @@ public class StandardGamemode: Gamemode
         winDelegate.AddWinCondition(new StandardWinConditions.LoversWin());
         winDelegate.AddWinCondition(new StandardWinConditions.SoloKillingWin());
         winDelegate.AddWinCondition(new StandardWinConditions.SoloRoleWin());
+        winDelegate.AddWinCondition(new UndeadWinCondition());
     }
 }

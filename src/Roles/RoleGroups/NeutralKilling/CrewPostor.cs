@@ -3,6 +3,7 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
+using TOHTOR.FactionsOLD;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -16,7 +17,7 @@ public class CrewPostor : Crewmate
     protected override void OnTaskComplete()
     {
         if (MyPlayer.Data.IsDead) return;
-        List<PlayerControl> inRangePlayers = RoleUtils.GetPlayersWithinDistance(MyPlayer, 999).Where(p => !p.GetCustomRole().IsAllied(MyPlayer)).ToList();
+        List<PlayerControl> inRangePlayers = RoleUtils.GetPlayersWithinDistance(MyPlayer, 999).Where(p => p.Relationship(MyPlayer) is not Relation.FullAllies).ToList();
         if (inRangePlayers.Count == 0) return;
         PlayerControl target = inRangePlayers.GetRandom();
         bool death = MyPlayer.Attack(target, () => new TaskDeathEvent(target, MyPlayer));
@@ -47,7 +48,7 @@ public class CrewPostor : Crewmate
                     .Build())
                 .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor("#DC6601").Factions(Faction.Solo);
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor("#DC6601").Faction(FactionInstances.Solo);
 
     class TaskKillEvent : KillEvent, IRoleEvent
     {

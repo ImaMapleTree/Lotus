@@ -39,7 +39,7 @@ public partial class Impostor : CustomRole, IModdable
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier
             .VanillaRole(RoleTypes.Impostor)
-            .Factions(Faction.Impostors)
+            .Faction(FactionInstances.Impostors)
             .CanVent(true)
             .OptionOverride(Override.KillCooldown, KillCooldown)
             .RoleColor(Color.red);

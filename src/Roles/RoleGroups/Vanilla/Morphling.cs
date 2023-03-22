@@ -1,5 +1,4 @@
 using AmongUs.GameOptions;
-using TOHTOR.Factions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
@@ -19,7 +18,6 @@ public class Morphling : Impostor
         roleModifier.VanillaRole(RoleTypes.Shapeshifter)
             .RoleColor(Color.red)
             .CanVent(true)
-            .Factions(Faction.Impostors)
             .OptionOverride(Override.ShapeshiftCooldown, shapeshiftCooldown)
             .OptionOverride(Override.ShapeshiftDuration, shapeshiftDuration);
 }

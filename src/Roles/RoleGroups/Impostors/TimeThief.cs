@@ -45,7 +45,7 @@ public class TimeThief : Vanilla.Impostor
                 discussionTime = 1;
             }
 
-            VentLogger.Info($"{MyPlayer.GetDynamicName().RawName} | Time Thief | Meeting Time: {discussionTime} | Voting Time: {votingTime}", "TimeThiefStolen");
+            VentLogger.Info($"{MyPlayer.UnalteredName()} | Time Thief | Meeting Time: {discussionTime} | Voting Time: {votingTime}", "TimeThiefStolen");
             votingTime = Mathf.Clamp(votingTime - remainingStolenTime, minimumVotingTime, votingTime);
             overrides = new GameOptionOverride[] { new(Override.DiscussionTime, discussionTime), new(Override.VotingTime, votingTime) };
         }

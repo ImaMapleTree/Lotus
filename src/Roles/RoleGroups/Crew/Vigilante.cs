@@ -5,6 +5,11 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
+using TOHTOR.GUI.Name.Impl;
+using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -69,10 +74,10 @@ public class Vigilante: CustomRole
         foreach (var tuple in roles.Indexed())
         {
             string name = tuple.item.Select(r => r.RoleColor.Colorize(r.RoleName)).Join();
-            DynamicName dynName = players[tuple.index].GetDynamicName();
+            INameModel nameModel = players[tuple.index].NameModel();
 
-            dynName.AddRule(GameState.InMeeting, UI.Name, new DynamicString(name), MyPlayer.PlayerId);
-            dynName.AddRule(GameState.InMeeting, UI.Role, new DynamicString(dynName.RawName), MyPlayer.PlayerId);
+            nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(name, new [] { GameState.InMeeting }, ViewMode.Replace, MyPlayer));
+            nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(new LiveString(nameModel.Unaltered), new [] { GameState.InMeeting }, ViewMode.Replace, MyPlayer));
         }
     }
 
@@ -91,7 +96,7 @@ public class Vigilante: CustomRole
                     break;
                 }
                 playerSelected = player;
-                string targetPlayerMessage = $"{selectPlayerMsg} {player.Get().GetRawName()}\n{skipMsg}";
+                string targetPlayerMessage = $"{selectPlayerMsg} {player.Get().UnalteredName()}\n{skipMsg}";
                 Utils.SendMessage(targetPlayerMessage, MyPlayer.PlayerId);
                 break;
             case VotingState.SelectingRole:

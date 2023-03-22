@@ -1,4 +1,5 @@
 using HarmonyLib;
+using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Options;
 
 namespace TOHTOR.Patches.Systems;
@@ -10,7 +11,7 @@ public static class ReactorSystemTypePatch
 {
     public static void Prefix(ReactorSystemType __instance)
     {
-        if (SabotagePatch.CurrentSabotage is SabotageType.Reactor)
+        if (SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Reactor)
             SabotagePatch.SabotageCountdown = __instance.Countdown;
         if (!__instance.IsActive || !StaticOptions.SabotageTimeControl)
             return;
@@ -25,7 +26,7 @@ public static class LifeSupportSystemPatch
 {
     public static void Prefix(LifeSuppSystemType __instance)
     {
-        if (SabotagePatch.CurrentSabotage is SabotageType.Oxygen)
+        if (SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Oxygen)
             SabotagePatch.SabotageCountdown = __instance.Countdown;
     }
 }

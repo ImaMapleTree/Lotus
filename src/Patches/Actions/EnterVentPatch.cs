@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using HarmonyLib;
+using Hazel;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Gamemodes;
@@ -8,6 +9,7 @@ using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Logging;
+using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
 namespace TOHTOR.Patches.Actions;
@@ -23,9 +25,10 @@ class EnterVentPatch
         CustomRole role = pc.GetCustomRole();
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.EnterVent)) pc.MyPhysics.RpcBootFromVent(__instance.Id);
         ActionHandle vented = ActionHandle.NoInit();
-        role.Trigger(RoleActionType.MyEnterVent, ref vented, __instance);
+        pc.Trigger(RoleActionType.MyEnterVent, ref vented, __instance);
 
         if (!role.CanVent() || vented.IsCanceled) {
+            VentLogger.Trace($"{pc.GetNameWithRole()} cannot enter vent. Booting.");
             Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.4f);
             return;
         }
@@ -57,8 +60,9 @@ class ExitVentPatch
     {
 
         ActionHandle exitVent = ActionHandle.NoInit();
-        pc.GetCustomRole().Trigger(RoleActionType.VentExit, ref exitVent, __instance);
-        if (exitVent.IsCanceled) Async.Schedule(() => pc.MyPhysics.RpcEnterVent(__instance.Id), 0.0f);
+        pc.Trigger(RoleActionType.VentExit, ref exitVent, __instance);
+        //if (exitVent.IsCanceled) Async.Schedule(() => pc.MyPhysics.RpcEnterVent(__instance.Id), 0.0f);
+        if (exitVent.IsCanceled) Async.Schedule(() => RpcV2.Immediate(pc.MyPhysics.NetId, RpcCalls.EnterVent, SendOption.None).WritePacked(__instance.Id).Send(), 0.5f);
         else EnterVentPatch.lastVentLocation.Remove(pc.PlayerId);
     }
 }

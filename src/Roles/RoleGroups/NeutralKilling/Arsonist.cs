@@ -5,13 +5,14 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Crew;
-using TOHTOR.Roles.RoleGroups.Neutral;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -94,10 +95,7 @@ public class Arsonist : NeutralKillingBase
 
     private void SuccessfulDouseEffects(PlayerControl target)
     {
-        DynamicName targetName = target.GetDynamicName();
-        targetName.AddRule(GameState.Roaming, UI.Counter, new DynamicString(RoleColor.Colorize("★")), MyPlayer.PlayerId);
-        targetName.AddRule(GameState.InMeeting, UI.Name, new DynamicString(RoleColor.Colorize("{0} ★")), MyPlayer.PlayerId);
-        targetName.RenderFor(MyPlayer);
+        target.NameModel().GetComponentHolder<IndicatorHolder>().Add(new SimpleIndicatorComponent("★", RoleColor, GameStates.IgnStates, MyPlayer));
 
         GameOptionOverride[] overrides = { new(Override.ImpostorLightMod, 0f) };
         SyncOptions(overrides);

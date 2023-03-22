@@ -3,8 +3,10 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -94,21 +96,21 @@ public class FireWorks: Morphling
         new List<PlayerControl>(playersInRadius)
             .Where(radiiPlayer => allPlayersInAllRadii.All(p => p.PlayerId != radiiPlayer.PlayerId))
             .Do(radiiPlayer => {
-                if (SabotagePatch.CurrentSabotage is not SabotageType.Reactor)
+                if (SabotagePatch.CurrentSabotage?.SabotageType() is not SabotageType.Reactor)
                     RoleUtils.EndReactorsForPlayer(radiiPlayer);
                 playersInRadius.RemoveAll(p => p.PlayerId == radiiPlayer.PlayerId);
             });
 
         allPlayersInAllRadii.Distinct().Where(p => playersInRadius.All(pr => pr.PlayerId != p.PlayerId)).Do(radiiPlayer =>
         {
-            if (SabotagePatch.CurrentSabotage is not SabotageType.Reactor)
+            if (SabotagePatch.CurrentSabotage?.SabotageType() is not SabotageType.Reactor)
                 RoleUtils.PlayReactorsForPlayer(radiiPlayer);
             playersInRadius.Add(radiiPlayer);
         });
 
         if (exploding) return;
         playersInRadius.Distinct().Do(radiiPlayer => {
-            if (SabotagePatch.CurrentSabotage is not SabotageType.Reactor)
+            if (SabotagePatch.CurrentSabotage?.SabotageType() is not SabotageType.Reactor)
                 RoleUtils.EndReactorsForPlayer(radiiPlayer);
             radiiPlayer.RpcMurderPlayer(radiiPlayer);
         });

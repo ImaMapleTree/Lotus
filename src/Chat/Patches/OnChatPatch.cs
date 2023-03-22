@@ -13,6 +13,6 @@ internal static class OnChatPatch
     {
         if (!TOHPlugin.PluginDataManager.ChatManager.HasBannedWord(chatText) || sourcePlayer.IsHost()) return;
         AmongUsClient.Instance.KickPlayer(sourcePlayer.GetClientId(), false);
-        Utils.SendMessage($"{sourcePlayer.GetRawName()} was kicked by AutoKick.");
+        Utils.SendMessage($"{sourcePlayer.UnalteredName()} was kicked by AutoKick.");
     }
 }

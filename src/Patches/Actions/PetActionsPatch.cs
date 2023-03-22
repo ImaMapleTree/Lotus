@@ -3,7 +3,6 @@ using Hazel;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
 namespace TOHTOR.Patches.Actions;
@@ -43,9 +42,12 @@ class ExternalRpcPetPatch
         if (AmongUsClient.Instance.AmHost)
             __instance.CancelPet();
 
-        RpcV2.Immediate(__instance.NetId, RpcCalls.CancelPet)
-            .SendExclusive(__instance.myPlayer.GetClientId());
-        Async.Schedule(() => RpcV2.Immediate(__instance.NetId, RpcCalls.CancelPet).SendInclusive(__instance.myPlayer.GetClientId()), NetUtils.DeriveDelay(0.5f));
+
+        foreach (PlayerControl player in PlayerControl.AllPlayerControls)
+            Async.Schedule(() => AmongUsClient.Instance.FinishRpcImmediately(
+                AmongUsClient.Instance.StartRpcImmediately(__instance.NetId, 50, SendOption.None,
+                    player.GetClientId())), 0.5f);
+
 
         ActionHandle handle = ActionHandle.NoInit();
         playerControl.Trigger(RoleActionType.OnPet, ref handle, __instance);

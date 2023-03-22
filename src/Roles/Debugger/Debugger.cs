@@ -42,7 +42,7 @@ public class Debugger: CustomRole
     {
         Vector2 location = MyPlayer.GetTruePosition();
         foreach (PlayerControl player in Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId))
-            VentLogger.Old($"Distance from {MyPlayer.GetRawName()} to {player.GetRawName()} :: {Vector2.Distance(location, player.GetTruePosition())}", "DebuggerDistance");
+            VentLogger.Old($"Distance from {MyPlayer.UnalteredName()} to {player.UnalteredName()} :: {Vector2.Distance(location, player.GetTruePosition())}", "DebuggerDistance");
     }
 
     private void TestTest()

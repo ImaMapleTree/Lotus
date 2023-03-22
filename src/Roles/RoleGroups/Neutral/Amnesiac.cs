@@ -2,6 +2,7 @@ using AmongUs.GameOptions;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
+using TOHTOR.FactionsOLD;
 using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
@@ -20,7 +21,7 @@ public class Amnesiac : CustomRole {
     [RoleAction(RoleActionType.AnyReportedBody)]
     public void AmnesiacRememberAction(PlayerControl reporter, GameData.PlayerInfo reported, ActionHandle handle)
     {
-        VentLogger.Old($"Reporter: {reporter.GetRawName()} | Reported: {reported.GetNameWithRole()} | Self: {MyPlayer.GetRawName()}", "");
+        VentLogger.Old($"Reporter: {reporter.UnalteredName()} | Reported: {reported.GetNameWithRole()} | Self: {MyPlayer.UnalteredName()}", "");
 
         if (reporter.PlayerId != MyPlayer.PlayerId) return;
         CustomRole newRole = reported.GetCustomRole();
@@ -51,5 +52,5 @@ public class Amnesiac : CustomRole {
                 .AddOnOffValues(false).Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor(new Color(0.51f, 0.87f, 0.99f)).DesyncRole(RoleTypes.Impostor).Factions(Faction.Solo);
+        roleModifier.RoleColor(new Color(0.51f, 0.87f, 0.99f)).DesyncRole(RoleTypes.Impostor).Faction(FactionInstances.Solo);
 }

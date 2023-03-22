@@ -4,13 +4,16 @@ using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.GUI;
+using TOHTOR.Factions;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
-using VentLib.Utilities;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
@@ -20,7 +23,10 @@ public class Puppeteer: Vanilla.Impostor
     private DateTime lastCheck = DateTime.Now;
     private List<PlayerControl> cursedPlayers;
 
+    private Dictionary<byte, Remote<IndicatorComponent>> playerRemotes = null!;
+
     protected override void Setup(PlayerControl player) => cursedPlayers = new List<PlayerControl>();
+    protected override void PostSetup() => playerRemotes = new Dictionary<byte, Remote<IndicatorComponent>>();
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
@@ -30,9 +36,11 @@ public class Puppeteer: Vanilla.Impostor
 
         Game.GameHistory.AddEvent(new ManipulatedEvent(MyPlayer, target));
         cursedPlayers.Add(target);
-        target.GetDynamicName().AddRule(GameState.Roaming, UI.Misc, new DynamicString(new Color(0.36f, 0f, 0.58f).Colorize("◆")), MyPlayer.PlayerId);
-        target.GetDynamicName().AddRule(GameState.InMeeting, UI.Name, new DynamicString(new Color(0.36f, 0f, 0.58f).Colorize("{0} ◆")), MyPlayer.PlayerId);
-        target.GetDynamicName().RenderFor(MyPlayer);
+
+        playerRemotes!.GetValueOrDefault(target.PlayerId, null)?.Delete();
+        IndicatorComponent component = new(new LiveString("◆", new Color(0.36f, 0f, 0.58f)), GameStates.IgnStates, viewers: MyPlayer);
+        playerRemotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
+
         MyPlayer.RpcGuardAndKill(target);
         return true;
     }
@@ -50,7 +58,7 @@ public class Puppeteer: Vanilla.Impostor
                 continue;
             }
 
-            List<PlayerControl> inRangePlayers = player.GetPlayersInAbilityRangeSorted().Where(p => !p.GetCustomRole().IsAllied(MyPlayer)).ToList();
+            List<PlayerControl> inRangePlayers = player.GetPlayersInAbilityRangeSorted().Where(p => p.Relationship(MyPlayer) is not Relation.FullAllies).ToList();
             if (inRangePlayers.Count == 0) continue;
             PlayerControl target = inRangePlayers.GetRandom();
             ManipulatedPlayerDeathEvent playerDeathEvent = new(target, player);
@@ -66,8 +74,7 @@ public class Puppeteer: Vanilla.Impostor
 
     private void RemovePuppet(PlayerControl puppet)
     {
-        puppet.GetDynamicName().RemoveRule(GameState.Roaming, UI.Role, MyPlayer.PlayerId);
-        puppet.GetDynamicName().RenderFor(MyPlayer);
+        playerRemotes!.GetValueOrDefault(puppet.PlayerId, null)?.Delete();
         cursedPlayers.Remove(puppet);
     }
 
