@@ -148,6 +148,7 @@ public static class CustomRoleManager
         public Disperser Disperser = new Disperser();
         public Consort Consort = new Consort();
         public FireWorks FireWorks = new FireWorks();
+        public Freezer Freezer = new Freezer();
         public Puppeteer Puppeteer = new Puppeteer();
         public Vampire Vampire = new Vampire();
         public SerialKiller SerialKiller = new SerialKiller();
@@ -169,7 +170,6 @@ public static class CustomRoleManager
         public Engineer Engineer = new Engineer();
         public Scientist Scientist = new Scientist();
 
-        public Baiter Baiter = new Baiter();
         public Bastion Bastion = new Bastion();
         public Bodyguard Bodyguard = new Bodyguard();
         public Child Child = new Child();

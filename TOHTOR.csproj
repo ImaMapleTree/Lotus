@@ -5,7 +5,6 @@
     <Authors>Discussions, Tealeaf</Authors>
     <langVersion>latest</langVersion>
     <RootNamespace>TOHTOR</RootNamespace>
-    
     <Nullable>enable</Nullable>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>

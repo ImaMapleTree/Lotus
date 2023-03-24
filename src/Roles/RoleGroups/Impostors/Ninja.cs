@@ -66,9 +66,6 @@ public class Ninja : Vanilla.Impostor
         Mode = Mode is NinjaMode.Killing ? NinjaMode.Hunting : NinjaMode.Killing;
     }
 
-    // Heavily simplified logic - I think you were looking at Puppeteer but that role is a bit special since
-    // it's not solely the Puppeteer doing the killing so there's more checks needed, here because the Ninja kills all
-    // in their Ninja kill list we can just iterate through it then clear it at the end of the action
     private void NinjaHuntAbility()
     {
         if (playerList.Count == 0) return;
