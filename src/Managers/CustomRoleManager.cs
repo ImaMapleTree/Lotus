@@ -137,108 +137,133 @@ public static class CustomRoleManager
 
     public class StaticRoles
     {
+        //Impostors
 
-        public Impostor Impostor = new Impostor();
-        public Morphling Morphling = new Morphling();
-        public Miner Miner = new Miner();
-        public Mafia Mafia = new Mafia();
-        public Sniper Sniper = new Sniper();
+        //assassin
+        //bomber
         public BountyHunter BountyHunter = new BountyHunter();
-        public Janitor Janitor = new Janitor();
-        public Disperser Disperser = new Disperser();
+        public Camouflager Camouflager = new Camouflager();
+        //cleaner
         public Consort Consort = new Consort();
+        public Disperser Disperser = new Disperser();
+        //escapist
         public FireWorks FireWorks = new FireWorks();
         public Freezer Freezer = new Freezer();
-        public Puppeteer Puppeteer = new Puppeteer();
-        public Vampire Vampire = new Vampire();
-        public SerialKiller SerialKiller = new SerialKiller();
-        public Swooper Swooper = new Swooper();
-        public Mare Mare = new Mare();
-        public Camouflager Camouflager = new Camouflager();
         public Grenadier Grenadier = new Grenadier();
+        //identity thief
+        public Impostor Impostor = new Impostor();
+        public Janitor Janitor = new Janitor();
+        public LastImpostor LastImpostor = new LastImpostor();
+        public Madmate Madmate = new Madmate();
+        //mad guardian
+        //mad snitch
+        public Mafia Mafia = new Mafia();
+        //manipulator
+        public Mare Mare = new Mare();
+        public Miner Miner = new Miner();
+        public Morphling Morphling = new Morphling();
+        public Ninja Ninja = new Ninja();
+        //parasite
+        //pickpocket
+        public Puppeteer Puppeteer = new Puppeteer();
+        //sidekick madmate
+        //silencer
+        public Sniper Sniper = new Sniper();
+        public Swooper Swooper = new Swooper();
         public TimeThief TimeThief = new TimeThief();
+        //traitor
+        public Vampire Vampire = new Vampire();
+        public Vampiress Vampiress = new Vampiress();
         public Warlock Warlock = new Warlock();
         public Witch Witch = new Witch();
-        public Coven Coven = new Coven();
-        public BloodKnight BloodKnight = new BloodKnight();
-
-        public LastImpostor LastImpostor = new LastImpostor();
-        public Ninja Ninja = new Ninja();
-
-        public Vigilante Vigilante = new Vigilante();
-        public Crewmate Crewmate = new Crewmate();
-        public Engineer Engineer = new Engineer();
-        public Scientist Scientist = new Scientist();
-
-        public Bastion Bastion = new Bastion();
-        public Bodyguard Bodyguard = new Bodyguard();
-        public Child Child = new Child();
-        public Crusader Crusader = new Crusader();
-        public Dictator Dictator = new Dictator();
-        public Observer Observer = new Observer();
-        public Oracle Oracle = new Oracle();
-        public Sheriff Sheriff = new Sheriff();
-        public Transporter Transporter = new Transporter();
-        public Veteran Veteran = new Veteran();
-        public Medic Medic = new Medic();
-        public Investigator Investigator = new Investigator();
-        public Mystic Mystic = new Mystic();
-        public Mayor Mayor = new Mayor();
-        public Jester Jester = new Jester();
-        public CrewPostor CrewPostor = new CrewPostor();
-        public Opportunist Opportunist = new Opportunist();
-        public Medium Medium = new Medium();
-        public SabotageMaster SabotageMaster = new SabotageMaster();
-
-
-        public Glitch Glitch = new Glitch();
-        public Jackal Jackal = new Jackal();
-        public Arsonist Arsonist = new Arsonist();
-        public Terrorist Terrorist = new Terrorist();
-        public Executioner Executioner = new Executioner();
-        public PlagueBearer PlagueBearer = new PlagueBearer();
-        public Pestilence Pestilence = new Pestilence();
-        public AgiTater AgiTater = new AgiTater();
-        public Retributionist Retributionist = new Retributionist();
-
-        public GuardianAngel GuardianAngel = new GuardianAngel();
-        public Archangel Archangel = new Archangel();
-
-        public Sidekick Sidekick = new Sidekick();
-        public SchrodingerCat SchrodingerCat = new SchrodingerCat();
-        public Demolitionist Demolitionist = new Demolitionist();
-        public Vampiress Vampiress = new Vampiress();
         public YingYanger YingYanger = new YingYanger();
 
 
-        public Amnesiac Amnesiac = new Amnesiac();
-        public Survivor Survivor = new Survivor();
+        //Crewmates
+
+
+        public Baiter Baiter = new Baiter();
+        public Bastion Bastion = new Bastion();
+        public Bodyguard Bodyguard = new Bodyguard();
+        public Child Child = new Child();
+        public Crewmate Crewmate = new Crewmate();
+        public Crusader Crusader = new Crusader();
+        public Demolitionist Demolitionist = new Demolitionist();
+        //dictator
+        //doctor
+        public Engineer Engineer = new Engineer();
+        //escort
+        public Investigator Investigator = new Investigator();
+        public Mayor Mayor = new Mayor();
+        //mechanic
+        public Medium Medium = new Medium();
+        public Mystic Mystic = new Mystic();
+        public Observer Observer = new Observer();
+        public Oracle Oracle = new Oracle();
+        //physicist
+        //psychic
+        //sabotage master
+        public Scientist Scientist = new Scientist();
+        public Sheriff Sheriff = new Sheriff();
         public Snitch Snitch = new Snitch();
         public Speedrunner Speedrunner = new Speedrunner();
+        public Transporter Transporter = new Transporter();
         public Trapper Trapper = new Trapper();
-        public Phantom Phantom = new Phantom();
-        public Hacker Hacker = new Hacker();
+        public Vigilante Vigilante = new Vigilante();
+        public Veteran Veteran = new Veteran();
 
+
+        //Neutrals
+
+
+        //agitater
+        public Amnesiac Amnesiac = new Amnesiac();
+        public Archangel Archangel = new Archangel();
+        public Arsonist Arsonist = new Arsonist();
+        public BloodKnight BloodKnight = new BloodKnight();
+        public CrewPostor CrewPostor = new CrewPostor();
         public Egoist Egoist = new Egoist();
-
-        public Necromancer Necromancer = new Necromancer();
-        public Deathknight Deathknight = new Deathknight();
-
-        public Madmate Madmate = new Madmate();
-        public MadGuardian MadGuardian = new MadGuardian();
-        public MadSnitch MadSnitch = new MadSnitch();
-        public Parasite Parasite = new Parasite();
+        public Executioner Executioner = new Executioner();
+        public Glitch Glitch = new Glitch();
+        public GuardianAngel GuardianAngel = new GuardianAngel();
+        //hacker
+        //hitman
+        public Jackal Jackal = new Jackal();
+        public Jester Jester = new Jester();
+        //juggernaught
+        //marksman
+        //neutral witch
+        public Opportunist Opportunist = new Opportunist();
+        public Pestilence Pestilence = new Pestilence();
+        public Phantom Phantom = new Phantom();
+        public PlagueBearer PlagueBearer = new PlagueBearer();
+        //postman
+        public SchrodingerCat SchrodingerCat = new SchrodingerCat();
+        public SerialKiller SerialKiller = new SerialKiller();
+        public Sidekick Sidekick = new Sidekick();
+        public Survivor Survivor = new Survivor();
+        //swapper
+        public Terrorist Terrorist = new Terrorist();
+        //vulture
+        //werewolf
     }
 
     public class ExtraRoles
     {
         public GM GM = new GM();
-        public Debugger Debugger = new Debugger();
-        public Lovers Lovers = new Lovers();
         public Bait Bait = new Bait();
         public Bewilder Bewilder = new Bewilder();
+        public Coven Coven = new Coven();
+        public Debugger Debugger = new Debugger();
         public Diseased Diseased = new Diseased();
-
+        //double shot
+        //flash
         public Fox Fox = new();
+        public Lovers Lovers = new Lovers();
+        //oblivious
+        //obvious
+        //sleuth
+        //torch
+        //watcher
     }
 }
