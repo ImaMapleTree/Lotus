@@ -15,6 +15,7 @@ using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -22,18 +23,18 @@ using VentLib.Utilities;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
 
-public class Transporter : Morphling
+public class Transporter : Shapeshifter
 {
     private int totalTransports;
     private int transportsRemaining;
     private TextComponent textComponent;
 
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown transportCooldown;
 
     private List<PlayerControl> transportList = new();
 
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string RemainingTransportCounter() => RoleUtils.Counter(transportsRemaining, totalTransports);
 
     protected override void Setup(PlayerControl player)
@@ -41,7 +42,7 @@ public class Transporter : Morphling
         transportList = new List<PlayerControl>();
         VentLogger.Fatal($"Total Transports: {totalTransports}");
         transportsRemaining = totalTransports;
-        shapeshiftCooldown = 0.1f;
+        ShapeshiftCooldown = 0.1f;
     }
 
     [RoleAction(RoleActionType.RoundStart)]

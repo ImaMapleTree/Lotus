@@ -11,13 +11,6 @@ namespace TOHTOR.Options;
 
 public static class DesyncOptions
 {
-    public static IGameOptions OriginalHostOptions {
-        set => originalHostOptions = value;
-        get => originalHostOptions ?? GameOptionsManager.Instance?.CurrentGameOptions!;
-    }
-
-    private static IGameOptions? originalHostOptions;
-
     public static void SyncToAll(IGameOptions options) => Game.GetAllPlayers().Do(p => SyncToPlayer(options, p));
 
     public static void SyncToPlayer(IGameOptions options, PlayerControl player)
@@ -76,7 +69,7 @@ public static class DesyncOptions
 
     public static void SendModifiedOptions(IEnumerable<GameOptionOverride> overrides, PlayerControl player)
     {
-        IGameOptions clonedOptions = OriginalHostOptions.DeepCopy();
+        IGameOptions clonedOptions = OriginalOptions.StaticOptions.DeepCopy();
         overrides.Where(o => o != null).Do(optionOverride => optionOverride.ApplyTo(clonedOptions));
         SyncToPlayer(clonedOptions, player);
     }

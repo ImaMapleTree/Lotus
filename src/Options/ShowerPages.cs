@@ -4,6 +4,7 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Managers;
 using TOHTOR.Roles;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options;

@@ -23,9 +23,8 @@ public class Phantom : Crewmate
     private bool immuneToRangedInteractions;
     private int phantomClickAmt;
     private int phantomAlertAmt;
+    [NewOnSetup]
     private List<Remote<IndicatorComponent>> indicatorComponents;
-
-    protected override void PostSetup() => indicatorComponents = new List<Remote<IndicatorComponent>>();
 
     [RoleAction(RoleActionType.Interaction)]
     private void PhantomInteraction(Interaction interaction, ActionHandle handle)
@@ -40,11 +39,11 @@ public class Phantom : Crewmate
     protected override void OnTaskComplete()
     {
         if (TotalTasks == TasksComplete) ManualWin.Activate(MyPlayer, WinReason.SoloWinner, 999);
-        if (TasksComplete < phantomAlertAmt) return;
+        if (TasksComplete != phantomAlertAmt) return;
 
         MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("★", RoleColor), GameStates.IgnStates));
 
-        Game.GetAllPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && p.IsAlive()).ForEach(p =>
+        Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).ForEach(p =>
         {
             LiveString liveString = new(() => RoleUtils.CalculateArrow(p, MyPlayer, RoleColor));
             var remote = p.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: p));

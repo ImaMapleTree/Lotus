@@ -4,27 +4,27 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using UnityEngine;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
+using BepInEx.Unity.IL2CPP.Utils;
 using Hazel;
+using InnerNet;
 using TOHTOR.API;
 using TOHTOR.Chat.Patches;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
+using TOHTOR.Extensions;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Managers;
 using TOHTOR.Options;
+using TOHTOR.Roles;
 using TOHTOR.Roles.Extra;
 using TOHTOR.Roles.Legacy;
-using TOHTOR.Roles.Subroles;
+using UnityEngine;
+using VentLib;
 using VentLib.Localization;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR;
+namespace TOHTOR.Utilities;
 
 public static class Utils
 {
@@ -216,6 +216,13 @@ public static class Utils
     public static PlayerControl? GetPlayerById(int playerId) => PlayerControl.AllPlayerControls.ToArray().FirstOrDefault(pc => pc.PlayerId == playerId);
 
     public static Optional<PlayerControl> PlayerById(int playerId) => PlayerControl.AllPlayerControls.ToArray().FirstOrOptional(pc => pc.PlayerId == playerId);
+
+    public static Optional<PlayerControl> PlayerByClientId(int clientId)
+    {
+        if (!AmongUsClient.Instance.allObjectsFast.TryGet((uint)clientId, out InnerNetObject? netObject)) return Optional<PlayerControl>.Null();
+        PlayerControl? playerControl = netObject!.TryCast<PlayerControl>();
+        return playerControl == null ? Optional<PlayerControl>.Null() : Optional<PlayerControl>.Of(playerControl);
+    }
 
     public static string GetVoteName(byte num)
     {

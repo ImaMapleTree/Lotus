@@ -62,9 +62,10 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         if (cloned.Editor != null)
             cloned.Editor = cloned.Editor.Instantiate(cloned, player);
 
+        CreateInstanceBasedVariables();
         cloned.Setup(player);
         cloned.SetupUI2(player.NameModel());
-        player.NameModel().Render();
+        player.NameModel().Render(force: true);
         if (StaticOptions.AllRolesCanVent && cloned.VirtualRole == RoleTypes.Crewmate)
             cloned.VirtualRole = RoleTypes.Engineer;
 
@@ -181,53 +182,53 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
         if (this is Subrole subrole) nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(subrole, gameStates, viewers: MyPlayer));
         nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(this, gameStates, ViewMode.Replace, MyPlayer));
-        CreateInstanceBasedVariables();
         SetupUiFields(nameModel);
-        //SetupUiMethods(nameModel);
+        SetupUiMethods(nameModel);
     }
 
     private void SetupUiFields(INameModel nameModel)
     {
         GameState[] gameStates = { GameState.InIntro, GameState.Roaming, GameState.InMeeting };
         this.GetType().GetFields(AccessFlags.InstanceAccessFlags)
-            .Where(f => f.GetCustomAttribute<DynElement>() != null)
+            .Where(f => f.GetCustomAttribute<UIComponent>() != null)
+            .Reverse()
             .ForEach(f =>
             {
-                DynElement dynElement = f.GetCustomAttribute<DynElement>()!;
+                UIComponent uiComponent = f.GetCustomAttribute<UIComponent>()!;
                 object? value = f.GetValue(this);
-                switch (dynElement.Component)
+                switch (uiComponent.Component)
                 {
                     case UI.Name:
-                        if (value is not string s) throw new ArgumentException($"Values for \"{nameof(UI.Name)}\" must be string. (Got: {value?.GetType()})");
+                        if (value is not string s) throw new ArgumentException($"Values for \"{nameof(UI.Name)}\" must be string. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(s, gameStates, viewers: MyPlayer));
                         break;
                     case UI.Role:
-                        if (value is not CustomRole cr) throw new ArgumentException($"Values for \"{nameof(UI.Role)}\" must be {nameof(CustomRole)}. (Got: {value?.GetType()})");
+                        if (value is not CustomRole cr) throw new ArgumentException($"Values for \"{nameof(UI.Role)}\" must be {nameof(CustomRole)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(cr, gameStates, viewers: MyPlayer));
                         break;
                     case UI.Subrole:
-                        if (value is not Subrole sr) throw new ArgumentException($"Values for \"{nameof(UI.Subrole)}\" must be {nameof(Subrole)}. (Got: {value?.GetType()})");
+                        if (value is not Subrole sr) throw new ArgumentException($"Values for \"{nameof(UI.Subrole)}\" must be {nameof(Subrole)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(sr, gameStates, viewers: MyPlayer));
                         break;
                     case UI.Cooldown:
-                        if (value is not Cooldown cd) throw new ArgumentException($"Values for \"{nameof(UI.Cooldown)}\" must be {nameof(Cooldown)}. (Got: {value?.GetType()})");
+                        if (value is not Cooldown cd) throw new ArgumentException($"Values for \"{nameof(UI.Cooldown)}\" must be {nameof(Cooldown)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         VentLogger.Fatal($"Loading Cooldown Field: {cd} for {this}");
                         nameModel.GetComponentHolder<CooldownHolder>().Add(new CooldownComponent(cd, gameStates, viewers: MyPlayer));
                         break;
                     case UI.Counter:
-                        if (value is not ICounter counter) throw new ArgumentException($"Values for \"{nameof(UI.Counter)}\" must be {nameof(ICounter)}. (Got: {value?.GetType()})");
+                        if (value is not ICounter counter) throw new ArgumentException($"Values for \"{nameof(UI.Counter)}\" must be {nameof(ICounter)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         nameModel.GetComponentHolder<CounterHolder>().Add(new CounterComponent(counter, gameStates, viewers: MyPlayer));
                         break;
                     case UI.Indicator:
-                        if (value is not string ind) throw new ArgumentException($"Values for \"{nameof(UI.Indicator)}\" must be string. (Got: {value?.GetType()})");
+                        if (value is not string ind) throw new ArgumentException($"Values for \"{nameof(UI.Indicator)}\" must be string. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         nameModel.GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(ind, gameStates, viewers: MyPlayer));
                         break;
                     case UI.Text:
-                        if (value is not string txt) throw new ArgumentException($"Values for \"{nameof(UI.Indicator)}\" must be string. (Got: {value?.GetType()})");
+                        if (value is not string txt) throw new ArgumentException($"Values for \"{nameof(UI.Indicator)}\" must be string. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         nameModel.GetComponentHolder<TextHolder>().Add(new TextComponent(txt, gameStates, viewers: MyPlayer));
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException($"Component: {dynElement.Component} is not a valid component");
+                        throw new ArgumentOutOfRangeException($"Component: {uiComponent.Component} is not a valid component in role: {EnglishRoleName}");
                 }
             });
     }
@@ -236,14 +237,15 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     {
         GameState[] gameStates = { GameState.InIntro, GameState.Roaming, GameState.InMeeting };
         this.GetType().GetMethods(AccessFlags.InstanceAccessFlags)
-            .Where(m => m.GetCustomAttribute<DynElement>() != null)
+            .Where(m => m.GetCustomAttribute<UIComponent>() != null)
+            .Reverse()
             .ForEach(m =>
             {
-                DynElement dynElement = m.GetCustomAttribute<DynElement>()!;
-                if (m.GetParameters().Length > 0) throw new ConstraintException("Methods marked by DynElement must have no parameters");
+                UIComponent uiComponent = m.GetCustomAttribute<UIComponent>()!;
+                if (m.GetParameters().Length > 0) throw new ConstraintException($"Methods marked by {nameof(UIComponent)} must have no parameters");
 
                 Func<string> supplier = () => m.Invoke(this, null)?.ToString() ?? "N/A";
-                switch (dynElement.Component)
+                switch (uiComponent.Component)
                 {
                     case UI.Name:
                         nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(new LiveString(supplier), gameStates, viewers: MyPlayer));
@@ -254,57 +256,31 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
                     case UI.Text:
                         nameModel.GetComponentHolder<TextHolder>().Add(new TextComponent(new LiveString(supplier), gameStates, viewers: MyPlayer));
                         break;
+                    case UI.Cooldown:
+                        object? CooldownSupplier() => m.Invoke(this, null);
+                        var obj = CooldownSupplier();
+                        if (obj is not Cooldown) throw new ArgumentException($"Values for \"{nameof(UI.Cooldown)}\" must be {nameof(Cooldown)}. (Got: {obj?.GetType()}) in role: {EnglishRoleName}");
+                        nameModel.GetComponentHolder<CooldownHolder>().Add(new CooldownComponent(() => (Cooldown)m.Invoke(this, null)!, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
+                        break;
+                    case UI.Counter:
+                        object? CounterSupplier() => m.Invoke(this, null);
+                        var counterObj = CounterSupplier();
+                        if (counterObj is string)
+                        {
+                            nameModel.GetComponentHolder<CounterHolder>().Add(new CounterComponent(new LiveString(() => (string)m.Invoke(this, null)!), uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
+                            break;
+                        }
+                        if (counterObj is not ICounter) throw new ArgumentException($"Values for \"{nameof(UI.Counter)}\" must be {nameof(ICounter)}. (Got: {counterObj?.GetType()}) in role: {EnglishRoleName}");
+                        nameModel.GetComponentHolder<CounterHolder>().Add(new CounterComponent(() => (ICounter)m.Invoke(this, null)!, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
+                        break;
                     case UI.Role:
                     case UI.Subrole:
-                    case UI.Cooldown:
-                    case UI.Counter:
-                        throw new ArgumentException($"{dynElement.Component} is not valid compatible on methods. To use this component annotate a field instead.");
                     default:
-                        throw new ArgumentOutOfRangeException($"Component: {dynElement.Component} is not a valid component");
+                        throw new ArgumentOutOfRangeException($"Component: {uiComponent.Component} is not a valid component");
                 }
             });
     }
 
-
-    /*private void SetupUI(DynamicName name)
-    {
-        Dictionary<UI, Type> declaringComponents = new();
-
-        CreateInstanceBasedVariables();
-        this.GetType().GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
-            .Where(f => f.GetCustomAttribute<DynElement>() != null)
-            .Do(f =>
-            {
-                DynElement dynElement = f.GetCustomAttribute<DynElement>();
-                bool isCooldown = false;
-                try { isCooldown = f.GetValue(this) is Cooldown; }
-                catch { /*ignored#1# }
-                if (declaringComponents.TryGetValue(dynElement.Component, out Type type))
-                    if (type.IsAssignableTo(f.DeclaringType)) return;
-
-                declaringComponents.Add(dynElement.Component, f.DeclaringType);
-                name.SetComponentValue(dynElement.Component, new DynamicString(() =>
-                {
-                    string value = f.GetValue(this)?.ToString() ?? "N/A";
-                    return isCooldown ? value == "0" ? "" : $"<color=#ed9247>CD:</color> {Color.white.Colorize(value + "s")}" : value;
-                }));
-            });
-
-        this.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic)
-            .Where(m => m.GetCustomAttribute<DynElement>() != null)
-            .Do(m =>
-            {
-                DynElement dynElement = m.GetCustomAttribute<DynElement>();
-                if (m.GetParameters().Length > 0)
-                    throw new ConstraintException("Methods marked by DynElement must have no parameters");
-
-                if (declaringComponents.TryGetValue(dynElement.Component, out Type type))
-                    if (type.IsAssignableTo(m.DeclaringType)) return;
-
-                declaringComponents.Add(dynElement.Component, m.DeclaringType);
-                name.SetComponentValue(dynElement.Component, new DynamicString(() => m.Invoke(this, null)?.ToString() ?? "N/A"));
-            });
-    }*/
 
     public CustomRole Read(MessageReader reader)
     {

@@ -1,5 +1,6 @@
 using AmongUs.GameOptions;
 using JetBrains.Annotations;
+using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
@@ -10,7 +11,7 @@ using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
-public class Freezer : Vanilla.Morphling
+public class Freezer : Vanilla.Shapeshifter
 {
     private PlayerControl currentFreezerTarget;
     private float freezeCooldown;
@@ -38,7 +39,7 @@ public class Freezer : Vanilla.Morphling
     {
         if (freezeDuration.NotReady()) return;
         freezeDuration.Start();
-        GameOptionOverride[] overrides = { new GameOptionOverride(Override.PlayerSpeedMod, 0.0001f) };
+        GameOptionOverride[] overrides = { new(Override.PlayerSpeedMod, 0.0001f) };
         target.GetCustomRole().SyncOptions(overrides);
         currentFreezerTarget = target;
     }
@@ -52,11 +53,9 @@ public class Freezer : Vanilla.Morphling
 
     private void ResetSpeed()
     {
-        if (currentFreezerTarget != null)
-        {
-            GameOptionOverride[] overrides = { new GameOptionOverride(Override.PlayerSpeedMod, DesyncOptions.OriginalHostOptions.GetFloat(FloatOptionNames.PlayerSpeedMod)) };
-            currentFreezerTarget.GetCustomRole().SyncOptions(overrides);
-        }
+        if (currentFreezerTarget == null) return;
+        GameOptionOverride[] overrides = { new(Override.PlayerSpeedMod, OriginalOptions.PlayerSpeedMod()) };
+        currentFreezerTarget.GetCustomRole().SyncOptions(overrides);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

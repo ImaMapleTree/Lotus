@@ -6,6 +6,7 @@ using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Utilities;
 using TOHTOR.Victory.Conditions;
 using UnityEngine;
 using VentLib.Logging;
@@ -57,13 +58,6 @@ public class Debugger: CustomRole
         VentLogger.Old("-=-=-=-=-=-=-=-=-=-=-=-= Other Players =-=-=-=-=-=-=-=-=-=-=-=-", "DebuggerStats");
         foreach (PlayerControl player in Game.GetAllPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId))
             VentLogger.Old($"{player.GetNameWithRole()} | Dead? {player.Data.IsDead} | AURole: {player.Data.Role.name} | Custom Role: {player.GetCustomRole().RoleName.RemoveHtmlTags()} | Subrole: {player.GetSubrole()?.RoleName}", "DebuggerStats");
-
-        VentLogger.Old("-=-=-=-=-=-=-=-=-=- Role Blocked Players -=-=-=-=-=-=-=-=-=-", "DebuggerStats");
-        foreach (byte playerId in CustomRoleManager.RoleBlockedPlayers.Distinct())
-        {
-            int count = CustomRoleManager.RoleBlockedPlayers.Count(b => b == playerId);
-            VentLogger.Old($"{Utils.GetPlayerById(playerId).GetNameWithRole()}: {count}", "DebuggerStats");
-        }
 
         VentLogger.Old("-=-=-=-=-=-=-=-= End Of Debugger =-=-=-=-=-=-=-=-", "DebuggerStats");
     }

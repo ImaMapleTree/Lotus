@@ -2,6 +2,8 @@ using TOHTOR.API;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
 using TOHTOR.Roles.Events;
+using TOHTOR.Roles.Interactions;
+using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using VentLib.Options.Game;
@@ -26,8 +28,9 @@ public class Demolitionist : Crewmate
         RoleUtils.EndReactorsForPlayer(killer);
         if (Game.State is not GameState.Roaming) return;
         if (killer.Data.IsDead || killer.inVent) return;
-        //  if (killer.Is(CustomRoleManager.Static.Pestilence)) // role not implemented yet
-        bool dead = killer.Attack(killer, () => new BombedEvent(killer, MyPlayer));
+
+        var interaction = new DelayedInteraction(new FatalIntent(true, () => new BombedEvent(killer, MyPlayer)), demoTime, this);
+        bool dead = MyPlayer.InteractWith(killer, interaction) is InteractionResult.Proceed;
         Game.GameHistory.AddEvent(new DemolitionistBombEvent(MyPlayer, killer, dead));
     }
 

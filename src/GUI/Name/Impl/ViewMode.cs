@@ -4,5 +4,6 @@ public enum ViewMode
 {
     Additive,
     Replace,
-    Absolute
+    Absolute,
+    Overriden
 }

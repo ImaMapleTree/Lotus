@@ -1,3 +1,5 @@
+using UnityEngine;
+
 namespace TOHTOR.Factions.Interfaces;
 
 public interface IFaction
@@ -7,6 +9,8 @@ public interface IFaction
     public Relation Relationship(IFaction other);
 
     public bool AlliesSeeRole();
+
+    public Color FactionColor();
 }
 
 public interface IFaction<in T> : IFaction where T : IFaction<T>

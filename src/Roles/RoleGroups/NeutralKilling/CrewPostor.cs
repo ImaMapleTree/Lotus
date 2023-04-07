@@ -6,6 +6,8 @@ using TOHTOR.Factions;
 using TOHTOR.FactionsOLD;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
+using TOHTOR.Roles.Interactions;
+using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
@@ -20,7 +22,9 @@ public class CrewPostor : Crewmate
         List<PlayerControl> inRangePlayers = RoleUtils.GetPlayersWithinDistance(MyPlayer, 999).Where(p => p.Relationship(MyPlayer) is not Relation.FullAllies).ToList();
         if (inRangePlayers.Count == 0) return;
         PlayerControl target = inRangePlayers.GetRandom();
-        bool death = MyPlayer.Attack(target, () => new TaskDeathEvent(target, MyPlayer));
+        var interaction = new RangedInteraction(new FatalIntent(true, () => new TaskDeathEvent(target, MyPlayer)), 0, this);
+
+        bool death = MyPlayer.InteractWith(target, interaction) is InteractionResult.Proceed;
         Game.GameHistory.AddEvent(new TaskKillEvent(MyPlayer, target, death));
     }
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

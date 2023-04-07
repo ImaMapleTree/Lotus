@@ -69,5 +69,5 @@ public class Crusader: Crewmate
         base.Modify(roleModifier)
             .DesyncRole(RoleTypes.Impostor)
             .RoleColor(new Color(0.78f, 0.36f, 0.22f))
-            .OptionOverride(Override.KillCooldown, () => DesyncOptions.OriginalHostOptions.GetFloat(FloatOptionNames.KillCooldown) * 2);
+            .OptionOverride(Override.KillCooldown, () => OriginalOptions.KillCooldown() * 2);
 }

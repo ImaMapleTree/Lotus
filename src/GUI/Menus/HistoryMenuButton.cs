@@ -1,4 +1,5 @@
 using System;
+using TOHTOR.Utilities;
 using UnityEngine;
 using UnityEngine.UI;
 using VentLib.Logging;
@@ -53,4 +54,13 @@ public class HistoryMenuButton
 
 
     public bool Exists() => optionalButton.Exists();
+
+    public void SetActive(bool b)
+    {
+        optionalButton.IfPresent(btn =>
+        {
+            if (!b) btn.Hide();
+            else btn.Show();
+        });
+    }
 }

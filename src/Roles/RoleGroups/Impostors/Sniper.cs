@@ -20,10 +20,10 @@ using Convert = System.Convert;
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
 // TODO: Redo Sniper
-public class Sniper: Morphling
+public class Sniper: Shapeshifter
 {
     private bool preciseShooting = true;
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown loadBulletCooldown;
     private Cooldown killCooldown;
 
@@ -37,10 +37,10 @@ public class Sniper: Morphling
     private int currentBulletCount;
     private Vector2 lastDirection;
 
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string BulletCountCounter() => RoleUtils.Counter(currentBulletCount, totalBulletCount);
 
-    [DynElement(UI.Misc)]
+    [UIComponent(UI.Indicator)]
     private string LoadedBulletDisplay() => Color.red.Colorize("▫".Repeat(loadedBullets));
 
     protected override void Setup(PlayerControl player)

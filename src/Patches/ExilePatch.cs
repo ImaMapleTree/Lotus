@@ -57,7 +57,7 @@ static class ExileControllerWrapUpPatch
             GameData.PlayerInfo realExiled = AntiBlackout.ExiledPlayer ?? exiled;
 
             realExiled.Object.Trigger(RoleActionType.SelfExiled, ref selfExiledHandle);
-            Game.TriggerForAll(RoleActionType.OtherExiled, ref otherExiledHandle, realExiled);
+            Game.TriggerForAll(RoleActionType.AnyExiled, ref otherExiledHandle, realExiled);
         }
         FallFromLadder.Reset();
     }

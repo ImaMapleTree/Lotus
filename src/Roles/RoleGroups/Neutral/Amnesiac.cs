@@ -9,6 +9,7 @@ using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.Legacy;
 using TOHTOR.Roles.RoleGroups.Impostors;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;

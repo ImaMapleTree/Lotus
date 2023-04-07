@@ -2,6 +2,7 @@ using HarmonyLib;
 using TMPro;
 using TOHTOR.Addons;
 using TOHTOR.Managers.Date;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;

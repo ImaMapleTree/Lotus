@@ -6,6 +6,7 @@ using TOHTOR.Options;
 using TOHTOR.Victory.Conditions;
 using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Debug.Profiling;
 
 namespace TOHTOR.Victory;
 
@@ -15,18 +16,30 @@ public class CheckEndGamePatch2
     private static bool _deferred;
     private static DateTime slowDown = DateTime.Now;
 
+    private static bool CodeToTest()
+    {
+        return true;
+    }
+
     public static bool Prefix()
     {
         if (DateTime.Now.Subtract(slowDown).TotalSeconds < 0.1f) return false;
         slowDown = DateTime.Now;
         if (!AmongUsClient.Instance.AmHost) return true;
         if (_deferred) return false;
+
+        uint id = Profilers.Global.Sampler.Start("CheckEndGamePatch");
+
         WinDelegate winDelegate = Game.GetWinDelegate();
         if (StaticOptions.NoGameEnd)
             winDelegate.CancelGameWin();
 
         bool isGameWin = winDelegate.IsGameOver();
-        if (!isGameWin) return false;
+        if (!isGameWin)
+        {
+            Profilers.Global.Sampler.Stop(id, "CheckEndGamePatch-NotGameWin");
+            return false;
+        }
 
 
         List<PlayerControl> winners = winDelegate.GetWinners();
@@ -51,6 +64,7 @@ public class CheckEndGamePatch2
         _deferred = true;
         Async.Schedule(() => DelayedWin(reason), NetUtils.DeriveDelay(0.6f));
 
+        Profilers.Global.Sampler.Stop(id);
         return false;
     }
 
@@ -60,5 +74,16 @@ public class CheckEndGamePatch2
         VentLogger.Info("Ending Game", "DelayedWin");
         GameManager.Instance.RpcEndGame(reason, false);
         Async.Schedule(() => GameManager.Instance.EndGame(), 0.1f);
+    }
+
+    public static void ShowcaseFunction()
+    {
+        Profiler profiler = Profilers.Global; //デフォルトのプロファイラー。独自のプロファイラーを作成できます
+        uint id = profiler.Sampler.Start(); // or profiler.Sampler.Start("NAME");
+
+        bool condition = CodeToTest();
+
+        if (!condition) profiler.Sampler.Discard(id); //.Discard は最後のピリオドの結果を無視します
+        else profiler.Sampler.Stop(id); //記録期間
     }
 }

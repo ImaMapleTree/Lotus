@@ -10,7 +10,7 @@ using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
-public class Camouflager: Morphling
+public class Camouflager: Shapeshifter
 {
     private bool canVent;
     private DateTime lastShapeshift;
@@ -40,12 +40,12 @@ public class Camouflager: Morphling
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub
                 .Name("Camouflage Cooldown")
-                .Bind(v => shapeshiftCooldown = (float)v)
+                .Bind(v => ShapeshiftCooldown = (float)v)
                 .AddFloatRange(5, 120, 2.5f, 5, "s")
                 .Build())
             .SubOption(sub => sub
                 .Name("Camouflage Duration")
-                .Bind(v => shapeshiftDuration = (float)v)
+                .Bind(v => ShapeshiftDuration = (float)v)
                 .AddFloatRange(5, 60, 2.5f, 5, "s")
                 .Build())
             .SubOption(sub => sub

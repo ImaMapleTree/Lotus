@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TOHTOR.API;
+using TOHTOR.API.Reactive;
 using TOHTOR.Gamemodes.CaptureTheFlag;
 using TOHTOR.Gamemodes.Colorwars;
 using TOHTOR.Gamemodes.Debug;
@@ -17,22 +19,30 @@ namespace TOHTOR.Gamemodes;
 // As we move to the future we're going to try to use instances for managers rather than making everything static
 public class GamemodeManager
 {
+    private const string GamemodeManagerStartHook = nameof(GamemodeManager);
+
     public List<IGamemode> Gamemodes = new();
 
     public IGamemode CurrentGamemode
     {
-        get => _currentGamemode;
+        get => currentGamemode!;
         set
         {
-            _currentGamemode?.InternalDeactivate();
-            _currentGamemode = value;
-            _currentGamemode?.InternalActivate();
+            currentGamemode?.InternalDeactivate();
+            currentGamemode = value;
+            currentGamemode?.InternalActivate();
         }
     }
 
-    private IGamemode _currentGamemode;
+    private IGamemode? currentGamemode;
     private Option gamemodeOption = null!;
     internal readonly List<Type> GamemodeTypes = new() { typeof(StandardGamemode), typeof(TestHnsGamemode), typeof(ColorwarsGamemode), typeof(DebugGamemode)/*, typeof(CTFGamemode)*/};
+
+    public GamemodeManager()
+    {
+        Hooks.GameStateHooks.GameStartHook.Bind(GamemodeManagerStartHook, _ => CurrentGamemode.SetupWinConditions(Game.GetWinDelegate()));
+    }
+
 
     public void SetGamemode(int id)
     {
@@ -62,7 +72,7 @@ public class GamemodeManager
         {
             if (ce is not OptionOpenEvent) return;
             GameOptionController.ClearTabs();
-            _currentGamemode.EnabledTabs().ForEach(GameOptionController.AddTab);
+            currentGamemode.EnabledTabs().ForEach(GameOptionController.AddTab);
         });
     }
 }

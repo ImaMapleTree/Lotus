@@ -5,6 +5,9 @@ using System.Linq;
 using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
+using TOHTOR.API;
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.Factions.Crew;
@@ -18,12 +21,15 @@ using TOHTOR.Roles.Extra;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.Subroles;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Options.Game;
+using VentLib.Utilities;
+using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
@@ -163,11 +169,18 @@ public abstract class AbstractBaseRole
     public void Trigger(RoleActionType actionType, ref ActionHandle handle, params object[] parameters)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+
+        uint id = Profilers.Global.Sampler.Start("Action: " + actionType);
         if (actionType == RoleActionType.FixedUpdate)
         {
             List<RoleAction> methods = roleActions[RoleActionType.FixedUpdate];
-            if (methods.Count == 0) return;
+            if (methods.Count == 0)
+            {
+                Profilers.Global.Sampler.Discard(id);
+                return;
+            }
             methods[0].ExecuteFixed(this);
+            Profilers.Global.Sampler.Stop(id);
             return;
         }
 
@@ -175,53 +188,33 @@ public abstract class AbstractBaseRole
         parameters = parameters.AddToArray(handle);
         // Block ALL triggers if not host
 
-
-        bool inBlockList = MyPlayer != null && CustomRoleManager.RoleBlockedPlayers.Contains(MyPlayer.PlayerId);
-        roleActions[actionType].Do(action =>
+        foreach (var action in roleActions[actionType].Sorted(a => (int)a.Priority))
         {
-            if (StaticOptions.LogAllActions)
+            if (handle.IsCanceled) continue;
+            if (MyPlayer != null && !MyPlayer.IsAlive() && !action.TriggerWhenDead) continue;
+
+            if (actionType.IsPlayerAction())
             {
-                VentLogger.Trace($"{MyPlayer.GetNameWithRole()} :: {actionType.ToString()}", "ActionLog");
-                VentLogger.Trace($"Parameters: {parameters.StrJoin()} :: Blocked? {inBlockList && action.Blockable}", "ActionLog");
+                Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(MyPlayer!, action, parameters));
+                Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer!, action, parameters);
             }
-            if (MyPlayer != null && !MyPlayer.IsAlive() && !action.WorksAfterDeath) return;
-            if (!inBlockList || !action.Blockable)
-                action.Execute(this, parameters);
-        });
+
+            if (handle.IsCanceled) continue;
+
+            action.Execute(this, parameters);
+        }
+        Profilers.Global.Sampler.Stop(id);
     }
 
     // lol this method is such a hack it's funny
     public IEnumerable<(RoleAction, AbstractBaseRole)> GetActions(RoleActionType actionType) => roleActions[actionType].Select(action => (action, this));
 
-
-    // Currently role interaction >> faction interaction and I do not trigger faction interaction if role interaction was triggered
-    // This is because in some scenarios the "default" faction interaction is not what is wanted when the role is targeted
-    // Maybe revisit TODO
-    [Obsolete("Use PlayerControl.InteractWith()")]
-    protected InteractionResult CheckInteractions(CustomRole role, params object[] parameters)
-    {
-        /*List<MethodInfo> interactionsWithRole = roleInteractions.GetValueOrDefault(role.GetType());
-        IEnumerable<MethodInfo> interactionsWithFaction = role.FactionsOld
-            .SelectMany(f => factionInteractions.GetValueOrDefault(f, new List<MethodInfo>()));
-
-        if (interactionsWithRole == null && interactionsWithFaction == null) return InteractionResult.Proceed;
-        if (interactionsWithRole != null)
-            return interactionsWithRole.All(interaction =>
-                (InteractionResult) interaction.InvokeAligned(this, parameters) == InteractionResult.Proceed)
-                ? InteractionResult.Proceed
-                : InteractionResult.Halt;
-
-        return interactionsWithFaction.All(interaction =>
-            (InteractionResult) interaction.InvokeAligned(this, parameters) == InteractionResult.Proceed)
-            ? InteractionResult.Proceed
-            : InteractionResult.Halt;*/
-        return InteractionResult.Halt;
-    }
-
     protected void CreateInstanceBasedVariables()
     {
-
-
+        this.GetType().GetFields(AccessFlags.InstanceAccessFlags)
+            .Where(f => f.GetCustomAttribute<NewOnSetupAttribute>() != null)
+            .Select(f => new NewOnSetup(f, f.GetCustomAttribute<NewOnSetupAttribute>()!.UseCloneIfPresent))
+            .ForEach(CreateAnnotatedFields);
         this.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic)
             .Where(f => f.FieldType == typeof(Cooldown) || (f.FieldType.IsGenericType && typeof(Optional<>).IsAssignableFrom(f.FieldType.GetGenericTypeDefinition())))
             .Do(f =>
@@ -229,6 +222,31 @@ public abstract class AbstractBaseRole
                 if (f.FieldType == typeof(Cooldown)) CreateCooldown(f);
                 else CreateOptional(f);
             });
+    }
+
+    private void CreateAnnotatedFields(NewOnSetup setupRules)
+    {
+
+        FieldInfo field = setupRules.FieldInfo;
+        object? currentValue = field.GetValue(this);
+        object newValue;
+        MethodInfo? cloneMethod = field.FieldType.GetMethod("Clone", AccessFlags.InstanceAccessFlags, Array.Empty<Type>());
+        if (currentValue == null || cloneMethod == null || !setupRules.UseCloneIfPresent)
+            try {
+                newValue = AccessTools.CreateInstance(field.FieldType);
+            } catch (Exception e) {
+                VentLogger.Exception(e);
+                throw new ArgumentException($"Error during \"{nameof(NewOnSetup)}\" processing. Could not create instance with no-args constructor for type {field.FieldType}. (Field={field}, Role={EnglishRoleName})");
+            }
+        else
+            try {
+                newValue = cloneMethod.Invoke(currentValue, null)!;
+            }
+            catch (Exception e) {
+                VentLogger.Exception(e);
+                throw new ArgumentException($"Error during \"{nameof(NewOnSetup)}\" processing. Could not clone original instance for type {field.FieldType}. (Field={field}, Role={EnglishRoleName})");
+            }
+        field.SetValue(this, newValue);
     }
 
     private void CreateCooldown(FieldInfo fieldInfo)

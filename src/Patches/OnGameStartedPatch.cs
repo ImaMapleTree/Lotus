@@ -5,10 +5,12 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Gamemodes;
+using TOHTOR.GUI.Menus;
 using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
+using TOHTOR.Utilities;
 using VentLib.Logging;
 
 namespace TOHTOR.Patches
@@ -24,6 +26,8 @@ namespace TOHTOR.Patches
 
         public static void Postfix(AmongUsClient __instance)
         {
+            HistoryMenuIntermediate.HistoryMenuButton.IfPresent(button => button.SetActive(false));
+
             TOHPlugin.ResetCamPlayerList = new List<byte>();
             StaticOptions.UsedButtonCount = 0;
             TOHPlugin.VisibleTasksCount = true;
@@ -31,7 +35,6 @@ namespace TOHTOR.Patches
             AntiBlackout.Reset();
 
             Game.State = GameState.InIntro;
-            DesyncOptions.OriginalHostOptions = GameOptionsManager.Instance.CurrentGameOptions;
             Game.GetAllPlayers().Do(p => CustomRoleManager.PlayersCustomRolesRedux[p.PlayerId] = CustomRoleManager.Default);
         }
     }

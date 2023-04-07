@@ -21,6 +21,7 @@ using TOHTOR.Roles.RoleGroups.Neutral;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.Roles.Subroles;
 using TOHTOR.RPC;
+using TOHTOR.Utilities;
 using VentLib;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
@@ -71,8 +72,8 @@ public static class PlayerControlExtensions
             : player.Data.Role.Role switch
             {
                 RoleTypes.Crewmate => CustomRoleManager.Static.Crewmate,
-                RoleTypes.Engineer => CustomRoleManager.Static.Engineer,
-                RoleTypes.Scientist => CustomRoleManager.Static.Scientist,
+                RoleTypes.Engineer => CustomRoleManager.Static.Mechanic,
+                RoleTypes.Scientist => CustomRoleManager.Static.Physicist,
                 /*RoleTypes.GuardianAngel => CustomRoleManager.Static.GuardianAngel,*/
                 RoleTypes.Impostor => CustomRoleManager.Static.Impostor,
                 RoleTypes.Shapeshifter => CustomRoleManager.Static.Morphling,

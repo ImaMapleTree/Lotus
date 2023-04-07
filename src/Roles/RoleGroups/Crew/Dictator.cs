@@ -1,7 +1,10 @@
 using System;
 using TOHTOR.API;
+using TOHTOR.API.Meetings;
 using TOHTOR.GUI.Patches;
 using TOHTOR.Managers.History.Events;
+using TOHTOR.Patches.Meetings;
+using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
@@ -16,7 +19,7 @@ public class Dictator: Crewmate
     {
         if (!target.Exists()) return;
         MeetingHud.VoterState[] voterStates = Array.Empty<MeetingHud.VoterState>();
-        CheckForEndVotingPatch.EndVoting(MeetingHud.Instance, voterStates, target.Get().Data, false);
+        MeetingApi.EndVoting(MeetingHud.Instance, voterStates, target.Get().Data, false);
         Game.GameHistory.AddEvent(new DictatorVoteEvent(MyPlayer, target.Get()));
     }
 

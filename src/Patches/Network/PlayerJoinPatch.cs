@@ -5,8 +5,11 @@ using HarmonyLib;
 using InnerNet;
 using TOHTOR.Addons;
 using TOHTOR.API;
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Gamemodes;
 using TOHTOR.Managers;
+using TOHTOR.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Version;
@@ -47,6 +50,8 @@ class OnPlayerJoinedPatch
         BanManager.CheckBanPlayer(client);
         BanManager.CheckDenyNamePlayer(client);
         TOHPlugin.PlayerVersion = new Dictionary<byte, Version>();
+
+        Utils.RunUntilSuccess(() => Hooks.PlayerHooks.PlayerJoinHook.Propagate(new PlayerHookEvent(client.Character)), 0.1f, () => client.Character != null);
         Game.CurrentGamemode.Trigger(GameAction.GameJoin, client);
     }
 }

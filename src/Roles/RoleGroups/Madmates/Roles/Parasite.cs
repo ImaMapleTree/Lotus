@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace TOHTOR.Roles.RoleGroups.Madmates.Roles;
 
-public class Parasite : Morphling
+public class Parasite : Shapeshifter
 {
     protected override void Setup(PlayerControl player)
     {

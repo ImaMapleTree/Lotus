@@ -3,6 +3,8 @@ using Hazel;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using VentLib.Logging;
+using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
 namespace TOHTOR.Patches.Actions;
@@ -11,10 +13,14 @@ namespace TOHTOR.Patches.Actions;
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.TryPet))]
 class LocalPetPatch
 {
+    private static bool _hostPetBuffer;
     public static bool Prefix(PlayerControl __instance)
     {
         if (!(AmongUsClient.Instance.AmHost)) return true;
+        if (_hostPetBuffer) return false;
         ExternalRpcPetPatch.Prefix(__instance.MyPhysics, 51, new MessageReader());
+        _hostPetBuffer = true;
+        Async.Schedule(() => _hostPetBuffer = false, 0.5f);
         return false;
     }
 
@@ -29,8 +35,7 @@ class LocalPetPatch
 [HarmonyPatch(typeof(PlayerPhysics), nameof(PlayerPhysics.HandleRpc))]
 class ExternalRpcPetPatch
 {
-    public static void Prefix(PlayerPhysics __instance, [HarmonyArgument(0)] byte callId,
-        [HarmonyArgument(1)] MessageReader reader)
+    public static void Prefix(PlayerPhysics __instance, [HarmonyArgument(0)] byte callId, [HarmonyArgument(1)] MessageReader reader)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         var rpcType = callId == 51 ? RpcCalls.Pet : (RpcCalls)callId;
@@ -38,17 +43,11 @@ class ExternalRpcPetPatch
 
         PlayerControl playerControl = __instance.myPlayer;
 
+        if (AmongUsClient.Instance.AmHost) __instance.CancelPet();
 
-        if (AmongUsClient.Instance.AmHost)
-            __instance.CancelPet();
+        Async.Schedule(() => RpcV2.Immediate(__instance.NetId, RpcCalls.CancelPet, SendOption.Reliable).Send(), 0.5f);
 
-
-        foreach (PlayerControl player in PlayerControl.AllPlayerControls)
-            Async.Schedule(() => AmongUsClient.Instance.FinishRpcImmediately(
-                AmongUsClient.Instance.StartRpcImmediately(__instance.NetId, 50, SendOption.None,
-                    player.GetClientId())), 0.5f);
-
-
+        VentLogger.Trace($"{playerControl.UnalteredName()} => Pet", "PetPatch");
         ActionHandle handle = ActionHandle.NoInit();
         playerControl.Trigger(RoleActionType.OnPet, ref handle, __instance);
     }

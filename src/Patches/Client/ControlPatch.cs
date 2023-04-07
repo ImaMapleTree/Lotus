@@ -9,10 +9,12 @@ using TOHTOR.Roles;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
+using TOHTOR.Utilities;
 using TOHTOR.Victory.Conditions;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
+using VentLib.Utilities.Debug.Profiling;
 
 namespace TOHTOR.Patches.Client;
 
@@ -114,6 +116,15 @@ class ControllerManagerUpdatePatch
             VentLogger.Old("Dump Logs", "KeyCommand");
             Utils.DumpLog();
         }
+
+        if (GetKeysDown(KeyCode.F2))
+        {
+            Profilers.All.ForEach(p =>
+            {
+                p.Display();
+                p.Clear();
+            });
+        }
         //実行ファイルのフォルダを開く
         /*if (GetKeysDown(KeyCode.F10))
         {
@@ -176,6 +187,11 @@ class ControllerManagerUpdatePatch
             PlayerControl.LocalPlayer.NoCheckStartMeeting(PlayerControl.LocalPlayer.Data);
         }
         //自分自身を追放
+        /*if (GameStates.IsLobby && GetKeysDown(KeyCode.LeftShift, KeyCode.P))
+        {
+            Game.Players[PlayerControl.LocalPlayer.PlayerId] = new PlayerPlus(PlayerControl.LocalPlayer);
+            CustomRoleManager.AllRoles.ForEach(r => r.Instantiate(PlayerControl.LocalPlayer));
+        }*/
         //--以下フリープレイ用コマンド--//
         if (!StaticOptions.NoGameEnd || Game.State is GameState.InLobby) return;
         //キルクールを0秒に設定

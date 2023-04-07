@@ -16,6 +16,7 @@ using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
+// TODO: Make into morphling
 public class BountyHunter: Vanilla.Impostor
 {
     private PlayerControl? bhTarget;
@@ -24,7 +25,7 @@ public class BountyHunter: Vanilla.Impostor
     private float bountyKillCoolDown;
     private float punishKillCoolDown;
 
-    [DynElement(UI.Text)]
+    [UIComponent(UI.Text)]
     private string ShowTarget() => bhTarget == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(bhTarget.UnalteredName());
 
     [RoleAction(RoleActionType.Attack)]

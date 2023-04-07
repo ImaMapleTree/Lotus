@@ -9,6 +9,7 @@ using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
+using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
@@ -35,8 +36,7 @@ public class YingYanger : Vanilla.Impostor
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        InteractionResult result = CheckInteractions(target.GetCustomRole(), target);
-        if (result is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         if (!InYingMode) return false;
 
         cursedPlayers.Add(target);

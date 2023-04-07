@@ -8,9 +8,11 @@ using BepInEx.Unity.IL2CPP;
 using TOHTOR.Addons;
 using TOHTOR.Gamemodes;
 using TOHTOR.Managers;
+using TOHTOR.Managers.Reporting;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.RPC;
+using TOHTOR.Utilities;
 using VentLib;
 using VentLib.Logging;
 using VentLib.Networking.Handshake;
@@ -20,6 +22,8 @@ using VentLib.Options.Game;
 using VentLib.Options.Game.Tabs;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
+using VentLib.Utilities.Debug;
+using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
 using VentLib.Version;
 using VentLib.Version.Git;
@@ -49,6 +53,8 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
     public Harmony Harmony { get; } = new(PluginGuid);
     public static string CredentialsText;
 
+    public static RProfiler Profiler = new RProfiler("General");
+
     public static bool Initialized;
 
     public TOHPlugin()
@@ -61,8 +67,6 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
 
 
     public static NormalGameOptionsV07 NormalOptions => GameOptionsManager.Instance.currentNormalGameOptions;
-
-
     public static Dictionary<byte, Version> PlayerVersion = new();
 
 
@@ -82,16 +86,15 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
 
     public static GameOptionTab TestTab = new("Test Tab", () => Utils.LoadSprite("TOHTOR.assets.Tabs.TabIcon_MiscRoles.png"));
 
-
     public override void Load()
     {
+        ReportManager.AddProducer(Profiler);
+        uint id = Profiler.Sampler.Start();
         GameOptionController.Enable();
         GamemodeManager = new GamemodeManager();
         PluginDataManager = new PluginDataManager();
 
         VisibleTasksCount = false;
-
-        VentLogger.Fatal($"Test: {new[] { "a", "b", "c", "d" }.Indexed().StrJoin()})");
 
         BanManager.Init();
 
@@ -110,6 +113,8 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
         ShowerPages.InitPages();
         //OptionManager.AllHolders.AddRange(OptionManager.Options().SelectMany(opt => opt.GetHoldersRecursive()));
         Initialized = true;
+        Profiler.Sampler.Stop(id);
+        ReportManager.GenerateReport();
     }
 
     public GitVersion Version() => CurrentVersion;

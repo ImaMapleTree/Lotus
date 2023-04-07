@@ -52,4 +52,6 @@ public class ReactorSabotage : ISabotage
         caller.OrElseSet(() => sabotageCaller);
         SabotagePatch.CurrentSabotage = this;
     }
+
+    public override string ToString() => $"ReactorSabotage(Caller={caller})";
 }

@@ -11,6 +11,7 @@ using TOHTOR.GUI.Name.Holders;
 using TOHTOR.GUI.Name.Impl;
 using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Roles.Interactions;
+using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Coven;
 using TOHTOR.Roles.RoleGroups.Impostors;
@@ -18,6 +19,7 @@ using TOHTOR.Roles.RoleGroups.Madmates.Roles;
 using TOHTOR.Roles.RoleGroups.Neutral;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -72,7 +74,7 @@ public class Investigator : Crewmate
         new Tuple<Type, Color, InvestOptCategory>(typeof(Parasite), Color.red, InvestOptCategory.Madmate),
     };
 
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown abilityCooldown;
     private NIOpt neutralPassiveRed;
     private NIOpt neutralKillingRed;

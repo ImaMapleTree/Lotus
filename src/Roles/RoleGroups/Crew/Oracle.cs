@@ -1,13 +1,12 @@
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities.Optionals;

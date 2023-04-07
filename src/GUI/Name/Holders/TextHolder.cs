@@ -6,5 +6,6 @@ public class TextHolder : ComponentHolder<TextComponent>
 {
     public TextHolder(int line = 0) : base(line)
     {
+        Spacing = 1;
     }
 }

@@ -4,9 +4,9 @@ public class ModifiedActionAttribute: RoleActionAttribute
 {
     public ModifiedBehaviour Behaviour = ModifiedBehaviour.Replace;
 
-    public ModifiedActionAttribute(RoleActionType actionType, bool worksAfterDeath = false, Priority priority = Priority.NoPriority) : base(actionType, worksAfterDeath, priority) { }
+    public ModifiedActionAttribute(RoleActionType actionType, bool triggerAfterDeath = false, bool blockable = false, Priority priority = Priority.NoPriority) : base(actionType, triggerAfterDeath, blockable, priority) { }
 
-    public ModifiedActionAttribute(RoleActionType actionType, ModifiedBehaviour behaviour, bool worksAfterDeath = false, Priority priority = Priority.NoPriority) : base(actionType, worksAfterDeath, priority)
+    public ModifiedActionAttribute(RoleActionType actionType, ModifiedBehaviour behaviour, bool triggerAfterDeath = false, bool blockable = false,  Priority priority = Priority.NoPriority) : base(actionType, triggerAfterDeath, blockable, priority)
     {
         Behaviour = behaviour;
     }

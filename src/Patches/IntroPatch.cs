@@ -15,6 +15,7 @@ using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.Impostors;
 using TOHTOR.Roles.RoleGroups.Neutral;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Anticheat;
 using VentLib.Localization;
@@ -168,7 +169,7 @@ class BeginCrewmatePatch
                 PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Crewmate);
                 break;
 
-            case SchrodingerCat:
+            case Copycat:
                 PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Impostor);
                 break;
 

@@ -36,7 +36,7 @@ public class AgiTater : NeutralKillingBase
     private ExplodeCondition Condition => !explodeAfterCondition ? ExplodeCondition.None : condition;
     private bool BombsPersist => !explodeAfterCondition && Condition is ExplodeCondition.DoubleBomb && bombsPersist;
 
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string BombCounter() => RoleUtils.Counter(currentBombs, bombsPerRound);
 
     protected override void Setup(PlayerControl player)
@@ -188,7 +188,7 @@ public class AgiTater : NeutralKillingBase
         private string IndicatorString(byte targetId)
         {
             if (!Active || this.Owner.PlayerId != targetId || !this.Owner.IsAlive()) return "";
-            if (fuse.IsReady()) return new Color(0.52f, 0.43f, 0.2f).Colorize("Pass the Bomb");
+            if (fuse.IsReady()) return new Color(0.71f, 0.58f, 0.27f).Colorize("Pass the Bomb");
             if (fuse.TimeRemaining() > 20) return Color.green.Colorize("Holding Bomb!");
             if (fuse.TimeRemaining() > 10) return Color.yellow.Colorize("Holding Bomb!!!");
             return Color.red.Colorize("Holding Bomb!!!!!");

@@ -7,7 +7,6 @@ using TOHTOR.Roles.Debugger;
 using TOHTOR.Roles.Extra;
 using TOHTOR.Roles.RoleGroups.Coven;
 using TOHTOR.Roles.RoleGroups.Crew;
-using TOHTOR.Roles.RoleGroups.Crew.Snitch;
 using TOHTOR.Roles.RoleGroups.Impostors;
 using TOHTOR.Roles.RoleGroups.Madmates.Roles;
 using TOHTOR.Roles.RoleGroups.Neutral;
@@ -33,7 +32,6 @@ public static class CustomRoleManager
 
     public static Dictionary<byte, List<CustomRole>> PlayerSubroles = new();
 
-    public static List<byte> RoleBlockedPlayers = new();
     public static StaticRoles Static = new();
     public static ExtraRoles Special = new();
     public static CustomRole Default = Static.Crewmate;
@@ -141,30 +139,26 @@ public static class CustomRoleManager
 
         //assassin
         //bomber
+        public Blackmailer Blackmailer = new Blackmailer();
         public BountyHunter BountyHunter = new BountyHunter();
         public Camouflager Camouflager = new Camouflager();
-        //cleaner
         public Consort Consort = new Consort();
         public Disperser Disperser = new Disperser();
         //escapist
         public FireWorks FireWorks = new FireWorks();
         public Freezer Freezer = new Freezer();
         public Grenadier Grenadier = new Grenadier();
-        //identity thief
+        public IdentityThief IdentityThief = new IdentityThief();
         public Impostor Impostor = new Impostor();
         public Janitor Janitor = new Janitor();
-        public LastImpostor LastImpostor = new LastImpostor();
-        public Madmate Madmate = new Madmate();
-        //mad guardian
-        //mad snitch
+
         public Mafia Mafia = new Mafia();
-        //manipulator
+        public Manipulator Manipulator = new Manipulator();
         public Mare Mare = new Mare();
         public Miner Miner = new Miner();
         public Morphling Morphling = new Morphling();
         public Ninja Ninja = new Ninja();
-        //parasite
-        //pickpocket
+        public PickPocket PickPocket = new PickPocket();
         public Puppeteer Puppeteer = new Puppeteer();
         //sidekick madmate
         //silencer
@@ -178,32 +172,34 @@ public static class CustomRoleManager
         public Witch Witch = new Witch();
         public YingYanger YingYanger = new YingYanger();
 
+        public Madmate Madmate = new Madmate();
+        public MadGuardian MadGuardian = new MadGuardian();
+        public MadSnitch MadSnitch = new MadSnitch();
+        public Parasite Parasite = new Parasite();
 
         //Crewmates
 
-
-        public Baiter Baiter = new Baiter();
         public Bastion Bastion = new Bastion();
         public Bodyguard Bodyguard = new Bodyguard();
         public Child Child = new Child();
         public Crewmate Crewmate = new Crewmate();
         public Crusader Crusader = new Crusader();
         public Demolitionist Demolitionist = new Demolitionist();
-        //dictator
-        //doctor
-        public Engineer Engineer = new Engineer();
-        //escort
+        public Dictator Dictator = new Dictator();
+        public Doctor Doctor = new Doctor();
+
+        public Escort Escort = new Escort();
         public Investigator Investigator = new Investigator();
         public Mayor Mayor = new Mayor();
-        //mechanic
+        public Mechanic Mechanic = new Mechanic();
+        public Medic Medic = new Medic();
         public Medium Medium = new Medium();
         public Mystic Mystic = new Mystic();
         public Observer Observer = new Observer();
         public Oracle Oracle = new Oracle();
-        //physicist
-        //psychic
-        //sabotage master
-        public Scientist Scientist = new Scientist();
+        public Physicist Physicist = new Physicist();
+        public Psychic Psychic = new Psychic();
+        public SabotageMaster SabotageMaster = new SabotageMaster();
         public Sheriff Sheriff = new Sheriff();
         public Snitch Snitch = new Snitch();
         public Speedrunner Speedrunner = new Speedrunner();
@@ -216,36 +212,39 @@ public static class CustomRoleManager
         //Neutrals
 
 
-        //agitater
+        public AgiTater AgiTater = new AgiTater();
         public Amnesiac Amnesiac = new Amnesiac();
         public Archangel Archangel = new Archangel();
         public Arsonist Arsonist = new Arsonist();
         public BloodKnight BloodKnight = new BloodKnight();
         public CrewPostor CrewPostor = new CrewPostor();
+        public Deathknight Deathknight = new Deathknight();
         public Egoist Egoist = new Egoist();
         public Executioner Executioner = new Executioner();
         public Glitch Glitch = new Glitch();
         public GuardianAngel GuardianAngel = new GuardianAngel();
-        //hacker
+        public Hacker Hacker = new Hacker();
         //hitman
         public Jackal Jackal = new Jackal();
         public Jester Jester = new Jester();
         //juggernaught
         //marksman
+        public Necromancer Necromancer = new Necromancer();
         //neutral witch
         public Opportunist Opportunist = new Opportunist();
-        public Pestilence Pestilence = new Pestilence();
         public Phantom Phantom = new Phantom();
         public PlagueBearer PlagueBearer = new PlagueBearer();
-        //postman
-        public SchrodingerCat SchrodingerCat = new SchrodingerCat();
+        public Pestilence Pestilence = new Pestilence();
+        public Postman Postman = new Postman();
+        public Retributionist Retributionist = new Retributionist();
+        public Copycat Copycat = new Copycat();
         public SerialKiller SerialKiller = new SerialKiller();
         public Sidekick Sidekick = new Sidekick();
         public Survivor Survivor = new Survivor();
         //swapper
         public Terrorist Terrorist = new Terrorist();
         //vulture
-        //werewolf
+        public Werewolf Werewolf = new Werewolf();
     }
 
     public class ExtraRoles
@@ -256,6 +255,7 @@ public static class CustomRoleManager
         public Coven Coven = new Coven();
         public Debugger Debugger = new Debugger();
         public Diseased Diseased = new Diseased();
+        public LastImpostor LastImpostor = new LastImpostor();
         //double shot
         //flash
         public Fox Fox = new();

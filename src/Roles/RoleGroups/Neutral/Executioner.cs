@@ -43,7 +43,7 @@ public class Executioner : CustomRole
         target.NameModel().GetComponentHolder<NameHolder>().Add(new ColoredNameComponent(target, RoleColor, GameStates.IgnStates, MyPlayer));
     }
 
-    [RoleAction(RoleActionType.OtherExiled)]
+    [RoleAction(RoleActionType.AnyExiled)]
     private void CheckExecutionerWin(PlayerControl exiled)
     {
         if (target == null || target.PlayerId != exiled.PlayerId) return;
@@ -66,7 +66,7 @@ public class Executioner : CustomRole
                 Game.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
             case ExeRoleChange.SchrodingerCat:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.SchrodingerCat);
+                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
                 break;
             case ExeRoleChange.Crewmate:
                 Game.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);

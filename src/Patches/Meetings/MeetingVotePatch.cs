@@ -2,9 +2,12 @@ using System.Linq;
 using HarmonyLib;
 using Hazel;
 using TOHTOR.API;
+using TOHTOR.API.Meetings;
 using TOHTOR.Extensions;
+using TOHTOR.Patches.Meetings;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
@@ -14,18 +17,23 @@ namespace TOHTOR.Patches.Actions;
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CastVote))]
 public class MeetingVotePatch
 {
-
-    public static void Postfix(MeetingHud __instance, byte srcPlayerId, byte suspectPlayerId)
+    public static void Prefix(MeetingHud __instance, byte srcPlayerId, byte suspectPlayerId)
     {
         PlayerControl voter = Utils.GetPlayerById(srcPlayerId)!;
-        Optional<PlayerControl> voted = Optional<PlayerControl>.Of(Utils.GetPlayerById(suspectPlayerId));
+        Optional<PlayerControl> voted = Utils.PlayerById(suspectPlayerId);
+        VentLogger.Trace($"{voter.GetNameWithRole()} Suspect Player: {voted}");
 
         ActionHandle handle = ActionHandle.NoInit();
-        voter.Trigger(RoleActionType.MyVote, ref handle, voted);
-        Game.TriggerForAll(RoleActionType.AnyVote, ref handle, voter, voted);
+        voter.Trigger(RoleActionType.MyVote, ref handle,MeetingStartPatch.MeetingDelegate, voted);
+        Game.TriggerForAll(RoleActionType.AnyVote, ref handle,MeetingStartPatch.MeetingDelegate, voter, voted);
 
-        VentLogger.High($"Canceled: {handle.IsCanceled}");
-        if (!handle.IsCanceled) return;
+        if (!handle.IsCanceled)
+        {
+            MeetingApi.MeetingDelegate()?.AddVote(voter, voted);
+            return;
+        }
+
+        VentLogger.Debug($"Canceled Vote from {voter.GetNameWithRole()}");
         Async.Schedule(() => ClearVote(__instance, voter), NetUtils.DeriveDelay(0.4f));
         Async.Schedule(() => ClearVote(__instance, voter), NetUtils.DeriveDelay(0.6f));
     }

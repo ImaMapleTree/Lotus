@@ -3,6 +3,7 @@ using System.Linq;
 using HarmonyLib;
 using Hazel;
 using TOHTOR.RPC;
+using TOHTOR.Utilities;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -15,6 +16,7 @@ public class ChatUpdatePatch
     public static List<(string, byte, string)> MessagesToSend = new();
     public static void Postfix(ChatController __instance)
     {
+        if (!AmongUsClient.Instance.AmHost) return;
         /*if (!AmongUsClient.Instance.AmHost || TOHPlugin.MessagesToSend.Count < 1 || (TOHPlugin.MessagesToSend[0].Item2 == byte.MaxValue && TOHPlugin.MessageWait.Value > __instance.TimeSinceLastMessage)) return;*/
         if (MessagesToSend.Count == 0) return;
         if (DoBlockChat) return;
@@ -26,9 +28,12 @@ public class ChatUpdatePatch
         if (clientId == -1)
         {
             player.SetName(title);
+            OnChatPatch.UtilsSentList.Add(player.PlayerId);
             DestroyableSingleton<HudManager>.Instance.Chat.AddChat(player, msg);
             player.SetName(name);
         }
+        else if (clientId == PlayerControl.LocalPlayer.PlayerId) OnChatPatch.UtilsSentList.Add(player.PlayerId);
+
         var writer = CustomRpcSender.Create("MessagesToSend", SendOption.None);
         writer.StartMessage(clientId);
         writer.StartRpc(player.NetId, (byte)RpcCalls.SetName)

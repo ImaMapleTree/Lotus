@@ -1,3 +1,4 @@
+using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
@@ -24,7 +25,7 @@ public class Observer: Crewmate
     protected override void Setup(PlayerControl player)
     {
         base.Setup(player);
-        currentVisionMod = overrideStartingVision ? startingVision : DesyncOptions.OriginalHostOptions.AsNormalOptions().CrewLightMod;
+        currentVisionMod = overrideStartingVision ? startingVision : OriginalOptions.CrewLightMod();
     }
 
     protected override void OnTaskComplete()

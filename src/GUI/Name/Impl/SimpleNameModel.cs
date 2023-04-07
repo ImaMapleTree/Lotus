@@ -9,6 +9,7 @@ using TOHTOR.GUI.Name.Interfaces;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
+using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.GUI.Name.Impl;
@@ -64,6 +65,7 @@ public class SimpleNameModel : INameModel
         float durationSinceLast = (float)(DateTime.Now - this.renders.GetOrCompute(rPlayer.PlayerId, () => DateTime.Now)).TotalSeconds;
         if (!force && durationSinceLast < ModConstants.DynamicNameTimeBetweenRenders && Game.State is not GameState.InMeeting) return cacheString;
         this.renders[rPlayer.PlayerId] = DateTime.Now;
+        uint id = Profilers.Global.Sampler.Start();
 
         state ??= Game.State;
         List<List<string>> renders = new();
@@ -75,9 +77,15 @@ public class SimpleNameModel : INameModel
             updated = updated || componentHolder.Updated(rPlayer.PlayerId);
         }
 
-        if (!updated && !force) return cacheString;
-        cacheString = renders.Select(s => s.Join(delimiter: " ".Repeat(spacing - 1))).Join(delimiter: "\n").TrimStart('\n').TrimEnd('\n');
+        if (!updated && !force)
+        {
+            Profilers.Global.Sampler.Stop(id);
+            return cacheString;
+        }
+
+        cacheString = renders.Select(s => s.Join(delimiter: " ".Repeat(spacing - 1))).Join(delimiter: "\n").TrimStart('\n').TrimEnd('\n').Replace("\n\n", "\n");
         if (sendToPlayer) RpcV2.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(rPlayer.GetClientId());
+        Profilers.Global.Sampler.Stop(id);
         return cacheString;
     }
 

@@ -14,7 +14,7 @@ namespace TOHTOR.Roles.RoleGroups.Impostors;
 
 public class Grenadier : Vanilla.Impostor
 {
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown blindCooldown;
     private float blindDuration;
     private float blindDistance;

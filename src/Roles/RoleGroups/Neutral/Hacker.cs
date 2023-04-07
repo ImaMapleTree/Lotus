@@ -4,6 +4,7 @@ using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
+using TOHTOR.Options;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Victory.Conditions;
@@ -19,7 +20,7 @@ public class Hacker: CustomRole
     private int sabotageTotal;
     private int sabotageCount;
 
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string HackerCounter() => RoleUtils.Counter(sabotageCount, sabotageTotal, RoleColor);
 
     [RoleAction(RoleActionType.SabotagePartialFix)]
@@ -39,6 +40,7 @@ public class Hacker: CustomRole
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
+            .Tab(DefaultTabs.NeutralTab)
             .SubOption(sub => sub.Name("Hacker Sabotage Amount")
                 .BindInt(i => sabotageTotal = i)
                 .AddIntRange(1, 30, 1, 7)

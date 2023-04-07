@@ -1,3 +1,4 @@
+using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
@@ -42,5 +43,5 @@ public class Jackal : NeutralKillingBase
         base.Modify(roleModifier)
             .RoleColor(new Color(0f, 0.71f, 0.92f))
             .CanVent(canVent)
-            .OptionOverride(Override.ImpostorLightMod, () => DesyncOptions.OriginalHostOptions.AsNormalOptions()!.CrewLightMod, () => !impostorVision);
+            .OptionOverride(Override.ImpostorLightMod, () => OriginalOptions.CrewLightMod(), () => !impostorVision);
 }

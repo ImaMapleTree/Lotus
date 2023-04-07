@@ -2,16 +2,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.Gamemodes;
-using TOHTOR.GUI;
 using TOHTOR.GUI.Menus;
 using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Managers;
 using TOHTOR.Managers.History;
 using TOHTOR.Options;
-using TOHTOR.Patches.Actions;
 using TOHTOR.Player;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Internals;
@@ -88,57 +88,26 @@ public static class Game
     }
 
     public static void SyncAll() => GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
-    public static void TriggerForAll(RoleActionType action, ref ActionHandle handle, params object[] parameters)
-    {
-        if (action == RoleActionType.FixedUpdate)
-            foreach (PlayerControl player in GetAllPlayers()) player.Trigger(action, ref handle, parameters);
-        // Using a new Trigger algorithm to deal with ordering of triggers
-        else
-        {
-            handle.ActionType = action;
-            parameters = parameters.AddToArray(handle);
-            List<(RoleAction, AbstractBaseRole)> actionList = GetAllPlayers().SelectMany(p => p.GetCustomRole().GetActions(action)).ToList();
-            actionList.AddRange(GetAllPlayers().SelectMany(p => p.GetSubroles().SelectMany(r => r.GetActions(action))));
-            actionList.Sort((a1, a2) => a1.Item1.Priority.CompareTo(a2.Item1.Priority));
-            foreach ((RoleAction roleAction, AbstractBaseRole role) in actionList)
-            {
-                bool inBlockList = role.MyPlayer != null && CustomRoleManager.RoleBlockedPlayers.Contains(role.MyPlayer.PlayerId);
-                if (StaticOptions.LogAllActions)
-                {
-                    VentLogger.Trace($"{role.MyPlayer.GetNameWithRole()} => {roleAction}", "ActionLog");
-                    VentLogger.Trace($"Parameters: {parameters.StrJoin()} :: Blocked? {roleAction.Blockable && inBlockList}", "ActionLog");
-                }
 
-                if (role.MyPlayer != null && !role.MyPlayer.IsAlive() && !roleAction.WorksAfterDeath) return;
-                if (!roleAction.Blockable || !inBlockList) roleAction.Execute(role, parameters);
-            }
-
-        }
-    }
+    public static void TriggerForAll(RoleActionType action, ref ActionHandle handle, params object[] parameters) => GetAllPlayers().Trigger(action, ref handle, parameters);
 
     public static void Trigger(this IEnumerable<PlayerControl> players, RoleActionType action, ref ActionHandle handle, params object[] parameters)
     {
         if (action == RoleActionType.FixedUpdate)
-            foreach (PlayerControl player in GetAllPlayers()) player.Trigger(action, ref handle, parameters);
+            foreach (PlayerControl player in players) player.Trigger(action, ref handle, parameters);
         // Using a new Trigger algorithm to deal with ordering of triggers
         else
         {
+            List<PlayerControl> allPlayers = players.ToList();
             handle.ActionType = action;
             parameters = parameters.AddToArray(handle);
-            List<(RoleAction, AbstractBaseRole)> actionList = GetAllPlayers().SelectMany(p => p.GetCustomRole().GetActions(action)).ToList();
-            actionList.AddRange(GetAllPlayers().SelectMany(p => p.GetSubroles().SelectMany(r => r.GetActions(action))));
+            List<(RoleAction, AbstractBaseRole)> actionList = allPlayers.SelectMany(p => p.GetCustomRole().GetActions(action)).ToList();
+            actionList.AddRange(allPlayers.SelectMany(p => p.GetSubroles().SelectMany(r => r.GetActions(action))));
             actionList.Sort((a1, a2) => a1.Item1.Priority.CompareTo(a2.Item1.Priority));
             foreach ((RoleAction roleAction, AbstractBaseRole role) in actionList)
             {
-                bool inBlockList = role.MyPlayer != null && CustomRoleManager.RoleBlockedPlayers.Contains(role.MyPlayer.PlayerId);
-                if (StaticOptions.LogAllActions)
-                {
-                    VentLogger.Trace($"{role.MyPlayer.GetNameWithRole()} => {roleAction}", "ActionLog");
-                    VentLogger.Trace($"Parameters: {parameters.StrJoin()} :: Blocked? {roleAction.Blockable && inBlockList}", "ActionLog");
-                }
-
-                if (role.MyPlayer != null && !role.MyPlayer.IsAlive() && !roleAction.WorksAfterDeath) return;
-                if (!roleAction.Blockable || !inBlockList) roleAction.Execute(role, parameters);
+                if (role.MyPlayer != null && !role.MyPlayer.IsAlive() && !roleAction.TriggerWhenDead) return;
+                roleAction.Execute(role, parameters);
             }
 
         }
@@ -148,22 +117,24 @@ public static class Game
 
     //public static void ResetNames() => players.Values.Select(p => p.DynamicName).Do(name => name.ClearComponents());
     public static GameState State = GameState.InLobby;
-    private static WinDelegate _winDelegate;
+    private static WinDelegate _winDelegate = new();
 
     public static WinDelegate GetWinDelegate() => _winDelegate;
 
     public static void Setup()
     {
+        _winDelegate = new WinDelegate();
         RandomSpawn = new RandomSpawn();
         StartTime = DateTime.Now;
         GameHistory = new();
-        HistoryMenuIntermediate.StoreOutfits();
         GameStates = new();
         Players.Clear();
         GetAllPlayers().Do(p => Players.Add(p.PlayerId, new PlayerPlus(p)));
         playerNames.Clear();
         PlayerControl.AllPlayerControls.ToArray().ForEach(p => playerNames[p.PlayerId] = p.UnalteredName());
-        _winDelegate = new WinDelegate();
+
+        Hooks.GameStateHooks.GameStartHook.Propagate(new GameStateHookEvent());
+        HistoryMenuIntermediate.StoreOutfits();
         CurrentGamemode.SetupWinConditions(_winDelegate);
     }
 
@@ -172,6 +143,8 @@ public static class Game
         Players.Clear();
         CustomRoleManager.PlayersCustomRolesRedux.Clear();
         CustomRoleManager.PlayerSubroles.Clear();
+
+        Hooks.GameStateHooks.GameEndHook.Propagate(new GameStateHookEvent());
     }
 }
 

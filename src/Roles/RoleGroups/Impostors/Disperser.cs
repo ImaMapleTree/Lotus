@@ -5,6 +5,7 @@ using TOHTOR.API;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
@@ -13,7 +14,7 @@ namespace TOHTOR.Roles.RoleGroups.Impostors;
 
 public class Disperser: Vanilla.Impostor
 {
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown abilityCooldown;
 
     [RoleAction(RoleActionType.Attack)]

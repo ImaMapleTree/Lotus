@@ -2,6 +2,7 @@ using TOHTOR.Factions.Crew;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.Factions.Interfaces;
 using TOHTOR.Factions.Neutrals;
+using UnityEngine;
 
 namespace TOHTOR.Factions.Undead;
 
@@ -21,4 +22,6 @@ public abstract partial class TheUndead : Faction<TheUndead>
             _ => other.Relationship(this)
         };
     }
+
+    public override Color FactionColor() => new(0.59f, 0.76f, 0.36f);
 }

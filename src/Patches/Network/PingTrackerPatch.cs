@@ -2,6 +2,7 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Options;
 using TOHTOR.Patches.Client;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization;
 

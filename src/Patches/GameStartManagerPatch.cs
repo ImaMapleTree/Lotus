@@ -70,7 +70,7 @@ public static class GameStartManagerPatch
         public static void Postfix(GameStartManager __instance)
         {
             // Lobby timer
-            if (!AmongUsClient.Instance.AmHost || !GameData.Instance) return;
+            if (!AmongUsClient.Instance.AmHost || !GameData.Instance || AmongUsClient.Instance.NetworkMode == NetworkModes.LocalGame) return;
 
             if (update) currentText = __instance.PlayerCounter.text;
 

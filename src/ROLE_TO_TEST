@@ -1,19 +1,19 @@
 Mare
-Invesigator
-Oracle
-Bounty Hunter
-Vigilante
-Veteran
+Invesigator X
+Oracle X
+Bounty Hunter X
+Vigilante X
+Veteran X
 Transporter
 Puppeteer
 Witch
-Archangel,
-Executioner
-Phantom
+Archangel X?,
+Executioner X
+Phantom X
 Agitater
 Arsonist
 Neut Witch (should work if puppeteer works)
-Retributionist
+Retributionist X
 
 
 
@@ -21,6 +21,11 @@ Retributionist
 
 
 
+Broken:
+- Report call
+- Puppet
+- Phantom
+- Mare completely broken
 
 
 

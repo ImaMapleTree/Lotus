@@ -11,7 +11,9 @@ using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
@@ -20,7 +22,7 @@ public class Sheriff : Crewmate
 {
     public bool sheriffHasTasks;
 
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown shootCooldown;
     private int totalShots;
     private bool oneShotPerRound;
@@ -32,12 +34,17 @@ public class Sheriff : Crewmate
     private int shotsRemaining;
 
 
-    protected override void Setup(PlayerControl player) => shotsRemaining = totalShots;
+    protected override void Setup(PlayerControl player)
+    {
+        if (!isSheriffDesync) base.Setup(player);
+        shotsRemaining = totalShots;
+    }
+
     public bool HasShots() => !(oneShotPerRound && shotThisRound) && shotsRemaining >= 0;
 
 
-    [DynElement(UI.Counter)]
-    public string RemainingShotCounter() => $"({Utils.ColorString(Color.yellow, $"{shotsRemaining}/{totalShots}")})";
+    [UIComponent(UI.Counter)]
+    public string RemainingShotCounter() => RoleUtils.Counter(shotsRemaining, totalShots);
 
     // ACTIONS
 
@@ -47,6 +54,7 @@ public class Sheriff : Crewmate
     [RoleAction(RoleActionType.OnPet)]
     public bool TryKillWithPet(ActionHandle handle)
     {
+        VentLogger.Trace("Sheriff Shoot Ability (Pet)", "SheriffAbility");
         handle.Cancel();
         if (isSheriffDesync || !shootCooldown.IsReady() || !HasShots()) return false;
         List<PlayerControl> closestPlayers = MyPlayer.GetPlayersInAbilityRangeSorted();

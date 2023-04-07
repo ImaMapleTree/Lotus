@@ -4,8 +4,10 @@ using AmongUs.GameOptions;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
+using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Utilities;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
@@ -18,7 +20,7 @@ public class Ninja : Vanilla.Impostor
     public NinjaMode Mode = NinjaMode.Killing;
     private ActivationType activationType;
 
-    [DynElement(UI.Misc)]
+    [UIComponent(UI.Text)]
     private string CurrentMode() => RoleColor.Colorize(Mode == NinjaMode.Hunting ? "(Hunting)" : "(Killing)");
 
     protected override void Setup(PlayerControl player) => playerList = new List<PlayerControl>();
@@ -28,11 +30,10 @@ public class Ninja : Vanilla.Impostor
     {
         SyncOptions();
         if (Mode is NinjaMode.Killing) return base.TryKill(target);
-        InteractionResult result = CheckInteractions(target.GetCustomRole(), target);
-        if (result is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         playerList.Add(target);
-        MyPlayer.RpcGuardAndKill(MyPlayer);
+        MyPlayer.RpcGuardAndKill(target);
         return true;
     }
 

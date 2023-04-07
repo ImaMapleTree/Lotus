@@ -12,6 +12,7 @@ using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
@@ -23,14 +24,14 @@ namespace TOHTOR.Roles.RoleGroups.Undead.Roles;
 
 public class Retributionist : NeutralKillingBase
 {
-    private Cooldown revengeDuration = new(45);
-
     private int lastVentId;
     private PlayerControl? attacker;
     private Remote<NameComponent>? remote;
 
-    [DynElement(UI.Cooldown)]
-    private string customCooldown() => revengeDuration.IsReady() ? "" : RoleColor.Colorize($"Time until Death: {revengeDuration}s");
+    [UIComponent(UI.Cooldown)]
+    private Cooldown revengeDuration = new(45);
+
+    protected override void PostSetup() => MyPlayer.NameModel().GetComponentHolder<CooldownHolder>()[0].SetPrefix("ime until Death: ").SetTextColor(RoleColor);
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)

@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.Internals.Attributes;
+namespace TOHTOR.Roles.Internals;
 
 public enum InteractionResult
 {

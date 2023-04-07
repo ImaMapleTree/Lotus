@@ -52,7 +52,7 @@ public static class OldRoleSystemBridge
     public static bool CanMakeMadmate(this CustomRole role)
         => role switch
         {
-            Morphling => true,
+            Shapeshifter => true,
             // TODO: EvilTracker => EvilTracker.CanCreateMadMate.GetBool(),
             /*Egoist => EgoistOLD.CanCreateMadMate.GetBool(),*/
             _ => false,

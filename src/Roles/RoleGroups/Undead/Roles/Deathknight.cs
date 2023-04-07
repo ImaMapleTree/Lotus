@@ -7,12 +7,11 @@ using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
-using VentLib.Utilities;
 
 namespace TOHTOR.Roles.RoleGroups.Undead.Roles;
 
@@ -23,7 +22,9 @@ public class Deathknight : UndeadRole
     private bool multiInfluence;
 
     private Cooldown influenceCooldown;
-    private List<PlayerControl> inRangePlayers = new();
+
+    [NewOnSetup]
+    private List<PlayerControl> inRangePlayers;
     private DateTime lastCheck = DateTime.Now;
 
     private const float UpdateTimeout = 0.25f;
@@ -31,10 +32,9 @@ public class Deathknight : UndeadRole
     protected override void Setup(PlayerControl player)
     {
         base.Setup(player);
-        LiveString liveString = new(inRangePlayers.Count > 0 ? "★" : "", Color.white);
-        player.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, ViewMode.Additive, player));
+        LiveString liveString = new(() => inRangePlayers.Count > 0 ? "★" : "", Color.white);
+        player.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: player));
     }
-
 
     [RoleAction(RoleActionType.FixedUpdate)]
     private void DeathknightFixedUpdate()
@@ -48,9 +48,10 @@ public class Deathknight : UndeadRole
             : RoleUtils.GetPlayersWithinDistance(MyPlayer, influenceRange).Where(IsUnconvertedUndead))
             .ToList();
     }
-    [RoleAction(RoleActionType.OnPet)]
+    [RoleAction(RoleActionType.OnPet, priority: Priority.First)]
     private void InitiatePlayer(ActionHandle handle)
     {
+        VentLogger.Trace("Deathknight Influence Ability", "DeathknightAbility");
         if (influenceCooldown.NotReady()) return;
         int influenceCount = Math.Min(inRangePlayers.Count, multiInfluence ? int.MaxValue : 1);
         if (influenceCount == 0) return;

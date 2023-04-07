@@ -53,6 +53,7 @@ class HudManagerPatch
             }
         }
 
+
         __instance.GameSettings.text = OptionShower.GetOptionShower().GetPage();
         //ゲーム中でなければ以下は実行されない
         if (!AmongUsClient.Instance.IsGameStarted) return;

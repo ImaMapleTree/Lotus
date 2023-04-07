@@ -48,4 +48,6 @@ public class ElectricSabotage : ISabotage
         caller.OrElseSet(() => sabotageCaller);
         SabotagePatch.CurrentSabotage = this;
     }
+
+    public override string ToString() => $"ElectricSabotage(Caller={caller})";
 }

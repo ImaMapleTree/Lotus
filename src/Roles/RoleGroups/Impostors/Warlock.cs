@@ -12,7 +12,7 @@ using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
-public class Warlock : Morphling
+public class Warlock : Shapeshifter
 {
     private List<PlayerControl> cursedPlayers;
     public bool Shapeshifted;
@@ -24,11 +24,10 @@ public class Warlock : Morphling
     {
         SyncOptions();
         if (Shapeshifted) return base.TryKill(target);
-        InteractionResult result = CheckInteractions(target.GetCustomRole(), target);
-        if (result is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         cursedPlayers.Add(target);
-        MyPlayer.RpcGuardAndKill(MyPlayer);
+        MyPlayer.RpcGuardAndKill(target);
         return true;
     }
 

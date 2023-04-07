@@ -1,4 +1,5 @@
 using TOHTOR.Factions.Interfaces;
+using UnityEngine;
 using VentLib.Logging;
 
 namespace TOHTOR.Factions;
@@ -38,6 +39,8 @@ public abstract class Faction<T> : IFaction<T> where T: IFaction<T>
     }
 
     public abstract bool AlliesSeeRole();
+
+    public abstract Color FactionColor();
 
     public abstract Relation RelationshipOther(IFaction other);
 

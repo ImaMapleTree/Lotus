@@ -3,6 +3,7 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
+using TOHTOR.Factions.Interfaces;
 using TOHTOR.Factions.Undead;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
@@ -83,8 +84,13 @@ public class UndeadRole : Impostor
         Game.GameHistory.AddEvent(new InitiateEvent(MyPlayer, target));
     }
 
-    protected bool IsConvertedUndead(PlayerControl player) => player.GetCustomRole().Faction is not TheUndead.Unconverted;
-    protected bool IsUnconvertedUndead(PlayerControl player) => player.GetCustomRole().Faction is TheUndead.Unconverted;
+    protected static bool IsUnconvertedUndead(PlayerControl player) => player.GetCustomRole().Faction is TheUndead.Unconverted;
+    protected static bool IsConvertedUndead(PlayerControl player)
+    {
+        IFaction faction = player.GetCustomRole().Faction;
+        if (faction is not TheUndead) return false;
+        return faction is not TheUndead.Unconverted;
+    }
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)

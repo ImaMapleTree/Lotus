@@ -30,7 +30,7 @@ public static class ShapeshiftPatch
         ActionHandle handle = ActionHandle.NoInit();
         __instance.Trigger(shapeshifting ? RoleActionType.Shapeshift : RoleActionType.Unshapeshift, ref handle, target);
         if (!handle.IsCanceled) return true;
-        Async.Schedule(() => __instance.CRpcRevertShapeshift(false), NetUtils.DeriveDelay(1f));
+        Async.Schedule(() => __instance.CRpcShapeshift(__instance, false), NetUtils.DeriveDelay(0.8f));
         return false;
     }
 }

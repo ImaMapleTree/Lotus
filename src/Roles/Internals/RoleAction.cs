@@ -6,7 +6,7 @@ namespace TOHTOR.Roles.Internals;
 public class RoleAction
 {
     public RoleActionType ActionType { get; }
-    public bool WorksAfterDeath { get; }
+    public bool TriggerWhenDead { get; }
     public Priority Priority { get; }
     public bool Blockable { get; }
 
@@ -16,7 +16,7 @@ public class RoleAction
     public RoleAction(RoleActionAttribute attribute, MethodInfo method)
     {
         this.method = method;
-        this.WorksAfterDeath = attribute.WorksAfterDeath;
+        this.TriggerWhenDead = attribute.WorksAfterDeath;
         this.ActionType = attribute.ActionType;
         this.Priority = attribute.Priority;
         this.Blockable = attribute.Blockable;

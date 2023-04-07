@@ -13,6 +13,7 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -22,26 +23,24 @@ namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
 
 public class Arsonist : NeutralKillingBase
 {
-
     private bool strictDousing;
     private bool IsDousing => dousingDuration.NotReady();
     private float douseCooldown;
-    private Cooldown dousingDuration;
     private HashSet<byte> dousedPlayers;
     private int knownAlivePlayers;
 
     private PlayerControl myTarget;
     private DateTime lastCheck = DateTime.Now;
 
+    [UIComponent(UI.Cooldown)]
+    private Cooldown dousingDuration;
+
     protected override void Setup(PlayerControl player) => dousedPlayers = new HashSet<byte>();
 
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string DouseCounter() => RoleUtils.Counter(dousedPlayers.Count, knownAlivePlayers - 1);
 
-    [DynElement(UI.Cooldown)]
-    private string DousingView() => dousingDuration.IsReady() ? "" : RoleColor.Colorize(dousingDuration + "s");
-
-    [DynElement(UI.Misc)]
+    [UIComponent(UI.Text)]
     private string DisplayWin() => dousedPlayers.Count >= knownAlivePlayers - 1 ? RoleColor.Colorize("Press Ignite to Win") : "";
 
     [RoleAction(RoleActionType.OnPet)]

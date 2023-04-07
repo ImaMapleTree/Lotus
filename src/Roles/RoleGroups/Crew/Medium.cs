@@ -4,6 +4,7 @@ using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.Internals.Interfaces;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 

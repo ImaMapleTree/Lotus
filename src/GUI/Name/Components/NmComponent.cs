@@ -5,6 +5,7 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.GUI.Name.Impl;
 using TOHTOR.GUI.Name.Interfaces;
+using VentLib.Logging;
 using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.GUI.Name.Components;
@@ -41,7 +42,7 @@ public class NmComponent : INameModelComponent
         this.mainText = mainText;
         this.gameStates = gameStates;
         this.viewMode = viewMode;
-        this.additionalViewers = viewers.ToList();
+        this.additionalViewers = (viewers.Length > 0 ? viewers : PlayerControl.AllPlayerControls.ToArray()).ToList();
     }
 
     protected NmComponent(LiveString mainText, GameState gameState, ViewMode viewMode = Impl.ViewMode.Additive, params PlayerControl[] viewers) : this (mainText, new [] {gameState}, viewMode, viewers)

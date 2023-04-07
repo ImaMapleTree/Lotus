@@ -3,6 +3,7 @@ using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
+using TOHTOR.Utilities;
 using VentLib.Options;
 using TOHTOR.Victory;
 using UnityEngine;

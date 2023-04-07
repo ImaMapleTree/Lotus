@@ -1,5 +1,5 @@
+using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
@@ -20,7 +20,7 @@ public class Speedrunner : Crewmate
 
     private float totalSpeedBoost;
 
-    private float currentSpeedBoost = DesyncOptions.OriginalHostOptions?.AsNormalOptions()?.CrewLightMod ?? 1;
+    private float currentSpeedBoost = OriginalOptions.PlayerSpeedMod();
 
     protected override void OnTaskComplete()
     {

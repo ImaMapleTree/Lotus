@@ -1,9 +1,12 @@
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
+using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using VentLib.Utilities.Debug.Profiling;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches.Actions;
 
@@ -15,13 +18,16 @@ static class FixedUpdatePatch
         Game.RecursiveCallCheck = 0;
         DisplayModVersion(__instance);
         if (!AmongUsClient.Instance.AmHost || Game.State is not GameState.Roaming) return;
+        uint id = Profilers.Global.Sampler.Start("Fixed Update Patch");
 
         var player = __instance;
         ActionHandle handle = null;
-        Game.RenderAllForAll();
-        Game.TriggerForAll(RoleActionType.FixedUpdate, ref handle);
+        INameModel nameModel = __instance.NameModel();
+        Game.GetAllPlayers().ForEach(p => nameModel.RenderFor(p));
+        __instance.Trigger(RoleActionType.FixedUpdate, ref handle);
 
         if (player.IsAlive() && StaticOptions.LadderDeath) FallFromLadder.FixedUpdate(player);
+        Profilers.Global.Sampler.Stop(id);
         /*if (player.PlayerId == PlayerControl.LocalPlayer.PlayerId) DisableDevice.FixedUpdate();*/
         /*EnterVentPatch.CheckVentSwap(__instance);*/
     }

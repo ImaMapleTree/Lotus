@@ -20,7 +20,7 @@ public class BloodKnight : NeutralKillingBase
     public override bool CanSabotage() => false;
 
     // Usually I use Misc but because the Blood Knight's color is hard to see I'm displaying this next to the player's name which requires a bit more hacky code
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string ProtectedIndicator() => isProtected ? RoleColor.Colorize("•") : "";
 
     [RoleAction(RoleActionType.RoundStart)]

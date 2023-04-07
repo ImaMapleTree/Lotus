@@ -8,7 +8,6 @@ public class Engineer: Crewmate
     protected float VentCooldown;
     protected float VentDuration;
 
-
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .VanillaRole(RoleTypes.Engineer)

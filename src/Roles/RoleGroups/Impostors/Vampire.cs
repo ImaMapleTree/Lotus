@@ -27,11 +27,7 @@ public class Vampire : Vanilla.Impostor
         MyPlayer.RpcGuardAndKill(target);
         bitten.Add(target);
         Game.GameHistory.AddEvent(new BittenEvent(MyPlayer, target));
-        Async.Schedule(() => {
-            FatalIntent intent = new(true, () => new BittenDeathEvent(target, MyPlayer));
-            DelayedInteraction interaction = new(intent, killDelay, this);
-            MyPlayer.InteractWith(target, interaction);
-        }, killDelay);
+        Async.Schedule(() => MyPlayer.InteractWith(target, CreateInteraction(target)), killDelay);
         return false;
     }
 
@@ -39,7 +35,13 @@ public class Vampire : Vanilla.Impostor
     public void ResetBitten() => bitten.Clear();
 
     [RoleAction(RoleActionType.RoundEnd)]
-    public void KillBitten() => bitten.Do(p => p.Attack(p, () => new BittenDeathEvent(p, MyPlayer)));
+    public void KillBitten() => bitten.Do(p => MyPlayer.InteractWith(p, CreateInteraction(p)));
+
+    private DelayedInteraction CreateInteraction(PlayerControl target)
+    {
+        FatalIntent intent = new(true, () => new BittenDeathEvent(target, MyPlayer));
+        return new DelayedInteraction(intent, killDelay, this);
+    }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)

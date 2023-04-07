@@ -1,8 +1,6 @@
-using AmongUs.GameOptions;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
@@ -30,25 +28,21 @@ public class TimeThief : Vanilla.Impostor
     [RoleAction(RoleActionType.RoundEnd)]
     private void TimeThiefSubtractMeetingTime()
     {
-        GameOptionOverride[] overrides = null;
-        if (!((MyPlayer.Data.IsDead || MyPlayer.Data.Disconnected) && returnTimeAfterDeath))
+        if (!MyPlayer.IsAlive() && returnTimeAfterDeath) return;
+        int discussionTime = OriginalOptions.DiscussionTime();
+        int votingTime = OriginalOptions.VotingTime();
+
+        int remainingStolenTime = 0;
+        discussionTime -= meetingTimeSubtractor * kills;
+        if (discussionTime < 0)
         {
-            NormalGameOptionsV07 normalOptions = DesyncOptions.OriginalHostOptions.AsNormalOptions();
-            int discussionTime = normalOptions.DiscussionTime;
-            int votingTime = normalOptions.VotingTime;
-
-            int remainingStolenTime = 0;
-            discussionTime -= meetingTimeSubtractor * kills;
-            if (discussionTime < 0)
-            {
-                remainingStolenTime = discussionTime;
-                discussionTime = 1;
-            }
-
-            VentLogger.Info($"{MyPlayer.UnalteredName()} | Time Thief | Meeting Time: {discussionTime} | Voting Time: {votingTime}", "TimeThiefStolen");
-            votingTime = Mathf.Clamp(votingTime - remainingStolenTime, minimumVotingTime, votingTime);
-            overrides = new GameOptionOverride[] { new(Override.DiscussionTime, discussionTime), new(Override.VotingTime, votingTime) };
+            remainingStolenTime = discussionTime;
+            discussionTime = 1;
         }
+
+        VentLogger.Info($"{MyPlayer.UnalteredName()} | Time Thief | Meeting Time: {discussionTime} | Voting Time: {votingTime}", "TimeThiefStolen");
+        votingTime = Mathf.Clamp(votingTime - remainingStolenTime, minimumVotingTime, votingTime);
+        GameOptionOverride[] overrides = { new(Override.DiscussionTime, discussionTime), new(Override.VotingTime, votingTime) };
         Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions(overrides));
     }
 

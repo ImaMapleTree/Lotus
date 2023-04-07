@@ -1,4 +1,5 @@
 using AmongUs.GameOptions;
+using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
@@ -13,7 +14,7 @@ public class Bewilder: Subrole
     private void BaitDies(PlayerControl killer)
     {
         CustomRole role = killer.GetCustomRole();
-        role.AddOverride(new GameOptionOverride(Override.ImpostorLightMod, DesyncOptions.OriginalHostOptions.GetFloat(FloatOptionNames.CrewLightMod)));
+        role.AddOverride(new GameOptionOverride(Override.ImpostorLightMod, OriginalOptions.CrewLightMod()));
     }
 
     public override string? Identifier() => "★";

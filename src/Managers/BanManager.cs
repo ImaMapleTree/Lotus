@@ -59,7 +59,6 @@ public static class BanManager
             AmongUsClient.Instance.KickPlayer(player.Id, true);
             VentLogger.SendInGame(string.Format(Localizer.Get("Messages.BanedByBanList"), player.PlayerName));
             VentLogger.Old($"{player.PlayerName}は過去にBAN済みのためBANされました。", "BAN");
-            return;
         }
     }
     public static bool CheckBanList(InnerNet.ClientData player)

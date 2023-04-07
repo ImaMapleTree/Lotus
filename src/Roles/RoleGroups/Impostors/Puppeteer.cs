@@ -31,8 +31,7 @@ public class Puppeteer: Vanilla.Impostor
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        InteractionResult result = CheckInteractions(target.GetCustomRole(), target);
-        if (result is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         Game.GameHistory.AddEvent(new ManipulatedEvent(MyPlayer, target));
         cursedPlayers.Add(target);

@@ -15,7 +15,7 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
     protected float Size = 2.925f;
     protected int DisplayLine;
 
-    private int spacing = 0;
+    protected int Spacing = 0;
 
     private readonly Dictionary<byte, bool> updated = new();
     private readonly Dictionary<byte, string> cacheStates = new();
@@ -40,19 +40,23 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
 
     public int Line() => DisplayLine;
 
-    public void SetSpacing(int spacing) => this.spacing = spacing;
+    public void SetSpacing(int spacing) => this.Spacing = spacing;
 
     public string Render(PlayerControl player, GameState state)
     {
         if (player.IsShapeshifted() && this is not NameHolder) return "";
         List<string> endString = new();
+        ViewMode lastMode = ViewMode.Absolute;
         foreach (T component in this.Where(p => p.GameStates().Contains(state)).Where(p => p.Viewers().Any(pp => pp.PlayerId == player.PlayerId)))
         {
-            if (component.ViewMode() is ViewMode.Replace) endString.Clear();
+            ViewMode newMode = component.ViewMode();
+            if (newMode is ViewMode.Replace or ViewMode.Absolute || lastMode is ViewMode.Overriden) endString.Clear();
+            lastMode = newMode;
             endString.Add(component.GenerateText());
+            if (newMode is ViewMode.Absolute) break;
         }
 
-        string newString = endString.Join(delimiter: " ".Repeat(spacing - 1));
+        string newString = endString.Join(delimiter: " ".Repeat(Spacing - 1));
 
         updated[player.PlayerId] = cacheStates.GetValueOrDefault(player.PlayerId, "") != newString;
         return cacheStates[player.PlayerId] = newString;

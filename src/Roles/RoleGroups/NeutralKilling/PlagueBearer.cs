@@ -10,6 +10,7 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Options;
 using VentLib.Options.Events;
@@ -26,7 +27,7 @@ public class PlagueBearer: NeutralKillingBase
     private float customCooldown;
     private int alivePlayers;
 
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string InfectionCounter() => RoleUtils.Counter(infectedPlayers.Count, alivePlayers, RoleColor);
 
     protected override void Setup(PlayerControl player)

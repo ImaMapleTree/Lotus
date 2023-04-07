@@ -16,7 +16,7 @@ public partial class SerialKiller : Vanilla.Impostor, IModdable
     public Cooldown DeathTimer;
     private float killCooldown;
 
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string CustomCooldown() => DeathTimer.IsReady() ? "" : Color.white.Colorize(DeathTimer + "s");
 
     [RoleAction(RoleActionType.Attack)]

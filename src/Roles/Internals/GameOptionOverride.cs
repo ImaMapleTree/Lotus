@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using AmongUs.GameOptions;
+using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
 using VentLib.Logging;
@@ -32,50 +33,51 @@ public class GameOptionOverride
     public void ApplyTo(IGameOptions options)
     {
         if (condition != null && !condition.Invoke()) return;
-        NormalGameOptionsV07? normalOptions = options.AsNormalOptions();
-        if (normalOptions == null) return;
         switch (Option)
         {
+            case Override.AnonymousVoting:
+                options.SetBool(BoolOptionNames.AnonymousVotes, (bool)(GetValue() ?? OriginalOptions.AnonymousVotes()));
+                break;
             case Override.DiscussionTime:
-                normalOptions.DiscussionTime = (int)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.DiscussionTime);
+                options.SetInt(Int32OptionNames.DiscussionTime, (int)(GetValue() ?? OriginalOptions.DiscussionTime()));
                 break;
             case Override.VotingTime:
-                normalOptions.VotingTime = (int)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.VotingTime);
+                options.SetInt(Int32OptionNames.VotingTime, (int)(GetValue() ?? OriginalOptions.VotingTime()));
                 break;
             case Override.PlayerSpeedMod:
-                VentLogger.Fatal("Setting Player Speed Mod");
-                options.SetFloat(FloatOptionNames.PlayerSpeedMod, (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.PlayerSpeedMod));
+                options.SetFloat(FloatOptionNames.PlayerSpeedMod, (float)(GetValue() ?? OriginalOptions.PlayerSpeedMod()));
                 break;
             case Override.CrewLightMod:
-                normalOptions.CrewLightMod = (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.CrewLightMod);
+                options.SetFloat(FloatOptionNames.CrewLightMod, (float)(GetValue() ?? OriginalOptions.CrewLightMod()));
                 break;
             case Override.ImpostorLightMod:
-                normalOptions.ImpostorLightMod = (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.CrewLightMod);
+                options.SetFloat(FloatOptionNames.ImpostorLightMod, (float)(GetValue() ?? OriginalOptions.ImpostorLightMod()));
                 break;
             case Override.KillCooldown:
-                normalOptions.KillCooldown = (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.KillCooldown);
+                options.SetFloat(FloatOptionNames.KillCooldown, (float)(GetValue() ?? OriginalOptions.KillCooldown()));
                 break;
             case Override.ShapeshiftDuration:
-                normalOptions.SetFloat(FloatOptionNames.ShapeshifterDuration, (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.GetFloat(FloatOptionNames.ShapeshifterDuration)));
+                options.SetFloat(FloatOptionNames.ShapeshifterDuration, (float)(GetValue() ??OriginalOptions.ShapeshifterDuration()));
                 break;
             case Override.ShapeshiftCooldown:
-                normalOptions.SetFloat(FloatOptionNames.ShapeshifterCooldown, (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.GetFloat(FloatOptionNames.ShapeshifterCooldown)));
+                options.SetFloat(FloatOptionNames.ShapeshifterCooldown, (float)(GetValue() ?? OriginalOptions.ShapeshifterCooldown()));
                 break;
             case Override.GuardianAngelDuration:
-                normalOptions.SetFloat(FloatOptionNames.ProtectionDurationSeconds, (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.GetFloat(FloatOptionNames.ProtectionDurationSeconds)));
+                options.SetFloat(FloatOptionNames.ProtectionDurationSeconds, (float)(GetValue() ?? OriginalOptions.ProtectionDurationSeconds()));
                 break;
             case Override.GuardianAngelCooldown:
-                normalOptions.SetFloat(FloatOptionNames.GuardianAngelCooldown, (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.GetFloat(FloatOptionNames.GuardianAngelCooldown)));
+                options.SetFloat(FloatOptionNames.GuardianAngelCooldown, (float)(GetValue() ?? OriginalOptions.GuardianAngelCooldown()));
                 break;
             case Override.KillDistance:
-                normalOptions.KillDistance = (int)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.KillDistance);
+                options.SetInt(Int32OptionNames.KillDistance, (int)(GetValue() ?? OriginalOptions.KillDistance()));
                 break;
             case Override.EngVentCooldown:
-                normalOptions.SetFloat(FloatOptionNames.EngineerCooldown, (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.GetFloat(FloatOptionNames.EngineerCooldown)));
+                options.SetFloat(FloatOptionNames.EngineerCooldown, (float)(GetValue() ?? OriginalOptions.EngineerCooldown()));
                 break;
             case Override.EngVentDuration:
-                normalOptions.SetFloat(FloatOptionNames.EngineerInVentMaxTime, (float)(GetValue() ?? DesyncOptions.OriginalHostOptions.AsNormalOptions()!.GetFloat(FloatOptionNames.EngineerInVentMaxTime)));
+                options.SetFloat(FloatOptionNames.EngineerInVentMaxTime, (float)(GetValue() ?? OriginalOptions.EngineerInVentMaxTime()));
                 break;
+            case Override.CanUseVent:
             default:
                 VentLogger.Warn($"Invalid Option Override: {this}", "ApplyOverride");
                 break;
@@ -108,6 +110,7 @@ public enum Override
 
 
     // Game override
+    AnonymousVoting,
     DiscussionTime,
     VotingTime,
     PlayerSpeedMod,

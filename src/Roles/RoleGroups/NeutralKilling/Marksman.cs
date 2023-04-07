@@ -1,3 +1,4 @@
+using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
@@ -16,14 +17,13 @@ public class Marksman : NeutralKillingBase
     protected override void Setup(PlayerControl player) => killDistance = 0;
 
     [RoleAction(RoleActionType.Attack)]
-    public new bool TryKill(PlayerControl target)
+    public override bool TryKill(PlayerControl target)
     {
         var flag = base.TryKill(target);
-        if (flag && !MyPlayer.Data.IsDead)
-        {
-            if (killDistance != 3)
-                killDistance += 1;
-        }
+        if (!flag) return false;
+        if (killDistance != 3)
+            killDistance += 1;
+        SyncOptions();
         return flag;
     }
 
@@ -54,6 +54,6 @@ public class Marksman : NeutralKillingBase
         base.Modify(roleModifier)
             .RoleColor(new Color(0f, 0.71f, 0.92f))
             .CanVent(canVent)
-            .OptionOverride(Override.ImpostorLightMod, () => DesyncOptions.OriginalHostOptions.AsNormalOptions()!.CrewLightMod, () => !impostorVision)
-            .OptionOverride(Override.KillDistance, killDistance);
+            .OptionOverride(Override.ImpostorLightMod, () => OriginalOptions.CrewLightMod(), () => !impostorVision)
+            .OptionOverride(Override.KillDistance, () => killDistance);
 }

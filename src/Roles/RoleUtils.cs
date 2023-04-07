@@ -6,16 +6,15 @@ using TOHTOR.API;
 using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
-using TOHTOR.Managers.History.Events;
 using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
-using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Roles;
 
@@ -92,34 +91,6 @@ public static class RoleUtils
         return cooldown.ToString() == "0" ? "" : $"{color1.Value.Colorize("CD:")} {color2.Value.Colorize(cooldown + "s")}";
     }
 
-    public static bool Attack(this PlayerControl killer, PlayerControl target, Func<IDeathEvent>? causeOfDeath = null)
-    {
-        if (!target.IsAlive()) return false;
-        ActionHandle handle = ActionHandle.NoInit();
-        Optional<IDeathEvent> deathEvent = Optional<IDeathEvent>.Of(causeOfDeath?.Invoke());
-        Game.TriggerForAll(RoleActionType.PlayerAttacked, ref handle, killer, target, deathEvent);
-
-        if (handle.IsCanceled)
-        {
-            Game.GameHistory.AddEvent(new KillEvent(killer, target, false));
-            killer.RpcGuardAndKill(target);
-            return false;
-        }
-
-        if (!target.GetCustomRole().CanBeKilled()) {
-            ShowGuardianShield(target);
-            return false;
-        }
-
-        Optional<IDeathEvent> currentDeathEvent = Game.GameHistory.GetCauseOfDeath(target.PlayerId);
-        deathEvent.IfPresent(death => Game.GameHistory.SetCauseOfDeath(target.PlayerId, death));
-        killer.RpcMurderPlayer(target);
-        ActionHandle ignored = ActionHandle.NoInit();
-        if (target.IsAlive()) Game.TriggerForAll(RoleActionType.SuccessfulAngelProtect, ref ignored, target, killer);
-        else currentDeathEvent.IfPresent(de => Game.GameHistory.SetCauseOfDeath(target.PlayerId, de));
-        return true;
-    }
-
     public static InteractionResult InteractWith(this PlayerControl player, PlayerControl target, Interaction interaction)
     {
         if (++Game.RecursiveCallCheck > ModConstants.RecursiveDepthLimit)
@@ -143,6 +114,7 @@ public static class RoleUtils
         RpcV2.Immediate(target.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).Send(target.GetClientId());
         Async.Schedule(() => RpcV2.Immediate(randomPlayer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId()), NetUtils.DeriveDelay(0.1f));
     }
+
 
     public static void SwapPositions(PlayerControl player1, PlayerControl player2)
     {

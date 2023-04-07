@@ -1,4 +1,5 @@
 using HarmonyLib;
+using TOHTOR.Utilities;
 using UnityEngine;
 
 namespace TOHTOR.Patches.Client

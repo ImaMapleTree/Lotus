@@ -1,6 +1,7 @@
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -9,7 +10,7 @@ namespace TOHTOR.Roles.RoleGroups.Impostors;
 
 public class Miner : Vanilla.Impostor
 {
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown minerAbilityCooldown;
     private Vector2 lastEnteredVentLocation = Vector2.zero;
 

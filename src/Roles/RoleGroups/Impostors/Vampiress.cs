@@ -7,6 +7,7 @@ using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -21,7 +22,7 @@ public class Vampiress : Impostor
 
     protected override void Setup(PlayerControl player) => bitten = new List<byte>();
 
-    [DynElement(UI.Misc)]
+    [UIComponent(UI.Text)]
     private string CurrentMode() => mode is VampireMode.Biting ? RoleColor.Colorize("(Bite)") : RoleColor.Colorize("(Kill)");
 
     [RoleAction(RoleActionType.Attack)]

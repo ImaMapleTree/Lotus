@@ -14,6 +14,7 @@ public partial class TheUndead
         {
             return subFaction switch
             {
+                Origin => Relation.FullAllies,
                 Converted => Relation.FullAllies,
                 Unconverted => Relation.SharedWinners,
                 _ => subFaction.Relationship(this)

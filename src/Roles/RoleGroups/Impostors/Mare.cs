@@ -1,8 +1,6 @@
-using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
-using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
@@ -10,8 +8,8 @@ using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
-using VentLib.Utilities;
 using Priority = TOHTOR.Roles.Internals.Attributes.Priority;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
@@ -41,6 +39,7 @@ public class Mare: Vanilla.Impostor
     private void MareSabotageCheck(ISabotage sabotage, ActionHandle handle)
     {
         if (!activationSabo.HasFlag(sabotage.SabotageType()) || handle.IsCanceled) return;
+        VentLogger.Trace("Mare ability is activated", "MareAbilityCheck");
         abilityEnabled = true;
         if (redNameDuringSabotage) MyPlayer.NameModel().GetComponentHolder<NameHolder>().Add(coloredName);
         SyncOptions();

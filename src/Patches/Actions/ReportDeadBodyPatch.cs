@@ -4,6 +4,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Gamemodes;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
 

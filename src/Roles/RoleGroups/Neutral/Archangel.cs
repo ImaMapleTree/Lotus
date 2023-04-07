@@ -20,7 +20,7 @@ namespace TOHTOR.Roles.RoleGroups.Neutral;
 
 public class Archangel : CustomRole
 {
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown protectCooldown;
     private Cooldown protectDuration; // I think this is for the amount of time the player is protected?
 
@@ -30,7 +30,7 @@ public class Archangel : CustomRole
     private GARoleChange roleChangeWhenTargetDies;
     private PlayerControl? target;
 
-    [DynElement(UI.Text)]
+    [UIComponent(UI.Text)]
     private string TargetDisplay() => target == null ? "" : RoleColor.Colorize("Target: ") + Color.white.Colorize(target.UnalteredName());
 
     protected override void Setup(PlayerControl player)
@@ -80,7 +80,7 @@ public class Archangel : CustomRole
                 Game.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
             case GARoleChange.SchrodingerCat:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.SchrodingerCat);
+                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
                 break;
             case GARoleChange.Crewmate:
                 Game.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);

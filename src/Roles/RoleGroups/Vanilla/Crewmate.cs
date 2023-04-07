@@ -6,6 +6,7 @@ using TOHTOR.Factions;
 using TOHTOR.FactionsOLD;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Options.Game;
@@ -27,10 +28,10 @@ public class Crewmate : CustomRole
     private Func<int>? taskSupplier;
 
     // TODO: Maybe make color customizable idk that's pretty extreme
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter, ViewMode.Overriden, GameState.InMeeting, GameState.Roaming)]
     protected string TaskTracker() => RoleUtils.Counter(TasksComplete, TotalTasks);
 
-    [RoleAction(RoleActionType.TaskComplete)]
+    [RoleAction(RoleActionType.TaskComplete, triggerAfterDeath: true, blockable: false)]
     protected void InternalTaskComplete(PlayerControl player)
     {
         if (player.PlayerId != MyPlayer.PlayerId) return;

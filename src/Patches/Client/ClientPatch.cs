@@ -1,6 +1,7 @@
 using HarmonyLib;
 using InnerNet;
 using TOHTOR.Managers;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;

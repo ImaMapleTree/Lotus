@@ -8,6 +8,5 @@ public enum UI
     Cooldown,
     Counter,
     Indicator,
-    Text,
-    Misc
+    Text
 }

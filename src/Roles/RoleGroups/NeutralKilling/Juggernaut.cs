@@ -1,5 +1,5 @@
+using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
@@ -14,19 +14,12 @@ public class Juggernaut : NeutralKillingBase
     private float decreaseBy;
 
     [RoleAction(RoleActionType.Attack)]
-    public new bool TryKill(PlayerControl target)
+    public override bool TryKill(PlayerControl target)
     {
         bool flag = base.TryKill(target);
-        if (flag && !MyPlayer.Data.IsDead)
-        {
-            if (KillCooldown - decreaseBy >= 1f)
-            {
-                KillCooldown -= decreaseBy;
-            }
-            else {
-                KillCooldown = 1f;
-            }
-        }
+        if (!flag) return false;
+        if (KillCooldown - decreaseBy >= 1f) KillCooldown -= decreaseBy;
+        else KillCooldown = 1f;
         return flag;
     }
 
@@ -62,5 +55,5 @@ public class Juggernaut : NeutralKillingBase
         base.Modify(roleModifier)
             .RoleColor(new Color(0f, 0.71f, 0.92f))
             .CanVent(canVent)
-            .OptionOverride(Override.ImpostorLightMod, () => DesyncOptions.OriginalHostOptions.AsNormalOptions()!.CrewLightMod, () => !impostorVision);
+            .OptionOverride(Override.ImpostorLightMod, () => OriginalOptions.CrewLightMod(), () => !impostorVision);
 }

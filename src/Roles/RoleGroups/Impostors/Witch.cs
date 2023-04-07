@@ -8,6 +8,7 @@ using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Roles.Events;
+using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
@@ -28,7 +29,7 @@ public class Witch: Vanilla.Impostor
     protected override void Setup(PlayerControl player) => cursedPlayers = new List<PlayerControl>();
     protected override void PostSetup() => remotes = new Dictionary<byte, Remote<IndicatorComponent>>();
 
-    [DynElement(UI.Misc)]
+    [UIComponent(UI.Text)]
     private string WitchModeDisplay() =>
         new Color(0.49f, 0.6f, 0.22f).Colorize("Mode: ") + (mode is WitchMode.Killing
             ? Color.red.Colorize("Kill")
@@ -46,25 +47,26 @@ public class Witch: Vanilla.Impostor
         }
 
         mode = WitchMode.Killing;
-        InteractionResult result = CheckInteractions(target.GetCustomRole(), target);
-        if (result is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         Game.GameHistory.AddEvent(new CursedEvent(MyPlayer, target));
         cursedPlayers.Add(target);
         remotes.GetValueOrDefault(target.PlayerId)?.Delete();
-        IndicatorComponent component = new(new LiveString("†", Color.red), GameState.InMeeting);
+        LiveString liveString = new("†", Color.red);
+        IndicatorComponent component = new(liveString, GameState.InMeeting);
         remotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
-
+        target.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: MyPlayer));
         MyPlayer.RpcGuardAndKill(target);
         return true;
     }
 
-    [RoleAction(RoleActionType.OtherExiled)]
+    [RoleAction(RoleActionType.AnyExiled)]
     private void WitchKillCheck()
     {
         cursedPlayers.Where(p => !p.Data.IsDead).Do(p =>
         {
-            p.Attack(p, () => new CursedDeathEvent(p, MyPlayer));
+            FatalIntent intent = new(true, () => new CursedDeathEvent(p, MyPlayer));
+            p.InteractWith(p, new IndirectInteraction(intent, this));
             remotes.GetValueOrDefault(p.PlayerId)?.Delete();
         });
         cursedPlayers.Clear();

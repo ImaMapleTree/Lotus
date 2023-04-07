@@ -18,7 +18,6 @@ class EndGamePatch
         GameStates.InGame = false;
         Game.State = GameState.InLobby;
         Game.Cleanup();
-        GameOptionsManager.Instance.CurrentGameOptions = DesyncOptions.OriginalHostOptions;
 
         SummaryText = new();
         /*foreach (var id in TOHPlugin.PlayerStates.Keys)

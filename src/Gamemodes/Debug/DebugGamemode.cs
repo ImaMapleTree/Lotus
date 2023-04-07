@@ -6,6 +6,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using VentLib.Options;
 using TOHTOR.Roles;
+using TOHTOR.Utilities;
 using TOHTOR.Victory;
 using VentLib.Logging;
 using VentLib.Options.Game;

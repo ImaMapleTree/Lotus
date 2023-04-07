@@ -7,6 +7,7 @@ using TOHTOR.Managers;
 using TOHTOR.Roles;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Roles.Subroles;
+using TOHTOR.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Gamemodes.Standard;

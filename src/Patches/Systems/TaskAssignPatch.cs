@@ -1,10 +1,12 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using VentLib.Logging;
 
 namespace TOHTOR.Patches.Systems;
@@ -53,14 +55,13 @@ class RpcSetTasksPatch
 
         //本来のRpcSetTasksの第二引数のクローン
         Il2CppSystem.Collections.Generic.List<byte> TasksList = new();
-        foreach (var num in taskTypeIds)
-            TasksList.Add(num);
+        foreach (var num in taskTypeIds) TasksList.Add(num);
 
         //参考:ShipStatus.Begin
         //不要な割り当て済みのタスクを削除する処理
         //コモンタスクを割り当てる設定ならコモンタスク以外を削除
         //コモンタスクを割り当てない設定ならリストを空にする
-        if (hasCommonTasks) TasksList.RemoveRange(DesyncOptions.OriginalHostOptions.AsNormalOptions()!.NumCommonTasks, TasksList.Count - DesyncOptions.OriginalHostOptions.AsNormalOptions()!.NumCommonTasks);
+        if (hasCommonTasks) TasksList.RemoveRange(OriginalOptions.NumCommonTasks(), TasksList.Count - OriginalOptions.NumCommonTasks());
         else TasksList.Clear();
 
         //割り当て済みのタスクが入れられるHashSet

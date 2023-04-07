@@ -14,11 +14,11 @@ namespace TOHTOR.Roles.RoleGroups.Neutral;
 
 public class Survivor : CustomRole
 {
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown vestCooldown;
     private Cooldown vestDuration;
 
-    [DynElement(UI.Misc)]
+    [UIComponent(UI.Indicator)]
     private string GetVestString() => vestDuration.IsReady() ? "" : RoleColor.Colorize("♣");
 
     public override bool CanBeKilled() => vestDuration.IsReady();

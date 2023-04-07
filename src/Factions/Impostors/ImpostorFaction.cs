@@ -2,6 +2,7 @@ using TOHTOR.Factions.Crew;
 using TOHTOR.Factions.Interfaces;
 using TOHTOR.Factions.Neutrals;
 using TOHTOR.Factions.Undead;
+using UnityEngine;
 
 namespace TOHTOR.Factions.Impostors;
 
@@ -10,6 +11,8 @@ public class ImpostorFaction : Faction<ImpostorFaction>
     public override Relation Relationship(ImpostorFaction sameFaction) => Relation.FullAllies;
 
     public override bool AlliesSeeRole() => true;
+
+    public override Color FactionColor() => Color.red;
 
     public override Relation RelationshipOther(IFaction other)
     {

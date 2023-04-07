@@ -17,6 +17,7 @@ using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Victory;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -25,7 +26,7 @@ namespace TOHTOR.Roles.RoleGroups.Undead.Roles;
 
 public class Necromancer : UndeadRole
 {
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown convertCooldown;
     private bool isFirstConvert = true;
     private bool immuneToPartialConverted;
@@ -98,8 +99,9 @@ public class Necromancer : UndeadRole
         Game.AssignRole(target, deathknight);
         myDeathknight = target.GetCustomRole<Deathknight>();
         target.NameModel().GetComponentHolder<RoleHolder>()[^1]
-            .SetViewerSupplier(() => Game.GetAlivePlayers().Where(p => p.PlayerId != target.PlayerId && p.Relationship(target) is Relation.FullAllies).ToList());
+            .SetViewerSupplier(() => Game.GetAllPlayers().Where(p => p.PlayerId == target.PlayerId || p.Relationship(target) is Relation.FullAllies).ToList());
 
+        VentLogger.Fatal($"Indicator count 22: {target.NameModel().GetComponentHolder<IndicatorHolder>().Count}");
         Game.GameHistory.AddEvent(new RoleChangeEvent(target, deathknight));
         return false;
     }

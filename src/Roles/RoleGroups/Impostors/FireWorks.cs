@@ -18,9 +18,9 @@ using VentLib.Utilities;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
-public class FireWorks: Morphling
+public class FireWorks: Shapeshifter
 {
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown fireworkCooldown;
     private int totalFireworkCount;
     private int fireworksPerRound;
@@ -29,25 +29,23 @@ public class FireWorks: Morphling
     private bool warnPlayers;
     private bool mustBeLastImpostor;
 
-    private List<Vector2> fireworkLocations;
     private int fireworksThisRound;
     private int currentFireworkCount;
     private bool CanPlantBomb => (fireworksThisRound < fireworksPerRound || fireworksPerRound == -1) && totalFireworkCount > 0;
     private bool WarnPlayers => warnPlayers && fireworkDelay > 0.26f;
     private DateTime lastCheck = DateTime.Now;
 
+    [NewOnSetup]
     private List<PlayerControl> playersInRadius;
+    [NewOnSetup]
+    private List<Vector2> fireworkLocations;
+
     private bool exploding;
 
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string FireworkCounter() => RoleUtils.Counter(currentFireworkCount, totalFireworkCount);
 
-    protected override void Setup(PlayerControl player)
-    {
-        currentFireworkCount = totalFireworkCount;
-        fireworkLocations = new List<Vector2>();
-        playersInRadius = new List<PlayerControl>();
-    }
+    protected override void Setup(PlayerControl player) => currentFireworkCount = totalFireworkCount;
 
     [RoleAction(RoleActionType.Attack)]
     public new void TryKill(PlayerControl target) => base.TryKill(target);

@@ -1,6 +1,5 @@
-using AmongUs.GameOptions;
+using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
@@ -13,7 +12,7 @@ public class Diseased: Subrole
     private void DiseasedDies(PlayerControl killer)
     {
         CustomRole role = killer.GetCustomRole();
-        float killCooldown = role is RoleGroups.Vanilla.Impostor imp ? imp.KillCooldown : DesyncOptions.OriginalHostOptions.GetFloat(FloatOptionNames.KillCooldown);
+        float killCooldown = role is RoleGroups.Vanilla.Impostor imp ? imp.KillCooldown : OriginalOptions.KillCooldown();
         role.AddOverride(new GameOptionOverride(Override.KillCooldown, killCooldown * 2));
     }
 

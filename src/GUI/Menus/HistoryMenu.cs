@@ -70,8 +70,6 @@ public class HistoryMenu
         Refresh();
 
         chatController.scroller.ScrollToTop();
-        AddLog(PlayerControl.LocalPlayer.PlayerId, Color.green.Colorize("Hello World"));
-        //for (int i = 0; i < 100; i++) AddLog(PlayerControl.LocalPlayer.PlayerId, $"Hello World!! {i}");
     }
 
     public void Close()

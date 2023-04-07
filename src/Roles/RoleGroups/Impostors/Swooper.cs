@@ -14,6 +14,7 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -31,10 +32,10 @@ public class Swooper: Impostor
     private bool canBeSeenByAllied;
     private Optional<Vent> initialVent = null!;
 
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown swoopingDuration = null!;
 
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown swooperCooldown = null!;
 
     private DateTime lastEntered = DateTime.Now;

@@ -10,6 +10,7 @@ using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Options.Game;
 
@@ -17,7 +18,7 @@ namespace TOHTOR.Roles.RoleGroups.Crew;
 
 public class Veteran : Crewmate
 {
-    [DynElement(UI.Cooldown)]
+    [UIComponent(UI.Cooldown)]
     private Cooldown veteranCooldown;
     private Cooldown veteranDuration;
 
@@ -33,10 +34,10 @@ public class Veteran : Crewmate
         remainingAlerts = totalAlerts;
     }
 
-    [DynElement(UI.Counter)]
+    [UIComponent(UI.Counter)]
     private string VeteranAlertCounter() => RoleUtils.Counter(remainingAlerts, totalAlerts);
 
-    [DynElement(UI.Misc)]
+    [UIComponent(UI.Indicator)]
     private string GetAlertedString() => veteranDuration.IsReady() ? "" : Utils.ColorString(Color.red, "♣");
 
     [RoleAction(RoleActionType.OnPet)]

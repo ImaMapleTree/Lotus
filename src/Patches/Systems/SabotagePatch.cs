@@ -44,6 +44,7 @@ public static class SabotagePatch
                 ISabotage sabo = ISabotage.From(sabotage, player);
                 Game.TriggerForAll(RoleActionType.SabotageStarted, ref handle, sabo, player);
                 if (!handle.IsCanceled) CurrentSabotage = sabo;
+                VentLogger.Debug($"Sabotage Started: {sabo}");
                 break;
             case SystemTypes.Electrical:
                 if (amount > 64) return true;

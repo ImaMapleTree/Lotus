@@ -5,6 +5,7 @@ using TOHTOR.Roles.RoleGroups.Coven;
 using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.Impostors;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
+using TOHTOR.Utilities;
 using VentLib.Logging;
 
 namespace TOHTOR.Roles.Legacy.Roles
