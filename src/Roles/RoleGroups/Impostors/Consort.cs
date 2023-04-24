@@ -36,7 +36,7 @@ public class Consort: Impostor
         if (!blocking) return base.TryKill(target);
         if (blockedPlayers.ContainsKey(target.PlayerId)) return false;
 
-        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         roleblockCooldown.Start();
         blocking = false;

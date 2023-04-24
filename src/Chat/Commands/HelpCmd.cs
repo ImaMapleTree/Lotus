@@ -1,5 +1,5 @@
-using System;
 using System.Linq;
+using HarmonyLib;
 using TOHTOR.Managers;
 using TOHTOR.Roles;
 using TOHTOR.Utilities;
@@ -11,7 +11,7 @@ using VentLib.Localization.Attributes;
 
 namespace TOHTOR.Chat.Commands;
 
-[Localized(Group = "Commands", Subgroup = "Help")]
+[Localized("Commands.Help")]
 [Command(new[] {"Commands.Help.Alias"}, "h", "help")]
 public class HelpCmd: ICommandReceiver
 {
@@ -34,21 +34,23 @@ public class HelpCmd: ICommandReceiver
     [Command(new[] {"Commands.Help.Roles.Alias"}, "r", "roles")]
     public static void Roles(PlayerControl source, CommandContext context)
     {
+        Localizer localizer = Localizer.Get();
         if (context.Args.Length == 0)
-            Utils.SendMessage(Localizer.Get("Commands.Help.Roles.Usage"), source.PlayerId);
-        else {
-            string roleName = String.Join(" ", context.Args);
-            CustomRole? matchingRole = CustomRoleManager.AllRoles.FirstOrDefault(r => Localizer.GetAll($"Roles.{r.EnglishRoleName}.RoleName").Contains(roleName));
+            Utils.SendMessage(localizer.Translate("Commands.Help.Roles.Usage"), source.PlayerId);
+        else
+        {
+            string roleName = context.Args.Join(delimiter: " ");
+            CustomRole? matchingRole = CustomRoleManager.AllRoles.FirstOrDefault(r => localizer.GetAllTranslations($"Roles.{r.EnglishRoleName}.RoleName").Select(s => s.ToLowerInvariant()).Contains(roleName.ToLowerInvariant()));
             if (matchingRole == null) {
-                Utils.SendMessage(Localizer.Get("Commands.Help.Roles.RoleNotFound"), source.PlayerId);
+                Utils.SendMessage(string.Format(Localizer.Translate("Commands.Help.Roles.RoleNotFound"), roleName), source.PlayerId);
                 return;
             }
-            Language? language = Localizer.GetLanguages($"Roles.{matchingRole.EnglishRoleName}.RoleName", roleName).FirstOrDefault();
+
+            Language? language = localizer.FindLanguageFromTranslation(roleName, $"Roles.{matchingRole.EnglishRoleName}.RoleName");
 
             Utils.SendMessage(
-                language == null
-                    ? Localizer.Get($"Roles.{matchingRole.EnglishRoleName}.Description")
-                    : language.Translate($"Roles.{matchingRole.EnglishRoleName}.Description"), source.PlayerId);
+                language == null ? Localizer.Translate($"Roles.{matchingRole.EnglishRoleName}.Description")
+                    : language.Translate($"Roles.{matchingRole.EnglishRoleName}.Description"), source.PlayerId, leftAlign: true);
         }
     }
 
@@ -56,12 +58,12 @@ public class HelpCmd: ICommandReceiver
     public void Receive(PlayerControl source, CommandContext context)
     {
         if (context.Args.Length > 0) return;
-        string help = Localizer.Get("Commands.Help.Alias");
+        string help = Localizer.Translate("Commands.Help.Alias");
         Utils.SendMessage(
-                Localizer.Get("Commands.Help.CommandList")
-                + $"\n/{help} {Localizer.Get("Commands.Help.Roles.Alias")} - {Localizer.Get("Commands.Help.Roles.Info")}"
-                + $"\n/{help} {Localizer.Get("Commands.Help.Addons.Alias")} - {Localizer.Get("Commands.Help.Addons.Info")}"
-                + $"\n/{help} {Localizer.Get("Commands.Help.Gamemodes.Alias")} - {Localizer.Get("Commands.Help.Gamemodes.Info")}",
+                Localizer.Translate("Commands.Help.CommandList")
+                + $"\n/{help} {Localizer.Translate("Commands.Help.Roles.Alias")} - {Localizer.Translate("Commands.Help.Roles.Info")}"
+                + $"\n/{help} {Localizer.Translate("Commands.Help.Addons.Alias")} - {Localizer.Translate("Commands.Help.Addons.Info")}"
+                + $"\n/{help} {Localizer.Translate("Commands.Help.Gamemodes.Alias")} - {Localizer.Translate("Commands.Help.Gamemodes.Info")}",
                 source.PlayerId
             );
     }

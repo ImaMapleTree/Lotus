@@ -5,7 +5,7 @@ using VentLib.Localization.Attributes;
 
 namespace TOHTOR.Managers.History;
 
-[Localized(Group = "HistoryEvent")]
+[Localized("HistoryEvent")]
 public class RoleChangeEvent: HistoryEvent
 {
     private PlayerControl player;
@@ -22,7 +22,7 @@ public class RoleChangeEvent: HistoryEvent
 
     public override string CreateReport()
     {
-        string timestamp = StaticOptions.ShowHistoryTimestamp ? RelativeTimestamp() + " " : "";
+        string timestamp = /*StaticOptions.ShowHistoryTimestamp*/true ? RelativeTimestamp() + " " : "";
         return $"{timestamp}{player.UnalteredName()} {roleChangedString} {role.RoleName}";
     }
 }

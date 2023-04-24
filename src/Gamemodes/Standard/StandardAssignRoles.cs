@@ -4,7 +4,9 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
+using TOHTOR.Options;
 using TOHTOR.Roles;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Roles.Subroles;
 using TOHTOR.Utilities;
@@ -23,16 +25,18 @@ class StandardAssignRoles
         RoleDistributor.DistributeImpostors(roles, impostors);
         RoleDistributor.DistributeNonImpostors(roles, unassignedPlayers.Count);
 
+        List<CustomRole> allAssignedRoles = new();
+
 
         int i = 0;
-        while (i < unassignedPlayers.Count)
+        while (GeneralOptions.DebugOptions.NameBasedRoleAssignment && i < unassignedPlayers.Count)
         {
             PlayerControl player = unassignedPlayers[i];
             CustomRole? role = CustomRoleManager.AllRoles.FirstOrDefault(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(player.UnalteredName()?.ToLower() ?? "HEHXD"));
             if (role != null && role.GetType() != typeof(Crewmate))
             {
-                role = CustomRoleManager.PlayersCustomRolesRedux[player.PlayerId] = role.Instantiate(player);
-                role.SyncOptions();
+                Game.AssignRole(player, role);
+                allAssignedRoles.Add(role);
                 unassignedPlayers.Pop(i);
             }
             else i++;
@@ -43,10 +47,9 @@ class StandardAssignRoles
         {
             PlayerControl assignedPlayer = unassignedPlayers.PopRandom();
             CustomRole role = roles.Dequeue();
-
             // We have to initialize the role past its "static" phase
-            Game.AssignRole(assignedPlayer, role, true);
-            role.SyncOptions();
+            Game.AssignRole(assignedPlayer, IVariableRole.PickAssignedRole(role));
+            allAssignedRoles.Add(role);
         }
 
         while (unassignedPlayers.Count > 0)
@@ -54,7 +57,7 @@ class StandardAssignRoles
             PlayerControl unassigned = unassignedPlayers.Pop();
             CustomRole crewmate = CustomRoleManager.Default;
             Game.AssignRole(unassigned, crewmate);
-            crewmate.SyncOptions();
+            allAssignedRoles.Add(crewmate);
         }
 
         List<Subrole> subroles = CustomRoleManager.AllRoles.OfType<Subrole>().ToList();
@@ -63,12 +66,16 @@ class StandardAssignRoles
             Subrole subrole = subroles.PopRandom();
             bool hasSubrole = subrole.Chance > UnityEngine.Random.RandomRange(0, 100);
             if (!hasSubrole) continue;
+
+            subrole = IVariableSubrole.PickAssignedRole(subrole);
+
             List<PlayerControl> victims = Game.GetAllPlayers().Where(p => p.GetSubrole() == null).ToList();
             if (victims.Count == 0) break;
             PlayerControl victim = victims.GetRandom();
             CustomRoleManager.AddPlayerSubrole(victim.PlayerId, (Subrole)subrole.Instantiate(victim));
+            allAssignedRoles.Add(subrole);
         }
 
-        Game.GetAllPlayers().Do(p => p.GetCustomRole().Assign());
+        Game.GetAllPlayers().Sorted(p => p.IsHost() ? 0 : 1).ForEach(p => p.GetCustomRole().Assign());
     }
 }

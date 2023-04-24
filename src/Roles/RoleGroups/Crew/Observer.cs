@@ -25,7 +25,7 @@ public class Observer: Crewmate
     protected override void Setup(PlayerControl player)
     {
         base.Setup(player);
-        currentVisionMod = overrideStartingVision ? startingVision : OriginalOptions.CrewLightMod();
+        currentVisionMod = overrideStartingVision ? startingVision : AUSettings.CrewLightMod();
     }
 
     protected override void OnTaskComplete()

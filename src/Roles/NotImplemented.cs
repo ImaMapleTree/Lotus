@@ -1,4 +1,6 @@
+using TOHTOR.Options;
 using VentLib.Logging;
+using VentLib.Options.Game;
 
 namespace TOHTOR.Roles;
 
@@ -9,4 +11,7 @@ public class NotImplemented: CustomRole
         VentLogger.Warn($"{this.RoleName} Not Implemented Yet", "RoleImplementation");
         return roleModifier;
     }
+
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
+        base.RegisterOptions(optionStream).Tab(DefaultTabs.HiddenTab);
 }

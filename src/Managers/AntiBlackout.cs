@@ -16,7 +16,7 @@ public static class AntiBlackout
     ///<summary>
     ///追放処理を上書きするかどうか
     ///</summary>
-    public static bool OverrideExiledPlayer => StaticOptions.NoGameEnd || GameStates.CountAliveRealImpostors() >= GameStates.CountAliveRealCrew();
+    public static bool OverrideExiledPlayer => GeneralOptions.DebugOptions.NoGameEnd || GameStates.CountAliveRealImpostors() >= GameStates.CountAliveRealCrew();
     public static GameData.PlayerInfo? ExiledPlayer;
     public static GameData.PlayerInfo? FakeExiled;
 
@@ -48,10 +48,10 @@ public static class AntiBlackout
         if (realPlayer == null) return null;
         GameData.PlayerInfo? deadPlayer = GameData.Instance.AllPlayers.ToArray().Where(p => p.Disconnected || p.IsDead).FirstOrDefault(AntiBlackoutLogic.IsFakeable);
         if (deadPlayer == null) return null;
-        VentLogger.Info($"Created Fake Player Using: {deadPlayer.Object.UnalteredName()} => {realPlayer.Object.UnalteredName()}");
+        VentLogger.Debug($"Created Fake Player Using: {deadPlayer.Object.UnalteredName()} => {realPlayer.Object.UnalteredName()}");
 
         GameData.PlayerOutfit outfit = realPlayer.Outfits[PlayerOutfitType.Default].Clone();
-        outfit.PlayerName = deadPlayer.PlayerName = "Modified " + realPlayer.Object.UnalteredName();
+        outfit.PlayerName = deadPlayer.PlayerName = realPlayer.Object.UnalteredName();
 
         deadPlayer.Outfits[PlayerOutfitType.Default] = outfit;
         FakeExiled = deadPlayer;

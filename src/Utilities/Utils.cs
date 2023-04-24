@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -55,36 +56,36 @@ public static class Utils
     // GM.Ref<GM>()
     public static void ShowActiveSettingsHelp(byte PlayerId = byte.MaxValue)
     {
-        SendMessage(Localizer.Get("StaticOptions.ActiveSettingsHelp") + ":", PlayerId);
+        SendMessage(Localizer.Translate("StaticOptions.ActiveSettingsHelp") + ":", PlayerId);
 
-        if (StaticOptions.SyncButtonMode)
+        if (GeneralOptions.GameplayOptions.SyncMeetings)
         {
-            SendMessage(Localizer.Get("StaticOptions.SyncButton.Info"), PlayerId);
+            SendMessage(Localizer.Translate("StaticOptions.SyncButton.Info"), PlayerId);
         }
 
-        if (StaticOptions.SabotageTimeControl)
+        /*if (StaticOptions.SabotageTimeControl)
         {
-            SendMessage(Localizer.Get("StaticOptions.SabotageTimeControl.Info"), PlayerId);
+            SendMessage(Localizer.Translate("StaticOptions.SabotageTimeControl.Info"), PlayerId);
+        }*/
+
+        if (GeneralOptions.MayhemOptions.UseRandomMap)
+        {
+            SendMessage(Localizer.Translate("StaticOptions.RandomMap.Info"), PlayerId);
         }
 
-        if (StaticOptions.RandomMapsMode)
+        if (GeneralOptions.AdminOptions.HostGM)
         {
-            SendMessage(Localizer.Get("StaticOptions.RandomMap.Info"), PlayerId);
-        }
-
-        if (StaticOptions.EnableGM)
-        {
-            SendMessage(CustomRoleManager.Special.GM.RoleName + Localizer.Get("StaticOptions.EnableGMInfo"), PlayerId);
+            SendMessage(CustomRoleManager.Special.GM.RoleName + Localizer.Translate("StaticOptions.EnableGMInfo"), PlayerId);
         }
 
         foreach (var role in CustomRoleManager.AllRoles)
         {
             if (role is Fox or Troll) continue;
             if (role.IsEnable() && !role.IsVanilla())
-                SendMessage(role.RoleName + Localizer.Get($"StaticOptions.{role.EnglishRoleName}.Description"), PlayerId);
+                SendMessage(role.RoleName + Localizer.Translate($"StaticOptions.{role.EnglishRoleName}.Description"), PlayerId);
         }
 
-        if (StaticOptions.NoGameEnd) SendMessage(Localizer.Get("StaticOptions.NoGameEndInfo"), PlayerId);
+        if (GeneralOptions.DebugOptions.NoGameEnd) SendMessage(Localizer.Translate("StaticOptions.NoGameEndInfo"), PlayerId);
     }
 
     /*public static void ShowActiveSettings(byte PlayerId = byte.MaxValue)
@@ -206,11 +207,12 @@ public static class Utils
 
     }*/
 
-    public static void SendMessage(string text, byte sendTo = byte.MaxValue, string title = "")
+    public static void SendMessage(string text, byte sendTo = byte.MaxValue, string title = "", bool leftAlign = false)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        if (title == "") title = "<color=#aaaaff>" + Localizer.Get("Announcements.SystemMessage") + "</color>";
-        ChatUpdatePatch.MessagesToSend.Add((text.RemoveHtmlTags(), sendTo, title));
+        if (title == "") title = "<color=#aaaaff>" + Localizer.Translate("Announcements.SystemMessage") + "</color>";
+        text = text.Replace("\\n", "\n");
+        ChatUpdatePatch.MessagesToSend.Enqueue((text.RemoveHtmlTags(), sendTo, title, leftAlign));
     }
 
     public static PlayerControl? GetPlayerById(int playerId) => PlayerControl.AllPlayerControls.ToArray().FirstOrDefault(pc => pc.PlayerId == playerId);
@@ -219,9 +221,8 @@ public static class Utils
 
     public static Optional<PlayerControl> PlayerByClientId(int clientId)
     {
-        if (!AmongUsClient.Instance.allObjectsFast.TryGet((uint)clientId, out InnerNetObject? netObject)) return Optional<PlayerControl>.Null();
-        PlayerControl? playerControl = netObject!.TryCast<PlayerControl>();
-        return playerControl == null ? Optional<PlayerControl>.Null() : Optional<PlayerControl>.Of(playerControl);
+        Optional<ClientData> client = AmongUsClient.Instance.allClients.ToArray().FirstOrOptional(c => c.Id == clientId);
+        return client.FlatMap(cl => UnityOptional<PlayerControl>.Of(cl.Character));
     }
 
     public static string GetVoteName(byte num)

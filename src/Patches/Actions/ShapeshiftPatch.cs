@@ -29,8 +29,16 @@ public static class ShapeshiftPatch
 
         ActionHandle handle = ActionHandle.NoInit();
         __instance.Trigger(shapeshifting ? RoleActionType.Shapeshift : RoleActionType.Unshapeshift, ref handle, target);
+
+        if (handle.IsCanceled)
+        {
+            Async.Schedule(() => __instance.CRpcShapeshift(__instance, false), NetUtils.DeriveDelay(1.2f));
+            return false;
+        }
+
+        Game.TriggerForAll(shapeshifting ? RoleActionType.AnyShapeshift : RoleActionType.AnyUnshapeshift, ref handle, __instance, target);
         if (!handle.IsCanceled) return true;
-        Async.Schedule(() => __instance.CRpcShapeshift(__instance, false), NetUtils.DeriveDelay(0.8f));
+        Async.Schedule(() => __instance.CRpcShapeshift(__instance, false), NetUtils.DeriveDelay(1.2f));
         return false;
     }
 }

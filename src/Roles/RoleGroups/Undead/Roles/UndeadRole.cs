@@ -56,7 +56,7 @@ public class UndeadRole : Impostor
             oldComponent.SetMainText(undeadPlayerName);
             oldComponent.AddViewer(target);
         } else {
-            NameComponent newComponent = new(new LiveString(), new[] { GameState.Roaming, GameState.InMeeting }, ViewMode.Replace, () => viewers);
+            NameComponent newComponent = new(undeadPlayerName, new[] { GameState.Roaming, GameState.InMeeting }, ViewMode.Replace, () => viewers);
             target.NameModel().GetComponentHolder<NameHolder>().Add(newComponent);
         }
 

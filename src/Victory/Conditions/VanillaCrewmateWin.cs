@@ -20,9 +20,17 @@ public class VanillaCrewmateWin: IFactionWinCondition
         factions = CrewmateFaction;
         winReason = WinReason.TasksComplete;
 
-        // Any player that is really an impostor but is also not allied to the crewmates
-        if (Game.GetAlivePlayers().Any(p => { CustomRole role = p.GetCustomRole(); return role.Faction is not Crewmates && role.RealRole.IsImpostor(); }))
-            return GameData.Instance.TotalTasks == GameData.Instance.CompletedTasks;
+
+        bool hasAliveImpostor = false;
+        bool hasOneTaskDoer = false;
+        foreach (CustomRole role in Game.GetAllPlayers().Select(p => p.GetCustomRole()))
+        {
+            if (role.MyPlayer.Data.Tasks.Count > 0) hasOneTaskDoer = true;
+            if (role.MyPlayer.IsAlive() && role.Faction is not Crewmates && role.RealRole.IsImpostor()) hasAliveImpostor = true;
+            if (hasOneTaskDoer && hasAliveImpostor) break;
+        }
+
+        if (hasAliveImpostor && hasOneTaskDoer) return GameManager.Instance.CheckTaskCompletion();
 
         winReason = WinReason.FactionLastStanding;
         return true;

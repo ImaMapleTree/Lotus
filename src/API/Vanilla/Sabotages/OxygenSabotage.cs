@@ -1,3 +1,5 @@
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals;
@@ -34,6 +36,7 @@ public class OxygenSabotage : ISabotage
 
         oxygen.Countdown = 10000f;
         SabotagePatch.CurrentSabotage = null;
+        Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
         return true;
     }
 

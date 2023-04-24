@@ -2,7 +2,7 @@ using TOHTOR.Roles.Interactions.Interfaces;
 
 namespace TOHTOR.Roles.Interactions;
 
-public class ManipulatedInteraction : SimpleInteraction, IManipulatedInteraction
+public class ManipulatedInteraction : DirectInteraction, IManipulatedInteraction
 {
     private PlayerControl manipulator;
 

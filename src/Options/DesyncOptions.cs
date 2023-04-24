@@ -67,11 +67,17 @@ public static class DesyncOptions
     // This method is used to find the "GameManager" client which is now needed for synchronizing options
     public static int GetManagerClientId() => GetTargetedClientId("Manager");
 
+    public static IGameOptions GetModifiedOptions(IEnumerable<GameOptionOverride> overrides)
+    {
+        IGameOptions clonedOptions = AUSettings.StaticOptions.DeepCopy();
+        overrides.Where(o => o != null).Do(optionOverride => optionOverride.ApplyTo(clonedOptions));
+        return clonedOptions;
+    }
+
     public static void SendModifiedOptions(IEnumerable<GameOptionOverride> overrides, PlayerControl player)
     {
-        IGameOptions clonedOptions = OriginalOptions.StaticOptions.DeepCopy();
-        overrides.Where(o => o != null).Do(optionOverride => optionOverride.ApplyTo(clonedOptions));
-        SyncToPlayer(clonedOptions, player);
+        SyncToPlayer(GetModifiedOptions(overrides), player);
     }
+
 
 }

@@ -3,7 +3,7 @@ using TOHTOR.GUI.Name.Impl;
 
 namespace TOHTOR.GUI.Name.Components;
 
-public class IndicatorComponent : NmComponent
+public class IndicatorComponent : SimpleComponent
 {
     public IndicatorComponent(LiveString mainText, GameState[] gameStates, ViewMode viewMode = Impl.ViewMode.Additive, params PlayerControl[] viewers) : base(mainText, gameStates, viewMode, viewers)
     {

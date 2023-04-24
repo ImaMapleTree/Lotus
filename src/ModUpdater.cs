@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.IO;
 using System.Net;
 using System.Reflection;
@@ -41,7 +41,7 @@ public class ModUpdater
         }
         if (!isChecked)
         {
-            /*CheckRelease(TOHPlugin.BetaBuildURL.Value != "").GetAwaiter().GetResult();*/
+            /*CheckRelease(TOHPlugin.BetaBuildURL.Value != "").GetAwaiter().GetResult();#1#
         }
         if (ForceAccept)
         {
@@ -55,7 +55,7 @@ public class ModUpdater
         {
             MainMenuManagerPatch.updateButton.transform
                 .GetChild(0).GetComponent<TMPro.TMP_Text>()
-                .SetText($"{Localizer.Get("ModUpdater.UpdateButton")}\n{latestTitle}");
+                .SetText($"{Localizer.Translate("ModUpdater.UpdateButton")}\n{latestTitle}");
         })));
         if (ForceAccept)
         {
@@ -86,7 +86,7 @@ public class ModUpdater
             {
                 latestTitle = data["name"].ToString();
                 downloadUrl = data["url"].ToString();
-                hasUpdate = false; /*latestTitle != ThisAssembly.Git.Commit;#1#
+                hasUpdate = false; /*latestTitle != ThisAssembly.Git.Commit;#2#
             }
             else
             {
@@ -108,7 +108,7 @@ public class ModUpdater
                     if (assets[i]["name"].ToString() == "TOHTOR.dll")
                         downloadUrl = assets[i]["browser_download_url"].ToString();
                 }
-                /*hasUpdate = latestVersion.CompareTo(TOHPlugin) > 0;#1#
+                /*hasUpdate = latestVersion.CompareTo(TOHPlugin) > 0;#2#
                 hasUpdate = false;
             }
             if (downloadUrl == null)
@@ -134,13 +134,13 @@ public class ModUpdater
             return flag;
         }
         return true;
-    }*/
+    }#1#
     public static void StartUpdate(string url)
     {
-        ShowPopup(Localizer.Get("ModUpdater.WaitMessage"));
+        ShowPopup(Localizer.Translate("ModUpdater.WaitMessage"));
         if (!BackupDLL())
         {
-            ShowPopup(Localizer.Get("ModUpdater.UpdateManually"), true);
+            ShowPopup(Localizer.Translate("ModUpdater.UpdateManually"), true);
             return;
         }
         _ = DownloadDLL(url);
@@ -183,19 +183,19 @@ public class ModUpdater
             client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadCallBack);
             client.DownloadFileAsync(new Uri(url), "BepInEx/plugins/TOHTOR.dll");
             while (client.IsBusy) await System.Threading.Tasks.Task.Delay(1);
-            ShowPopup(Localizer.Get("ModUpater.UpdateRestart"), true);
+            ShowPopup(Localizer.Translate("ModUpater.UpdateRestart"), true);
         }
         catch (Exception ex)
         {
             VentLogger.Error($"ダウンロードに失敗しました。\n{ex}", "DownloadDLL");
-            ShowPopup(Localizer.Get("ModUpdater.UpdateManually"), true);
+            ShowPopup(Localizer.Translate("ModUpdater.UpdateManually"), true);
             return false;
         }
         return true;
     }
     private static void DownloadCallBack(object sender, DownloadProgressChangedEventArgs e)
     {
-        ShowPopup($"{Localizer.Get("ModUpdater.UpdateInProgress")}\n{e.BytesReceived}/{e.TotalBytesToReceive}({e.ProgressPercentage}%)");
+        ShowPopup($"{Localizer.Translate("ModUpdater.UpdateInProgress")}\n{e.BytesReceived}/{e.TotalBytesToReceive}({e.ProgressPercentage}%)");
     }
     private static void ShowPopup(string message, bool showButton = false)
     {
@@ -212,4 +212,4 @@ public class ModUpdater
             }
         }
     }
-}
+}*/

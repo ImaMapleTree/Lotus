@@ -11,7 +11,6 @@ using TOHTOR.RPC;
 using VentLib;
 using VentLib.Logging;
 using VentLib.Networking.RPC.Attributes;
-using VentLib.Options.Announcement;
 using VentLib.Utilities;
 
 namespace TOHTOR.Addons;
@@ -40,21 +39,17 @@ public class AddonManager
             TOHAddon addon = (TOHAddon)tohType.GetConstructor(new Type[] { })!.Invoke(null);
             VentLogger.Log(AddonLL,$"Loading Addon [{addon.AddonName()} {addon.AddonVersion()}]", "AddonManager");
             Vents.Register(assembly);
+
             Addons.Add(addon);
-            MethodInfo initialize = tohType.GetMethod("Initialize");
-            initialize!.Invoke(addon, null);
+            addon.Initialize();
 
             //addon.Factions.Do(f => FactionConstraintValidator.ValidateAndAdd(f, file.Name));
             CustomRoleManager.AllRoles.AddRange(addon.CustomRoles);
             TOHPlugin.GamemodeManager.GamemodeTypes.AddRange(addon.Gamemodes);
-
-            AnnouncementTab announcementTab = new(addon.AddonName(), addon.AddonVersion());
-            addon.PluginOptions().ForEach(announcementTab.AddOption);
-            AnnouncementOptionController.AddTab(announcementTab);
         }
         catch (Exception e)
         {
-            throw new AddonException($"Exception encountered while loading addon: {file.Name}", e);
+            VentLogger.Exception(e, $"Exception encountered while loading addon: {file.Name}", "AddonManager");
         }
     }
 

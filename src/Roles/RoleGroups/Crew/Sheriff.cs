@@ -6,6 +6,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
@@ -20,19 +21,16 @@ namespace TOHTOR.Roles.RoleGroups.Crew;
 
 public class Sheriff : Crewmate
 {
-    public bool sheriffHasTasks;
-
-    [UIComponent(UI.Cooldown)]
-    private Cooldown shootCooldown;
     private int totalShots;
     private bool oneShotPerRound;
     private bool canKillCrewmates;
     private bool isSheriffDesync;
 
-
     private bool shotThisRound;
     private int shotsRemaining;
 
+    [UIComponent(UI.Cooldown)]
+    private Cooldown shootCooldown;
 
     protected override void Setup(PlayerControl player)
     {
@@ -40,13 +38,10 @@ public class Sheriff : Crewmate
         shotsRemaining = totalShots;
     }
 
-    public bool HasShots() => !(oneShotPerRound && shotThisRound) && shotsRemaining >= 0;
+    private bool HasShots() => !(oneShotPerRound && shotThisRound) && shotsRemaining >= 0;
 
-
-    [UIComponent(UI.Counter)]
+    [UIComponent(UI.Counter, ViewMode.Additive, GameState.Roaming, GameState.InMeeting)]
     public string RemainingShotCounter() => RoleUtils.Counter(shotsRemaining, totalShots);
-
-    // ACTIONS
 
     [RoleAction(RoleActionType.RoundStart)]
     public bool RefreshShotThisRound() => shotThisRound = false;
@@ -72,7 +67,7 @@ public class Sheriff : Crewmate
         shootCooldown.Start();
 
         if (target.Relationship(MyPlayer) is Relation.FullAllies) Suicide(target);
-        return MyPlayer.InteractWith(target, SimpleInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
+        return MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
     }
 
     private void Suicide(PlayerControl target)
@@ -80,7 +75,7 @@ public class Sheriff : Crewmate
         MyPlayer.RpcMurderPlayer(MyPlayer);
 
         if (!canKillCrewmates) return;
-        bool killed = MyPlayer.InteractWith(target, SimpleInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
+        bool killed = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
         Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target, killed));
     }
     // OPTIONS
@@ -113,12 +108,6 @@ public class Sheriff : Crewmate
                 .Bind(v => isSheriffDesync = (bool)v)
                 .Value(v => v.Text("Kill Button (legacy)").Value(true).Color(Color.green).Build())
                 .Value(v => v.Text("Pet Button").Value(false).Color(Color.cyan).Build())
-                .ShowSubOptionPredicate(v => !(bool)v)
-                .SubOption(sub2 => sub2
-                    .Name("Sheriff Has Tasks")
-                    .Bind(v => this.sheriffHasTasks = (bool)v)
-                    .AddOnOffValues()
-                    .Build())
                 .Build());
 
     // Sheriff is not longer a desync role for simplicity sake && so that they can do tasks

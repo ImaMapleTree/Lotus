@@ -2,7 +2,7 @@ using HarmonyLib;
 using TOHTOR.Managers;
 using VentLib.Logging;
 
-namespace TOHTOR.Patches.Systems;
+namespace TOHTOR.Patches.Meetings;
 
 
 [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.SetHighlighted))]

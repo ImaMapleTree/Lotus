@@ -10,7 +10,9 @@ using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.GUI.Name.Impl;
+using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Events;
+using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -20,7 +22,6 @@ using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
 using VentLib.Utilities;
-using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
@@ -30,6 +31,7 @@ public class Swooper: Impostor
     private bool canVentNormally;
     private bool endsAtOriginalVent;
     private bool canBeSeenByAllied;
+    private bool remainInvisibleOnKill;
     private Optional<Vent> initialVent = null!;
 
     [UIComponent(UI.Cooldown)]
@@ -41,7 +43,14 @@ public class Swooper: Impostor
     private DateTime lastEntered = DateTime.Now;
 
     [RoleAction(RoleActionType.Attack)]
-    public override bool TryKill(PlayerControl target) => base.TryKill(target);
+    public new bool TryKill(PlayerControl target)
+    {
+        if (!remainInvisibleOnKill || swoopingDuration.IsReady()) return base.TryKill(target);
+        InteractionResult result = MyPlayer.InteractWith(target, new DirectInteraction(new FatalIntent(true), this));
+        MyPlayer.RpcGuardAndKill(MyPlayer);
+        Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
+        return result is InteractionResult.Proceed;
+    }
 
     protected override void PostSetup()
     {
@@ -101,7 +110,6 @@ public class Swooper: Impostor
 
     private List<PlayerControl> GetUnaffected() => Game.GetAllPlayers().Where(p => !p.IsAlive() || canBeSeenByAllied && p.Relationship(MyPlayer) is Relation.FullAllies).AddItem(MyPlayer).ToList();
 
-
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => base.RegisterOptions(optionStream)
         .SubOption(sub => sub.Name("Invisibility Cooldown")
             .AddFloatRange(5, 120, 2.5f, 16, "s")
@@ -122,5 +130,13 @@ public class Swooper: Impostor
         .SubOption(sub => sub.Name("Can Vent During Cooldown")
             .AddOnOffValues(false)
             .BindBool(b => canVentNormally = b)
+            .Build())
+        .SubOption(sub => sub.Name("Remain Invisible on Kill")
+            .AddOnOffValues()
+            .BindBool(b => remainInvisibleOnKill = b)
             .Build());
+
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
+        base.Modify(roleModifier)
+            .OptionOverride(Override.KillCooldown, () => KillCooldown * 2, () => remainInvisibleOnKill && swoopingDuration.NotReady());
 }

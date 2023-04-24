@@ -52,7 +52,7 @@ public class Phantom : Crewmate
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-         base.RegisterOptions(optionStream)
+         AddTaskOverrideOptions(base.RegisterOptions(optionStream)
              .Tab(DefaultTabs.NeutralTab)
              .SubOption(sub => sub.Name("Immune to Ranged Interactions")
                  .AddOnOffValues()
@@ -67,7 +67,7 @@ public class Phantom : Crewmate
                 opt.Name("Tasks until Phantom Alert")
                 .BindInt(v => phantomAlertAmt = v)
                 .AddIntRange(1, 5, 1)
-                .Build());
+                .Build()));
 
     protected override RoleModifier Modify(RoleModifier roleModifier)
     {

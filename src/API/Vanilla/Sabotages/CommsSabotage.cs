@@ -1,4 +1,6 @@
 using Il2CppSystem;
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals;
@@ -43,6 +45,7 @@ public class CommsSabotage : ISabotage
         }
 
         SabotagePatch.CurrentSabotage = null;
+        Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
         return true;
     }
 

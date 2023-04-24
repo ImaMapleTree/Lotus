@@ -13,7 +13,7 @@ using VentLib.Utilities;
 
 namespace TOHTOR.Patches.Client;
 
-[Localized(Group = "ModUpdater")]
+/*[Localized(Group = "ModUpdater")]
 [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.MakePublic))]
 class MakePublicPatch
 {
@@ -32,15 +32,15 @@ class MakePublicPatch
         VentLogger.SendInGame(message);
         return false;
     }
-}
+}*/
 
-[HarmonyPatch(typeof(MMOnlineManager), nameof(MMOnlineManager.Start))]
+/*[HarmonyPatch(typeof(MMOnlineManager), nameof(MMOnlineManager.Start))]
 class MMOnlineManagerStartPatch
 {
     public static void Postfix(MMOnlineManager __instance)
     {
-        if (!(ModUpdater.hasUpdate || ModUpdater.isBroken)) return;
-        if (ModUpdater.ForceAccept) return;
+        /*if (!(ModUpdater.hasUpdate || ModUpdater.isBroken)) return;
+        if (ModUpdater.ForceAccept) return;#1#
         var obj = GameObject.Find("FindGameButton");
         if (!obj) return;
 
@@ -49,11 +49,11 @@ class MMOnlineManagerStartPatch
         var textObj = Object.Instantiate<TMPro.TextMeshPro>(obj.transform.FindChild("Text_TMP").GetComponent<TMPro.TextMeshPro>());
         textObj.transform.position = new Vector3(1f, -0.3f, 0);
         textObj.name = "CanNotJoinPublic";
-        var message = ModUpdater.isBroken ? $"<size=2>{Utils.ColorString(Color.red, MakePublicPatch.ModBrokenMessage)}</size>"
+        /*var message = ModUpdater.isBroken ? $"<size=2>{Utils.ColorString(Color.red, MakePublicPatch.ModBrokenMessage)}</size>"
             : $"<size=2>{Utils.ColorString(Color.red, MakePublicPatch.ModUpdateMessage)}</size>";
-        Async.Schedule(() => { textObj.text = message; }, 0.01f);
+        Async.Schedule(() => { textObj.text = message; }, 0.01f);#1#
     }
-}
+}*/
 
 [HarmonyPatch(typeof(BanMenu), nameof(BanMenu.SetVisible))]
 class BanMenuSetVisiblePatch
@@ -92,9 +92,9 @@ class SetResolutionManager
 {
     public static void Postfix()
     {
-        if (MainMenuManagerPatch.discordButton != null)
+        /*if (MainMenuManagerPatch.discordButton != null)
             MainMenuManagerPatch.discordButton.transform.position = Vector3.Reflect(MainMenuManagerPatch.template.transform.position, Vector3.left);
         if (MainMenuManagerPatch.updateButton != null)
-            MainMenuManagerPatch.updateButton.transform.position = MainMenuManagerPatch.template.transform.position + new Vector3(0.25f, 0.75f);
+            MainMenuManagerPatch.updateButton.transform.position = MainMenuManagerPatch.template.transform.position + new Vector3(0.25f, 0.75f);*/
     }
 }

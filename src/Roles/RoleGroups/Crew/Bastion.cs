@@ -1,8 +1,11 @@
 using System.Collections.Generic;
+using TOHTOR.Extensions;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
+using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using VentLib.Logging;
 using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
@@ -10,15 +13,19 @@ namespace TOHTOR.Roles.RoleGroups.Crew;
 public class Bastion: Engineer
 {
     // Here we can use the vent button as cooldown
-    [NewOnSetup]
-    private HashSet<int> bombedVents;
+    [NewOnSetup] private HashSet<int> bombedVents;
 
     [RoleAction(RoleActionType.AnyEnterVent)]
-    private void EnterVent(Vent vent, PlayerControl player)
+    private void EnterVent(Vent vent, PlayerControl player, ActionHandle handle)
     {
         bool isBombed = bombedVents.Remove(vent.Id);
+        VentLogger.Trace($"Bombed Vent Check: (player={player.UnalteredName()}, isBombed={isBombed})", "BastionAbility");
         if (isBombed) MyPlayer.InteractWith(player, CreateInteraction(player));
-        else if (player.PlayerId == MyPlayer.PlayerId) bombedVents.Add(vent.Id);
+        else if (player.PlayerId == MyPlayer.PlayerId)
+        {
+            handle.Cancel();
+            bombedVents.Add(vent.Id);
+        }
     }
 
     [RoleAction(RoleActionType.RoundEnd)]
@@ -39,7 +46,5 @@ public class Bastion: Engineer
 
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier)
-            .RoleColor("#524f4d")
-            .CanVent(false);
+        base.Modify(roleModifier).RoleColor("#524f4d");
 }

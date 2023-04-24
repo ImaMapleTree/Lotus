@@ -42,11 +42,12 @@ public static class AntiBlackoutLogic
                 if (localImpostors < aliveCrew) continue;
                 if (player.PlayerId == info.PlayerId) continue;
 
+                if (info.Object == null) continue;
                 if (info.Object.GetCustomRole().RealRole.IsCrewmate() || info.Object.Relationship(player) is Relation.FullAllies) continue;
                 if (info.Object.IsHost())
                 {
                     VentLogger.Trace($"Set {info.Object.UnalteredName()} => isDead = true");
-                    info.IsDead = true;
+                    info.Disconnected = true;
                 }
                 else
                 {

@@ -54,6 +54,6 @@ public class Marksman : NeutralKillingBase
         base.Modify(roleModifier)
             .RoleColor(new Color(0f, 0.71f, 0.92f))
             .CanVent(canVent)
-            .OptionOverride(Override.ImpostorLightMod, () => OriginalOptions.CrewLightMod(), () => !impostorVision)
+            .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod(), () => !impostorVision)
             .OptionOverride(Override.KillDistance, () => killDistance);
 }

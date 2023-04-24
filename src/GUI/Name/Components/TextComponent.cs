@@ -5,7 +5,7 @@ using TOHTOR.GUI.Name.Impl;
 
 namespace TOHTOR.GUI.Name.Components;
 
-public class TextComponent : NmComponent
+public class TextComponent : SimpleComponent
 {
     public TextComponent(LiveString mainText, GameState[] gameStates, ViewMode viewMode = Impl.ViewMode.Additive, Func<List<PlayerControl>>? viewers = null) : base(mainText, gameStates, viewMode, viewers)
     {

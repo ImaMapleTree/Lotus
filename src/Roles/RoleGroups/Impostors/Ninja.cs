@@ -30,7 +30,7 @@ public class Ninja : Vanilla.Impostor
     {
         SyncOptions();
         if (Mode is NinjaMode.Killing) return base.TryKill(target);
-        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         playerList.Add(target);
         MyPlayer.RpcGuardAndKill(target);

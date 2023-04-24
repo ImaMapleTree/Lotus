@@ -1,6 +1,15 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using HarmonyLib;
+using TMPro;
+using TOHTOR.Extensions;
 using TOHTOR.Managers.History.Events;
+using TOHTOR.Roles.Events;
+using TOHTOR.Utilities;
 using UnityEngine;
+using UnityEngine.UI;
+using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -15,7 +24,14 @@ public class HistoryMenu
     public UnityOptional<Scroller> Scroller() => chatOptional.UnityMap(c => c.scroller);
     public UnityOptional<SpriteRenderer> Background() => chatOptional.UnityMap(c => c.BackgroundImage);
     public UnityOptional<ObjectPoolBehavior> ChatBubblePool() => chatOptional.UnityMap(c => c.chatBubPool);
+
+    public UnityOptional<PassiveButton> historyTab;
+    public UnityOptional<PassiveButton> winnersTab;
+    public CustomOptional<WinnersMenu> winnersMenu;
+
     private List<IHistoryEvent> historyEvents = new();
+
+    private int activeTab;
 
     private HistoryMenu(ChatController chatController, HudManager hudManager)
     {
@@ -32,6 +48,33 @@ public class HistoryMenu
         background.flipX = true;
         background.flipY = true;
 
+        winnersMenu = CustomOptional<WinnersMenu>.Of(new WinnersMenu(chatController), menu => menu.Exists());
+
+        PassiveButton parentButton = chatController.Content.FindChild<PassiveButton>("OpenKeyboardButton");
+        PassiveButton historyTabButton = Object.Instantiate(parentButton, parentButton.transform.parent);
+        PassiveButton winnersTabButton = Object.Instantiate(parentButton, parentButton.transform.parent);
+
+        historyTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("TOHTOR.assets.HistoryTab.png"));
+        historyTabButton.transform.localPosition += new Vector3(-6f, 4.1f);
+        historyTab = UnityOptional<PassiveButton>.Of(historyTabButton);
+
+
+        winnersTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("TOHTOR.assets.Winners.png"));
+        winnersTabButton.transform.localPosition += new Vector3(-5.15f, 4.1f);
+        winnersTab = UnityOptional<PassiveButton>.Of(winnersTabButton);
+
+        historyTabButton.OnClick = new Button.ButtonClickedEvent();
+        historyTabButton.OnClick.AddListener((Action)(() =>
+        {
+            Refresh();
+            winnersMenu.IfPresent(wm => wm.Close());
+        }));
+        winnersTabButton.OnClick.AddListener((Action)(() =>
+        {
+            ChatBubblePool().IfPresent(bp => bp.ReclaimAll());
+            winnersMenu.IfPresent(wm => wm.Open());
+        }));
+
         InitChatPool();
     }
 
@@ -43,7 +86,7 @@ public class HistoryMenu
             menu => menu.Exists());
     }
 
-    public void Open()
+    public void Open(bool openWinnersMenu = false)
     {
         if (!chatOptional.Exists()) return;
         ChatController chatController = chatOptional.Get();
@@ -51,6 +94,11 @@ public class HistoryMenu
         chatController.Content.SetActive(true);
         chatController.ChatButton.SetActive(false);
         chatController.TextArea.gameObject.SetActive(false);
+
+        GameStartManager.Instance.StartButton.enabled = false;
+        GameStartManager.Instance.startLabelText.enabled = false;
+        GameStartManager.Instance.PlayerCounter.gameObject.SetActive(false);
+
         try
         {
             chatController.Content.FindChild<Transform>("TypingArea").gameObject.SetActive(false);
@@ -67,13 +115,29 @@ public class HistoryMenu
             // ignored
         }
 
+
         Refresh();
 
+        AddLog(PlayerControl.LocalPlayer.PlayerId, "Hello World!");
         chatController.scroller.ScrollToTop();
+
+        winnersMenu.IfPresent(wm =>
+        {
+            if (!openWinnersMenu) wm.Close();
+            else
+            {
+                ChatBubblePool().IfPresent(bp => bp.ReclaimAll());
+                wm.Open();
+            }
+        });
     }
 
     public void Close()
     {
+        GameStartManager.Instance.StartButton.enabled = true;
+        GameStartManager.Instance.startLabelText.enabled = true;
+        GameStartManager.Instance.PlayerCounter.gameObject.SetActive(true);
+
         if (!chatOptional.Exists()) return;
         ChatController chatController = chatOptional.Get();
         ControllerManager.Instance.CloseOverlayMenu(chatController.name);
@@ -91,7 +155,6 @@ public class HistoryMenu
         ChatBubble bubble = chatBubblePool.Get<ChatBubble>();
         bubble.Background.transform.localScale = new Vector3(1.5f, 1f, 1f);
         bubble.TextArea.transform.localScale = new Vector3(0.7f, 1f, 1f);
-        bubble.Player.transform.localScale = new Vector3(0.7f, 1f, 1f);
         bubble.SetLeft();
 
         Transform transform;
@@ -109,6 +172,9 @@ public class HistoryMenu
 
         bubble.Background.size = new Vector2(5.52f, 0.2f + bubble.TextArea.GetNotDumbRenderedHeight());
         bubble.MaskArea.size = bubble.Background.size - new Vector2(0.0f, 0.03f);
+        var playerTransform = bubble.Player.transform;
+        playerTransform.localScale = new Vector3(0.3f, 0.4f, 1f);
+        playerTransform.localPosition += new Vector3(0.1f, 0f);
 
         /*bubble.MaskArea.material.SetInt(PlayerMaterial.MaskLayer, 0);
         bubble.Background.material.SetInt(PlayerMaterial.MaskLayer, 0);*/

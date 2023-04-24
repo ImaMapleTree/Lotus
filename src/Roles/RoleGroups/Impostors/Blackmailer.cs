@@ -76,6 +76,13 @@ public class Blackmailer: Shapeshifter
         });
     }
 
+    [RoleAction(RoleActionType.MyDeath)]
+    private void BlackmailerDies()
+    {
+        blackmailedPlayer = Optional<PlayerControl>.Null();
+        blackmailingText?.Delete();
+    }
+
     [RoleAction(RoleActionType.Chat)]
     public void InterceptChat(PlayerControl speaker, GameState state, bool isAlive)
     {

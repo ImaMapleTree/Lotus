@@ -15,6 +15,7 @@ using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
@@ -22,12 +23,9 @@ public class Witch: Vanilla.Impostor
 {
     private bool canSwitchWithButton;
 
-    private Dictionary<byte, Remote<IndicatorComponent>> remotes;
-    private List<PlayerControl> cursedPlayers;
+    [NewOnSetup] private Dictionary<byte, Remote<IndicatorComponent>> remotes;
+    [NewOnSetup] private List<PlayerControl> cursedPlayers;
     private WitchMode mode = WitchMode.Killing;
-
-    protected override void Setup(PlayerControl player) => cursedPlayers = new List<PlayerControl>();
-    protected override void PostSetup() => remotes = new Dictionary<byte, Remote<IndicatorComponent>>();
 
     [UIComponent(UI.Text)]
     private string WitchModeDisplay() =>
@@ -39,7 +37,6 @@ public class Witch: Vanilla.Impostor
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        SyncOptions();
         if (mode is WitchMode.Killing)
         {
             mode = WitchMode.Cursing;
@@ -47,7 +44,7 @@ public class Witch: Vanilla.Impostor
         }
 
         mode = WitchMode.Killing;
-        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         Game.GameHistory.AddEvent(new CursedEvent(MyPlayer, target));
         cursedPlayers.Add(target);
@@ -60,20 +57,27 @@ public class Witch: Vanilla.Impostor
         return true;
     }
 
-    [RoleAction(RoleActionType.AnyExiled)]
-    private void WitchKillCheck()
+    [RoleAction(RoleActionType.OnPet)]
+    private void WitchSwitchModes() => mode = canSwitchWithButton ? mode is WitchMode.Killing ? mode = WitchMode.Cursing : WitchMode.Killing : mode;
+
+    [RoleAction(RoleActionType.SelfExiled)]
+    [RoleAction(RoleActionType.MyDeath)]
+    private void ClearCursed()
     {
-        cursedPlayers.Where(p => !p.Data.IsDead).Do(p =>
-        {
-            FatalIntent intent = new(true, () => new CursedDeathEvent(p, MyPlayer));
-            p.InteractWith(p, new IndirectInteraction(intent, this));
-            remotes.GetValueOrDefault(p.PlayerId)?.Delete();
-        });
+        remotes.Values.ForEach(v => v.Delete());
+        remotes.Clear();
         cursedPlayers.Clear();
     }
 
-    [RoleAction(RoleActionType.OnPet)]
-    private void WitchSwitchModes() => mode = canSwitchWithButton ? mode is WitchMode.Killing ? mode = WitchMode.Cursing : WitchMode.Killing : mode;
+    [RoleAction(RoleActionType.RoundStart)]
+    private void KilledCursed()  {
+        cursedPlayers.Where(p => p.IsAlive()).ForEach(p =>
+        {
+            FatalIntent intent = new(true, () => new CursedDeathEvent(p, MyPlayer));
+            p.InteractWith(p, new IndirectInteraction(intent, this));
+        });
+        ClearCursed();
+    }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)

@@ -20,6 +20,7 @@ namespace TOHTOR.Patches
     {
         public static void Prefix(AmongUsClient __instance)
         {
+
             Game.Setup();
             /*GameOptionsManager.Instance.CurrentGameOptions = GameOptionsManager.Instance.normalGameHostOptions.Cast<IGameOptions>();*/
         }
@@ -29,13 +30,14 @@ namespace TOHTOR.Patches
             HistoryMenuIntermediate.HistoryMenuButton.IfPresent(button => button.SetActive(false));
 
             TOHPlugin.ResetCamPlayerList = new List<byte>();
-            StaticOptions.UsedButtonCount = 0;
+            /*StaticOptions.UsedButtonCount = 0;*/
             TOHPlugin.VisibleTasksCount = true;
             FallFromLadder.Reset();
             AntiBlackout.Reset();
 
             Game.State = GameState.InIntro;
             Game.GetAllPlayers().Do(p => CustomRoleManager.PlayersCustomRolesRedux[p.PlayerId] = CustomRoleManager.Default);
+            Game.CurrentGamemode.Setup();
         }
     }
 

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -14,11 +15,11 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
 {
     protected float Size = 2.925f;
     protected int DisplayLine;
-
     protected int Spacing = 0;
 
     private readonly Dictionary<byte, bool> updated = new();
     private readonly Dictionary<byte, string> cacheStates = new();
+    private readonly List<Action<INameModelComponent>> eventConsumers = new();
 
     public ComponentHolder()
     {
@@ -33,10 +34,7 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
 
     public void SetSize(float size) => Size = size;
 
-    public void SetLine(int line)
-    {
-        DisplayLine = line;
-    }
+    public void SetLine(int line) => DisplayLine = line;
 
     public int Line() => DisplayLine;
 
@@ -52,7 +50,9 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
             ViewMode newMode = component.ViewMode();
             if (newMode is ViewMode.Replace or ViewMode.Absolute || lastMode is ViewMode.Overriden) endString.Clear();
             lastMode = newMode;
-            endString.Add(component.GenerateText());
+            string text = component.GenerateText();
+            if (text == null) continue;
+            endString.Add(text);
             if (newMode is ViewMode.Absolute) break;
         }
 
@@ -63,4 +63,13 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
     }
 
     public bool Updated(byte playerId) => updated.GetValueOrDefault(playerId, false);
+
+    public new Remote<T> Add(T component)
+    {
+        Remote<T> remote = base.Add(component);
+        eventConsumers.ForEach(ev => ev(component));
+        return remote;
+    }
+
+    public void AddListener(Action<INameModelComponent> eventConsumer) => eventConsumers.Add(eventConsumer);
 }

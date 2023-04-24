@@ -4,7 +4,6 @@ using System.Reflection;
 using TOHTOR.Extensions;
 using TOHTOR.Factions.Interfaces;
 using TOHTOR.Roles;
-using VentLib.Options.Announcement;
 
 namespace TOHTOR.Addons;
 
@@ -31,8 +30,6 @@ public abstract class TOHAddon
     public abstract string AddonName();
 
     public abstract string AddonVersion();
-
-    public abstract List<AnnouncementOption> PluginOptions();
 
     public void RegisterRole(CustomRole customRole) => CustomRoles.Add(customRole);
 

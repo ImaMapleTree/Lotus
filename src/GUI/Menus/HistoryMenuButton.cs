@@ -45,10 +45,8 @@ public class HistoryMenuButton
         ReportButton button = optionalButton.Get();
         button.SetActive(toggle);
         toggle = !toggle;
-        VentLogger.Fatal($"Exists: {HistoryMenuIntermediate.HistoryMenu.Exists()}");
         HistoryMenu menu = HistoryMenuIntermediate.HistoryMenu.OrElseSet(() => HistoryMenu.Create().Get());
-        VentLogger.Info($"Menu: {menu}");
-        if (toggle) menu.Open();
+        if (toggle) menu.Open(true);
         else menu.Close();
     }
 

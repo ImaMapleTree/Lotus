@@ -25,6 +25,8 @@ public abstract class Gamemode: IGamemode
 
     public virtual void FixedUpdate() { }
 
+    public abstract void Setup();
+
     public abstract void AssignRoles(List<PlayerControl> players);
 
     public abstract void SetupWinConditions(WinDelegate winDelegate);

@@ -1,6 +1,7 @@
 using HarmonyLib;
 using TMPro;
 using TOHTOR.Addons;
+using TOHTOR.GUI.Patches;
 using TOHTOR.Managers.Date;
 using TOHTOR.Utilities;
 using UnityEngine;
@@ -47,32 +48,13 @@ public class VersionShowerStartPatch
             SpecialEventText.transform.position = new Vector3(0, 0.5f, 0);
         }
 
-        SpecialEventText.enabled = TitleLogoPatch.AmongUsLogo != null;
+        SpecialEventText.enabled = SplashPatch.AmongUsLogo != null;
         if (!_init)
             ISpecialDate.CheckDates();
         _init = true;
     }
 }
 
-[HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
-class TitleLogoPatch
-{
-    public static GameObject AmongUsLogo;
-    static void Postfix(MainMenuManager __instance)
-    {
-        if ((AmongUsLogo = GameObject.Find("bannerLogo_AmongUs")) != null)
-        {
-            AmongUsLogo.transform.localScale *= 0.4f;
-            AmongUsLogo.transform.position += Vector3.up * 0.25f;
-        }
-
-        var tohLogo = new GameObject("titleLogo_TOH");
-        tohLogo.transform.position = Vector3.up;
-        tohLogo.transform.localScale *= 1.2f;
-        var renderer = tohLogo.AddComponent<SpriteRenderer>();
-        renderer.sprite = Utils.LoadSprite("TOHTOR.assets.tohtor-logo-rold.png", 300f);
-    }
-}
 [HarmonyPatch(typeof(ModManager), nameof(ModManager.LateUpdate))]
 class ModManagerLateUpdatePatch
 {

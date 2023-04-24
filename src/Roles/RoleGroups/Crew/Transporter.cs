@@ -142,7 +142,7 @@ public class Transporter : Shapeshifter
         public override string Message() => $"{Game.GetName(target1)} and {Game.GetName(target2)} were transported by {Game.GetName(Player())}.";
     }
 
-    public class TransportInteraction : SimpleInteraction {
+    public class TransportInteraction : DirectInteraction {
         public TransportInteraction(PlayerControl actor) : base(new NeutralIntent(), actor.GetCustomRole()) { }
     }
 }

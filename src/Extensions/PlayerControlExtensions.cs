@@ -8,7 +8,6 @@ using InnerNet;
 using TOHTOR.API;
 using TOHTOR.GUI;
 using TOHTOR.Managers;
-using TOHTOR.Options;
 using UnityEngine;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Internals;
@@ -25,6 +24,7 @@ using TOHTOR.Utilities;
 using VentLib;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
+using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using GameStates = TOHTOR.API.GameStates;
 using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
@@ -33,14 +33,15 @@ namespace TOHTOR.Extensions;
 
 public static class PlayerControlExtensions
 {
-    public static bool IsHost(this PlayerControl player) =>
-        AmongUsClient.Instance.AmHost && PlayerControl.LocalPlayer != null && PlayerControl.LocalPlayer.PlayerId == player.PlayerId;
+    public static bool IsHost(this PlayerControl player) => player != null && AmongUsClient.Instance.AmHost && PlayerControl.LocalPlayer != null && PlayerControl.LocalPlayer.PlayerId == player.PlayerId;
 
     public static ClientData? GetClient(this PlayerControl player)
     {
         var client = AmongUsClient.Instance.allClients.ToArray().FirstOrDefault(cd => cd.Character.PlayerId == player.PlayerId);
         return client;
     }
+
+    public static UniquePlayerId UniquePlayerId(this PlayerControl player) => API.UniquePlayerId.From(player);
 
     public static void Trigger(this PlayerControl player, RoleActionType action, ref ActionHandle handle, params object[] parameters)
     {
@@ -81,14 +82,14 @@ public static class PlayerControlExtensions
             });
     }
 
-    public static Subrole? GetSubrole(this PlayerControl player)
+    public static CustomRole? GetSubrole(this PlayerControl player)
     {
         List<CustomRole>? role = CustomRoleManager.PlayerSubroles.GetValueOrDefault(player.PlayerId);
         if (role == null || role.Count == 0) return null;
         return role[0] as Subrole;
     }
 
-    public static T? GetSubrole<T>(this PlayerControl player) where T : Subrole
+    public static T GetSubrole<T>(this PlayerControl player) where T: CustomRole
     {
         return (T?)player.GetSubrole()!;
     }
@@ -217,7 +218,7 @@ public static class PlayerControlExtensions
 
     public static T GetCustomRole<T>(this PlayerControl player) where T : CustomRole
     {
-        return (T)player.GetCustomRole();
+        return (player.GetCustomRole() as T) ?? player.GetSubrole<T>();
     }
 
     public static string? GetAllRoleName(this PlayerControl player)
@@ -271,12 +272,12 @@ public static class PlayerControlExtensions
                 player.Data.Role.CanVent = false;
                 return;
             case Arsonist a:
-                bool canUse = a.CanVent() || (StaticOptions.TOuRArso);
+                bool canUse = a.CanVent();
                 DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(canUse && !player.Data.IsDead);
                 player.Data.Role.CanVent = canUse;
                 return;
-            case Juggernaut:
-                bool jug_canUse = StaticOptions.JuggerCanVent;
+            case Juggernaut j:
+                bool jug_canUse = j.CanVent();
                 DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(jug_canUse && !player.Data.IsDead);
                 player.Data.Role.CanVent = jug_canUse;
                 return;
@@ -287,7 +288,7 @@ public static class PlayerControlExtensions
                 player.Data.Role.CanVent = jackal_canUse;
                 return;
             case Marksman:
-                bool marks_canUse = StaticOptions.MarksmanCanVent;
+                bool marks_canUse = player.GetCustomRole().CanVent();
                 DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(marks_canUse && !player.Data.IsDead);
                 player.Data.Role.CanVent = marks_canUse;
                 return;
@@ -296,7 +297,7 @@ public static class PlayerControlExtensions
                 player.Data.Role.CanVent = false;
                 return;
             case Pestilence:
-                bool pesti_CanUse = StaticOptions.PestiCanVent;
+                bool pesti_CanUse = player.GetCustomRole().CanVent();
                 DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(pesti_CanUse && !player.Data.IsDead);
                 player.Data.Role.CanVent = pesti_CanUse;
                 return;
@@ -313,39 +314,16 @@ public static class PlayerControlExtensions
                 DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(!player.Data.IsDead);
                 player.Data.Role.CanVent = true;
                 return;
-            case HexMaster:
-            /*case CovenWitch:
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(TOHPlugin.HasNecronomicon && !player.Data.IsDead);
-                player.Data.Role.CanVent = TOHPlugin.HasNecronomicon;*/
-                break;
-            case Janitor:
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(StaticOptions.STIgnoreVent && !player.Data.IsDead);
-                player.Data.Role.CanVent = StaticOptions.STIgnoreVent;
-                break;
         }
     }
-    public static bool CanMakeMadmate(this PlayerControl player)
-    {
-        return StaticOptions.CanMakeMadmateCount > TOHPlugin.SKMadmateNowCount
-               && player != null
-               && player.Data.Role.Role == RoleTypes.Shapeshifter
-               && player.GetCustomRole().CanMakeMadmate();
-    }
+
     public static void RpcExileV2(this PlayerControl player)
     {
+        VentLogger.Trace($"Exiled (V2): {player.GetNameWithRole()}");
         player.Exiled();
-        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(player.NetId, (byte)RpcCalls.Exiled, SendOption.None, -1);
-        AmongUsClient.Instance.FinishRpcImmediately(writer);
+        RpcV2.Immediate(player.NetId, RpcCalls.Exiled, SendOption.None).Send();
     }
-    public static void RpcMurderPlayerV2(this PlayerControl killer, PlayerControl target)
-    {
-        if (target == null) target = killer;
-        if (AmongUsClient.Instance.AmClient)
-            killer.MurderPlayer(target);
-        MessageWriter messageWriter = AmongUsClient.Instance.StartRpcImmediately(killer.NetId, (byte)RpcCalls.MurderPlayer, SendOption.None, -1);
-        messageWriter.WriteNetObject(target);
-        AmongUsClient.Instance.FinishRpcImmediately(messageWriter);
-    }
+
     public static void NoCheckStartMeeting(this PlayerControl reporter, GameData.PlayerInfo target)
     { /*サボタージュ中でも関係なしに会議を起こせるメソッド
             targetがnullの場合はボタンとなる*/
@@ -385,13 +363,6 @@ public static class PlayerControlExtensions
                 Jackal;
     }
     // this is new
-    public static bool KnowDeathReason(this PlayerControl seer, PlayerControl target)
-       => (seer.Is(Doctor.Ref<Doctor>())
-            || (seer.Is(RoleType.Madmate) && StaticOptions.MadmateCanSeeDeathReason)
-            || (seer.Data.IsDead && StaticOptions.GhostCanSeeDeathReason))
-           && target.Data.IsDead;
-
-    public static bool IsModded(this PlayerControl player) => Vents.VersionControl.IsModdedClient(player.GetClientId());
 
     //汎用
     public static bool Is(this PlayerControl target, CustomRole role) =>

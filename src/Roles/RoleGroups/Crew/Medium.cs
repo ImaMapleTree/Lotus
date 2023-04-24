@@ -1,8 +1,8 @@
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Managers.History.Events;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Internals.Interfaces;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
 using VentLib.Localization.Attributes;
@@ -10,7 +10,7 @@ using VentLib.Utilities;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
 
-[Localized(Group = "Roles", Subgroup = "Medium")]
+[Localized("Roles.Medium")]
 public partial class Medium: Crewmate, IModdable
 {
     [Localized("MediumMessage")]

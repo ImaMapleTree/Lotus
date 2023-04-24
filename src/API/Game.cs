@@ -7,11 +7,10 @@ using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.Gamemodes;
-using TOHTOR.GUI.Menus;
+using TOHTOR.GUI.Name.Impl;
 using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Managers;
 using TOHTOR.Managers.History;
-using TOHTOR.Options;
 using TOHTOR.Player;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Internals;
@@ -20,7 +19,6 @@ using TOHTOR.Roles.Subroles;
 using TOHTOR.RPC;
 using TOHTOR.Victory;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities;
@@ -56,7 +54,7 @@ public static class Game
         if (sendToClient) role.Assign();
     }
 
-    public static INameModel NameModel(this PlayerControl playerControl) => Players[playerControl.PlayerId].NameModel;
+    public static INameModel NameModel(this PlayerControl playerControl) => Players.GetValueOrDefault(playerControl.PlayerId, new PlayerPlus(playerControl)).NameModel;
     public static PlayerPlus GetPlayerPlus(this PlayerControl playerControl) => Players[playerControl.PlayerId];
 
     public static void RenderAllNames() => Players.Values.Select(p => p.NameModel).Do(name => name.Render());
@@ -134,7 +132,6 @@ public static class Game
         PlayerControl.AllPlayerControls.ToArray().ForEach(p => playerNames[p.PlayerId] = p.UnalteredName());
 
         Hooks.GameStateHooks.GameStartHook.Propagate(new GameStateHookEvent());
-        HistoryMenuIntermediate.StoreOutfits();
         CurrentGamemode.SetupWinConditions(_winDelegate);
     }
 
@@ -143,7 +140,6 @@ public static class Game
         Players.Clear();
         CustomRoleManager.PlayersCustomRolesRedux.Clear();
         CustomRoleManager.PlayerSubroles.Clear();
-
         Hooks.GameStateHooks.GameEndHook.Propagate(new GameStateHookEvent());
     }
 }

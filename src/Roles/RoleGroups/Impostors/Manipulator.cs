@@ -24,6 +24,7 @@ public class Manipulator : Impostor
     [RoleAction(RoleActionType.AnyReportedBody)]
     public void ReportBodyAbility(GameData.PlayerInfo reported) => triggerAbility = killedPlayers.Contains(reported.PlayerId);
 
+    [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
         bool killed = base.TryKill(target);
@@ -36,9 +37,9 @@ public class Manipulator : Impostor
     public void SabotageMeeting()
     {
         List<GameOptionOverride> overrides = new();
-        if (affectAnonymousMeeting) overrides.Add(new GameOptionOverride(Override.AnonymousVoting, !OriginalOptions.AnonymousVotes()));
-        overrides.Add(new GameOptionOverride(Override.DiscussionTime, Math.Max(OriginalOptions.DiscussionTime() - discussionTimeDecrease, 1f)));
-        overrides.Add(new GameOptionOverride(Override.VotingTime, Math.Max(OriginalOptions.DiscussionTime() - votingTimeDecrease, 1f)));
+        if (affectAnonymousMeeting) overrides.Add(new GameOptionOverride(Override.AnonymousVoting, !AUSettings.AnonymousVotes()));
+        overrides.Add(new GameOptionOverride(Override.DiscussionTime, Math.Max(AUSettings.DiscussionTime() - discussionTimeDecrease, 1)));
+        overrides.Add(new GameOptionOverride(Override.VotingTime, Math.Max(AUSettings.DiscussionTime() - votingTimeDecrease, 1)));
         Game.GetAllPlayers().ForEach(p => p.GetCustomRole().SyncOptions(overrides));
     }
 

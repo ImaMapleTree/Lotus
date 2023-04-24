@@ -4,6 +4,7 @@ using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Events;
@@ -15,6 +16,7 @@ using UnityEngine;
 using VentLib.Options;
 using VentLib.Options.Events;
 using VentLib.Options.Game;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Optionals;
 using static TOHTOR.Managers.CustomRoleManager;
 
@@ -22,7 +24,8 @@ namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
 
 public class PlagueBearer: NeutralKillingBase
 {
-    private HashSet<byte> infectedPlayers;
+    [NewOnSetup] private List<Remote<IndicatorComponent>> indicatorRemotes = new();
+    [NewOnSetup] private HashSet<byte> infectedPlayers;
     private int cooldownSetting;
     private float customCooldown;
     private int alivePlayers;
@@ -30,20 +33,25 @@ public class PlagueBearer: NeutralKillingBase
     [UIComponent(UI.Counter)]
     private string InfectionCounter() => RoleUtils.Counter(infectedPlayers.Count, alivePlayers, RoleColor);
 
-    protected override void Setup(PlayerControl player)
-    {
-        base.Setup(player);
-        infectedPlayers = new HashSet<byte>();
-    }
-
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (infectedPlayers.Contains(target.PlayerId))
+        {
+            MyPlayer.RpcGuardAndKill(target);
+            return false;
+        }
+
+        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         MyPlayer.RpcGuardAndKill(target);
+
         Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{MyPlayer.UnalteredName()} infected {target.UnalteredName()}."));
 
         infectedPlayers.Add(target.PlayerId);
+
+        IndicatorComponent indicator = new SimpleIndicatorComponent("◆", RoleColor, GameStates.IgnStates, MyPlayer);
+        indicatorRemotes.Add(target.NameModel().GetComponentHolder<IndicatorHolder>().Add(indicator));
+
         CheckPestilenceTransform();
 
         return false;
@@ -57,8 +65,11 @@ public class PlagueBearer: NeutralKillingBase
         handle ??= ActionHandle.NoInit();
         if (handle.ActionType is RoleActionType.RoundStart or RoleActionType.RoundEnd) alivePlayers = Game.GetAlivePlayers().Count() - 1;
         if (!Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).All(p => infectedPlayers.Contains(p.PlayerId))) return;
+
+        indicatorRemotes.ForEach(remote => remote.Delete());
         MyPlayer.NameModel().GetComponentHolder<CounterHolder>().RemoveAt(0);
         Game.AssignRole(MyPlayer, Static.Pestilence);
+
         Game.GameHistory.AddEvent(new RoleChangeEvent(MyPlayer, Static.Pestilence));
     }
 

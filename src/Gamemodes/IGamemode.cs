@@ -22,6 +22,8 @@ public interface IGamemode
 
     void AssignRoles(List<PlayerControl> players);
 
+    void Setup();
+
     void SetupWinConditions(WinDelegate winDelegate);
 
     internal void InternalActivate()

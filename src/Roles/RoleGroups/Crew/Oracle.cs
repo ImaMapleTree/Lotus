@@ -18,16 +18,20 @@ public class Oracle: Crewmate
 {
     private Optional<byte> selectedPlayer = Optional<byte>.Null();
     private bool targetLockedIn;
+    private bool initialSkip;
 
     [Localized("VotePlayerInfo")]
     private static string votePlayerMessage = "Vote to select a player to reveal on your death. You can re-vote a player to unselect them.\nAfter confirming your target cannot be changed.";
     [Localized("SelectRole")]
     private static string selectRoleMsg = "You have selected:";
+    [Localized("UnselectRole")]
+    private static string unselectRoleMsg = "You have unselected:";
     private static string skipMsg = "Press \"Skip Vote\" to continue.";
 
     [RoleAction(RoleActionType.RoundEnd)]
     private void OracleSendMessage()
     {
+        initialSkip = false;
         if (selectedPlayer.Exists()) return;
         Utils.SendMessage(votePlayerMessage, MyPlayer.PlayerId);
     }
@@ -35,15 +39,39 @@ public class Oracle: Crewmate
     [RoleAction(RoleActionType.MyVote)]
     private void OracleLockInTarget(Optional<PlayerControl> target, ActionHandle handle)
     {
-        if (targetLockedIn) return;
+        if (targetLockedIn || initialSkip) return;
         handle.Cancel();
-        if (selectedPlayer.Exists() && !target.Exists())
+
+        if (!selectedPlayer.Exists())
         {
+            selectedPlayer = target.Map(p => p.PlayerId);
+            selectedPlayer.Handle(
+                _ => Utils.SendMessage($"{selectRoleMsg} {target.Get().UnalteredName()}\n{skipMsg}", MyPlayer.PlayerId, "Oracle Ability"),
+                () =>
+                {
+                    Utils.SendMessage("You may now vote normally", MyPlayer.PlayerId, "Oracle Ability");
+                    initialSkip = true;
+                }
+            );
+            return;
+        }
+
+        if (!target.Exists())
+        {
+            Utils.SendMessage("You may now vote normally", MyPlayer.PlayerId, "Oracle Ability");
             targetLockedIn = true;
             return;
         }
+
+        if (selectedPlayer.Get() == target.Get().PlayerId)
+        {
+            selectedPlayer = Optional<byte>.Null();
+            Utils.SendMessage($"{unselectRoleMsg} {target.Get().UnalteredName()}\n{skipMsg}", MyPlayer.PlayerId, "Oracle Ability");
+            return;
+        }
+
         selectedPlayer = target.Map(p => p.PlayerId);
-        Utils.SendMessage($"{selectRoleMsg} {target.Get().UnalteredName()}\n{skipMsg}");
+        Utils.SendMessage($"{selectRoleMsg} {target.Get().UnalteredName()}\n{skipMsg}", MyPlayer.PlayerId, "Oracle Ability");
     }
 
     [RoleAction(RoleActionType.MyDeath)]
@@ -52,6 +80,14 @@ public class Oracle: Crewmate
         if (!selectedPlayer.Exists()) return;
         PlayerControl target = Utils.GetPlayerById(selectedPlayer.Get())!;
         target.NameModel().GetComponentHolder<RoleHolder>().Last(c => c.ViewMode() is ViewMode.Replace).SetViewerSupplier(() => Game.GetAllPlayers().ToList());
+    }
+
+    [RoleAction(RoleActionType.OnDisconnect)]
+    private void TargetDisconnected(PlayerControl dcPlayer)
+    {
+        if (!selectedPlayer.Exists() || selectedPlayer.Get() != dcPlayer.PlayerId) return;
+        selectedPlayer = Optional<byte>.Null();
+        targetLockedIn = false;
     }
 
 

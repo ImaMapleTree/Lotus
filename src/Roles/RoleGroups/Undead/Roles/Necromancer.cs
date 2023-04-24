@@ -26,6 +26,8 @@ namespace TOHTOR.Roles.RoleGroups.Undead.Roles;
 
 public class Necromancer : UndeadRole
 {
+    private static Deathknight _deathknight = new Deathknight();
+
     [UIComponent(UI.Cooldown)]
     private Cooldown convertCooldown;
     private bool isFirstConvert = true;
@@ -45,7 +47,7 @@ public class Necromancer : UndeadRole
     private bool NecromancerConvert(PlayerControl? target)
     {
         if (target == null) return false;
-        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         MyPlayer.RpcGuardAndKill(target);
         if (isFirstConvert) return ConvertToDeathknight(target);
         ConvertToUndead(target);
@@ -89,20 +91,19 @@ public class Necromancer : UndeadRole
     private bool ConvertToDeathknight(PlayerControl target)
     {
         isFirstConvert = false;
-        Deathknight deathknight = CustomRoleManager.Static.Deathknight;
 
         ConvertToUndead(target);
         InitiateUndead(target);
 
         deathknightOriginal = target.GetCustomRole();
         CustomRoleManager.PlayerSubroles.GetOrCompute(target.PlayerId, () => new List<CustomRole>()).Add(deathknightOriginal);
-        Game.AssignRole(target, deathknight);
+        Game.AssignRole(target, _deathknight);
         myDeathknight = target.GetCustomRole<Deathknight>();
         target.NameModel().GetComponentHolder<RoleHolder>()[^1]
             .SetViewerSupplier(() => Game.GetAllPlayers().Where(p => p.PlayerId == target.PlayerId || p.Relationship(target) is Relation.FullAllies).ToList());
 
         VentLogger.Fatal($"Indicator count 22: {target.NameModel().GetComponentHolder<IndicatorHolder>().Count}");
-        Game.GameHistory.AddEvent(new RoleChangeEvent(target, deathknight));
+        Game.GameHistory.AddEvent(new RoleChangeEvent(target, _deathknight));
         return false;
     }
 
@@ -133,5 +134,6 @@ public class Necromancer : UndeadRole
         base.Modify(roleModifier)
             .RoleColor(new Color(0.61f, 0.53f, 0.67f))
             .CanVent(false)
-            .OptionOverride(Override.KillCooldown, convertCooldown.Duration * 2);
+            .OptionOverride(Override.KillCooldown, convertCooldown.Duration * 2)
+            .LinkedRoles(_deathknight);
 }

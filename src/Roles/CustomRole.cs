@@ -22,10 +22,11 @@ using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Roles.Subroles;
 using VentLib.Logging;
+using VentLib.Networking;
 using VentLib.Networking.Interfaces;
-using VentLib.Networking.Managers;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles;
@@ -38,7 +39,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     }
 
 
-    public virtual bool CanVent() => BaseCanVent || StaticOptions.AllRolesCanVent;
+    public virtual bool CanVent() => BaseCanVent || GeneralOptions.MayhemOptions.AllRolesCanVent;
     public virtual bool CanBeKilled() => !Invincible;
     public virtual bool HasTasks() => this is Crewmate;
     public bool IsDesyncRole() => this.DesyncRole != null;
@@ -46,7 +47,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
     public bool Invincible;
 
-    private HashSet<GameOptionOverride> currentOverrides = new();
+    private RemoteList<GameOptionOverride> currentOverrides = new();
     private List<RoleEditor> injections;
 
 
@@ -66,7 +67,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         cloned.Setup(player);
         cloned.SetupUI2(player.NameModel());
         player.NameModel().Render(force: true);
-        if (StaticOptions.AllRolesCanVent && cloned.VirtualRole == RoleTypes.Crewmate)
+        if (GeneralOptions.MayhemOptions.AllRolesCanVent && cloned.VirtualRole == RoleTypes.Crewmate)
             cloned.VirtualRole = RoleTypes.Engineer;
 
         cloned.PostSetup();
@@ -88,7 +89,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     /// Adds a GameOverride that continuously modifies this instances game options until removed
     /// </summary>
     /// <param name="optionOverride">Override to apply whenever SyncOptions is called</param>
-    public void AddOverride(GameOptionOverride optionOverride) => currentOverrides.Add(optionOverride);
+    public Remote<GameOptionOverride> AddOverride(GameOptionOverride optionOverride) => currentOverrides.Add(optionOverride);
     /// <summary>
     /// Removes a continuous GameOverride
     /// </summary>
@@ -98,12 +99,13 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     /// Removes a continuous GameOverride
     /// </summary>
     /// <param name="override">Override type to remove</param>
-    protected void RemoveOverride(Override @override) => currentOverrides.RemoveWhere(o => o.Option == @override);
+    protected void RemoveOverride(Override @override) => currentOverrides.RemoveAll(o => o.Option == @override);
 
     // Useful for shorthand delegation
     public void SyncOptions() => SyncOptions(null);
 
-    public void SyncOptions(IEnumerable<GameOptionOverride> newOverrides = null)
+    // ReSharper disable once MethodOverloadWithOptionalParameter
+    public void SyncOptions(IEnumerable<GameOptionOverride>? newOverrides = null, bool official = false)
     {
         if (MyPlayer == null || !AmongUsClient.Instance.AmHost) return;
         List<GameOptionOverride> thisList = new(currentOverrides);
@@ -111,20 +113,23 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         thisList.AddRange(this.roleSpecificGameOptionOverrides);
         if (newOverrides != null) thisList.AddRange(newOverrides);
 
-        thisList.StrJoin().DebugLog($"Sending Overrides To {MyPlayer.GetNameWithRole()}: ");
-
-        DesyncOptions.SendModifiedOptions(thisList, MyPlayer);
+        IGameOptions modifiedOptions = DesyncOptions.GetModifiedOptions(thisList);
+        if (official) RpcV2.Immediate(PlayerControl.LocalPlayer.NetId, RpcCalls.SyncSettings).WriteOptions(modifiedOptions).Send(MyPlayer.GetClientId());
+        DesyncOptions.SyncToPlayer(modifiedOptions, MyPlayer);
     }
 
 
-    public void Assign(bool desync = false)
+    public void Assign()
     {
+
+        RoleTypes assignedType;
+        if (!AmongUsClient.Instance.AmHost) return;
         // Here we do a "lazy" check for (all?) conditions that'd cause a role to need to be desync
         if (this.DesyncRole != null || this is Impostor)
         {
-
             // Get the ACTUAL role to assign the player
-            RoleTypes assignedType = this.DesyncRole ?? this.VirtualRole;
+            assignedType = this.DesyncRole ?? this.VirtualRole;
+
             // Get the opposite type of this role
             if (MyPlayer.IsHost())
             {
@@ -163,8 +168,12 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
             if (MyPlayer.IsHost())
                 Game.GetAlivePlayers().Except(allies).Do(p => p.Data.Role.Role = RoleTypes.Crewmate);
         }
-        else
-            MyPlayer.RpcSetRole(this.VirtualRole);
+        else MyPlayer.RpcSetRole(assignedType = this.VirtualRole);
+
+        if (MyPlayer.Relationship(PlayerControl.LocalPlayer) is Relation.FullAllies) MyPlayer.SetRole(assignedType);
+        else MyPlayer.SetRole(assignedType.IsImpostor() ? RoleTypes.Crewmate : RoleTypes.Impostor);
+
+        SyncOptions(new GameOptionOverride[] { new(Override.KillCooldown, 0.1f)} , true);
         HudManager.Instance.SetHudActive(true);
     }
 
@@ -188,7 +197,6 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
     private void SetupUiFields(INameModel nameModel)
     {
-        GameState[] gameStates = { GameState.InIntro, GameState.Roaming, GameState.InMeeting };
         this.GetType().GetFields(AccessFlags.InstanceAccessFlags)
             .Where(f => f.GetCustomAttribute<UIComponent>() != null)
             .Reverse()
@@ -200,32 +208,32 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
                 {
                     case UI.Name:
                         if (value is not string s) throw new ArgumentException($"Values for \"{nameof(UI.Name)}\" must be string. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
-                        nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(s, gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(s, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Role:
                         if (value is not CustomRole cr) throw new ArgumentException($"Values for \"{nameof(UI.Role)}\" must be {nameof(CustomRole)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
-                        nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(cr, gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(cr, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Subrole:
                         if (value is not Subrole sr) throw new ArgumentException($"Values for \"{nameof(UI.Subrole)}\" must be {nameof(Subrole)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
-                        nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(sr, gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(sr, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Cooldown:
                         if (value is not Cooldown cd) throw new ArgumentException($"Values for \"{nameof(UI.Cooldown)}\" must be {nameof(Cooldown)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         VentLogger.Fatal($"Loading Cooldown Field: {cd} for {this}");
-                        nameModel.GetComponentHolder<CooldownHolder>().Add(new CooldownComponent(cd, gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<CooldownHolder>().Add(new CooldownComponent(cd, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Counter:
                         if (value is not ICounter counter) throw new ArgumentException($"Values for \"{nameof(UI.Counter)}\" must be {nameof(ICounter)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
-                        nameModel.GetComponentHolder<CounterHolder>().Add(new CounterComponent(counter, gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<CounterHolder>().Add(new CounterComponent(counter, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Indicator:
                         if (value is not string ind) throw new ArgumentException($"Values for \"{nameof(UI.Indicator)}\" must be string. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
-                        nameModel.GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(ind, gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(ind, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Text:
                         if (value is not string txt) throw new ArgumentException($"Values for \"{nameof(UI.Indicator)}\" must be string. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
-                        nameModel.GetComponentHolder<TextHolder>().Add(new TextComponent(txt, gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<TextHolder>().Add(new TextComponent(txt, uiComponent.GameStates, uiComponent.ViewMode,  viewers: MyPlayer));
                         break;
                     default:
                         throw new ArgumentOutOfRangeException($"Component: {uiComponent.Component} is not a valid component in role: {EnglishRoleName}");
@@ -248,13 +256,16 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
                 switch (uiComponent.Component)
                 {
                     case UI.Name:
-                        nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(new LiveString(supplier), gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(new LiveString(supplier), uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
+                        break;
+                    case UI.Role:
+                        nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(new LiveString(supplier), uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Indicator:
-                        nameModel.GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString(supplier), gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString(supplier), uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Text:
-                        nameModel.GetComponentHolder<TextHolder>().Add(new TextComponent(new LiveString(supplier), gameStates, viewers: MyPlayer));
+                        nameModel.GetComponentHolder<TextHolder>().Add(new TextComponent(new LiveString(supplier), uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Cooldown:
                         object? CooldownSupplier() => m.Invoke(this, null);
@@ -273,7 +284,6 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
                         if (counterObj is not ICounter) throw new ArgumentException($"Values for \"{nameof(UI.Counter)}\" must be {nameof(ICounter)}. (Got: {counterObj?.GetType()}) in role: {EnglishRoleName}");
                         nameModel.GetComponentHolder<CounterHolder>().Add(new CounterComponent(() => (ICounter)m.Invoke(this, null)!, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
-                    case UI.Role:
                     case UI.Subrole:
                     default:
                         throw new ArgumentOutOfRangeException($"Component: {uiComponent.Component} is not a valid component");
@@ -299,7 +309,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         return a.Equals(b);
     }
 
-    public static bool operator !=(CustomRole a, CustomRole b)
+    public static bool operator !=(CustomRole? a, CustomRole? b)
     {
         return !(a == b);
     }

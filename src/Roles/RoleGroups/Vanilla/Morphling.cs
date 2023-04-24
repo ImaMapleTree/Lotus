@@ -1,9 +1,13 @@
+using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Vanilla;
 
 public class Morphling : Shapeshifter
 {
+    [RoleAction(RoleActionType.Attack)]
+    public override bool TryKill(PlayerControl target) => base.TryKill(target);
+
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Shapeshift Cooldown")

@@ -66,7 +66,7 @@ public class Veteran : Crewmate
         if (actor.GetCustomRole().Faction.Relationship(this.Faction) is Relation.FullAllies && !canKillCrewmates) return;
         handle.Cancel();
         Game.GameHistory.AddEvent(new VettedEvent(MyPlayer, actor));
-        MyPlayer.InteractWith(actor, new SimpleInteraction(new FatalIntent(interaction is IRangedInteraction), this));
+        MyPlayer.InteractWith(actor, new DirectInteraction(new FatalIntent(interaction is IRangedInteraction), this));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

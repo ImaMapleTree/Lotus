@@ -16,6 +16,8 @@ namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
 public class Werewolf: NeutralKillingBase
 {
     private bool rampaging;
+    private bool canVentNormally;
+    private bool canVentDuringRampage;
 
     [UIComponent(UI.Cooldown)]
     private Cooldown rampageDuration;
@@ -53,6 +55,8 @@ public class Werewolf: NeutralKillingBase
         rampageCooldown.Start();
     }
 
+    public override bool CanVent() => canVentNormally || rampaging;
+
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Rampage Kill Cooldown")
@@ -66,8 +70,17 @@ public class Werewolf: NeutralKillingBase
             .SubOption(sub => sub.Name("Rampage Duration")
                 .AddFloatRange(5f, 120f, 2.5f, 4, "s")
                 .BindFloat(rampageDuration.SetDuration)
+                .Build())
+            .SubOption(sub => sub.Name("Can Vent Normally")
+                .AddOnOffValues(false)
+                .BindBool(b => canVentNormally = b)
+                .ShowSubOptionPredicate(o => !(bool)o)
+                .SubOption(sub2 => sub2.Name("Can Vent in Rampage")
+                    .BindBool(b => canVentDuringRampage = b)
+                    .AddOnOffValues()
+                    .Build())
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier).RoleColor(new Color(0.66f, 0.4f, 0.16f));
+        base.Modify(roleModifier).RoleColor(new Color(0.66f, 0.4f, 0.16f)).CanVent(canVentNormally || canVentDuringRampage);
 }

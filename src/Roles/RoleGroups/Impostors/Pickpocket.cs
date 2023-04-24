@@ -1,11 +1,14 @@
 
+using System;
 using TOHTOR.API;
+using TOHTOR.API.Meetings;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;
+using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
@@ -22,8 +25,14 @@ public class PickPocket : Impostor
     {
         bool killed = base.TryKill(target);
         if (!killed) return false;
-        currentVotes++;
+        if (currentVotes < maximumVotes) currentVotes++;
         return true;
+    }
+
+    [RoleAction(RoleActionType.MyVote)]
+    private void EnhancedVote(Optional<PlayerControl> target, MeetingDelegate meetingDelegate)
+    {
+        for (int i = 0; i < currentVotes; i++) meetingDelegate.AddVote(MyPlayer, target);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

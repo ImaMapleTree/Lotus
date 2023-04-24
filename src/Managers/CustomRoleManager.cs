@@ -14,6 +14,7 @@ using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.Roles.RoleGroups.Undead.Roles;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Roles.Subroles;
+using VentLib.Options;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using static TOHTOR.Roles.AbstractBaseRole;
@@ -27,6 +28,7 @@ namespace TOHTOR.Managers;
 [LoadStatic]
 public static class CustomRoleManager
 {
+    public static OptionManager RoleOptionManager = OptionManager.GetManager(file: "role_options.txt");
     public static Dictionary<byte, CustomRole> PlayersCustomRolesRedux = new();
     public static Dictionary<byte, CustomRole> LastRoundCustomRoles = new();
 
@@ -35,6 +37,8 @@ public static class CustomRoleManager
     public static StaticRoles Static = new();
     public static ExtraRoles Special = new();
     public static CustomRole Default = Static.Crewmate;
+
+    private static List<CustomRole>? _lazyInitializeList;
 
     public static readonly List<CustomRole> MainRoles = Static.GetType()
         .GetFields()
@@ -46,16 +50,17 @@ public static class CustomRoleManager
         .Select(f => (CustomRole)f.GetValue(Special))
         .ToList();
 
-    public static readonly List<CustomRole> AllRoles = MainRoles.Concat(SpecialRoles).ToList();
-
+    public static readonly List<CustomRole> AllRoles = MainRoles.Concat(SpecialRoles).Concat(_lazyInitializeList!).ToList();
 
     public static void AddRole(CustomRole staticRole)
     {
-        AllRoles.Add(staticRole);
+        if (AllRoles == null!) (_lazyInitializeList ??= new List<CustomRole>()).Add(staticRole);
+        else AllRoles.Add(staticRole);
     }
 
     public static int GetRoleId(CustomRole role) => role == null ? 0 : GetRoleId(role.GetType());
     public static CustomRole GetRoleFromType(Type roleType) => GetRoleFromId(GetRoleId(roleType));
+    public static CustomRole GetCleanRole(CustomRole role) => GetRoleFromId(GetRoleId(role));
 
     public static int GetRoleId(Type roleType)
     {
@@ -64,6 +69,8 @@ public static class CustomRoleManager
                 return i;
         return -1;
     }
+
+    public static CustomRole GetRoleFromName(string name) => AllRoles.First(r => r.EnglishRoleName == name);
 
     public static CustomRole GetRoleFromId(int id)
     {
@@ -144,8 +151,8 @@ public static class CustomRoleManager
         public Camouflager Camouflager = new Camouflager();
         public Consort Consort = new Consort();
         public Disperser Disperser = new Disperser();
-        //escapist
-        public FireWorks FireWorks = new FireWorks();
+        public Escapist Escapist = new Escapist();
+        public FireWorker FireWorker = new FireWorker();
         public Freezer Freezer = new Freezer();
         public Grenadier Grenadier = new Grenadier();
         public IdentityThief IdentityThief = new IdentityThief();
@@ -162,12 +169,12 @@ public static class CustomRoleManager
         public Puppeteer Puppeteer = new Puppeteer();
         //sidekick madmate
         //silencer
+        public SerialKiller SerialKiller = new SerialKiller();
         public Sniper Sniper = new Sniper();
         public Swooper Swooper = new Swooper();
         public TimeThief TimeThief = new TimeThief();
         //traitor
         public Vampire Vampire = new Vampire();
-        public Vampiress Vampiress = new Vampiress();
         public Warlock Warlock = new Warlock();
         public Witch Witch = new Witch();
         public YingYanger YingYanger = new YingYanger();
@@ -179,6 +186,7 @@ public static class CustomRoleManager
 
         //Crewmates
 
+        public Alchemist Alchemist = new Alchemist();
         public Bastion Bastion = new Bastion();
         public Bodyguard Bodyguard = new Bodyguard();
         public Child Child = new Child();
@@ -189,6 +197,7 @@ public static class CustomRoleManager
         public Doctor Doctor = new Doctor();
 
         public Escort Escort = new Escort();
+        public ExConvict ExConvict = new ExConvict();
         public Investigator Investigator = new Investigator();
         public Mayor Mayor = new Mayor();
         public Mechanic Mechanic = new Mechanic();
@@ -218,17 +227,17 @@ public static class CustomRoleManager
         public Arsonist Arsonist = new Arsonist();
         public BloodKnight BloodKnight = new BloodKnight();
         public CrewPostor CrewPostor = new CrewPostor();
-        public Deathknight Deathknight = new Deathknight();
+        public Copycat Copycat = new Copycat();
         public Egoist Egoist = new Egoist();
         public Executioner Executioner = new Executioner();
         public Glitch Glitch = new Glitch();
         public GuardianAngel GuardianAngel = new GuardianAngel();
         public Hacker Hacker = new Hacker();
-        //hitman
+        public Hitman Hitman = new Hitman();
         public Jackal Jackal = new Jackal();
         public Jester Jester = new Jester();
-        //juggernaught
-        //marksman
+        public Juggernaut Juggernaut = new Juggernaut();
+        public Marksman Marksman = new Marksman();
         public Necromancer Necromancer = new Necromancer();
         //neutral witch
         public Opportunist Opportunist = new Opportunist();
@@ -237,13 +246,11 @@ public static class CustomRoleManager
         public Pestilence Pestilence = new Pestilence();
         public Postman Postman = new Postman();
         public Retributionist Retributionist = new Retributionist();
-        public Copycat Copycat = new Copycat();
-        public SerialKiller SerialKiller = new SerialKiller();
         public Sidekick Sidekick = new Sidekick();
         public Survivor Survivor = new Survivor();
-        //swapper
+        public Swapper Swapper = new Swapper();
         public Terrorist Terrorist = new Terrorist();
-        //vulture
+        public Vulture Vulture = new Vulture();
         public Werewolf Werewolf = new Werewolf();
     }
 

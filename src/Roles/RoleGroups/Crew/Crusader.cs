@@ -5,6 +5,7 @@ using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interactions.Interfaces;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -14,7 +15,7 @@ using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
 
-public class Crusader: Crewmate
+public class Crusader: Crewmate, ISabotagerRole
 {
     private Optional<byte> protectedPlayer = Optional<byte>.Null();
     private bool protectAgainstHelpfulInteraction;
@@ -23,7 +24,7 @@ public class Crusader: Crewmate
     [RoleAction(RoleActionType.Attack)]
     private void SelectTarget(PlayerControl target)
     {
-        if (MyPlayer.InteractWith(target, SimpleInteraction.HelpfulInteraction.Create(this)) == InteractionResult.Halt) return;
+        if (MyPlayer.InteractWith(target, DirectInteraction.HelpfulInteraction.Create(this)) == InteractionResult.Halt) return;
         protectedPlayer = Optional<byte>.NonNull(target.PlayerId);
         MyPlayer.RpcGuardAndKill(target);
         Game.GameHistory.AddEvent(new ProtectEvent(MyPlayer, target));
@@ -49,7 +50,7 @@ public class Crusader: Crewmate
 
         handle.Cancel();
         RoleUtils.SwapPositions(target, MyPlayer);
-        bool killed = MyPlayer.InteractWith(killer, SimpleInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
+        bool killed = MyPlayer.InteractWith(killer, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
         Game.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, killer));
         Game.GameHistory.AddEvent(new KillEvent(MyPlayer, killer, killed));
     }
@@ -69,5 +70,7 @@ public class Crusader: Crewmate
         base.Modify(roleModifier)
             .DesyncRole(RoleTypes.Impostor)
             .RoleColor(new Color(0.78f, 0.36f, 0.22f))
-            .OptionOverride(Override.KillCooldown, () => OriginalOptions.KillCooldown() * 2);
+            .OptionOverride(Override.KillCooldown, () => AUSettings.KillCooldown() * 2);
+
+    public bool CanSabotage() => false;
 }

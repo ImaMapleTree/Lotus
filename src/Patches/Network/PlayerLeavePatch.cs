@@ -5,7 +5,10 @@ using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Gamemodes;
 using TOHTOR.Managers;
+using TOHTOR.Roles.Internals;
+using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Logging;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches.Network;
 
@@ -28,6 +31,8 @@ class OnPlayerLeftPatch
         Game.Players.Remove(data.Character.PlayerId);
         AntiBlackout.OnDisconnect(data.Character.Data);
 
+        ActionHandle uselessHandle = ActionHandle.NoInit();
+        if (Game.State is not GameState.InLobby) PlayerControl.AllPlayerControls.ToArray().Trigger(RoleActionType.OnDisconnect, ref uselessHandle, data.Character);
         Hooks.PlayerHooks.PlayerLeaveHook.Propagate(new PlayerHookEvent(data.Character));
         Game.CurrentGamemode.Trigger(GameAction.GameLeave, data);
     }

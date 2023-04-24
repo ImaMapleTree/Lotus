@@ -1,12 +1,12 @@
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
-using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using VentLib.Logging;
+using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
-using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches.Actions;
 
@@ -17,16 +17,20 @@ static class FixedUpdatePatch
     {
         Game.RecursiveCallCheck = 0;
         DisplayModVersion(__instance);
-        if (!AmongUsClient.Instance.AmHost || Game.State is not GameState.Roaming) return;
+
+        if (!AmongUsClient.Instance.AmHost) return;
+
+        if (!__instance.IsHost() && Game.State is GameState.InLobby && __instance.Data.PlayerLevel < GeneralOptions.AdminOptions.KickPlayersUnderLevel)
+            AmongUsClient.Instance.KickPlayer(__instance.GetClientId(), false);
+
+        if (Game.State is not GameState.Roaming) return;
         uint id = Profilers.Global.Sampler.Start("Fixed Update Patch");
 
         var player = __instance;
         ActionHandle handle = null;
-        INameModel nameModel = __instance.NameModel();
-        Game.GetAllPlayers().ForEach(p => nameModel.RenderFor(p));
         __instance.Trigger(RoleActionType.FixedUpdate, ref handle);
 
-        if (player.IsAlive() && StaticOptions.LadderDeath) FallFromLadder.FixedUpdate(player);
+        if (player.IsAlive() && GeneralOptions.MiscellaneousOptions.EnableLadderDeath) FallFromLadder.FixedUpdate(player);
         Profilers.Global.Sampler.Stop(id);
         /*if (player.PlayerId == PlayerControl.LocalPlayer.PlayerId) DisableDevice.FixedUpdate();*/
         /*EnterVentPatch.CheckVentSwap(__instance);*/

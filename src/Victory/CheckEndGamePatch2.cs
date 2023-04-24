@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.Managers.History;
 using TOHTOR.Options;
 using TOHTOR.Victory.Conditions;
 using VentLib.Logging;
@@ -16,13 +18,9 @@ public class CheckEndGamePatch2
     private static bool _deferred;
     private static DateTime slowDown = DateTime.Now;
 
-    private static bool CodeToTest()
-    {
-        return true;
-    }
-
     public static bool Prefix()
     {
+        if (Game.State is GameState.InLobby or GameState.InIntro) return false;
         if (DateTime.Now.Subtract(slowDown).TotalSeconds < 0.1f) return false;
         slowDown = DateTime.Now;
         if (!AmongUsClient.Instance.AmHost) return true;
@@ -31,7 +29,7 @@ public class CheckEndGamePatch2
         uint id = Profilers.Global.Sampler.Start("CheckEndGamePatch");
 
         WinDelegate winDelegate = Game.GetWinDelegate();
-        if (StaticOptions.NoGameEnd)
+        if (GeneralOptions.DebugOptions.NoGameEnd)
             winDelegate.CancelGameWin();
 
         bool isGameWin = winDelegate.IsGameOver();
@@ -55,14 +53,14 @@ public class CheckEndGamePatch2
             WinReason.HostForceEnd => GameOverReason.ImpostorDisconnect,
             WinReason.GamemodeSpecificWin => GameOverReason.ImpostorByKill,
             WinReason.SoloWinner => GameOverReason.ImpostorByKill,
-            _ => throw new ArgumentOutOfRangeException()
         };
 
 
+        Game.GameHistory.PlayerHistory = Game.Players.Values.Select(p => new PlayerHistory(p.MyPlayer)).ToList();
         VictoryScreen.ShowWinners(winDelegate.GetWinners(), reason);
 
         _deferred = true;
-        Async.Schedule(() => DelayedWin(reason), NetUtils.DeriveDelay(0.6f));
+        Async.Schedule(() => DelayedWin(reason), NetUtils.DeriveDelay(1f));
 
         Profilers.Global.Sampler.Stop(id);
         return false;
@@ -74,16 +72,5 @@ public class CheckEndGamePatch2
         VentLogger.Info("Ending Game", "DelayedWin");
         GameManager.Instance.RpcEndGame(reason, false);
         Async.Schedule(() => GameManager.Instance.EndGame(), 0.1f);
-    }
-
-    public static void ShowcaseFunction()
-    {
-        Profiler profiler = Profilers.Global; //デフォルトのプロファイラー。独自のプロファイラーを作成できます
-        uint id = profiler.Sampler.Start(); // or profiler.Sampler.Start("NAME");
-
-        bool condition = CodeToTest();
-
-        if (!condition) profiler.Sampler.Discard(id); //.Discard は最後のピリオドの結果を無視します
-        else profiler.Sampler.Stop(id); //記録期間
     }
 }

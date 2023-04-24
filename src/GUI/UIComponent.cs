@@ -12,7 +12,6 @@ public class UIComponent: Attribute
     public ViewMode ViewMode;
     public GameState[] GameStates;
 
-
     public UIComponent(UI component, ViewMode viewMode = ViewMode.Additive, params GameState[] gameStates)
     {
         this.Component = component;

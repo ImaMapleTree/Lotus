@@ -52,6 +52,20 @@ public enum RoleActionType
     AnyPlayerAction,
     OnPet,
     /// <summary>
+    /// Triggers when the pet button is held down. This gets sent every 0.4 seconds if the button is held down. The
+    /// times parameter indicates how many times the button has been held down during the current span.
+    /// <br/>
+    /// Example: if times = 3 then the button has been held down for 1.2 seconds because 3 x 0.4 = 1.2
+    /// </summary>
+    /// <param name="times">the number of times the button has been detected in the down state (+1 every 0.4 seconds)</param>
+    OnHoldPet,
+    /// <summary>
+    /// Triggers when the pet button has been held then released. Similar to <see cref="OnHoldPet"/>, the
+    /// times parameter indicates how many times the button has been held down during the current span.
+    /// </summary>
+    /// <param name="times">the number of times the button has been detected in the down state (+1 every 0.4 seconds)</param>
+    OnPetRelease,
+    /// <summary>
     /// Triggers whenever the player enters a vent (this INCLUDES vent activation)
     /// Parameters: (Vent vent)
     /// </summary>
@@ -70,7 +84,9 @@ public enum RoleActionType
     /// </summary>
     SabotagePartialFix,
     SabotageFixed,
+    AnyShapeshift,
     Shapeshift,
+    AnyUnshapeshift,
     Unshapeshift,
     /// <summary>
     /// Triggered when my player attacks another player<br/>
@@ -140,7 +156,12 @@ public enum RoleActionType
     /// <param name="message"><see cref="string"/> the message sent</param>
     /// <param name="state"><see cref="TOHTOR.API.GameState"/> the current state of the game (for checking in meeting)</param>
     /// <param name="isAlive"><see cref="bool"/> if the chatting player is alive</param>
-    Chat
+    Chat,
+    /// <summary>
+    /// Triggers whenever a player leaves the game. This action cannot be canceled
+    /// </summary>
+    /// <param name="player"><see cref="PlayerControl"/> the player who disconnected</param>
+    OnDisconnect,
 }
 
 public static class RoleActionTypeMethods

@@ -93,7 +93,7 @@ public class Bodyguard: Crewmate
 
         RoleUtils.SwapPositions(target, MyPlayer);
         Game.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, actor));
-        InteractionResult result = MyPlayer.InteractWith(actor, SimpleInteraction.FatalInteraction.Create(this));
+        InteractionResult result = MyPlayer.InteractWith(actor, DirectInteraction.FatalInteraction.Create(this));
 
         if (result is InteractionResult.Proceed) Game.GameHistory.AddEvent(new KillEvent(MyPlayer, actor));
         actor.GetCustomRole().GetActions(RoleActionType.Attack)
@@ -101,7 +101,7 @@ public class Bodyguard: Crewmate
             .Handle(t => t.Item1.Execute(t.Item2, new object[] { MyPlayer} ),
             () =>
             {
-                if (actor.InteractWith(MyPlayer, SimpleInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed)
+                if (actor.InteractWith(MyPlayer, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed)
                     Game.GameHistory.AddEvent(new KillEvent(actor, MyPlayer));
             });
     }

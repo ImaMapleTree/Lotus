@@ -18,15 +18,12 @@ public class MeetingApi
 {
     public static void StartMeeting(Func<ReporterSetter, MeetingCreator> creationFunction) => creationFunction(new MeetingCreator()).BeginMeeting();
 
-    public static MeetingDelegate? MeetingDelegate() => MeetingStartPatch.MeetingDelegate;
-
     public static void EndVoting(MeetingHud meetingHud, MeetingHud.VoterState[] voterStates, GameData.PlayerInfo? exiledPlayer, bool tie)
     {
         AntiBlackout.SaveCosmetics();
         GameData.PlayerInfo? fakeExiled = AntiBlackout.CreateFakePlayer(exiledPlayer);
 
-        if (AntiBlackout.OverrideExiledPlayer)
-            AntiBlackout.ExiledPlayer = exiledPlayer;
+        AntiBlackout.ExiledPlayer = exiledPlayer;
 
         if (fakeExiled == null)
         {

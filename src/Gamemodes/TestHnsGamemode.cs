@@ -12,6 +12,10 @@ public class TestHnsGamemode: Gamemode
 
     public static GameOptionTab HnsTab = new("Hide & Seek Options", () => Utils.LoadSprite("TOHTOR.assets.Tabs.TabIcon_HideAndSeek.png"));
 
+    public override void Setup()
+    {
+    }
+
     public override void AssignRoles(List<PlayerControl> players)
     {
         throw new System.NotImplementedException();

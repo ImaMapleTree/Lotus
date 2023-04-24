@@ -14,7 +14,7 @@ using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Options;
 
-[Localized(Group = "OptionShower")]
+[Localized("OptionShower")]
 public class ShowerPages
 {
     [Localized("ActiveRolesList")]
@@ -41,7 +41,7 @@ public class ShowerPages
         return () =>
         {
             string content = $"Gamemode: {Game.CurrentGamemode.GetName()}\n\n";
-            content += $"{CustomRoleManager.Special.GM.RoleColor.Colorize("GM")}: {Utils.GetOnOffColored(StaticOptions.EnableGM)}\n\n";
+            content += $"{CustomRoleManager.Special.GM.RoleColor.Colorize("GM")}: {Utils.GetOnOffColored(GeneralOptions.AdminOptions.HostGM)}\n\n";
             content += ActiveRolesList + "\n";
 
             CustomRoleManager.MainRoles.Where(role => role.IsEnabled()).ForEach(role =>

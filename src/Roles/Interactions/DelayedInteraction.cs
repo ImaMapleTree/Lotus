@@ -2,7 +2,7 @@ using TOHTOR.Roles.Interactions.Interfaces;
 
 namespace TOHTOR.Roles.Interactions;
 
-public class DelayedInteraction : SimpleInteraction, IDelayedInteraction
+public class DelayedInteraction : DirectInteraction, IDelayedInteraction
 {
     private readonly float delay;
 

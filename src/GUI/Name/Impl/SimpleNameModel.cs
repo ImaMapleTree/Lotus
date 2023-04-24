@@ -1,8 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.Extensions;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.GUI.Name.Interfaces;
@@ -31,7 +31,6 @@ public class SimpleNameModel : INameModel
 
     private List<IComponentHolder> componentHolders;
     private PlayerControl player;
-    private Dictionary<byte, DateTime> renders = new();
 
     private void SetHolders()
     {
@@ -55,16 +54,11 @@ public class SimpleNameModel : INameModel
 
     public PlayerControl MyPlayer() => player;
 
-    public string Render(GameState? state = null, bool sendToPlayer = true, bool force = false)
-    {
-        return this.RenderFor(MyPlayer(), state, sendToPlayer, force);
-    }
+    public string Render(GameState? state = null, bool sendToPlayer = true, bool force = false) => this.RenderFor(MyPlayer(), state, sendToPlayer, force);
 
     public string RenderFor(PlayerControl rPlayer, GameState? state = null, bool sendToPlayer = true, bool force = false)
     {
-        float durationSinceLast = (float)(DateTime.Now - this.renders.GetOrCompute(rPlayer.PlayerId, () => DateTime.Now)).TotalSeconds;
-        if (!force && durationSinceLast < ModConstants.DynamicNameTimeBetweenRenders && Game.State is not GameState.InMeeting) return cacheString;
-        this.renders[rPlayer.PlayerId] = DateTime.Now;
+        if (!AmongUsClient.Instance.AmHost) return "";
         uint id = Profilers.Global.Sampler.Start();
 
         state ??= Game.State;
@@ -84,7 +78,12 @@ public class SimpleNameModel : INameModel
         }
 
         cacheString = renders.Select(s => s.Join(delimiter: " ".Repeat(spacing - 1))).Join(delimiter: "\n").TrimStart('\n').TrimEnd('\n').Replace("\n\n", "\n");
-        if (sendToPlayer) RpcV2.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(rPlayer.GetClientId());
+        if (sendToPlayer)
+        {
+            /*VentLogger.Fatal($"Sending Name for {player.UnalteredName()}: {cacheString} to: {rPlayer.UnalteredName()}");*/
+            if (rPlayer.IsHost()) Api.Local.SetName(player, cacheString);
+            else RpcV2.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(rPlayer.GetClientId());
+        }
         Profilers.Global.Sampler.Stop(id);
         return cacheString;
     }

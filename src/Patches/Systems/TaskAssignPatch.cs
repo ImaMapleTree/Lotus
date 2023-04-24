@@ -1,9 +1,11 @@
+using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
+using TOHTOR.Options.General;
 using TOHTOR.Roles;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
@@ -14,20 +16,24 @@ namespace TOHTOR.Patches.Systems;
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.AddTasksFromList))]
 class AddTasksFromListPatch
 {
-    public static void Prefix(ShipStatus __instance,
-        [HarmonyArgument(4)] Il2CppSystem.Collections.Generic.List<NormalPlayerTask> unusedTasks)
+    public static void Prefix(ShipStatus __instance, [HarmonyArgument(4)] Il2CppSystem.Collections.Generic.List<NormalPlayerTask> unusedTasks)
     {
-        if (!StaticOptions.DisableTasks) return;
+        if (!GeneralOptions.GameplayOptions.DisableTasks) return;
         List<NormalPlayerTask> disabledTasks = new();
         for (var i = 0; i < unusedTasks.Count; i++)
         {
             var task = unusedTasks[i];
-            if (task.TaskType == TaskTypes.SwipeCard && StaticOptions.DisableSwipeCard) disabledTasks.Add(task);//カードタスク
-            if (task.TaskType == TaskTypes.SubmitScan && StaticOptions.DisableSubmitScan) disabledTasks.Add(task);//スキャンタスク
-            if (task.TaskType == TaskTypes.UnlockSafe && StaticOptions.DisableUnlockSafe) disabledTasks.Add(task);//金庫タスク
-            if (task.TaskType == TaskTypes.UploadData && StaticOptions.DisableUploadData) disabledTasks.Add(task);//アップロードタスク
-            if (task.TaskType == TaskTypes.StartReactor && StaticOptions.DisableStartReactor) disabledTasks.Add(task);//リアクターの3x3タスク
-            if (task.TaskType == TaskTypes.ResetBreakers && StaticOptions.DisableResetBreaker) disabledTasks.Add(task);//レバータスク
+            switch (task.TaskType)
+            {
+                case TaskTypes.SwipeCard when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.CardSwipe):
+                case TaskTypes.SubmitScan when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.MedScan):
+                case TaskTypes.UnlockSafe when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.UnlockSafe):
+                case TaskTypes.UploadData when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.UploadData):
+                case TaskTypes.StartReactor when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.StartReactor):
+                case TaskTypes.ResetBreakers when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.ResetBreaker):
+                    disabledTasks.Add(task);//カードタスク
+                    break;
+            }
         }
         foreach (var task in disabledTasks)
         {
@@ -61,7 +67,7 @@ class RpcSetTasksPatch
         //不要な割り当て済みのタスクを削除する処理
         //コモンタスクを割り当てる設定ならコモンタスク以外を削除
         //コモンタスクを割り当てない設定ならリストを空にする
-        if (hasCommonTasks) TasksList.RemoveRange(OriginalOptions.NumCommonTasks(), TasksList.Count - OriginalOptions.NumCommonTasks());
+        if (hasCommonTasks) TasksList.RemoveRange(AUSettings.NumCommonTasks(), TasksList.Count - AUSettings.NumCommonTasks());
         else TasksList.Clear();
 
         //割り当て済みのタスクが入れられるHashSet

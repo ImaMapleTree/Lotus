@@ -16,40 +16,31 @@ namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
 
 public class CrewPostor : Crewmate
 {
+    private bool warpToTarget;
+    private bool canKillAllied;
+
     protected override void OnTaskComplete()
     {
         if (MyPlayer.Data.IsDead) return;
-        List<PlayerControl> inRangePlayers = RoleUtils.GetPlayersWithinDistance(MyPlayer, 999).Where(p => p.Relationship(MyPlayer) is not Relation.FullAllies).ToList();
+        List<PlayerControl> inRangePlayers = RoleUtils.GetPlayersWithinDistance(MyPlayer, 999, true).Where(p => canKillAllied || p.Relationship(MyPlayer) is not Relation.FullAllies).ToList();
         if (inRangePlayers.Count == 0) return;
         PlayerControl target = inRangePlayers.GetRandom();
-        var interaction = new RangedInteraction(new FatalIntent(true, () => new TaskDeathEvent(target, MyPlayer)), 0, this);
+        var interaction = new RangedInteraction(new FatalIntent(!warpToTarget, () => new TaskDeathEvent(target, MyPlayer)), 0, this);
 
         bool death = MyPlayer.InteractWith(target, interaction) is InteractionResult.Proceed;
         Game.GameHistory.AddEvent(new TaskKillEvent(MyPlayer, target, death));
     }
+
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
-        .Tab(DefaultTabs.NeutralTab)
-            .SubOption(sub => sub
-                .Name("Override CrewPostor's Tasks")
-                .Bind(v => HasOverridenTasks = (bool)v)
-                .ShowSubOptionPredicate(v => (bool)v)
+        AddTaskOverrideOptions(base.RegisterOptions(optionStream)
+            .Tab(DefaultTabs.NeutralTab)
+            .SubOption(sub => sub.Name("Warp to Target")
+                .AddOnOffValues()
+                .BindBool(b => warpToTarget = b)
+                .Build()))
+            .SubOption(sub => sub.Name("Can Kill Allies")
                 .AddOnOffValues(false)
-                .SubOption(sub2 => sub2
-                    .Name("Allow Common Tasks")
-                    .Bind(v => HasCommonTasks = (bool)v)
-                    .AddOnOffValues()
-                    .Build())
-                .SubOption(sub2 => sub2
-                    .Name("CrewPostor Long Tasks")
-                    .Bind(v => LongTasks = (int)v)
-                    .AddIntRange(0, 20, 1, 5)
-                    .Build())
-                .SubOption(sub2 => sub2
-                    .Name("CrewPostor Short Tasks")
-                    .Bind(v => ShortTasks = (int)v)
-                    .AddIntRange(1, 20, 1, 5)
-                    .Build())
+                .BindBool(b => canKillAllied = b)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor("#DC6601").Faction(FactionInstances.Solo);

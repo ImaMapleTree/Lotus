@@ -1,10 +1,12 @@
 using HarmonyLib;
+using TMPro;
 using TOHTOR.API;
 using TOHTOR.Options;
 using TOHTOR.Patches.Client;
 using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization;
+using VentLib.Logging;
 
 
 namespace TOHTOR.Patches.Network;
@@ -12,13 +14,31 @@ namespace TOHTOR.Patches.Network;
 [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
 class PingTrackerPatch
 {
+    public static float deltaTime;
+    private static bool dipped;
     static void Postfix(PingTracker __instance)
     {
         __instance.text.alignment = TMPro.TextAlignmentOptions.TopRight;
+
+        deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
+        float fps = Mathf.Ceil(1.0f / deltaTime);
+        if (fps < 55 && !dipped && Game.State is GameState.Roaming)
+        {
+            VentLogger.High($"FPS Dipped Below 60 => {fps}");
+            dipped = true;
+        }
+        else dipped = false;
+
+        __instance.text.text += " " + fps + " fps";
+        __instance.text.sortingOrder = -1;
+
+
         if (ControllerManagerUpdatePatch.showPing)
             __instance.text.text += TOHPlugin.CredentialsText;
-        if (StaticOptions.NoGameEnd) __instance.text.text += $"\r\n" + Utils.ColorString(Color.red, Localizer.Get("StaticOptions.NoGameEnd"));
+        if (GeneralOptions.DebugOptions.NoGameEnd) __instance.text.text += $"\r\n" + Utils.ColorString(Color.red, Localizer.Translate("StaticOptions.NoGameEnd"));
         __instance.text.text += $"\r\n" + Game.CurrentGamemode.GetName();
+
+
 
         var offsetX = 1.2f; //右端からのオフセット
         if (HudManager.InstanceExists && HudManager._instance.Chat.ChatButton.active) offsetX += 0.8f; //チャットボタンがある場合の追加オフセット

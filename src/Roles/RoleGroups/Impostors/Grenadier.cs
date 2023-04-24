@@ -55,7 +55,7 @@ public class Grenadier : Vanilla.Impostor
             .SubOption(sub => sub
                 .Name("Amount of Grenades")
                 .Bind(v => grenadeAmount = (int)v)
-                .AddIntRange(1, 5, 1, 2, "s")
+                .AddIntRange(1, 5, 1, 2)
                 .Build())
             .SubOption(sub => sub
                 .Name("Blind Cooldown")

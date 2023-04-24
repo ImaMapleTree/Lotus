@@ -5,6 +5,7 @@ using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Roles.Interactions;
@@ -27,6 +28,7 @@ public class FatalIntent : IFatalIntent
     public virtual void Action(PlayerControl actor, PlayerControl target)
     {
         Optional<IDeathEvent> deathEvent = CauseOfDeath();
+        actor.GetCustomRole().SyncOptions();
 
         if (!target.GetCustomRole().CanBeKilled())
         {
@@ -44,8 +46,7 @@ public class FatalIntent : IFatalIntent
 
     public void KillTarget(PlayerControl actor, PlayerControl target)
     {
-        if (ranged) target.RpcMurderPlayer(target);
-        else actor.RpcMurderPlayer(target);
+        ProtectedRpc.CheckMurder(!ranged ? actor : target, target);
     }
 
     public void Halted(PlayerControl actor, PlayerControl target)

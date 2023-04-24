@@ -27,22 +27,22 @@ public class WinDelegate
 
     public bool IsGameOver()
     {
-        bool isWin = false;
-        foreach (IWinCondition winCondition in winConditions)
+        if (forcedWin)
         {
-            isWin = winCondition.IsConditionMet(out winners);
-            if (!isWin) continue;
-            winReason = winCondition.GetWinReason();
-            if (!StaticOptions.NoGameEnd)
-                VentLogger.Info($"Triggering Win by \"{winCondition.GetType()}\", winners={winners.Select(p => p.UnalteredName()).StrJoin()}, reason={winReason}", "WinCondition");
-            break;
+            VentLogger.Info($"Triggering Game Win by Force, winners={winners.Select(p => p.UnalteredName()).Join()}, reason={winReason}", "WinCondition");
+            winNotifiers.ForEach(notify => notify(this));
+            return true;
         }
 
-        if (isWin)
-            winNotifiers.Do(notify => notify(this));
-        isWin = forcedWin || (isWin && !forcedCancel);
-        forcedCancel = false;
-        return isWin;
+        IWinCondition? condition = winConditions.FirstOrDefault(con => con.IsConditionMet(out winners));
+        if (condition == null) return false;
+        winNotifiers.ForEach(notify => notify(this));
+
+        if (forcedCancel) return false;
+
+        winReason = condition.GetWinReason();
+        VentLogger.Info($"Triggering Win by \"{condition.GetType()}\", winners={winners.Select(p => p.UnalteredName()).StrJoin()}, reason={winReason}", "WinCondition");
+        return true;
     }
 
     /// <summary>
@@ -61,8 +61,10 @@ public class WinDelegate
         winConditions.Sort();
     }
 
-    public void ForceGameWin()
+    public void ForceGameWin(List<PlayerControl> forcedWinners, WinReason reason)
     {
+        this.winners = forcedWinners;
+        this.winReason = reason;
         forcedWin = true;
     }
 

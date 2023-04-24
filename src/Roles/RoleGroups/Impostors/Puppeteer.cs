@@ -31,7 +31,7 @@ public class Puppeteer: Vanilla.Impostor
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         Game.GameHistory.AddEvent(new ManipulatedEvent(MyPlayer, target));
         cursedPlayers.Add(target);
@@ -63,7 +63,6 @@ public class Puppeteer: Vanilla.Impostor
             ManipulatedPlayerDeathEvent playerDeathEvent = new(target, player);
             FatalIntent fatalIntent = new(false, () => playerDeathEvent);
             bool isDead = player.InteractWith(target, new ManipulatedInteraction(fatalIntent, player.GetCustomRole(), MyPlayer)) is InteractionResult.Proceed;
-            Game.GameHistory.AddEvent(new ManipulatedPlayerKillEvent(player, target, MyPlayer, isDead));
             Game.GameHistory.AddEvent(new ManipulatedPlayerKillEvent(player, target, MyPlayer, isDead));
             RemovePuppet(player);
         }

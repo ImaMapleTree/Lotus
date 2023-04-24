@@ -5,6 +5,7 @@ using TOHTOR.Factions;
 using TOHTOR.FactionsOLD;
 using TOHTOR.Managers;
 using TOHTOR.Options;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.Legacy;
@@ -16,7 +17,8 @@ using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Neutral;
 
-public class Amnesiac : CustomRole {
+public class Amnesiac : CustomRole, ISabotagerRole
+{
     private bool stealExactRole;
 
     [RoleAction(RoleActionType.AnyReportedBody)]
@@ -53,5 +55,9 @@ public class Amnesiac : CustomRole {
                 .AddOnOffValues(false).Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor(new Color(0.51f, 0.87f, 0.99f)).DesyncRole(RoleTypes.Impostor).Faction(FactionInstances.Solo);
+        roleModifier.RoleColor(new Color(0.51f, 0.87f, 0.99f))
+            .DesyncRole(RoleTypes.Impostor)
+            .Faction(FactionInstances.Solo);
+
+    public bool CanSabotage() => false;
 }

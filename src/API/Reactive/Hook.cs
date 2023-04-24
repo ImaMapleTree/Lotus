@@ -3,15 +3,8 @@ using System;
 namespace TOHTOR.API.Reactive;
 
 // ReSharper disable once InconsistentNaming
-public interface Hook<T> where T: IHookEvent
+public interface Hook<T>: Hook where T: IHookEvent
 {
-    /// <summary>
-    /// Checks if a consumer is bound to the given key
-    /// </summary>
-    /// <param name="key">key of binding binding</param>
-    /// <returns>true if consumer exists, otherwise false</returns>
-    bool Exists(string key);
-
     /// <summary>
     /// Checks and potentially returns event consumer bound to given key. Returns true if consumer exists, otherwise false.
     /// </summary>
@@ -31,15 +24,26 @@ public interface Hook<T> where T: IHookEvent
     void Bind(string key, Action<T> eventConsumer, bool replace = false);
 
     /// <summary>
+    /// Propagates the incoming hook event to the subscribers of this hook
+    /// </summary>
+    /// <param name="hookEvent">event to propagate</param>
+    void Propagate(T hookEvent);
+}
+
+// ReSharper disable once InconsistentNaming
+public interface Hook
+{
+    /// <summary>
+    /// Checks if a consumer is bound to the given key
+    /// </summary>
+    /// <param name="key">key of binding binding</param>
+    /// <returns>true if consumer exists, otherwise false</returns>
+    bool Exists(string key);
+
+    /// <summary>
     /// Unbinds event consumer on given key, returns true if consumer was unbound otherwise returns false
     /// </summary>
     /// <param name="key">key to unbind consumer from</param>
     /// <returns>true if consumer was successfully unbound, otherwise false</returns>
     bool Unbind(string key);
-
-    /// <summary>
-    /// Propagates the incoming hook event to the subscribers of this hook
-    /// </summary>
-    /// <param name="hookEvent">event to propagate</param>
-    void Propagate(T hookEvent);
 }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Reflection;
 using BepInEx;
@@ -5,7 +6,9 @@ using HarmonyLib;
 using UnityEngine;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP;
+using Discord;
 using TOHTOR.Addons;
+using TOHTOR.API;
 using TOHTOR.Gamemodes;
 using TOHTOR.Managers;
 using TOHTOR.Managers.Reporting;
@@ -22,9 +25,6 @@ using VentLib.Options.Game;
 using VentLib.Options.Game.Tabs;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
-using VentLib.Utilities.Debug;
-using VentLib.Utilities.Debug.Profiling;
-using VentLib.Utilities.Extensions;
 using VentLib.Version;
 using VentLib.Version.Git;
 using Version = VentLib.Version.Version;
@@ -39,7 +39,7 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
 {
     public const string PluginGuid = "com.discussions.tohtor";
     public const string PluginVersion = "1.0.0";
-    public readonly GitVersion CurrentVersion = new GitVersion();
+    public readonly GitVersion CurrentVersion = new();
 
     public static readonly string ModName = "Town Of Host: The Other Roles";
     public static readonly string ModColor = "#4FF918";
@@ -54,15 +54,15 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
     public static string CredentialsText;
 
     public static RProfiler Profiler = new RProfiler("General");
-
     public static bool Initialized;
+
 
     public TOHPlugin()
     {
         Instance = this;
         Vents.Initialize();
-        Vents.VersionControl.For(this);
-        Vents.VersionControl.AddVersionReceiver(ReceiveVersion);
+        VersionControl versionControl = ModVersion.VersionControl = VersionControl.For(this);
+        versionControl.AddVersionReceiver(ReceiveVersion);
     }
 
 
@@ -80,7 +80,6 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
     public static int SKMadmateNowCount;
     public static bool VisibleTasksCount;
 
-    public static PluginDataManager PluginDataManager;
     public static GamemodeManager GamemodeManager;
     public static TOHPlugin Instance = null!;
 
@@ -88,11 +87,11 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
 
     public override void Load()
     {
+        //Profilers.Global.SetActive(false);
         ReportManager.AddProducer(Profiler);
         uint id = Profiler.Sampler.Start();
         GameOptionController.Enable();
         GamemodeManager = new GamemodeManager();
-        PluginDataManager = new PluginDataManager();
 
         VisibleTasksCount = false;
 
@@ -109,12 +108,12 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
         AddonManager.ImportAddons();
 
         GamemodeManager.Setup();
-        StaticOptions.AddStaticOptions();
         ShowerPages.InitPages();
         //OptionManager.AllHolders.AddRange(OptionManager.Options().SelectMany(opt => opt.GetHoldersRecursive()));
         Initialized = true;
         Profiler.Sampler.Stop(id);
         ReportManager.GenerateReport();
+
     }
 
     public GitVersion Version() => CurrentVersion;
@@ -134,7 +133,7 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
         if (version is not NoVersion)
         {
             ModRPC rpc = Vents.FindRPC((uint)ModCalls.SendOptionPreview)!;
-            rpc.Send(new[] { player.GetClientId() }, new BatchList<Option>(VentLib.Options.OptionManager.GetManager().GetOptions()));
+            rpc.Send(new[] { player.GetClientId() }, new BatchList<Option>(OptionManager.GetManager().GetOptions()));
         }
 
         if (PluginDataManager.TemplateManager.TryFormat(player, "lobby-join", out string message)) Utils.SendMessage(message, player.PlayerId);

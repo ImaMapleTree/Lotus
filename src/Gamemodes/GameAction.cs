@@ -9,10 +9,11 @@ public enum GameAction
     CallMeeting = 2,
     KillPlayers = 4,
     CallSabotage = 8,
-    EnterVent = 16,
+    CloseDoors = 16,
+    EnterVent = 32,
 
     // These flags cannot be blocked so it doesn't matter if we set them to the following
-    GameJoin = 16,
-    GameLeave = 17,
-    GameStart = 18,
+    GameJoin,
+    GameLeave,
+    GameStart,
 }

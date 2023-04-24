@@ -3,6 +3,8 @@ using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using TOHTOR.Options;
@@ -15,14 +17,19 @@ using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.Impostors;
 using TOHTOR.Roles.RoleGroups.Neutral;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
+using TOHTOR.RPC;
 using TOHTOR.Utilities;
 using UnityEngine;
+using VentLib;
 using VentLib.Anticheat;
 using VentLib.Localization;
 using VentLib.Logging;
+using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using VentLib.Version;
 using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
+using Version = VentLib.Version.Version;
 
 namespace TOHTOR.Patches;
 
@@ -59,13 +66,13 @@ class CoBeginPatch
         VentLogger.Old("------------名前表示------------", "Info");
         foreach (var pc in PlayerControl.AllPlayerControls)
         {
-            VentLogger.Old($"{(pc.AmOwner ? "[*]" : ""),-3}{pc.PlayerId,-2}:{pc.name.PadRightV2(20)}:{pc.cosmetics.nameText.text}({Palette.ColorNames[pc.Data.DefaultOutfit.ColorId].ToString().Replace("Color", "")})", "Info");
+            VentLogger.Old($"{(pc.AmOwner ? "[*]" : ""),-3}{pc.PlayerId,-2}:{pc.UnalteredName().PadRightV2(20)}:{pc.cosmetics.nameText.text}({Palette.ColorNames[pc.Data.DefaultOutfit.ColorId].ToString().Replace("Color", "")})", "Info");
             pc.cosmetics.nameText.text = pc.name;
         }
         VentLogger.Old("----------役職割り当て----------", "Info");
         foreach (var pc in PlayerControl.AllPlayerControls)
         {
-            VentLogger.Old($"{(pc.AmOwner ? "[*]" : ""),-3}{pc.PlayerId,-2}:{pc?.Data?.PlayerName?.PadRightV2(20)}:{pc.GetAllRoleName()}", "Info");
+            VentLogger.Old($"{(pc.AmOwner ? "[*]" : ""),-3}{pc.PlayerId,-2}:{pc.UnalteredName().PadRightV2(20)}:{pc.GetAllRoleName()}", "Info");
         }
         VentLogger.Old("--------------環境--------------", "Info");
         foreach (var pc in PlayerControl.AllPlayerControls)
@@ -73,10 +80,10 @@ class CoBeginPatch
             try
             {
                 var text = pc.AmOwner ? "[*]" : "   ";
-                text += $"{pc.PlayerId,-2}:{pc.Data?.PlayerName?.PadRightV2(20)}:{PlayerControlExtensions.GetClient(pc)?.PlatformData?.Platform.ToString()?.Replace("Standalone", ""),-11}";
-                if (TOHPlugin.PlayerVersion.TryGetValue(pc.PlayerId, out VentLib.Version.Version? pv))
-                    text += $":Mod({pv})";
-                else text += ":Vanilla";
+                text += $"{pc.PlayerId,-2}:{pc.UnalteredName().PadRightV2(20)}:{PlayerControlExtensions.GetClient(pc)?.PlatformData?.Platform.ToString()?.Replace("Standalone", ""),-11}";
+
+                Version version = ModVersion.VersionControl.GetPlayerVersion(pc.PlayerId);
+                text += version == new NoVersion() ? ":Vanilla" : $":Mod({version})";
                 VentLogger.Old(text, "Info");
             }
             catch (Exception ex)
@@ -96,7 +103,8 @@ class CoBeginPatch
 
     public static void Postfix()
     {
-        if (StaticOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
+        if (!AmongUsClient.Instance.AmHost) return;
+        if (GeneralOptions.GameplayOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.RoundStart, ref handle, true);
     }
@@ -128,16 +136,16 @@ class BeginCrewmatePatch
                 __instance.ImpostorText.gameObject.SetActive(true);
                 __instance.ImpostorText.text = role switch
                 {
-                    Egoist => Localizer.Get("Roles.Egoist.TeamEgoist"),
-                    Jackal => Localizer.Get("Roles.Jackal.TeamJackal"),
-                    _ => Localizer.Get("Roles.Miscellaneous.NeutralText"),
+                    Egoist => Localizer.Translate("Roles.Egoist.TeamEgoist"),
+                    Jackal => Localizer.Translate("Roles.Jackal.TeamJackal"),
+                    _ => Localizer.Translate("Roles.Miscellaneous.NeutralText"),
                 };
                 __instance.BackgroundBar.material.color = Utils.GetRoleColor(role);
                 break;
             case RoleType.Madmate:
-                __instance.TeamTitle.text = Localizer.Get("Roles.Madmate.RoleName");
+                __instance.TeamTitle.text = Localizer.Translate("Roles.Madmate.RoleName");
                 __instance.TeamTitle.color = CustomRoleManager.Static.Madmate.RoleColor;
-                __instance.ImpostorText.text = Localizer.Get("Roles.Miscellaneous.ImpostorText");
+                __instance.ImpostorText.text = Localizer.Translate("Roles.Miscellaneous.ImpostorText");
                 StartFadeIntro(__instance, Palette.CrewmateBlue, Palette.ImpostorRed);
                 PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Impostor);
                 break;
@@ -274,11 +282,12 @@ class IntroCutsceneDestroyPatch
         if (TOHPlugin.NormalOptions.MapId != 4)
         {
             PlayerControl.AllPlayerControls.ToArray().Do(pc => pc.RpcResetAbilityCooldown());
-            if (StaticOptions.FixFirstKillCooldown)
+            if (GeneralOptions.GameplayOptions.FixFirstKillCooldown)
                 Async.Schedule(() =>
                 {
                     PlayerControl.AllPlayerControls.ToArray().Do(pc =>
                     {
+                        if (pc == null) return;
                         if (pc.GetCustomRole() is not Impostor impostor) return;
                         pc.SetKillCooldown(impostor.KillCooldown);
                     });
@@ -287,12 +296,38 @@ class IntroCutsceneDestroyPatch
 
         if (PlayerControl.LocalPlayer.Is(CustomRoleManager.Special.GM)) PlayerControl.LocalPlayer.RpcExileV2();
 
-        if (StaticOptions.RandomSpawn) Game.GetAllPlayers().Do(p => Game.RandomSpawn.Spawn(p));
+        if (GeneralOptions.MayhemOptions.RandomSpawn) Game.GetAllPlayers().Do(p => Game.RandomSpawn.Spawn(p));
 
-        Async.Schedule(() => PlayerControl.AllPlayerControls.ToArray().Do(pc => pc.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3)), NetUtils.DeriveDelay(0.15f));
-        Async.Schedule(() => GameData.Instance.AllPlayers.ToArray().ForEach(pd => pd.PlayerName = pd.Object.NameModel().Unaltered()), NetUtils.DeriveDelay(0.25f));
-        Async.Schedule(() => PlayerControl.AllPlayerControls.ToArray().Do(pc => PetBypass.SetPet(pc, "pet_Doggy", true)), NetUtils.DeriveDelay(0.3f));
+        Async.Schedule(() => PlayerControl.AllPlayerControls.ToArray().Do(pc =>
+        {
+            if (pc == null) return;
+            pc.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3);
+        }), NetUtils.DeriveDelay(0.15f));
+
+        Async.Schedule(() =>
+        {
+            Game.GetAllPlayers().ForEach(p => p.RpcSetName(p.UnalteredName()));
+            string pet = GeneralOptions.MiscellaneousOptions.AssignedPet;
+            pet = pet != "Random" ? pet : ModConstants.Pets.Values.ToList().GetRandom();
+            GameData.Instance.AllPlayers.ToArray().ForEach(pi =>
+            {
+                if (pi?.Object == null) return;
+
+                if (pi.Object.AmOwner) {
+                    pi.Object.SetPet(pet);
+                    return;
+                }
+
+                var outfit = pi.Outfits[PlayerOutfitType.Default];
+                outfit.PetId = pet;
+            });
+            GeneralRPC.SendGameData();
+            Game.GetAllPlayers().ForEach(p => p.CRpcShapeshift(p, false));
+        }, 0.3f);
+
         Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.6f));
         VentLogger.Trace("Intro Scene Ending", "IntroCutscene");
+
+        Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent());
     }
 }

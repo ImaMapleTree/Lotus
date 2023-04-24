@@ -1,14 +1,20 @@
 using HarmonyLib;
+using Hazel;
 using TOHTOR.API;
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Gamemodes;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Logging;
+using VentLib.Networking.RPC;
+using VentLib.Utilities;
 
 namespace TOHTOR.Patches.Actions;
 
+// TODO: Kick under level, kick no friend code
 public static class MurderPatches
 {
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CheckMurder))]
@@ -52,6 +58,7 @@ public static class MurderPatches
             return false;
         }
     }
+
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
     public class MurderPlayerPatch
     {
@@ -76,6 +83,9 @@ public static class MurderPatches
             ActionHandle ignored = ActionHandle.NoInit();
             target.Trigger(RoleActionType.MyDeath, ref ignored, __instance);
             Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, __instance);
+
+            Hooks.PlayerHooks.PlayerMurderHook.Propagate(new PlayerMurderHookEvent(__instance, target));
+            Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerHookEvent(target));
         }
     }
 }

@@ -1,5 +1,6 @@
 using TOHTOR.Factions;
 using TOHTOR.Roles.Internals;
+using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 
@@ -7,6 +8,9 @@ namespace TOHTOR.Roles.RoleGroups.Madmates.Roles;
 
 public class Parasite : Shapeshifter
 {
+    [RoleAction(RoleActionType.Attack)]
+    public override bool TryKill(PlayerControl target) => base.TryKill(target);
+
     protected override void Setup(PlayerControl player)
     {
         base.Setup(player);

@@ -5,19 +5,23 @@ using HarmonyLib;
 using VentLib.Localization.Attributes;
 using VentLib.Options;
 using VentLib.Options.Interfaces;
+using VentLib.Utilities.Harmony.Attributes;
 using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Options;
 
-[Localized(Group = "OptionShower")]
+[Localized("OptionShower")]
 public class OptionShower
 {
+    [QuickPostfix(typeof(GameOptionsManager), nameof(GameOptionsManager.SaveNormalHostOptions))]
+    public static void VanillaUpdateShower() => GetOptionShower().Update();
+
     private static Optional<OptionShower> Instance = Optional<OptionShower>.Null();
 
     [Localized("ActiveRolesList")]
-    private static string ActiveRolesList;
+    private static string ActiveRolesList = "Active Role List";
     [Localized("NextPage")]
-    private static string NextPageString;
+    private static string NextPageString = "Press (Tab) To Advance Page";
 
     private List<ShowerPage> pages = new();
     private List<string> pageContent;
@@ -56,7 +60,7 @@ public class OptionShower
             updated = true;
         }
 
-        string bottomText = $"\n{NextPageString} ({currentPage + 1}/{pageContent.Count + 1})";
+        string bottomText = $"\n{NextPageString} ({currentPage + 1}/{pageContent.Count})";
         return pageContent[currentPage] + bottomText;
     }
 

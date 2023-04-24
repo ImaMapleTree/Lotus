@@ -27,7 +27,7 @@ public class ManualWin: IWinCondition
     public void Activate()
     {
         Game.GetWinDelegate().AddWinCondition(this);
-        Game.GetWinDelegate().ForceGameWin();
+        Game.GetWinDelegate().ForceGameWin(this.winners, winReason);
     }
 
     public bool IsConditionMet(out List<PlayerControl> winners)

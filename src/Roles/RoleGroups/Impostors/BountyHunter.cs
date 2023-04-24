@@ -11,6 +11,7 @@ using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;
+using VentLib.Options.IO;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -79,15 +80,18 @@ public class BountyHunter: Vanilla.Impostor
                 .Name("Time Until New Target")
                 .Bind(v => acquireNewTarget.Duration = (float)v)
                 .AddFloatRange(5f, 120, 5, 11)
+                .IOSettings(settings => settings.UnknownValueAction = ADEAnswer.Allow)
                 .Build())
             .SubOption(sub => sub
                 .Name("Kill Cooldown After Killing Target")
                 .Bind(v => bountyKillCoolDown = (float)v)
-                .AddFloatRange(0, 30, 0.5f, 6)
+                .AddFloatRange(0, 180, 2.5f, 6)
+                .IOSettings(settings => settings.UnknownValueAction = ADEAnswer.Allow)
                 .Build())
             .SubOption(sub => sub
                 .Name("Kill Cooldown After Killing Other")
                 .Bind(v => punishKillCoolDown = (float)v)
-                .AddFloatRange(30, 180, 2.5f, 15)
+                .AddFloatRange(0, 180, 2.5f, 15)
+                .IOSettings(settings => settings.UnknownValueAction = ADEAnswer.Allow)
                 .Build());
 }

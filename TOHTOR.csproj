@@ -11,7 +11,12 @@
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
   </PropertyGroup>
   
+  <PropertyGroup>
+    <debug>true</debug>
+  </PropertyGroup>
+  
   <ItemGroup>
+    <!--<Reference Include="E:\SteamLibrary\steamapps\common\Among Us\dump\Assembly-CSharp-2023.3.28.dll" />-->
     <PackageReference Include="AmongUs.GameLibs.Steam" Version="2023.3.28" />
     <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" PrivateAssets="all" />
     <PackageReference Include="Samboy063.Cpp2IL.Core" Version="2022.1.0-development.866" />
@@ -22,11 +27,18 @@
     <PackageReference Condition="$(Debug) == 'false'" Include="VentFramework" Version="1.2.0.143" />
 
     <PackageReference Include="GitInfo" Version="3.0.4" />
+    
+    <Reference Condition="$(Debug) == 'true'" Include="../VentFramework/bin/Debug/net6.0/VentFramework.dll">
+      <IncludeAssets>runtime; compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <EmbeddedResource Include=".\assets\*.png" />
+    <EmbeddedResource Include=".\assets\*.jpg" />
     <EmbeddedResource Include=".\assets\*\*.png" />
+    <EmbeddedResource Include=".\assets\*\*.jpg" />
     <EmbeddedResource Include=".\assets\string.csv" />
   </ItemGroup>
   
@@ -39,4 +51,9 @@
     <Content Remove="./SourceGenerators/**/*" />
     <Compile Remove="./SourceGenerators/**/*" />
   </ItemGroup>
+  
+  <Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" Condition="'$(Configuration)' == 'Debug'" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs) - Copy/BepInEx/plugins/" Condition="'$(Configuration)' == 'Debug'" />
+  </Target>
 </Project>

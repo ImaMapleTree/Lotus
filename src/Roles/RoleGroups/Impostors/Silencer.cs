@@ -4,8 +4,8 @@ namespace TOHTOR.Roles.RoleGroups.Impostors;
 
 public class Silencer: Impostor
 {
-    /*private static string _blackmailedMessage = Localizer.Get("Roles.Blackmail.BlackmailMessage");
-    private static string _warningMessage = Localizer.Get("Roles.Blackmail.BlackmailWarning");
+    /*private static string _blackmailedMessage = Localizer.Translate("Roles.Blackmail.BlackmailMessage");
+    private static string _warningMessage = Localizer.Translate("Roles.Blackmail.BlackmailWarning");
     private Remote<TextComponent>? blackmailingText;
     private Optional<PlayerControl> blackmailedPlayer = Optional<PlayerControl>.Null();
 

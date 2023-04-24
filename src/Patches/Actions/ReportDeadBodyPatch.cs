@@ -1,7 +1,9 @@
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Meetings;
 using TOHTOR.Extensions;
 using TOHTOR.Gamemodes;
+using TOHTOR.Patches.Meetings;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Utilities;
@@ -13,15 +15,8 @@ namespace TOHTOR.Patches.Actions;
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
 public class ReportDeadBodyPatch
 {
-    private static bool alreadyReported;
-
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo target)
     {
-        if (alreadyReported)
-        {
-            alreadyReported = false;
-            return true;
-        }
         VentLogger.Old($"{__instance.GetNameWithRole()} => {target?.Object?.GetNameWithRole() ?? "null"}", "ReportDeadBody");
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.ReportBody) && target != null) return false;
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.CallMeeting) && target == null) return false;
@@ -35,14 +30,8 @@ public class ReportDeadBodyPatch
         Game.TriggerForAll(RoleActionType.AnyReportedBody, ref handle, __instance, target);
         if (handle.IsCanceled) return false;
 
-        target.PlayerName = Utils.GetPlayerById(target.PlayerId)!.NameModel().Render(state: GameState.InIntro);
-        Game.State = GameState.InMeeting;
-        Game.RenderAllForAll(state: GameState.InMeeting, force: true);
-        Game.GetAllPlayers().Do(p => p.NameModel().RenderFor(PlayerControl.LocalPlayer, state: GameState.InMeeting, force: true));
-
-        Async.Schedule(() => __instance.CmdReportDeadBody(target), 0.3f);
-
-        alreadyReported = true;
+        MeetingPrep.Reported = target;
+        MeetingPrep.PrepMeeting(__instance);
         return false;
     }
 }

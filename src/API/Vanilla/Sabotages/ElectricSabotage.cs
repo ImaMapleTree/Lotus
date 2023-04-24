@@ -1,8 +1,11 @@
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Logging;
+using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.API.Vanilla.Sabotages;
@@ -18,8 +21,7 @@ public class ElectricSabotage : ISabotage
 
     public SabotageType SabotageType() => Sabotages.SabotageType.Lights;
 
-    public bool Fix(PlayerControl? fixer = null)
-    {
+    public bool Fix(PlayerControl? fixer = null) {
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? Optional<PlayerControl>.Null() : Optional<PlayerControl>.Of(fixer));
         if (handle.IsCanceled) return false;
@@ -31,8 +33,15 @@ public class ElectricSabotage : ISabotage
             VentLogger.Warn($"Error Fixing Lights Sabotage. Invalid System Cast from {SabotageType()}.");
             return false;
         }
-        electrical.ActualSwitches = electrical.ExpectedSwitches;
-        SabotagePatch.CurrentSabotage = null;
+
+        // Requires scheduling since lights actions happen in the prefix and if this is called it'll cause an issue
+        Async.Schedule(() =>
+        {
+            electrical.ActualSwitches = electrical.ExpectedSwitches;
+            SabotagePatch.CurrentSabotage = null;
+        }, 0.05f);
+
+        Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
         return true;
     }
 

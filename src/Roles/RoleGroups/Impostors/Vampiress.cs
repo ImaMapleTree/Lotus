@@ -30,7 +30,7 @@ public class Vampiress : Impostor
     {
         SyncOptions();
         if (mode is VampireMode.Killing) return base.TryKill(target);
-        InteractionResult result = MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this));
+        InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this));
         if (result is InteractionResult.Halt) return false;
 
         MyPlayer.RpcGuardAndKill(target);
@@ -81,7 +81,8 @@ public class Vampiress : Impostor
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, KillCooldown * 2, () => mode is VampireMode.Biting);
+            .OptionOverride(Override.KillCooldown, KillCooldown * 2, () => mode is VampireMode.Biting)
+            .RoleFlags(RoleFlag.VariationRole);
 
     public enum VampireMode
     {

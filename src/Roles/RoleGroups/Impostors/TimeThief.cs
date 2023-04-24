@@ -29,20 +29,24 @@ public class TimeThief : Vanilla.Impostor
     private void TimeThiefSubtractMeetingTime()
     {
         if (!MyPlayer.IsAlive() && returnTimeAfterDeath) return;
-        int discussionTime = OriginalOptions.DiscussionTime();
-        int votingTime = OriginalOptions.VotingTime();
+        int discussionTime = AUSettings.DiscussionTime();
+        int votingTime = AUSettings.VotingTime();
 
-        int remainingStolenTime = 0;
-        discussionTime -= meetingTimeSubtractor * kills;
-        if (discussionTime < 0)
+        int totalStolenTime = meetingTimeSubtractor * kills;
+
+        // Total Meeting Time - Stolen Time = Remaining Meeting Time
+        int modifiedDiscussionTime = discussionTime - totalStolenTime;
+
+        if (modifiedDiscussionTime < 0)
         {
-            remainingStolenTime = discussionTime;
-            discussionTime = 1;
+            totalStolenTime = -modifiedDiscussionTime;
+            modifiedDiscussionTime = 1;
         }
 
-        VentLogger.Info($"{MyPlayer.UnalteredName()} | Time Thief | Meeting Time: {discussionTime} | Voting Time: {votingTime}", "TimeThiefStolen");
-        votingTime = Mathf.Clamp(votingTime - remainingStolenTime, minimumVotingTime, votingTime);
-        GameOptionOverride[] overrides = { new(Override.DiscussionTime, discussionTime), new(Override.VotingTime, votingTime) };
+        int modifiedVotingTime = Mathf.Clamp(votingTime - totalStolenTime, minimumVotingTime, votingTime);
+
+        VentLogger.Debug($"{MyPlayer.UnalteredName()} | Time Thief | Meeting Time: {modifiedDiscussionTime} | Voting Time: {modifiedVotingTime}", "TimeThiefStolen");
+        GameOptionOverride[] overrides = { new(Override.DiscussionTime, modifiedDiscussionTime), new(Override.VotingTime, modifiedVotingTime) };
         Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions(overrides));
     }
 

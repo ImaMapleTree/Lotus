@@ -36,7 +36,7 @@ public class Psychic: Crewmate
 
         PlayerControl evilPlayer = eligiblePlayers.GetRandom();
         List<PlayerControl> targetPlayers = new() { evilPlayer };
-        List<PlayerControl> remainingPlayers = Game.GetAlivePlayers().Where(p => p != evilPlayer).ToList();
+        List<PlayerControl> remainingPlayers = Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && p.PlayerId != evilPlayer.PlayerId).ToList();
 
         while (targetPlayers.Count < numberOfPlayers && remainingPlayers.Count != 0) targetPlayers.Add(remainingPlayers.PopRandom());
 
@@ -54,7 +54,7 @@ public class Psychic: Crewmate
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Highlighted Players")
-                .AddIntRange(1, 14, 1, 3)
+                .AddIntRange(1, 14, 1, 2)
                 .BindInt(i => numberOfPlayers = i)
                 .Build())
             .SubOption(sub => sub.Name("Non-impostor Killing Are Evil")

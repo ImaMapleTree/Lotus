@@ -1,10 +1,8 @@
-using System.Linq;
 using HarmonyLib;
 using Hazel;
 using TOHTOR.API;
 using TOHTOR.API.Meetings;
 using TOHTOR.Extensions;
-using TOHTOR.Patches.Meetings;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Utilities;
@@ -12,7 +10,7 @@ using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Patches.Actions;
+namespace TOHTOR.Patches.Meetings;
 
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CastVote))]
 public class MeetingVotePatch
@@ -21,15 +19,15 @@ public class MeetingVotePatch
     {
         PlayerControl voter = Utils.GetPlayerById(srcPlayerId)!;
         Optional<PlayerControl> voted = Utils.PlayerById(suspectPlayerId);
-        VentLogger.Trace($"{voter.GetNameWithRole()} Suspect Player: {voted}");
+        VentLogger.Trace($"{voter.GetNameWithRole()} voted for {voted.Map(v => v.UnalteredName())}");
 
         ActionHandle handle = ActionHandle.NoInit();
-        voter.Trigger(RoleActionType.MyVote, ref handle,MeetingStartPatch.MeetingDelegate, voted);
-        Game.TriggerForAll(RoleActionType.AnyVote, ref handle,MeetingStartPatch.MeetingDelegate, voter, voted);
+        voter.Trigger(RoleActionType.MyVote, ref handle,MeetingDelegate.Instance, voted);
+        Game.TriggerForAll(RoleActionType.AnyVote, ref handle, MeetingDelegate.Instance, voter, voted);
 
         if (!handle.IsCanceled)
         {
-            MeetingApi.MeetingDelegate()?.AddVote(voter, voted);
+            MeetingDelegate.Instance.AddVote(voter, voted);
             return;
         }
 
@@ -41,8 +39,8 @@ public class MeetingVotePatch
     private static void ClearVote(MeetingHud hud, PlayerControl target)
     {
         VentLogger.Trace($"Clearing vote for: {target.GetNameWithRole()}");
-        PlayerVoteArea voteArea = hud.playerStates.ToArray().FirstOrDefault(state => state.TargetPlayerId == target.PlayerId)!;
-        voteArea.UnsetVote();
+        /*PlayerVoteArea voteArea = hud.playerStates.ToArray().FirstOrDefault(state => state.TargetPlayerId == target.PlayerId)!;
+        voteArea.UnsetVote();*/
         MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
         writer.StartMessage(6);
         writer.Write(AmongUsClient.Instance.GameId);

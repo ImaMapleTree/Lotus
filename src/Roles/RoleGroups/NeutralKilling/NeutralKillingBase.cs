@@ -1,6 +1,6 @@
 using TOHTOR.Factions;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Interfaces;
 using UnityEngine;
 
 namespace TOHTOR.Roles.RoleGroups.NeutralKilling;

@@ -21,8 +21,8 @@ public class SabotageMaster: Crewmate
     private void SaboMasterFixes(ISabotage sabotage, PlayerControl fixer)
     {
         if (fixer.PlayerId != MyPlayer.PlayerId || !sabotages.Contains(sabotage.SabotageType())) return;
-        sabotage.Fix(MyPlayer);
-        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{ModConstants.HColor1.Colorize(MyPlayer.UnalteredName())} fixed {sabotage.SabotageType()}."));
+        bool result = sabotage is DoorSabotage doorSabotage ? doorSabotage.FixRoom(MyPlayer) : sabotage.Fix(MyPlayer);
+        if (result) Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{ModConstants.HColor1.Colorize(MyPlayer.UnalteredName())} fixed {sabotage.SabotageType()}."));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

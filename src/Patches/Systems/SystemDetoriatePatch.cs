@@ -1,3 +1,4 @@
+using System;
 using HarmonyLib;
 using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Options;
@@ -13,11 +14,26 @@ public static class ReactorSystemTypePatch
     {
         if (SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Reactor)
             SabotagePatch.SabotageCountdown = __instance.Countdown;
-        if (!__instance.IsActive || !StaticOptions.SabotageTimeControl)
-            return;
-        if (ShipStatus.Instance.Type != ShipStatus.MapType.Pb) return;
-        if (__instance.Countdown >= StaticOptions.PolusReactorTimeLimit)
-            __instance.Countdown = StaticOptions.PolusReactorTimeLimit;
+
+        if (!__instance.IsActive) return;
+
+        switch (ShipStatus.Instance.Type)
+        {
+            case ShipStatus.MapType.Ship when GeneralOptions.SabotageOptions.CustomSkeldReactorCountdown:
+                if (__instance.Countdown > GeneralOptions.SabotageOptions.SkeldReactorCountdown)
+                    __instance.Countdown = GeneralOptions.SabotageOptions.SkeldReactorCountdown;
+                break;
+            case ShipStatus.MapType.Hq when GeneralOptions.SabotageOptions.CustomMiraReactorCountdown:
+                if (__instance.Countdown > GeneralOptions.SabotageOptions.MiraReactorCountdown)
+                    __instance.Countdown = GeneralOptions.SabotageOptions.MiraReactorCountdown;
+                break;
+            case ShipStatus.MapType.Pb when GeneralOptions.SabotageOptions.CustomPolusReactorCountdown:
+                if (__instance.Countdown > GeneralOptions.SabotageOptions.PolusReactorCountdown)
+                    __instance.Countdown = GeneralOptions.SabotageOptions.PolusReactorCountdown;
+                break;
+            default:
+                break;
+        }
     }
 }
 
@@ -36,10 +52,13 @@ public static class HeliSabotageSystemPatch
 {
     public static void Prefix(HeliSabotageSystem __instance)
     {
-        if (!__instance.IsActive || !StaticOptions.SabotageTimeControl)
-            return;
+        if (!__instance.IsActive) return;
+
         if (AirshipStatus.Instance == null) return;
-        if (__instance.Countdown >= StaticOptions.AirshipReactorTimeLimit)
-            __instance.Countdown = StaticOptions.AirshipReactorTimeLimit;
+
+        if (!GeneralOptions.SabotageOptions.CustomAirshipReactorCountdown) return;
+
+        if (__instance.Countdown > GeneralOptions.SabotageOptions.AirshipReactorCountdown)
+            __instance.Countdown = GeneralOptions.SabotageOptions.AirshipReactorCountdown;
     }
 }

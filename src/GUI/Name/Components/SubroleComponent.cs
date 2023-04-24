@@ -4,7 +4,7 @@ using TOHTOR.Roles.Subroles;
 
 namespace TOHTOR.GUI.Name.Components;
 
-public class SubroleComponent : NmComponent
+public class SubroleComponent : SimpleComponent
 {
     public SubroleComponent(Subrole subrole, GameState[] gameStates, ViewMode viewMode = Impl.ViewMode.Additive, params PlayerControl[] viewers) : base("", gameStates, viewMode, viewers)
     {

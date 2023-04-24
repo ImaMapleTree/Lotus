@@ -1,3 +1,4 @@
+using System;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
@@ -13,6 +14,7 @@ using TOHTOR.Roles.RoleGroups.Neutral;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using UnityEngine;
 using VentLib.Localization;
+using VentLib.Logging;
 using VentLib.Utilities;
 using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
 
@@ -29,6 +31,7 @@ class HudManagerPatch
     public static int NowFrameCount = 0;
     public static float FrameRateTimer = 0.0f;
     public static TMPro.TextMeshPro LowerInfoText;
+
     public static void Postfix(HudManager __instance)
     {
         var player = PlayerControl.LocalPlayer;
@@ -66,29 +69,29 @@ class HudManagerPatch
                 /*case Sniper:
                     __instance.AbilityButton.OverrideText(SniperOLD.OverrideShapeText(player.PlayerId));
                     break;*/
-                case FireWorks:
-                    __instance.AbilityButton.OverrideText($"{Localizer.Get("Roles.FireWorks.AbilityText")}");
+                case FireWorker:
+                    __instance.AbilityButton.OverrideText($"{Localizer.Translate("Roles.FireWorks.AbilityText")}");
                     break;
                 /*case SerialKiller:
                     // ? What ?
                     SerialKillerOLD.GetAbilityButtonText(__instance, player);
                     break;*/
                 case Warlock warlock:
-                    __instance.KillButton.OverrideText(Localizer.Get(!warlock.Shapeshifted
+                    __instance.KillButton.OverrideText(Localizer.Translate(!warlock.Shapeshifted
                         ? "Roles.Warlock.CurseButtonText"
-                        : Localizer.Get("Roles.Warlock.KillButtonText")));
+                        : Localizer.Translate("Roles.Warlock.KillButtonText")));
                     break;
                 /*case Witch:
                     WitchOLD.GetAbilityButtonText(__instance);
                     break;*/
                 case Vampire:
-                    __instance.KillButton.OverrideText($"{Localizer.Get("Roles.Vampire.KillButtonText")}");
+                    __instance.KillButton.OverrideText($"{Localizer.Translate("Roles.Vampire.KillButtonText")}");
                     break;
                 case Arsonist:
-                    __instance.KillButton.OverrideText($"{Localizer.Get("Roles.Arsonist.KillButtonText")}");
+                    __instance.KillButton.OverrideText($"{Localizer.Translate("Roles.Arsonist.KillButtonText")}");
                     break;
                 case Puppeteer:
-                    __instance.KillButton.OverrideText($"{Localizer.Get("Roles.Puppeteer.KillButtonText")}");
+                    __instance.KillButton.OverrideText($"{Localizer.Translate("Roles.Puppeteer.KillButtonText")}");
                     break;
                 /*case BountyHunter:
                     BountyHunterOLD.GetAbilityButtonText(__instance);
@@ -144,40 +147,18 @@ class HudManagerPatch
             }
         }
 
-        if (Input.GetKeyDown(KeyCode.Y) && AmongUsClient.Instance.NetworkMode == NetworkModes.FreePlay)
-        {
-            __instance.ToggleMapVisible(new MapOptions()
-            {
-                Mode = MapOptions.Modes.Sabotage,
-                AllowMovementWhileMapOpen = true
-            });
-            if (player.AmOwner)
-            {
-                player.MyPhysics.inputHandler.enabled = true;
-                ConsoleJoystick.SetMode_Task();
-            }
-        }
+        if (!Input.GetKeyDown(KeyCode.Y) || AmongUsClient.Instance.NetworkMode != NetworkModes.FreePlay) return;
 
-        if (AmongUsClient.Instance.NetworkMode == NetworkModes.OnlineGame) RepairSender.enabled = false;
-        if (Input.GetKeyDown(KeyCode.RightShift) && AmongUsClient.Instance.NetworkMode != NetworkModes.OnlineGame)
+        __instance.ToggleMapVisible(new MapOptions()
         {
-            RepairSender.enabled = !RepairSender.enabled;
-            RepairSender.Reset();
-        }
-        if (RepairSender.enabled && AmongUsClient.Instance.NetworkMode != NetworkModes.OnlineGame)
-        {
-            if (Input.GetKeyDown(KeyCode.Alpha0)) RepairSender.Input(0);
-            if (Input.GetKeyDown(KeyCode.Alpha1)) RepairSender.Input(1);
-            if (Input.GetKeyDown(KeyCode.Alpha2)) RepairSender.Input(2);
-            if (Input.GetKeyDown(KeyCode.Alpha3)) RepairSender.Input(3);
-            if (Input.GetKeyDown(KeyCode.Alpha4)) RepairSender.Input(4);
-            if (Input.GetKeyDown(KeyCode.Alpha5)) RepairSender.Input(5);
-            if (Input.GetKeyDown(KeyCode.Alpha6)) RepairSender.Input(6);
-            if (Input.GetKeyDown(KeyCode.Alpha7)) RepairSender.Input(7);
-            if (Input.GetKeyDown(KeyCode.Alpha8)) RepairSender.Input(8);
-            if (Input.GetKeyDown(KeyCode.Alpha9)) RepairSender.Input(9);
-            if (Input.GetKeyDown(KeyCode.Return)) RepairSender.InputEnter();
-        }
+            Mode = MapOptions.Modes.Sabotage,
+            AllowMovementWhileMapOpen = true
+        });
+
+        if (!player.AmOwner) return;
+
+        player.MyPhysics.inputHandler.enabled = true;
+        ConsoleJoystick.SetMode_Task();
     }
 }
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ToggleHighlight))]
@@ -200,11 +181,15 @@ class SetVentOutlinePatch
 
     public static void Postfix(Vent __instance, [HarmonyArgument(1)] ref bool mainTarget)
     {
-        Color color = PlayerControl.LocalPlayer.GetRoleColor();
+        CustomRole role = PlayerControl.LocalPlayer.GetCustomRole();
+
+        Color color = !PlayerControl.LocalPlayer.IsAlive() || !role.CanVent() ? Color.clear : role.RoleColor;
+
         __instance.myRend.material.SetColor(OutlineColor, color);
         __instance.myRend.material.SetColor(AddColor, mainTarget ? color : Color.clear);
     }
 }
+
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.SetHudActive), typeof(bool))]
 class SetHudActivePatch
 {
@@ -233,6 +218,7 @@ class SetHudActivePatch
         }
     }
 }
+
 [HarmonyPatch(typeof(MapBehaviour), nameof(MapBehaviour.ShowNormalMap))]
 class ShowNormalMapPatch
 {
@@ -252,6 +238,7 @@ class ShowNormalMapPatch
         player.Data.Role.TeamType = __state;
     }
 }
+
 [HarmonyPatch(typeof(TaskPanelBehaviour), nameof(TaskPanelBehaviour.SetTaskText))]
 class TaskPanelBehaviourPatch
 {
@@ -260,71 +247,13 @@ class TaskPanelBehaviourPatch
     {
         PlayerControl player = PlayerControl.LocalPlayer;
         CustomRole role = player.GetCustomRole();
+        if (role.IsVanilla()) return;
 
-        // 役職説明表示
-        if (!player.GetCustomRole().IsVanilla())
-        {
-            __instance.taskText.text = __instance.taskText.text.Replace("Sabotage and kill everyone.\r\nFake Tasks:", "");
-            string roleWithInfo = $"{role.RoleName}:\r\n";
-            roleWithInfo += role.Blurb;
-            __instance.taskText.text = role.RoleColor.Colorize(roleWithInfo) + "\n" + __instance.taskText.text;
-        }
-
-        // RepairSenderの表示
-        if (RepairSender.enabled && AmongUsClient.Instance.NetworkMode != NetworkModes.OnlineGame)
-            __instance.taskText.text = RepairSender.GetText();
-    }
-}
-
-class RepairSender
-{
-    public static bool enabled = false;
-    public static bool TypingAmount = false;
-
-    public static int SystemType;
-    public static int amount;
-
-    public static void Input(int num)
-    {
-        if (!TypingAmount)
-        {
-            //SystemType入力中
-            SystemType *= 10;
-            SystemType += num;
-        }
-        else
-        {
-            //Amount入力中
-            amount *= 10;
-            amount += num;
-        }
-    }
-    public static void InputEnter()
-    {
-        if (!TypingAmount)
-        {
-            //SystemType入力中
-            TypingAmount = true;
-        }
-        else
-        {
-            //Amount入力中
-            Send();
-        }
-    }
-    public static void Send()
-    {
-        ShipStatus.Instance.RpcRepairSystem((SystemTypes)SystemType, amount);
-        Reset();
-    }
-    public static void Reset()
-    {
-        TypingAmount = false;
-        SystemType = 0;
-        amount = 0;
-    }
-    public static string GetText()
-    {
-        return SystemType.ToString() + "(" + ((SystemTypes)SystemType).ToString() + ")\r\n" + amount;
+        string modifiedText = __instance.taskText.text;
+        int impostorTaskIndex = modifiedText.IndexOf(":</color>", StringComparison.Ordinal);
+        if (impostorTaskIndex != -1) modifiedText = modifiedText[(9 + impostorTaskIndex)..];
+        string roleWithInfo = $"{role.RoleName}:\r\n";
+        roleWithInfo += role.Blurb + (role.RealRole.IsImpostor() ? "" : "\r\n");
+        __instance.taskText.text = role.RoleColor.Colorize(roleWithInfo) + modifiedText;
     }
 }

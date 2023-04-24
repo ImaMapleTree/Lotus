@@ -5,6 +5,7 @@ using TOHTOR.API;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -12,7 +13,7 @@ using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
-public class Disperser: Vanilla.Impostor
+public class Disperser: Impostor
 {
     [UIComponent(UI.Cooldown)]
     private Cooldown abilityCooldown;

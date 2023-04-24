@@ -1,9 +1,10 @@
 using TOHTOR.API;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.RoleGroups.Vanilla;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
-public class Mafia: Vanilla.Impostor
+public class Mafia: Impostor
 {
     public override bool CanKill() => GameStates.CountAliveImpostors() <= 1;
 

@@ -11,14 +11,14 @@ namespace TOHTOR.Patches
     {
         public static Dictionary<byte, Vector3> TargetLadderData;
         // TODO: FIX THIS LOL
-        private static int Chance => StaticOptions.LadderDeathChance;
+        private static int Chance => GeneralOptions.MiscellaneousOptions.LadderDeathChance;
         public static void Reset()
         {
             TargetLadderData = new();
         }
         public static void OnClimbLadder(PlayerPhysics player, Ladder source)
         {
-            if (!StaticOptions.LadderDeath) return;
+            if (!GeneralOptions.MiscellaneousOptions.EnableLadderDeath) return;
             var sourcePos = source.transform.position;
             var targetPos = source.Destination.transform.position;
             //降りているのかを検知

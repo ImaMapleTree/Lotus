@@ -9,8 +9,15 @@ namespace TOHTOR.API.Meetings;
 
 public class MeetingDelegate
 {
+    public static MeetingDelegate Instance = null!;
+
     private Dictionary<byte, List<Optional<byte>>> currentVotes = new();
     private bool isForceEnd;
+
+    public MeetingDelegate()
+    {
+        Instance = this;
+    }
 
     public void AddVote(PlayerControl player, Optional<PlayerControl> target)
     {

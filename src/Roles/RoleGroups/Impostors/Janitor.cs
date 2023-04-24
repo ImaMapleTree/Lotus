@@ -1,18 +1,21 @@
-using AmongUs.GameOptions;
+using System.Linq;
+using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Managers.History.Events;
-using TOHTOR.Options;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
+using VentLib.Logging;
+using VentLib.Networking.RPC.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
@@ -27,11 +30,11 @@ public class Janitor: Vanilla.Impostor
     [RoleAction(RoleActionType.Attack)]
     public new bool TryKill(PlayerControl target)
     {
-        cleanCooldown.Start(OriginalOptions.KillCooldown());
+        cleanCooldown.Start(AUSettings.KillCooldown());
 
         if (!cleanOnKill) return base.TryKill(target);
 
-        if (MyPlayer.InteractWith(target, new SimpleInteraction(new FakeFatalIntent(), this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, new DirectInteraction(new FakeFatalIntent(), this)) is InteractionResult.Halt) return false;
         target.RpcExileV2();
         Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
         Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{Color.red.Colorize(MyPlayer.UnalteredName())} cleaned {target.GetRoleColor().Colorize(target.UnalteredName())}."));
@@ -45,14 +48,21 @@ public class Janitor: Vanilla.Impostor
         handle.Cancel();
         cleanCooldown.Start();
 
+        byte playerId = target.Object.PlayerId;
+
         foreach (DeadBody deadBody in Object.FindObjectsOfType<DeadBody>())
-            if (deadBody.ParentId == target.Object.PlayerId)
-            {
-                Game.GameStates.UnreportableBodies.Add(target.PlayerId);
-                Object.Destroy(deadBody.gameObject);
-            }
+            if (deadBody.ParentId == playerId)
+                if (ModVersion.AllClientsModded()) CleanBody(playerId);
+                else Game.GameStates.UnreportableBodies.Add(playerId);
 
         MyPlayer.RpcGuardAndKill(MyPlayer);
+    }
+
+    [ModRPC(RoleRPC.RemoveBody, invocation: MethodInvocation.ExecuteAfter)]
+    private static void CleanBody(byte playerId)
+    {
+        VentLogger.Debug("Destroying Bodies", "JanitorClean");
+        Object.FindObjectsOfType<DeadBody>().ToArray().Where(db => db.ParentId == playerId).ForEach(b => Object.Destroy(b.gameObject));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

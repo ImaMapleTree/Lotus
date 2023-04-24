@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -17,25 +16,22 @@ using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
 
 public class Arsonist : NeutralKillingBase
 {
-    private bool strictDousing;
-    private bool IsDousing => dousingDuration.NotReady();
-    private float douseCooldown;
-    private HashSet<byte> dousedPlayers;
+    private static string[] _douseProgressIndicators = { "◦", "◎", "◉", "●" };
+
+    private int requiredAttacks;
+    private bool canIgniteAnyitme;
+
     private int knownAlivePlayers;
-
-    private PlayerControl myTarget;
-    private DateTime lastCheck = DateTime.Now;
-
-    [UIComponent(UI.Cooldown)]
-    private Cooldown dousingDuration;
-
-    protected override void Setup(PlayerControl player) => dousedPlayers = new HashSet<byte>();
+    [NewOnSetup] private HashSet<byte> dousedPlayers;
+    [NewOnSetup] private Dictionary<byte, Remote<IndicatorComponent>> indicators;
+    [NewOnSetup] private Dictionary<byte, int> douseProgress;
 
     [UIComponent(UI.Counter)]
     private string DouseCounter() => RoleUtils.Counter(dousedPlayers.Count, knownAlivePlayers - 1);
@@ -43,36 +39,47 @@ public class Arsonist : NeutralKillingBase
     [UIComponent(UI.Text)]
     private string DisplayWin() => dousedPlayers.Count >= knownAlivePlayers - 1 ? RoleColor.Colorize("Press Ignite to Win") : "";
 
+    [RoleAction(RoleActionType.Attack)]
+    public new bool TryKill(PlayerControl target)
+    {
+        bool douseAttempt = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Proceed;
+        if (!douseAttempt) return false;
+
+        int progress = douseProgress[target.PlayerId] = douseProgress.GetValueOrDefault(target.PlayerId) + 1;
+        if (progress > requiredAttacks) return false;
+
+        RenderProgress(target, progress);
+        if (progress < requiredAttacks) return false;
+
+        dousedPlayers.Add(target.PlayerId);
+        MyPlayer.RpcGuardAndKill(target);
+        Game.GameHistory.AddEvent(new PlayerDousedEvent(MyPlayer, target));
+
+        MyPlayer.NameModel().Render();
+
+        return false;
+    }
+
+    private void RenderProgress(PlayerControl target, int progress)
+    {
+        if (progress > requiredAttacks) return;
+        string indicator = _douseProgressIndicators[Mathf.Clamp(Mathf.FloorToInt(progress / (requiredAttacks / (float)_douseProgressIndicators.Length) - 1), 0, 3)];
+
+        Remote<IndicatorComponent> IndicatorSupplier() => target.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent("", GameStates.IgnStates, viewers: MyPlayer));
+
+        Remote<IndicatorComponent> component = indicators.GetOrCompute(target.PlayerId, IndicatorSupplier);
+        component.Get().SetMainText(new LiveString(indicator, RoleColor));
+    }
+
+
     [RoleAction(RoleActionType.OnPet)]
     private void KillDoused() => dousedPlayers.Filter(p => Utils.PlayerById(p)).Where(p => p.IsAlive()).Do(p =>
     {
+        if (dousedPlayers.Count < knownAlivePlayers - 1 && !canIgniteAnyitme) return;
         FatalIntent intent = new(true, () => new IncineratedDeathEvent(p, MyPlayer));
         IndirectInteraction interaction = new(intent, this);
         MyPlayer.InteractWith(p, interaction);
     });
-
-    [RoleAction(RoleActionType.Attack)]
-    private void StartDousePlayer(PlayerControl target)
-    {
-        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return;
-        MyPlayer.RpcGuardAndKill(target);
-        myTarget = target;
-        dousingDuration.StartThenRun(EndDousePlayer);
-        SyncOptions();
-    }
-
-    [RoleAction(RoleActionType.FixedUpdate)]
-    private void ArsonistStrictDousing()
-    {
-        if (!strictDousing || !IsDousing) return;
-        double elapsed = (DateTime.Now - lastCheck).TotalSeconds;
-        if (elapsed < ModConstants.RoleFixedUpdateCooldown) return;
-        lastCheck = DateTime.Now;
-
-        List<PlayerControl> closestPlayers = MyPlayer.GetPlayersInAbilityRangeSorted(false);
-        if (closestPlayers.Count > 0 || closestPlayers.Any(p => p.PlayerId == myTarget.PlayerId)) return;
-        myTarget = null;
-    }
 
     [RoleAction(RoleActionType.RoundStart)]
     private void UpdatePlayerCounts()
@@ -81,52 +88,23 @@ public class Arsonist : NeutralKillingBase
         dousedPlayers.RemoveWhere(p => Utils.PlayerById(p).Transform(pp => !pp.IsAlive(), () => true));
     }
 
-    private void EndDousePlayer()
-    {
-        List<PlayerControl> closestPlayers = MyPlayer.GetPlayersInAbilityRangeSorted();
-        MyPlayer.RpcGuardAndKill(MyPlayer);
-        SyncOptions();
-        if (myTarget == null || closestPlayers.Count == 0 || closestPlayers.All(p => p.PlayerId != myTarget.PlayerId)) return;
-        dousedPlayers.Add(myTarget.PlayerId);
-        SuccessfulDouseEffects(myTarget);
-        myTarget = null!;
-    }
-
-    private void SuccessfulDouseEffects(PlayerControl target)
-    {
-        target.NameModel().GetComponentHolder<IndicatorHolder>().Add(new SimpleIndicatorComponent("★", RoleColor, GameStates.IgnStates, MyPlayer));
-
-        GameOptionOverride[] overrides = { new(Override.ImpostorLightMod, 0f) };
-        SyncOptions(overrides);
-        Game.GameHistory.AddEvent(new PlayerDousedEvent(MyPlayer, target));
-        Async.Schedule(SyncOptions, 0.3f);
-    }
+    [RoleAction(RoleActionType.MyDeath)]
+    private void ArsonistDies() => indicators.Values.ForEach(v => v.Delete());
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .Color(RoleColor)
-            .SubOption(sub => sub
-                .Name("Time Until Douse Complete")
-                .Bind(v => dousingDuration.Duration = (float)v)
-                .AddFloatRange(0.5f, 5, 0.25f, 3, "s")
+            .SubOption(sub => sub.Name("Attacks to Complete Douse")
+                .AddIntRange(3, 100, defaultIndex: 16)
+                .BindInt(i => requiredAttacks = i)
                 .Build())
-            .SubOption(sub => sub
-                .Name("Strict Dousing")
-                .Bind(v => strictDousing = (bool)v)
-                .AddOnOffValues()
-                .Build())
-            .SubOption(sub => sub
-                .Name("Douse Cooldown")
-                .Bind(v => douseCooldown = (float)v)
-                .AddFloatRange(5, 60, 2.5f, 4, "s")
+            .SubOption(sub => sub.Name("Can Ignite Anytime")
+                .AddOnOffValues(false)
+                .BindBool(b => canIgniteAnyitme = b)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier)
-            .RoleColor(new Color(1f, 0.4f, 0.2f))
-            .CanVent(false)
-            .OptionOverride(Override.PlayerSpeedMod, 0f, () => IsDousing)
-            .OptionOverride(Override.KillCooldown, () => douseCooldown * 2);
+        base.Modify(roleModifier).RoleColor(new Color(1f, 0.4f, 0.2f)).CanVent(false);
 
 
     class PlayerDousedEvent : TargetedAbilityEvent, IRoleEvent

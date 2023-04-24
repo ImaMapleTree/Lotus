@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles.RoleGroups.Coven;
@@ -43,7 +43,7 @@ namespace TOHTOR.Roles.Legacy.Roles
                             if (!ar.Data.IsDead && !ar.GetCustomRole().IsCoven())
                                 Main.isInfected.Add((player.PlayerId, ar.PlayerId), false);
                         currentRole = role;
-                        break;*/
+                        break;#1#
                     case Sheriff:
                     case Traitor:
                         if (StaticOptions.NecroCanUseSheriff)
@@ -506,56 +506,15 @@ namespace TOHTOR.Roles.Legacy.Roles
                         break;
                     }
                     break;
-            }*/
+            }#1#
             /*if (target.Is(CustomRoles.Veteran) && !Main.HasNecronomicon && Main.VetIsAlerted)
-                target.RpcMurderPlayer(necromancer);*/
+                target.RpcMurderPlayer(necromancer);#1#
         }
         public static void OnShapeshiftCheck(this PlayerControl pc, bool shapeshifting)
         {
 
         }
-        public static bool CanUseVent()
-        {
-            /*
-            else if (pc.Object.Is(CustomRoles.Arsonist) && pc.Object.IsDouseDone() && !Options.TOuRArso.GetBool())
-                canUse = couldUse = VentForTrigger = true;
-            else if (pc.Object.Is(CustomRoles.Arsonist) && Options.TOuRArso.GetBool())
-                canUse = couldUse = true;
-            else if (pc.Object.Is(CustomRoles.Jackal) || pc.Object.Is(CustomRoles.Sidekick))
-                canUse = couldUse = Options.JackalCanVent.GetBool();
-            else if (pc.Object.Is(CustomRoles.Jester))
-                canUse = couldUse = Options.JesterCanVent.GetBool();
-            else if (pc.Object.Is(CustomRoles.Pestilence))
-                canUse = couldUse = Options.PestiCanVent.GetBool();
-            else if (pc.Object.Is(CustomRoles.Juggernaut))
-                canUse = couldUse = Options.JuggerCanVent.GetBool();
-            else if (pc.Object.Is(CustomRoles.BloodKnight))
-                canUse = couldUse = Options.BKcanVent.GetBool();
-            else if (pc.Object.Is(CustomRoles.TheGlitch))
-            */
-            switch (currentRole)
-            {
-                case Arsonist:
-                    break;
-                case Sidekick:
-                case Jackal:
-                    return currentRole.CanVent();
-                case Pestilence:
-                    return StaticOptions.PestiCanVent;
-                case Juggernaut:
-                    return StaticOptions.JuggerCanVent;
-                case BloodKnight:
-                    return StaticOptions.BKcanVent;
 
-                case Necromancer:
-                case Werewolf:
-                case Medusa:
-                case Glitch:
-                case Traitor:
-                    return true;
-            }
-            return false;
-        }
         public static void OnUseVent(int ventId)
         {
 
@@ -565,4 +524,4 @@ namespace TOHTOR.Roles.Legacy.Roles
             return "";
         }
     }
-}
+}*/

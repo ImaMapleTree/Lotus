@@ -18,6 +18,9 @@ public class Freezer : Vanilla.Shapeshifter
     private Cooldown freezeDuration;
     private bool canVent;
 
+    [RoleAction(RoleActionType.Attack)]
+    public override bool TryKill(PlayerControl target) => base.TryKill(target);
+
     [RoleAction(RoleActionType.SelfReportBody)]
     [RoleAction(RoleActionType.AnyReportedBody)]
     private void OnBodyReport()
@@ -54,7 +57,7 @@ public class Freezer : Vanilla.Shapeshifter
     private void ResetSpeed()
     {
         if (currentFreezerTarget == null) return;
-        GameOptionOverride[] overrides = { new(Override.PlayerSpeedMod, OriginalOptions.PlayerSpeedMod()) };
+        GameOptionOverride[] overrides = { new(Override.PlayerSpeedMod, AUSettings.PlayerSpeedMod()) };
         currentFreezerTarget.GetCustomRole().SyncOptions(overrides);
     }
 

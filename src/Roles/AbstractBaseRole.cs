@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using AmongUs.GameOptions;
@@ -20,11 +21,11 @@ using TOHTOR.Options;
 using TOHTOR.Roles.Extra;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Roles.Subroles;
 using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization;
-using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Options.Game;
@@ -36,10 +37,9 @@ using VentLib.Utilities.Optionals;
 namespace TOHTOR.Roles;
 
 // Some people hate using "Base" and "Abstract" in class names but I used both so now I'm a war-criminal :)
-[Localized(Group = "Roles")]
 public abstract class AbstractBaseRole
 {
-    public PlayerControl MyPlayer { get; protected set;  }
+    public PlayerControl MyPlayer { get; protected set; } = null!;
     private static bool ROLE_DEBUG = true;
 
     public static T Ref<T>() where T : CustomRole
@@ -55,12 +55,12 @@ public abstract class AbstractBaseRole
     private static List<RoleEditor> _editors = new();
 
 
-    public string Description => Localizer.Get($"Roles.{EnglishRoleName.RemoveHtmlTags()}.Description");
-    public string Blurb => Localizer.Get($"Roles.{EnglishRoleName.RemoveHtmlTags()}.Blurb");
+    public string Description => Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.Description");
+    public string Blurb => Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.Blurb");
 
     public string RoleName {
         get {
-            string name = Localizer.Get($"Roles.{EnglishRoleName.RemoveHtmlTags()}.RoleName");
+            string name = Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.RoleName", useCache: false);
             return name == "N/A" ? EnglishRoleName : name;
         }
     }
@@ -69,7 +69,6 @@ public abstract class AbstractBaseRole
     public RoleTypes? DesyncRole;
     public RoleTypes VirtualRole;
     public IFaction Faction { get; set; } = FactionInstances.Crewmates;
-    /*public FactionOld[] FactionsOld { get; set; } = { FactionOld.Crewmates };*/
     public SpecialType SpecialType = SpecialType.None;
     public Color RoleColor = Color.white;
     public bool IsSubrole { get; private set; }
@@ -78,18 +77,16 @@ public abstract class AbstractBaseRole
     public int AdditionalChance { get; private set; }
     public bool BaseCanVent;
 
+    public RoleFlag RoleFlags;
+    public readonly List<CustomRole> LinkedRoles = new();
+
     internal GameOption Options;
+    internal Assembly DeclaringAssembly = Assembly.GetCallingAssembly();
 
     public string EnglishRoleName { get; private set; }
-    private readonly Dictionary<Type, List<MethodInfo>> roleInteractions = new();
     private readonly Dictionary<RoleActionType, List<RoleAction>> roleActions = new();
 
     protected List<GameOptionOverride> roleSpecificGameOptionOverrides = new();
-
-    private static GameOptionBuilder RoleOptionsBuilder => roleOptionsBuilder.Clone();
-    private static GameOptionBuilder roleOptionsBuilder = new GameOptionBuilder()
-        .AddIntRange(0, 100, 10, 0, "%")
-        .ShowSubOptionPredicate(value => ((int)value) > 0);
 
     protected AbstractBaseRole()
     {
@@ -106,11 +103,25 @@ public abstract class AbstractBaseRole
         } catch { }
         this.roleSpecificGameOptionOverrides.Clear();
 
-        Options = _editors.Aggregate(GetGameOptionBuilder(), (current, editor) => editor.HookOptions(current)).Build();
-        if (Options.GetValueText() != "N/A")
+        GameOptionBuilder optionBuilder = _editors.Aggregate(GetGameOptionBuilder(), (current, editor) => editor.HookOptions(current));
+
+        LinkedRoles.ForEach(r =>
         {
-            if (Options.Tab == null)
+            optionBuilder.SubOption(_ => r.GetGameOptionBuilder().IsHeader(false).Build());
+            CustomRoleManager.AddRole(r);
+        });
+
+        Options = optionBuilder.Build();
+
+        if (!RoleFlags.HasFlag(RoleFlag.DontRegisterOptions) && Options.GetValueText() != "N/A")
+        {
+            if (!RoleFlags.HasFlag(RoleFlag.Hidden) && Options.Tab == null)
             {
+                if (this.GetType() == typeof(Impostor)) Options.Tab = DefaultTabs.HiddenTab;
+                if (this.GetType() == typeof(Engineer)) Options.Tab = DefaultTabs.HiddenTab;
+                if (this.GetType() == typeof(Scientist)) Options.Tab = DefaultTabs.HiddenTab;
+                if (this.GetType() == typeof(Crewmate)) Options.Tab = DefaultTabs.HiddenTab;
+
                 if (this is GM) { /*ignored*/ }
                 if (this is Subrole)
                     Options.Tab = DefaultTabs.MiscTab;
@@ -125,7 +136,7 @@ public abstract class AbstractBaseRole
                 else
                     Options.Tab = DefaultTabs.MiscTab;
             }
-            Options.Register(OptionManager.GetManager(file: "role_options.txt"), OptionLoadMode.LoadOrCreate);
+            Options.Register(CustomRoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
         }
 
         SetupRoleActions();
@@ -292,15 +303,19 @@ public abstract class AbstractBaseRole
     /// <returns>Provided <b>OR</b> new RoleFactory</returns>
     protected abstract RoleModifier Modify(RoleModifier roleModifier);
 
+    public GameOptionBuilder GetGameOptionBuilder()
+    {
+        GameOptionBuilder b = GetBaseBuilder();
+        if (RoleFlags.HasFlag(RoleFlag.RemoveRoleMaximum)) return RegisterOptions(b);
 
-    public GameOptionBuilder GetGameOptionBuilder() {
-        GameOptionBuilder b = RoleOptionsBuilder.Color(RoleColor).Bind(val => this.Chance = (int)val)
-            .SubOption(s => s.Name("Maximum")
+       b = b.SubOption(s => s.Name(RoleTranslations.MaximumText)
+                .Key("Maximum")
                 .AddIntRange(1, 15)
                 .Bind(val => this.Count = (int)val)
                 .ShowSubOptionPredicate(v => 1 < (int)v)
                 .SubOption(subsequent => subsequent
-                    .Name(Localizer.Get("Roles.Options.SubsequentChance"))
+                    .Name(RoleTranslations.SubsequentChanceText)
+                    .Key("Subsequent Chance")
                     .AddIntRange(10, 100, 10, 0, "%")
                     .BindInt(v => AdditionalChance = v)
                     .Build())
@@ -311,9 +326,44 @@ public abstract class AbstractBaseRole
 
     protected virtual GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream)
     {
-        optionStream.LocaleName($"Roles.{EnglishRoleName}.RoleName").Key(EnglishRoleName).Description(Localizer.Get($"Roles.{EnglishRoleName}.Blurb")).IsHeader(true);
-        return optionStream;
+        Assembly callingAssembly = Assembly.GetCallingAssembly();
+        Localizer localizer = Localizer.Get(callingAssembly);
+        string qualifier = $"Roles.{EnglishRoleName}.RoleName";
+
+        return optionStream
+            .LocaleName(qualifier)
+            .Key(EnglishRoleName)
+            .Color(RoleColor)
+            .Description(localizer.Translate($"Roles.{EnglishRoleName}.Blurb"))
+            .IsHeader(true);
     }
+
+    [SuppressMessage("ReSharper", "RemoveRedundantBraces")]
+    private GameOptionBuilder GetBaseBuilder()
+    {
+        if (!RoleFlags.HasFlag(RoleFlag.RemoveRolePercent))
+        {
+            return new GameOptionBuilder()
+                .BindInt(val => this.Chance = val)
+                .AddIntRange(0, 100, RoleFlags.HasFlag(RoleFlag.IncrementChanceByFives) ? 5 : 10, 0, "%")
+                .ShowSubOptionPredicate(value => ((int)value) > 0);
+        }
+
+        string onText = GeneralOptionTranslations.OnText;
+        string offText = GeneralOptionTranslations.OffText;
+
+        if (RoleFlags.HasFlag(RoleFlag.TransformationRole))
+        {
+            onText = GeneralOptionTranslations.ShowText;
+            offText = GeneralOptionTranslations.HideText;
+        }
+
+        return new GameOptionBuilder()
+                .Value(v => v.Text(onText).Value(true).Color(Color.cyan).Build())
+                .Value(v => v.Text(offText).Value(false).Color(Color.red).Build())
+                .ShowSubOptionPredicate(b => (bool)b);
+    }
+
 
     public bool Is(CustomRole role) => this.GetType() == role.GetType();
 
@@ -403,6 +453,28 @@ public abstract class AbstractBaseRole
         public RoleModifier RoleColor(Color color)
         {
             myRole.RoleColor = color;
+            return this;
+        }
+
+        /// <summary>
+        /// Roles that are "Linked" to this role. What this means:
+        /// ANY role you put in here will have its options become a sub-option of this role.
+        /// Additionally, you DO NOT (AND SHOULD NOT) register said role in your addon. The role will be automatically hooked in by being a member
+        /// of this function. If you happen to do so probably nothing will go wrong, but it's undefined behaviour and should be avoided.
+        /// <br/><br/>
+        /// If you're looking to change the options from % chance to "Show" / "Hide" refer to <see cref="RoleFlags"/> on the child role.
+        /// </summary>
+        /// <param name="roles">The roles linked to this role</param>
+        /// <returns>this role modifier</returns>
+        public RoleModifier LinkedRoles(params CustomRole[] roles)
+        {
+            myRole.LinkedRoles.AddRange(roles);
+            return this;
+        }
+
+        public RoleModifier RoleFlags(RoleFlag roleFlags)
+        {
+            myRole.RoleFlags = roleFlags;
             return this;
         }
     }

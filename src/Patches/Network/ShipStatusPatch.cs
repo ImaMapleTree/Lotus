@@ -43,10 +43,6 @@ class RepairSystemPatch
         [HarmonyArgument(2)] byte amount)
     {
         VentLogger.Info("SystemType: " + systemType.ToString() + ", PlayerName: " + player.GetNameWithRole() + ", amount: " + amount, "RepairSystem");
-        if (RepairSender.enabled && AmongUsClient.Instance.NetworkMode != NetworkModes.OnlineGame)
-        {
-            VentLogger.SendInGame("SystemType: " + systemType + ", PlayerName: " + player.GetNameWithRole() + ", amount: " + amount);
-        }
         IsComms = false;
         foreach (PlayerTask task in PlayerControl.LocalPlayer.myTasks)
             if (task.TaskType == TaskTypes.FixComms) IsComms = true;
@@ -56,7 +52,11 @@ class RepairSystemPatch
         /*if (player.Is(CustomRoles.SabotageMaster))
             SabotageMasterOLD.RepairSystem(__instance, systemType, amount);*/
 
-        if (systemType == SystemTypes.Electrical && 0 <= amount && amount <= 4)
+        // TODO: TLC
+        //StaticOptions.DisableAirshipViewingDeckLightsPanel
+        //StaticOptions.DisableAirshipGapRoomLightsPanel
+        //StaticOptions.DisableAirshipCargoLightsPanel
+        /*if (systemType == SystemTypes.Electrical && 0 <= amount && amount <= 4)
         {
             if (!StaticOptions.MadmateCanFixLightsOut && player.GetCustomRole().IsMadmate()) return false; //Madmateが停電を直せる設定がオフ
             switch (TOHPlugin.NormalOptions.MapId)
@@ -67,12 +67,8 @@ class RepairSystemPatch
                     if (StaticOptions.DisableAirshipCargoLightsPanel && Vector2.Distance(player.transform.position, new(30.56f, 2.12f)) <= 2f) return false;
                     break;
             }
-        }
+        }*/
 
-        if (!StaticOptions.MadmateCanFixComms && player.GetCustomRole().IsMadmate() //Madmateがコミュサボを直せる設定がオフ
-                                              && systemType == SystemTypes.Comms //システムタイプが通信室
-                                              && amount is 0 or 16 or 17)
-            return false;
         return true;
     }
     public static void CheckAndOpenDoorsRange(ShipStatus __instance, int amount, int min, int max)
@@ -114,7 +110,7 @@ class StartMeetingPatch
 {
     public static void Prefix(ShipStatus __instance, PlayerControl reporter, GameData.PlayerInfo target)
     {
-        UnityEngine.Object.FindObjectsOfType<DeadBody>();
+        Object.FindObjectsOfType<DeadBody>();
     }
 }
 
@@ -123,11 +119,10 @@ class CheckTaskCompletionPatch
 {
     public static bool Prefix(ref bool __result)
     {
-        if (StaticOptions.DisableTaskWin || StaticOptions.NoGameEnd)
-        {
-            __result = false;
-            return false;
-        }
-        return true;
+        if (!GeneralOptions.GameplayOptions.DisableTaskWin && !GeneralOptions.DebugOptions.NoGameEnd) return true;
+
+        __result = false;
+
+        return false;
     }
 }

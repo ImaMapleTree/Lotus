@@ -5,6 +5,13 @@ namespace TOHTOR.Victory.Conditions;
 
 public interface IWinCondition: IComparable<IWinCondition>
 {
+    /// <summary>
+    /// Called by game system, returns true if win condition criteria has been met, otherwise false.
+    /// <br/>
+    /// <b>IMPORTANT!</b> This function does NOT run on the main thread! Do not use Unity functions unless you know what you're doing. You have been warned!
+    /// </summary>
+    /// <param name="winners">the list of winners that met the win criteria</param>
+    /// <returns>true if the win condition has been met, otherwise false</returns>
     bool IsConditionMet(out List<PlayerControl> winners);
 
     /// <summary>

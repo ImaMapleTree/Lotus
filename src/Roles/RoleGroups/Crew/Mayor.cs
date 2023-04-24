@@ -11,11 +11,13 @@ using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
 
+[Localized("Roles.Mayor")]
 public class Mayor: Crewmate
 {
     private bool hasPocketMeeting;
@@ -27,6 +29,9 @@ public class Mayor: Crewmate
 
     private bool revealToVote;
     private bool revealed;
+
+    [Localized("RevealMessage")]
+    private static string _mayorRevealMessage = "Mr. Mayor, you must reveal yourself to gain additional votes. Currently you can vote normally, but if you vote yourself you'll reveal your role to everyone and gain more votes!";
 
     [UIComponent(UI.Counter)]
     private string PocketCounter() => RoleUtils.Counter(remainingVotes, totalVotes);
@@ -62,6 +67,12 @@ public class Mayor: Crewmate
         }
         if (!voted.Exists()) return;
         for (int i = 0; i < additionalVotes; i++) meetingDelegate.AddVote(MyPlayer, voted);
+    }
+
+    [RoleAction(RoleActionType.RoundEnd)]
+    private void MayorNotify()
+    {
+       if (revealToVote && !revealed) Utils.SendMessage(_mayorRevealMessage, MyPlayer.PlayerId);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

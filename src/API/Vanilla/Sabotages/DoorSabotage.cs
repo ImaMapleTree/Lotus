@@ -1,22 +1,65 @@
+using System.Linq;
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
+using TOHTOR.Roles.Internals;
+using TOHTOR.Roles.Internals.Attributes;
+using VentLib.Logging;
+using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.API.Vanilla.Sabotages;
 
 public class DoorSabotage : ISabotage
 {
-    public SabotageType SabotageType() => Sabotages.SabotageType.Door;
-    public bool Fix(PlayerControl? fixer = null)
+    public SystemTypes Room { get; }
+    private Optional<int> doorIndex;
+    private UnityOptional<PlayerControl> caller;
+
+    public DoorSabotage(SystemTypes? room, int doorIndex = -1, PlayerControl? caller = null)
     {
-        throw new System.NotImplementedException();
+        Room = room ?? ShipStatus.Instance.AllDoors[doorIndex != -1 ? doorIndex : 0].Room;
+        this.doorIndex = doorIndex != -1 ? Optional<int>.NonNull(doorIndex) : Optional<int>.Null();
+        this.caller = caller == null ? UnityOptional<PlayerControl>.Null() : UnityOptional<PlayerControl>.NonNull(caller);
     }
 
-    public Optional<PlayerControl> Caller()
+    public SabotageType SabotageType() => Sabotages.SabotageType.Door;
+
+    public bool Fix(PlayerControl? fixer = null)
     {
-        throw new System.NotImplementedException();
+        ActionHandle handle = ActionHandle.NoInit();
+        Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? Optional<PlayerControl>.Null() : Optional<PlayerControl>.Of(fixer));
+        if (handle.IsCanceled) return false;
+
+        Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
+
+        return doorIndex.Transform(index => {
+            if (index >= ShipStatus.Instance.AllDoors.Length) {
+                VentLogger.Warn($"Targeted door was out of range ({index})", "FixDoor");
+                return false;
+            }
+            ShipStatus.Instance.AllDoors[index].SetDoorway(true);
+            return true;
+        }, () => FixRoom(fixer, false));
     }
+
+    public bool FixRoom(PlayerControl? fixer = null, bool sendAction = true)
+    {
+        if (sendAction)
+        {
+            ActionHandle handle = ActionHandle.NoInit();
+            Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? Optional<PlayerControl>.Null() : Optional<PlayerControl>.Of(fixer));
+            Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
+            if (handle.IsCanceled) return false;
+        }
+
+        ShipStatus.Instance.AllDoors.Where(d => d.Room == Room).ForEach(door => door.SetDoorway(true));
+        return true;
+    }
+
+    public Optional<PlayerControl> Caller() => caller;
 
     public void Sabotage(PlayerControl sabotageCaller)
     {
-        throw new System.NotImplementedException();
+        ShipStatus.Instance.AllDoors.Where(d => d.Room == Room).ForEach(door => door.SetDoorway(false));
     }
 }

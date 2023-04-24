@@ -2,6 +2,8 @@ using System.Linq;
 using AmongUs.Data;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using TOHTOR.Options;
@@ -45,6 +47,7 @@ static class ExileControllerWrapUpPatch
     static void WrapUpPostfix(GameData.PlayerInfo? exiled)
     {
         if (!AmongUsClient.Instance.AmHost) return; //ホスト以外はこれ以降の処理を実行しません
+        exiled = AntiBlackout.ExiledPlayer ?? exiled;
         if (exiled != null)
         {
             //霊界用暗転バグ対処
@@ -58,18 +61,17 @@ static class ExileControllerWrapUpPatch
 
             realExiled.Object.Trigger(RoleActionType.SelfExiled, ref selfExiledHandle);
             Game.TriggerForAll(RoleActionType.AnyExiled, ref otherExiledHandle, realExiled);
+
+            Hooks.PlayerHooks.PlayerExiledHook.Propagate(new PlayerHookEvent(exiled.Object!));
+            Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerHookEvent(exiled.Object!));
         }
         FallFromLadder.Reset();
     }
 
     static void WrapUpFinalizer()
     {
-        if (AmongUsClient.Instance.AmHost) Async.Schedule(() => {
-            GameData.PlayerInfo? exiled = AntiBlackout.ExiledPlayer;
-            AntiBlackout.LoadCosmetics();
-            AntiBlackout.RestoreIsDead(doSend: true);
-            if (AntiBlackout.OverrideExiledPlayer && exiled?.Object != null) exiled.Object.RpcExileV2();
-        }, NetUtils.DeriveDelay(0.8f));
+        if (!AmongUsClient.Instance.AmHost) return;
+        Async.Schedule(AntiblackOutRestore, NetUtils.DeriveDelay(0.8f));
 
         /*RemoveDisableDevicesPatch.UpdateDisableDevices();*/
         SoundManager.Instance.ChangeMusicVolume(DataManager.Settings.Audio.MusicVolume);
@@ -79,14 +81,25 @@ static class ExileControllerWrapUpPatch
         AntiBlackout.FakeExiled = null;
 
         Game.State = GameState.Roaming;
-        if (StaticOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
+        if (GeneralOptions.GameplayOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
         Async.Schedule(() =>
         {
             ActionHandle handle = ActionHandle.NoInit();
             Game.TriggerForAll(RoleActionType.RoundStart, ref handle, false);
+            Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent());
             Game.RenderAllForAll(force: true);
         }, 0.5f);
 
+    }
+
+    private static void AntiblackOutRestore()
+    {
+        GameData.PlayerInfo? exiled = AntiBlackout.ExiledPlayer;
+        AntiBlackout.LoadCosmetics();
+        AntiBlackout.RestoreIsDead(doSend: true);
+        if (exiled?.Object == null) return;
+        exiled.Object.RpcExileV2();
+        Async.Schedule(() => exiled.Object.RpcExileV2(), NetUtils.DeriveDelay(0.8f));
     }
 }
 

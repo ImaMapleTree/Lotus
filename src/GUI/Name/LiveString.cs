@@ -4,11 +4,11 @@ using VentLib.Utilities;
 
 namespace TOHTOR.GUI.Name;
 
-public struct LiveString
+public class LiveString
 {
     public static LiveString Empty = new("");
 
-    private readonly Color? mainColor = null;
+    private readonly Color? mainColor;
     private readonly Func<string> valueSupplier;
 
     public LiveString(Func<string> supplier, Color? color = null)
@@ -21,8 +21,6 @@ public struct LiveString
     {
     }
 
-    public override string ToString()
-    {
-        return mainColor == null ? valueSupplier() : mainColor.Value.Colorize(valueSupplier());
-    }
+
+    public override string ToString() => mainColor == null ? valueSupplier() : mainColor.Value.Colorize(valueSupplier());
 }

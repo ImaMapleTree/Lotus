@@ -10,29 +10,31 @@ public interface INameModelComponent
 {
     public void AddPrefix(Ubifix prefix);
 
-    public void RemovePrefix(Ubifix prefix);
-
     public void AddSuffix(Ubifix suffix);
-
-    public void RemoveSuffix(Ubifix suffix);
-
-    public void SetMainText(LiveString liveString);
-
-    public GameState[] GameStates();
-
-    public Optional<float> Size();
-
-    public List<PlayerControl> Viewers();
-
-    public void SetViewerSupplier(Func<List<PlayerControl>> viewers);
 
     public void AddViewer(PlayerControl player);
 
-    public void RemoveViewer(byte playerId);
+    public INameModelComponent Clone();
+
+    public GameState[] GameStates();
 
     public string GenerateText();
 
+    public void SetMainText(LiveString liveString);
+
+    public void SetViewerSupplier(Func<List<PlayerControl>> viewers);
+
+    public Optional<float> Size();
+
+    public void RemovePrefix(Ubifix prefix);
+
+    public void RemoveSuffix(Ubifix suffix);
+
+    public void RemoveViewer(byte playerId);
+
+    public List<PlayerControl> Viewers();
+
     public ViewMode ViewMode();
 
-    public INameModelComponent Clone();
+
 }

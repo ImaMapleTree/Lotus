@@ -10,6 +10,7 @@ public class Engineer: Crewmate
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
+            .CanVent(true)
             .VanillaRole(RoleTypes.Engineer)
             .OptionOverride(Override.EngVentCooldown, VentCooldown)
             .OptionOverride(Override.EngVentDuration, VentDuration);

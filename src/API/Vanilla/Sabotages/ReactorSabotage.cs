@@ -1,3 +1,5 @@
+using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals;
@@ -37,6 +39,7 @@ public class ReactorSabotage : ISabotage
         reactor.Countdown = 10005f;
         Async.Schedule(() => VentLogger.Info($"Reactor Countdown: {reactor.Countdown}"), 1f);
         SabotagePatch.CurrentSabotage = null;
+        Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
         return true;
     }
 

@@ -1,19 +1,20 @@
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Options;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Internals.Interfaces;
+using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
-public partial class SerialKiller : Vanilla.Impostor, IModdable
+public partial class SerialKiller : Impostor, IModdable
 {
     private bool paused = true;
-    public Cooldown DeathTimer;
+    public Cooldown DeathTimer = null!;
     private float killCooldown;
 
     [UIComponent(UI.Counter)]
@@ -46,11 +47,10 @@ public partial class SerialKiller : Vanilla.Impostor, IModdable
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-            .Tab(DefaultTabs.GeneralTab)
             .SubOption(sub => sub
                 .Name("Kill Cooldown")
                 .Bind(v => killCooldown = (float)v)
-                .AddFloatRange(0, 90, 0.5f, 30, "s")
+                .AddFloatRange(0.5f, 90, 0.5f, 30, "s")
                 .Build())
             .SubOption(sub => sub
                 .Name("Time Until Suicide")

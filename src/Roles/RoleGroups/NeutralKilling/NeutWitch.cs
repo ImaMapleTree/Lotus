@@ -32,7 +32,7 @@ public class NeutWitch : NeutralKillingBase
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        if (MyPlayer.InteractWith(target, SimpleInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         cursedPlayers.Add(target);
         remotes.GetValueOrDefault(target.PlayerId)?.Delete();

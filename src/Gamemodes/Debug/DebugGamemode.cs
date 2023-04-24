@@ -25,6 +25,10 @@ public class DebugGamemode: Gamemode
     public override string GetName() => "Debug";
     public override IEnumerable<GameOptionTab> EnabledTabs() => new[] { DebugTab };
 
+    public override void Setup()
+    {
+    }
+
     public override void AssignRoles(List<PlayerControl> players)
     {
         players.Do(p =>

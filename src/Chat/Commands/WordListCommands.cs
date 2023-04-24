@@ -32,6 +32,6 @@ public class WordListCommands
         Utils.SendMessage("Successfully Reloaded Wordlist", source.PlayerId);
     }
 
-    private ChatManager ChatManager => TOHPlugin.PluginDataManager.ChatManager;
+    private ChatManager ChatManager => PluginDataManager.ChatManager;
 
 }

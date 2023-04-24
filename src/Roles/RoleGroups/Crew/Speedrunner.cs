@@ -20,7 +20,7 @@ public class Speedrunner : Crewmate
 
     private float totalSpeedBoost;
 
-    private float currentSpeedBoost = OriginalOptions.PlayerSpeedMod();
+    private float currentSpeedBoost = AUSettings.PlayerSpeedMod();
 
     protected override void OnTaskComplete()
     {

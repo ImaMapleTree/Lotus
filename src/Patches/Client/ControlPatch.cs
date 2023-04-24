@@ -1,20 +1,26 @@
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.Extensions;
+using TOHTOR.Managers;
+using TOHTOR.Managers.Reporting;
 using TOHTOR.Options;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.RoleGroups.Crew;
+using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.Utilities;
 using TOHTOR.Victory.Conditions;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
+using VentLib.Options;
 using VentLib.Utilities.Debug.Profiling;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches.Client;
 
@@ -54,6 +60,23 @@ class ControllerManagerUpdatePatch
             if (resolutionIndex >= resolutions.Length) resolutionIndex = 0;
             ResolutionManager.SetResolution(resolutions[resolutionIndex].Item1, resolutions[resolutionIndex].Item2, false);
         }
+
+        if (GetKeysDown(KeyCode.LeftControl, KeyCode.Equals))
+        {
+            (int width, int height) = ResolutionUtils.ResolutionsSixteenNine[ResolutionUtils.ResolutionIndex++];
+            ResolutionUtils.SetResolution(width, height);
+            if (ResolutionUtils.ResolutionIndex >= ResolutionUtils.Resolutions.Length)
+                ResolutionUtils.ResolutionIndex = ResolutionUtils.Resolutions.Length - 1;
+        }
+
+        if (GetKeysDown(KeyCode.LeftControl, KeyCode.Minus))
+        {
+            (int width, int height) = ResolutionUtils.ResolutionsSixteenNine[ResolutionUtils.ResolutionIndex--];
+            ResolutionUtils.SetResolution(width, height);
+            if (ResolutionUtils.ResolutionIndex < 0)
+                ResolutionUtils.ResolutionIndex = 0;
+        }
+
         if (GetKeysDown(KeyCode.LeftShift | KeyCode.RightShift, KeyCode.F12))
         {
             var hudManager = DestroyableSingleton<HudManager>.Instance;
@@ -104,10 +127,12 @@ class ControllerManagerUpdatePatch
             }
         }
         //カスタム翻訳のリロード
-        if (GetKeysDown(KeyCode.F5, KeyCode.T))
+        if (GetKeysDown(KeyCode.LeftControl, KeyCode.T) || GetKeysDown(KeyCode.F5, KeyCode.T))
         {
             VentLogger.Old("Reload Custom Translation File", "KeyCommand");
-            Localizer.Initialize();
+            Localizer.Reload();
+            FieldInfo optionNameField = typeof(Option).GetField("name", BindingFlags.Instance | BindingFlags.NonPublic)!;
+            CustomRoleManager.RoleOptionManager.GetOptions().ForEach(o => optionNameField.SetValue(o, Localizer.Translate(o.Qualifier(), o.Name())));
             VentLogger.SendInGame("Reloaded Custom Translation File");
         }
         //ログファイルのダンプ
@@ -125,6 +150,8 @@ class ControllerManagerUpdatePatch
                 p.Clear();
             });
         }
+
+        if (GetKeysDown(KeyCode.F3)) ReportManager.GenerateReport();
         //実行ファイルのフォルダを開く
         /*if (GetKeysDown(KeyCode.F10))
         {
@@ -166,6 +193,19 @@ class ControllerManagerUpdatePatch
         {
             Utils.ShowActiveSettingsHelp();
         }
+
+        if (GetKeysDown(KeyCode.LeftControl, KeyCode.X))
+        {
+            VentLogger.Info("Adding Ingredient");
+            List<IAlchemyIngredient> ingredients = new()
+            {
+                new IngredientCatalyst(), new IngredientChaos(), new IngredientDeath(null),
+                new IngredientPurity(default), new IngredientSight()
+            };
+
+            Alchemist.GlobalIngredients.Add(ingredients.GetRandom());
+        }
+
         //現在の有効な設定を表示
         if (GetKeysDown(KeyCode.N, KeyCode.LeftControl) && !Input.GetKey(KeyCode.LeftShift))
         {
@@ -193,12 +233,13 @@ class ControllerManagerUpdatePatch
             CustomRoleManager.AllRoles.ForEach(r => r.Instantiate(PlayerControl.LocalPlayer));
         }*/
         //--以下フリープレイ用コマンド--//
-        if (!StaticOptions.NoGameEnd || Game.State is GameState.InLobby) return;
+
         //キルクールを0秒に設定
         if (Input.GetKeyDown(KeyCode.X))
         {
             PlayerControl.LocalPlayer.Data.Object.SetKillTimer(0f);
         }
+        if (!GameStates.IsFreePlay) return;
         //自身のタスクをすべて完了
         if (Input.GetKeyDown(KeyCode.O))
         {

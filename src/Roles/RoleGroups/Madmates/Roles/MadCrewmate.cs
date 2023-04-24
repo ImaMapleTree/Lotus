@@ -41,5 +41,5 @@ public abstract class MadCrewmate : Engineer
             .SpecialType(SpecialType.Madmate)
             .RoleColor(new Color(0.73f, 0.18f, 0.02f))
             .Faction(FactionInstances.Madmates)
-            .OptionOverride(Override.CrewLightMod, () => OriginalOptions.CrewLightMod(), () => impostorVision);
+            .OptionOverride(Override.CrewLightMod, () => AUSettings.CrewLightMod(), () => impostorVision);
 }

@@ -33,7 +33,7 @@ public class HistoryMenuIntermediate
     public static void StoreOutfits()
     {
         _outfits.Clear();
-        Game.GetAlivePlayers().ForEach(p => _outfits[p.PlayerId] = p.Data.Outfits[PlayerOutfitType.Default]);
+        PlayerControl.AllPlayerControls.ToArray().ForEach(p => _outfits[p.PlayerId] = p.Data.Outfits[PlayerOutfitType.Default]);
     }
 
     public static void AddHistoryEvents(List<IHistoryEvent> historyEvents)

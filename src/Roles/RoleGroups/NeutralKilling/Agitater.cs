@@ -54,7 +54,7 @@ public class AgiTater : NeutralKillingBase
     {
         if (currentBombs <= 0) return false;
         currentBombs--;
-        if (MyPlayer.InteractWith(target, new SimpleInteraction(new EfIntent(), this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, new DirectInteraction(new EfIntent(), this)) is InteractionResult.Halt) return false;
         MyPlayer.RpcGuardAndKill(target);
         AgiBomb bomb = new(MyPlayer, new Cooldown(bombTimer));
         bombs.Add(bomb);

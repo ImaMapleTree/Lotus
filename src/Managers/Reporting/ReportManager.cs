@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.IO.Compression;
 using System.Linq;
 using HarmonyLib;
 using VentLib.Logging;
@@ -61,13 +62,8 @@ public static class ReportManager
         if (reports.Count == 0) return;
         VentLogger.Log(ReportLevel, $"Generating Report | Tags: [{tags.Join()}]");
 
-        DirectoryInfo thisReport = ReportingDirectory.GetDirectory("latest");
-        if (!thisReport.Exists) thisReport.Create();
-        else
-        {
-            thisReport.Delete(true);
-            thisReport.Create();
-        }
+        FileStream reportStream = File.Open(Path.Join(ReportingDirectory.FullName, "latest.zip"), FileMode.OpenOrCreate);
+        ZipArchive archive = new(reportStream, ZipArchiveMode.Create);
 
         reports.ForEach(kp =>
         {
@@ -75,8 +71,6 @@ public static class ReportManager
             List<ReportInfo> reportInfos = kp.Value;
             FileInfo fileInfo = new(fileName.TrimEnd('.'));
             if (fileInfo.Extension == "") fileName += ".txt";
-
-            fileInfo = thisReport.GetFile(fileName);
 
             string content = "";
             string fileContent = "";
@@ -88,9 +82,12 @@ public static class ReportManager
             });
 
             VentLogger.Log(ReportLevel, $"\nReport for {fileName}\n{content}");
-            StreamWriter writer = new(fileInfo.Open(FileMode.Create));
+            ZipArchiveEntry entry = archive.CreateEntry(fileName);
+            StreamWriter writer = new(entry.Open());
             writer.Write(fileContent);
             writer.Close();
         });
+
+        archive.Dispose();
     }
 }

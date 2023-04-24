@@ -1,7 +1,11 @@
+using System.Collections.Generic;
 using AmongUs.Data;
+using AmongUs.GameOptions;
 using HarmonyLib;
 using InnerNet;
+using TOHTOR.API;
 using TOHTOR.Options;
+using TOHTOR.Options.General;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
@@ -98,36 +102,29 @@ public class GameStartRandomMap
 {
     public static bool Prefix(GameStartManager __instance)
     {
-        if (StaticOptions.EnableGM) VentLogger.SendInGame("[Info] GM is Enabled");
+        if (GeneralOptions.AdminOptions.HostGM) VentLogger.SendInGame("[Info] GM is Enabled");
 
         __instance.ReallyBegin(false);
         return false;
     }
     public static bool Prefix(GameStartRandomMap __instance)
     {
-        bool continueStart = true;
-        if (StaticOptions.RandomMapsMode)
-        {
-            System.Collections.Generic.List<byte> RandomMaps = new();
-            /*TheSkeld   = 0
-            MIRAHQ     = 1
-            Polus      = 2
-            Dleks      = 3
-            TheAirShip = 4*/
-            if (StaticOptions.AddedTheSkeld) RandomMaps.Add(0);
-            if (StaticOptions.AddedMiraHQ) RandomMaps.Add(1);
-            if (StaticOptions.AddedPolus) RandomMaps.Add(2);
-            // if (Options.AddedDleks.GetBool()) RandomMaps.Add(3);
-            if (StaticOptions.AddedTheAirShip) RandomMaps.Add(4);
+        if (!GeneralOptions.MayhemOptions.UseRandomMap) return true;
 
-            if (RandomMaps.Count <= 0) return true;
-            var MapsId = RandomMaps.GetRandom();
-            TOHPlugin.NormalOptions.MapId = MapsId;
+        List<byte> randomMaps = new();
+        AuMap map = GeneralOptions.MayhemOptions.RandomMaps;
+        if (map.HasFlag(AuMap.Skeld)) randomMaps.Add(0);
+        if (map.HasFlag(AuMap.Mira)) randomMaps.Add(1);
+        if (map.HasFlag(AuMap.Polus)) randomMaps.Add(2);
+        if (map.HasFlag(AuMap.Airship)) randomMaps.Add(4);
 
-        }
-        return continueStart;
+        if (randomMaps.Count == 0) return true;
+
+        AUSettings.StaticOptions.SetByte(ByteOptionNames.MapId, randomMaps.GetRandom());
+        return true;
     }
 }
+
 [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.ResetStartState))]
 class ResetStartStatePatch
 {

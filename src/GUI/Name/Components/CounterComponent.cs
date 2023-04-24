@@ -5,7 +5,7 @@ using TOHTOR.GUI.Name.Impl;
 
 namespace TOHTOR.GUI.Name.Components;
 
-public class CounterComponent : NmComponent
+public class CounterComponent : SimpleComponent
 {
     private readonly ICounter? counter;
     private Func<ICounter>? counterSupplier;

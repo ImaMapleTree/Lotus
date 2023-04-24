@@ -6,7 +6,7 @@ using VentLib.Utilities;
 
 namespace TOHTOR.GUI.Name.Components;
 
-public class CooldownComponent : NmComponent
+public class CooldownComponent : SimpleComponent
 {
     private Cooldown? cooldown;
     private Func<Cooldown>? cooldownSupplier;

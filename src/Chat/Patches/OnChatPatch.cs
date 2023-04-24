@@ -5,9 +5,12 @@ using TOHTOR.API;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
+using TOHTOR.Managers;
+using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Utilities;
+using VentLib.Logging;
 using VentLib.Utilities;
 
 namespace TOHTOR.Chat.Patches;
@@ -20,13 +23,15 @@ internal static class OnChatPatch
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static void Prefix(ChatController __instance, PlayerControl sourcePlayer, string chatText)
     {
-        if (UtilsSentList.Count > 0 && UtilsSentList.Contains(sourcePlayer.PlayerId))
+        VentLogger.Log(LogLevel.All, $"{sourcePlayer.UnalteredName()} => {chatText}");
+        if (UtilsSentList.Contains(sourcePlayer.PlayerId))
         {
+            VentLogger.Trace($"Filtered Util Message Sent By: {sourcePlayer.UnalteredName()}");
             UtilsSentList.RemoveAt(UtilsSentList.FindIndex(b => b == sourcePlayer.PlayerId));
             return;
         }
         Hooks.PlayerHooks.PlayerMessageHook.Propagate(new PlayerMessageHookEvent(sourcePlayer, chatText));
-        if (!TOHPlugin.PluginDataManager.ChatManager.HasBannedWord(chatText) || sourcePlayer.IsHost())
+        if (!UseWordList() || !PluginDataManager.ChatManager.HasBannedWord(chatText) || sourcePlayer.IsHost())
         {
             if (Game.State is GameState.InLobby) return;
             ActionHandle handle = ActionHandle.NoInit();
@@ -36,4 +41,6 @@ internal static class OnChatPatch
         AmongUsClient.Instance.KickPlayer(sourcePlayer.GetClientId(), false);
         Utils.SendMessage($"{sourcePlayer.UnalteredName()} was kicked by AutoKick.");
     }
+
+    public static bool UseWordList() => GeneralOptions.AdminOptions.AutoKick;
 }

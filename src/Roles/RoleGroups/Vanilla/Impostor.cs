@@ -3,14 +3,14 @@ using TOHTOR.API;
 using TOHTOR.Factions;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Interactions;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Internals.Interfaces;
 using UnityEngine;
 
 namespace TOHTOR.Roles.RoleGroups.Vanilla;
 
-public partial class Impostor : CustomRole, IModdable
+public partial class Impostor : CustomRole, IModdable, ISabotagerRole
 {
     public virtual bool CanSabotage() => canSabotage;
     public virtual bool CanKill() => canKill;
@@ -19,15 +19,14 @@ public partial class Impostor : CustomRole, IModdable
     public float KillCooldown
     {
         set => _killCooldown = value;
-        get => _killCooldown ?? OriginalOptions.KillCooldown();
+        get => _killCooldown ?? AUSettings.KillCooldown();
     }
     private float? _killCooldown;
 
     [RoleAction(RoleActionType.Attack, Subclassing = false)]
     public virtual bool TryKill(PlayerControl target)
     {
-        SyncOptions();
-        InteractionResult result = MyPlayer.InteractWith(target, SimpleInteraction.FatalInteraction.Create(this));
+        InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this));
         Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }

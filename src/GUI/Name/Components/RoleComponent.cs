@@ -7,7 +7,7 @@ using TOHTOR.Roles;
 
 namespace TOHTOR.GUI.Name.Components;
 
-public class RoleComponent : NmComponent
+public class RoleComponent : SimpleComponent
 {
     private CustomRole role;
 

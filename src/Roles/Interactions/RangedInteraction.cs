@@ -2,7 +2,7 @@ using TOHTOR.Roles.Interactions.Interfaces;
 
 namespace TOHTOR.Roles.Interactions;
 
-public class RangedInteraction : SimpleInteraction, IRangedInteraction
+public class RangedInteraction : DirectInteraction, IRangedInteraction
 {
     private readonly float distance;
 

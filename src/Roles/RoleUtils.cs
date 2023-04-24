@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -15,6 +16,7 @@ using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles;
 
@@ -41,15 +43,24 @@ public static class RoleUtils
         return color == null ? Arrows[arrow < 8 ?  arrow : 0].ToString() : color.Value.Colorize(Arrows[arrow < 8 ? arrow : 0].ToString());
     }
 
-    public static IEnumerable<PlayerControl> GetPlayersWithinDistance(PlayerControl source, float distance)
+    public static IEnumerable<PlayerControl> GetPlayersWithinDistance(PlayerControl source, float distance, bool sorted = false)
     {
         Vector2 position = source.GetTruePosition();
-        return Game.GetAlivePlayers().Where(p => p.PlayerId != source.PlayerId && Vector2.Distance(position, p.GetTruePosition()) <= distance);
+        return GetPlayersWithinDistance(position, distance, sorted).Where(p => p.PlayerId != source.PlayerId);
     }
 
-    public static IEnumerable<PlayerControl> GetPlayersWithinDistance(Vector2 position, float distance)
+    public static IEnumerable<PlayerControl> GetPlayersWithinDistance(Vector2 position, float distance, bool sorted = false)
     {
-        return Game.GetAlivePlayers().Where(p => Vector2.Distance(position, p.GetTruePosition()) <= distance);
+        Dictionary<byte, float> distances = sorted ? new Dictionary<byte, float>() : null!;
+
+        IEnumerable<PlayerControl> distancePlayers = Game.GetAlivePlayers().Where(p =>
+        {
+            float distanceApart = Vector2.Distance(position, p.GetTruePosition());
+            if (sorted) distances[p.PlayerId] = distanceApart;
+            return distanceApart <= distance;
+        });
+
+        return sorted ? distancePlayers.Sorted(p => distances[p.PlayerId]) : distancePlayers;
     }
 
     public static IEnumerable<PlayerControl> GetPlayersOutsideDistance(PlayerControl source, float distance)
@@ -89,6 +100,14 @@ public static class RoleUtils
         color1 ??= new Color(0.93f, 0.57f, 0.28f);
         color2 ??= Color.white;
         return cooldown.ToString() == "0" ? "" : $"{color1.Value.Colorize("CD:")} {color2.Value.Colorize(cooldown + "s")}";
+    }
+
+    public static string ProgressBar(int current, int max, Color? color1 = null, Color? color2 = null)
+    {
+        color1 ??= new Color(0.92f, 0.77f, 0.22f);
+        color2 ??= Color.gray;
+        int diff = max - current;
+        return "[" + color1.Value.Colorize("■".Repeat(current - 1) + color2.Value.Colorize("■".Repeat(diff - 1))) + "]";
     }
 
     public static InteractionResult InteractWith(this PlayerControl player, PlayerControl target, Interaction interaction)

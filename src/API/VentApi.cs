@@ -12,6 +12,7 @@ public class VentApi
 {
     public static void ForceNoVenting(PlayerControl player, int ventId = -1)
     {
+        if (player.NetTransform == null) return;
         Vector2 originalPos = player.GetTruePosition();
         if (ventId == -1)
         {
@@ -24,7 +25,7 @@ public class VentApi
         messageWriter.WritePacked(ventId);
         messageWriter.EndMessage();
 
-        Async.Schedule(() => player.MyPhysics.RpcBootFromVent(ventId), 0.01f);
-        Async.Schedule(() => Utils.Teleport(player.NetTransform, originalPos), 1f);
+        Async.Schedule(() => player.MyPhysics.RpcBootFromVent(ventId), NetUtils.DeriveDelay(0.05f));
+        Async.Schedule(() => Utils.Teleport(player.NetTransform, originalPos), 0.5f);
     }
 }

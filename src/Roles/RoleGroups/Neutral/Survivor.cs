@@ -18,6 +18,12 @@ public class Survivor : CustomRole
     private Cooldown vestCooldown;
     private Cooldown vestDuration;
 
+    private int vestUsages;
+    private int reaminingVests;
+
+    [UIComponent(UI.Counter)]
+    private string VestCounter() => RoleUtils.Counter(reaminingVests, vestUsages, RoleColor);
+
     [UIComponent(UI.Indicator)]
     private string GetVestString() => vestDuration.IsReady() ? "" : RoleColor.Colorize("♣");
 
@@ -27,18 +33,16 @@ public class Survivor : CustomRole
     {
         base.Setup(player);
         vestDuration.Start(10f);
+        reaminingVests = vestUsages;
         Game.GetWinDelegate().AddSubscriber(GameEnd);
     }
-
-    [RoleAction(RoleActionType.RoundStart)]
-    public void Restart() => vestCooldown.Start();
 
     [RoleAction(RoleActionType.OnPet)]
     public void OnPet()
     {
-        if (vestCooldown.NotReady()) return;
-        vestCooldown.Start();
-        vestDuration.Start();
+        if (reaminingVests == 0 || vestDuration.NotReady() || vestCooldown.NotReady()) return;
+        reaminingVests--;
+        vestDuration.StartThenRun(() => vestCooldown.Start());;
     }
 
     private void GameEnd(WinDelegate winDelegate)
@@ -59,6 +63,11 @@ public class Survivor : CustomRole
                 .Name("Vest Cooldown")
                 .BindFloat(vestCooldown.SetDuration)
                 .AddFloatRange(2.5f, 180f, 2.5f, 5, "s")
+                .Build())
+            .SubOption(sub => sub.Name("Vest Usages")
+                .BindInt(i => vestUsages = i)
+                .Value(v => v.Value(-1).Text("∞").Build())
+                .AddIntRange(1, 60, 1)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

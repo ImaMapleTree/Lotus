@@ -14,7 +14,7 @@ public class Bewilder: Subrole
     private void BaitDies(PlayerControl killer)
     {
         CustomRole role = killer.GetCustomRole();
-        role.AddOverride(new GameOptionOverride(Override.ImpostorLightMod, OriginalOptions.CrewLightMod()));
+        role.AddOverride(new GameOptionOverride(Override.ImpostorLightMod, AUSettings.CrewLightMod()));
     }
 
     public override string? Identifier() => "★";

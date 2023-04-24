@@ -17,7 +17,7 @@ using OptionValue = VentLib.Options.OptionValue;
 namespace TOHTOR.Gamemodes.Colorwars;
 
 // TODO add option to convert killed to same color, last color standing = win AND/OR traditional mode
-[Localized(Group = "Gamemodes", Subgroup = "Colorwars")]
+[Localized("Gamemodes.Colorwars")]
 public class ColorwarsGamemode: Gamemode
 {
     public static GameOptionTab ColorwarsTab = new("Colorwars", () => Utils.LoadSprite("TOHTOR.assets.Tabs.TabIcon_ColorWars.png"));
@@ -110,6 +110,10 @@ public class ColorwarsGamemode: Gamemode
             //TODO: Save on change
             playerOptions.Add(newOption);
         });
+    }
+
+    public override void Setup()
+    {
     }
 
     public override void AssignRoles(List<PlayerControl> players)

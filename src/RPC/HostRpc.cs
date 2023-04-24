@@ -1,5 +1,6 @@
 using System.Linq;
 using TOHTOR.Extensions;
+using TOHTOR.Options;
 using TOHTOR.Utilities;
 using VentLib;
 using VentLib.Utilities.Extensions;
@@ -16,6 +17,7 @@ public static class HostRpc
     public static void RpcSendOptions(BatchList<Option> options)
     {
         VentLogger.Debug($"Received {options.Count} Options from Host");
+        OptionShower.GetOptionShower().Update();
     }
 
     [ModRPC((uint) ModCalls.Debug, RpcActors.Host, RpcActors.NonHosts)]
