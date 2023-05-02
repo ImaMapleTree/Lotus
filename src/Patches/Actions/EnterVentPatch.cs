@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using HarmonyLib;
 using Hazel;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Gamemodes;
 using TOHTOR.Roles;
@@ -62,7 +63,7 @@ class ExitVentPatch
         ActionHandle exitVent = ActionHandle.NoInit();
         pc.Trigger(RoleActionType.VentExit, ref exitVent, __instance);
         //if (exitVent.IsCanceled) Async.Schedule(() => pc.MyPhysics.RpcEnterVent(__instance.Id), 0.0f);
-        if (exitVent.IsCanceled) Async.Schedule(() => RpcV2.Immediate(pc.MyPhysics.NetId, RpcCalls.EnterVent, SendOption.None).WritePacked(__instance.Id).Send(), 0.5f);
+        if (exitVent.IsCanceled) Async.Schedule(() => RpcV3.Immediate(pc.MyPhysics.NetId, RpcCalls.EnterVent, SendOption.None).WritePacked(__instance.Id).Send(), 0.5f);
         else EnterVentPatch.lastVentLocation.Remove(pc.PlayerId);
     }
 }

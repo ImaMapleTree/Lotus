@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
@@ -97,7 +98,7 @@ public class Vigilante: CustomRole
                     break;
                 }
                 playerSelected = player;
-                string targetPlayerMessage = $"{selectPlayerMsg} {player.Get().UnalteredName()}\n{skipMsg}";
+                string targetPlayerMessage = $"{selectPlayerMsg} {player.Get().name}\n{skipMsg}";
                 Utils.SendMessage(targetPlayerMessage, MyPlayer.PlayerId);
                 break;
             case VotingState.SelectingRole:

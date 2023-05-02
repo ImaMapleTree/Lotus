@@ -11,7 +11,7 @@ public interface ISabotage
 
     public Optional<PlayerControl> Caller();
 
-    public void Sabotage(PlayerControl sabotageCaller);
+    public void CallSabotage(PlayerControl sabotageCaller);
 
     public static ISabotage From(SabotageType type, PlayerControl? caller = null)
     {

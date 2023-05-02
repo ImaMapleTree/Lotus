@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Meetings;
+using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.Extensions;
-using TOHTOR.RPC;
 using TOHTOR.Utilities;
 using VentLib.Logging;
+using VentLib.Networking.RPC;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Chat.Patches;
 
@@ -29,10 +29,10 @@ public class ChatUpdatePatch
         var player = PlayerControl.AllPlayerControls.ToArray().OrderBy(x => x.PlayerId).FirstOrDefault(x => !x.Data.IsDead);
         if (player == null) return;
         (string msg, byte sendTo, string title, bool leftAlign) = MessagesToSend.Dequeue();
-        VentLogger.Fatal($"Left Align: {leftAlign}");
         if (leftAlign) ChatBubblePatch.SetRightQueue.Enqueue(0);
         int clientId = sendTo == byte.MaxValue ? -1 : Utils.GetPlayerById(sendTo).GetClientId();
-        var name = Game.State is GameState.InLobby ? player.UnalteredName() : player.NameModel().RenderFor(player);
+        var name = player.name;
+
         if (clientId == -1)
         {
             player.SetName(title);
@@ -42,19 +42,25 @@ public class ChatUpdatePatch
         }
         else if (clientId == PlayerControl.LocalPlayer.GetClientId()) OnChatPatch.UtilsSentList.Add(player.PlayerId);
 
-        var writer = CustomRpcSender.Create("MessagesToSend");
-        writer.StartMessage(clientId);
-        writer.StartRpc(player.NetId, (byte)RpcCalls.SetName)
-            .Write(title)
-            .EndRpc();
-        writer.StartRpc(player.NetId, (byte)RpcCalls.SendChat)
-            .Write(msg)
-            .EndRpc();
-        writer.StartRpc(player.NetId, (byte)RpcCalls.SetName)
-            .Write(player.Data.PlayerName)
-            .EndRpc();
-        writer.EndMessage();
-        writer.SendMessage();
+        PlayerControl.AllPlayerControls.ToArray().Where(p => clientId == -1 || p.GetClientId() == clientId).ForEach(p =>
+        {
+            if (p.AmOwner && clientId == -1) return;
+
+            string message = p.IsModded() ? msg : msg.RemoveHtmlTags();
+            VentLogger.Fatal($"Message: {message}");
+
+            RpcV3.Mass()
+                .Start(player.NetId, RpcCalls.SetName)
+                    .Write(title)
+                    .End()
+                .Start(player.NetId, RpcCalls.SendChat)
+                    .Write(message)
+                    .End()
+                .Start(player.NetId, RpcCalls.SetName)
+                    .Write(name)
+                    .End()
+                .Send(p.GetClientId());
+        });
         __instance.TimeSinceLastMessage = 0f;
     }
 }

@@ -1,4 +1,4 @@
-using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles;
 using VentLib.Utilities;
@@ -31,7 +31,7 @@ public class RoleChangeEvent : IRoleChangeEvent
 
     public string Message()
     {
-        return $"{Game.GetName(player, originalRole.OrElse(CustomRoleManager.Default).RoleColor)} transformed into {newRole.RoleColor.Colorize(newRole.RoleName)}";
+        return $"{originalRole.OrElse(CustomRoleManager.Default).RoleColor.Colorize(Game.GetName(player))} transformed into {newRole.RoleColor.Colorize(newRole.RoleName)}";
     }
 
     public CustomRole OriginalRole() => originalRole.Get();

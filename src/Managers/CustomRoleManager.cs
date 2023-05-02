@@ -2,9 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using TOHTOR.Options;
+using TOHTOR.Options.Roles;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Debugger;
 using TOHTOR.Roles.Extra;
+using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.RoleGroups.Coven;
 using TOHTOR.Roles.RoleGroups.Crew;
 using TOHTOR.Roles.RoleGroups.Impostors;
@@ -179,6 +182,7 @@ public static class CustomRoleManager
         public Witch Witch = new Witch();
         public YingYanger YingYanger = new YingYanger();
 
+        public CrewPostor CrewPostor = new CrewPostor();
         public Madmate Madmate = new Madmate();
         public MadGuardian MadGuardian = new MadGuardian();
         public MadSnitch MadSnitch = new MadSnitch();
@@ -220,13 +224,14 @@ public static class CustomRoleManager
 
         //Neutrals
 
+        // ReSharper disable once InconsistentNaming
+        private CustomRole LOAD_NEUTRAL_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadNeutralOptions());
 
         public AgiTater AgiTater = new AgiTater();
         public Amnesiac Amnesiac = new Amnesiac();
         public Archangel Archangel = new Archangel();
         public Arsonist Arsonist = new Arsonist();
         public BloodKnight BloodKnight = new BloodKnight();
-        public CrewPostor CrewPostor = new CrewPostor();
         public Copycat Copycat = new Copycat();
         public Egoist Egoist = new Egoist();
         public Executioner Executioner = new Executioner();
@@ -256,17 +261,18 @@ public static class CustomRoleManager
 
     public class ExtraRoles
     {
+        public IllegalRole IllegalRole = new IllegalRole();
+
         public GM GM = new GM();
         public Bait Bait = new Bait();
         public Bewilder Bewilder = new Bewilder();
         public Coven Coven = new Coven();
         public Debugger Debugger = new Debugger();
         public Diseased Diseased = new Diseased();
-        public LastImpostor LastImpostor = new LastImpostor();
         //double shot
         //flash
         public Fox Fox = new();
-        public Lovers Lovers = new Lovers();
+        public LoversReal LoversReal = new LoversReal();
         //oblivious
         //obvious
         //sleuth

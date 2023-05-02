@@ -1,4 +1,3 @@
-using Hazel;
 using TOHTOR.Extensions;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
@@ -17,11 +16,10 @@ public class ProtectedRpc
         if (MeetingHud.Instance != null)
         {
             target.RpcExileV2();
-            RpcV2.Immediate(killer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
+            RpcV3.Immediate(killer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
             return;
         }
 
-        if (AmongUsClient.Instance.AmClient) killer.MurderPlayer(target);
-        RpcV2.Immediate(killer.NetId, RpcCalls.MurderPlayer, SendOption.None).Write(target).Send();
+        killer.RpcMurderPlayer(target);
     }
 }

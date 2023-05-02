@@ -1,6 +1,5 @@
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
-using TOHTOR.FactionsOLD;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -35,33 +34,12 @@ public class Terrorist : Crewmate
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
-        .Tab(DefaultTabs.NeutralTab)
+        AddTaskOverrideOptions(base.RegisterOptions(optionStream)
+            .Tab(DefaultTabs.NeutralTab)
             .SubOption(sub => sub
                 .Name("Can Win By Suicide")
                 .Bind(v => canWinBySuicide = (bool)v)
-                .AddOnOffValues(false).Build())
-            .SubOption(sub => sub
-                .Name("Override Terrorist's Tasks")
-                .Bind(v => HasOverridenTasks = (bool)v)
-                .ShowSubOptionPredicate(v => (bool)v)
-                .AddOnOffValues(false)
-                .SubOption(sub2 => sub2
-                    .Name("Allow Common Tasks")
-                    .Bind(v => HasCommonTasks = (bool)v)
-                    .AddOnOffValues()
-                    .Build())
-                .SubOption(sub2 => sub2
-                    .Name("Terrorist Long Tasks")
-                    .Bind(v => LongTasks = (int)v)
-                    .AddIntRange(0, 20, 1, 5)
-                    .Build())
-                .SubOption(sub2 => sub2
-                    .Name("Terrorist Short Tasks")
-                    .Bind(v => ShortTasks = (int)v)
-                    .AddIntRange(1, 20, 1, 5)
-                    .Build())
-                .Build());
+                .AddOnOffValues(false).Build()));
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(Color.green).Faction(FactionInstances.Solo);

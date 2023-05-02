@@ -14,6 +14,8 @@ public class ImpostorFaction : Faction<ImpostorFaction>
 
     public override Color FactionColor() => Color.red;
 
+    public override string Name() => "Impostors";
+
     public override Relation RelationshipOther(IFaction other)
     {
         return other switch

@@ -1,3 +1,4 @@
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
@@ -47,7 +48,7 @@ public class ElectricSabotage : ISabotage
 
     public Optional<PlayerControl> Caller() => caller;
 
-    public void Sabotage(PlayerControl sabotageCaller)
+    public void CallSabotage(PlayerControl sabotageCaller)
     {
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.SabotageStarted, ref handle, this, sabotageCaller);

@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Meetings;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.Extensions;
 using TOHTOR.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Harmony.Attributes;
 using VentLib.Utilities.Optionals;
 using static MeetingHud;
 
@@ -57,7 +59,14 @@ public class CheckForEndVotingPatch
         VentLogger.Trace($"Player With Most Votes: {Utils.PlayerById(exiledPlayer)}");
 
         GameData.PlayerInfo? playerInfo = GameData.Instance.AllPlayers.ToArray().FirstOrDefault(info => !isTie && info.PlayerId == exiledPlayer);
-        MeetingApi.EndVoting(__instance, votingStates.ToArray(), playerInfo, isTie);
+        MeetingDelegate.Instance.ExiledPlayer = playerInfo;
+        __instance.RpcVotingComplete(votingStates.ToArray(), playerInfo, isTie);
         return false;
+    }
+
+    [QuickPrefix(typeof(MeetingHud), nameof(MeetingHud.VotingComplete))]
+    public static void VotingCompletePatch(MeetingHud __instance, [HarmonyArgument(1)] GameData.PlayerInfo? playerInfo)
+    {
+        MeetingDelegate.Instance.ExiledPlayer = playerInfo;
     }
 }

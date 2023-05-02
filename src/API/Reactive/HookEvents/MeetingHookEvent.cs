@@ -1,4 +1,4 @@
-using TOHTOR.API.Meetings;
+using TOHTOR.API.Vanilla.Meetings;
 
 namespace TOHTOR.API.Reactive.HookEvents;
 

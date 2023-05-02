@@ -28,4 +28,10 @@ public static class GeneralOptionTranslations
 
     [Localized(nameof(HideText))]
     public static string HideText = "Hide";
+
+    [Localized(nameof(FriendsText))]
+    public static string FriendsText = "Friends";
+
+    [Localized(nameof(EveryoneText))]
+    public static string EveryoneText = "Everyone";
 }

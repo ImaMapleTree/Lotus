@@ -1,5 +1,7 @@
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Options;
@@ -27,7 +29,7 @@ public class Survivor : CustomRole
     [UIComponent(UI.Indicator)]
     private string GetVestString() => vestDuration.IsReady() ? "" : RoleColor.Colorize("♣");
 
-    public override bool CanBeKilled() => vestDuration.IsReady();
+    public virtual bool CanBeKilled() => vestDuration.IsReady();
 
     protected override void Setup(PlayerControl player)
     {
@@ -72,6 +74,7 @@ public class Survivor : CustomRole
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier
+            .Faction(FactionInstances.Solo)
             .SpecialType(SpecialType.Neutral)
             .RoleColor("#FFE64D");
 }

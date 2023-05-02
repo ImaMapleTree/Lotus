@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -53,8 +54,7 @@ public static class ShapeshiftFixPatch
     {
         if (target.PlayerId == __instance.PlayerId)
             _shapeshifted.Remove(__instance.PlayerId);
-        else
-            _shapeshifted.Add(__instance.PlayerId, target.PlayerId);
+        else _shapeshifted[__instance.PlayerId] = target.PlayerId;
 
         Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.1f));
     }

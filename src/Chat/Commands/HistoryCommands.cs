@@ -1,6 +1,7 @@
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;

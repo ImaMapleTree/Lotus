@@ -23,6 +23,6 @@ public class RoleChangeEvent: HistoryEvent
     public override string CreateReport()
     {
         string timestamp = /*StaticOptions.ShowHistoryTimestamp*/true ? RelativeTimestamp() + " " : "";
-        return $"{timestamp}{player.UnalteredName()} {roleChangedString} {role.RoleName}";
+        return $"{timestamp}{player.name} {roleChangedString} {role.RoleName}";
     }
 }

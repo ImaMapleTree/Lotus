@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
@@ -104,13 +105,13 @@ public class AgiTater : NeutralKillingBase
     private void ExplodeBomb(PlayerControl t, int bombIndex)
     {
         MyPlayer.InteractWith(t, new IndirectInteraction(new FatalIntent(true, () => new BombedEvent(t, MyPlayer)), this));
-        Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, t, $"A bomb from {ModConstants.HColor1.Colorize(MyPlayer.UnalteredName())} blew up {ModConstants.HColor2.Colorize(t.UnalteredName())}."));
+        Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, t, $"A bomb from {ModConstants.HColor1.Colorize(MyPlayer.name)} blew up {ModConstants.HColor2.Colorize(t.name)}."));
         if (bombIndex >= 0) bombs.RemoveAt(bombIndex);
     }
 
     private void AddPassEvent(PlayerControl passer, PlayerControl receiver)
     {
-        Game.GameHistory.AddEvent(new GenericTargetedEvent(passer, receiver, $"{ModConstants.HColor1.Colorize(passer.UnalteredName())} passed a bomb to {ModConstants.HColor2.Colorize(receiver.UnalteredName())}."));
+        Game.GameHistory.AddEvent(new GenericTargetedEvent(passer, receiver, $"{ModConstants.HColor1.Colorize(passer.name)} passed a bomb to {ModConstants.HColor2.Colorize(receiver.name)}."));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

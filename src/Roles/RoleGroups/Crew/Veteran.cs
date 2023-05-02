@@ -1,5 +1,6 @@
 using AmongUs.GameOptions;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
@@ -66,7 +67,7 @@ public class Veteran : Crewmate
         if (actor.GetCustomRole().Faction.Relationship(this.Faction) is Relation.FullAllies && !canKillCrewmates) return;
         handle.Cancel();
         Game.GameHistory.AddEvent(new VettedEvent(MyPlayer, actor));
-        MyPlayer.InteractWith(actor, new DirectInteraction(new FatalIntent(interaction is IRangedInteraction), this));
+        MyPlayer.InteractWith(actor, new DirectInteraction(new FatalIntent(interaction is not DirectInteraction), this));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -80,7 +81,7 @@ public class Veteran : Crewmate
                 .Build())
             .SubOption(sub => sub.Name("Alert Duration")
                 .Bind(v => veteranDuration.Duration = (float)v)
-                .AddFloatRange(1, 20, 0.5f, 5, "s").Build())
+                .AddFloatRange(1, 20, 0.25f, 10, "s").Build())
             .SubOption(sub => sub.Name("Kill Crewmates")
                 .Bind(v => canKillCrewmates = (bool)v)
                 .AddOnOffValues().Build())

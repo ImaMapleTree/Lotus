@@ -1,7 +1,8 @@
 
 using System;
 using TOHTOR.API;
-using TOHTOR.API.Meetings;
+using TOHTOR.API.Odyssey;
+using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals.Attributes;
@@ -38,7 +39,7 @@ public class PickPocket : Impostor
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Kill Cooldown")
-                .AddFloatRange(2, 120, 2.5f, 16, "s")
+                .AddFloatRange(0, 120, 2.5f, 16, "s")
                 .BindFloat(f => KillCooldown = f)
                 .Build())
             .SubOption(sub => sub.Name("Maximum Additional Votes")

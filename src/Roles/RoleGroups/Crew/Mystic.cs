@@ -4,7 +4,6 @@ using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -20,12 +19,8 @@ public class Mystic : Crewmate
     private void MysticAnyDeath()
     {
         if (MyPlayer.Data.IsDead) return;
-        if (MyPlayer.IsModClient()) Utils.FlashColor(new Color(1f, 0f, 0f, 0.5f));
-        else
-        {
-            GameOptionOverride[] overrides = { new(Override.CrewLightMod, 0f) };
-            SyncOptions(overrides);
-        }
+        GameOptionOverride[] overrides = { new(Override.CrewLightMod, 0f) };
+        SyncOptions(overrides);
 
         bool didReactorAlert = false;
         if (sendAudioAlert && SabotagePatch.CurrentSabotage?.SabotageType() is not SabotageType.Reactor)
@@ -34,7 +29,7 @@ public class Mystic : Crewmate
             didReactorAlert = true;
         }
 
-        Async.Schedule(() => MysticRevertAlert(didReactorAlert), flashDuration);
+        Async.Schedule(() => MysticRevertAlert(didReactorAlert), NetUtils.DeriveDelay(flashDuration));
 
     }
 
@@ -51,7 +46,7 @@ public class Mystic : Crewmate
             .SubOption(sub => sub
                 .Name("Flash Duration")
                 .Bind(v => flashDuration = (float)v)
-                .AddFloatRange(0, 1.5f, 0.1f, 4, "s")
+                .AddFloatRange(0.2f, 1.5f, 0.1f, 4, "s")
                 .Build())
             .SubOption(sub => sub
                 .Name("Send Audio Alert")

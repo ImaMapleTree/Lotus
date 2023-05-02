@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.API.Vanilla.Sabotages;
@@ -29,7 +30,7 @@ public static class SabotagePatch
     {
         ActionHandle handle = ActionHandle.NoInit();
         ISystemType systemInstance;
-        VentLogger.Trace($"Repair System: {systemType} | Player: {player.UnalteredName()} | Amount: {amount}");
+        VentLogger.Trace($"Repair System: {systemType} | Player: {player.name} | Amount: {amount}");
         switch (systemType)
         {
             case SystemTypes.Sabotage:
@@ -70,7 +71,7 @@ public static class SabotagePatch
                     Hooks.SabotageHooks.SabotagePartialFixHook.Propagate(new SabotageHookEvent(CurrentSabotage));
                     break;
                 }
-                VentLogger.Info($"Electrical Sabotage Fixed by {player.UnalteredName()}", "SabotageFix");
+                VentLogger.Info($"Electrical Sabotage Fixed by {player.name}", "SabotageFix");
                 Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
@@ -99,7 +100,7 @@ public static class SabotagePatch
                     CurrentSabotage = null;
                 }
                 if (CurrentSabotage == null)
-                    VentLogger.Info($"Communications Sabotage Fixed by {player.UnalteredName()}", "SabotageFix");
+                    VentLogger.Info($"Communications Sabotage Fixed by {player.name}", "SabotageFix");
                 break;
             case SystemTypes.LifeSupp:
                 if (CurrentSabotage?.SabotageType() != SabotageType.Oxygen) break;
@@ -113,7 +114,7 @@ public static class SabotagePatch
                 Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
-                VentLogger.Info($"Oxygen Sabotage Fixed by {player.UnalteredName()}", "SabotageFix");
+                VentLogger.Info($"Oxygen Sabotage Fixed by {player.name}", "SabotageFix");
                 break;
             case SystemTypes.Laboratory:
             case SystemTypes.Reactor:
@@ -128,7 +129,7 @@ public static class SabotagePatch
                 Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
-                VentLogger.Info($"Reactor Sabotage Fixed by {player.UnalteredName()}", "SabotageFix");
+                VentLogger.Info($"Reactor Sabotage Fixed by {player.name}", "SabotageFix");
                 break;
             case SystemTypes.Doors:
                 int doorIndex = amount & 31;

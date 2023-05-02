@@ -1,6 +1,7 @@
 using HarmonyLib;
 using TMPro;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Options;
 using TOHTOR.Patches.Client;
 using TOHTOR.Utilities;

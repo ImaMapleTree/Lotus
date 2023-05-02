@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
@@ -61,16 +63,13 @@ public class Phantom : Crewmate
              .SubOption(opt =>
                 opt.Name("Tasks until Phantom Targetable")
                 .BindInt(v => phantomClickAmt = v)
-                .AddIntRange(1, 10, 1)
+                .AddIntRange(1, 40, 1)
                 .Build())
             .SubOption(opt =>
                 opt.Name("Tasks until Phantom Alert")
                 .BindInt(v => phantomAlertAmt = v)
-                .AddIntRange(1, 5, 1)
+                .AddIntRange(1, 40, 1)
                 .Build()));
 
-    protected override RoleModifier Modify(RoleModifier roleModifier)
-    {
-        return roleModifier.RoleColor(new Color(0.4f, 0.16f, 0.38f)).SpecialType(SpecialType.Neutral);
-    }
+    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier.RoleColor(new Color(0.4f, 0.16f, 0.38f)).SpecialType(SpecialType.Neutral).Faction(FactionInstances.Solo);
 }

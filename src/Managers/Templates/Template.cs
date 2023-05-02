@@ -6,6 +6,7 @@ using AmongUs.Data;
 using HarmonyLib;
 using InnerNet;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using VentLib.Options;
 
@@ -53,9 +54,9 @@ public class Template
         { "$Gamemode", _ => Game.CurrentGamemode.GetName() },
         { "$Date", _ => DateTime.Now.ToShortDateString() },
         { "$Time", _ => DateTime.Now.ToShortTimeString() },
-        { "$Players", _ => PlayerControl.AllPlayerControls.ToArray().Select(p => p.UnalteredName()).Join() },
+        { "$Players", _ => PlayerControl.AllPlayerControls.ToArray().Select(p => p.name).Join() },
         { "$PlayerCount", _ => PlayerControl.AllPlayerControls.Count.ToString() },
-        { "@Name", player => player.UnalteredName() },
+        { "@Name", player => player.name },
         { "@Color", player => ModConstants.ColorNames[player.cosmetics.bodyMatProperties.ColorId] },
         { "@Role", player => player.GetCustomRole().RoleName },
         { "@Blurb", player => player.GetCustomRole().Blurb },

@@ -2,12 +2,13 @@ using System.Linq;
 using TOHTOR.API.Reactive;
 using TOHTOR.Extensions;
 using VentLib.Utilities.Attributes;
+using VentLib.Utilities.Extensions;
 using VentLib.Version;
 
 namespace TOHTOR.API;
 
 [LoadStatic]
-public class ModVersion
+public static class ModVersion
 {
     public static VersionControl VersionControl = null!;
     public static Version Version => VersionControl.Version!;

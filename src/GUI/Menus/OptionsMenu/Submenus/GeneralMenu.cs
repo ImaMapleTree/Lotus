@@ -1,4 +1,5 @@
 using System;
+using AmongUs.Data;
 using TMPro;
 using TOHTOR.GUI.Menus.OptionsMenu.Components;
 using UnityEngine;
@@ -116,8 +117,16 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         controlScheme = controlGameObject.AddComponent<TiledToggleButton>();
         controlScheme.SetLeftButtonText("Mouse");
         controlScheme.SetRightButtonText("Mouse & Keyboard");
+        controlScheme.SetState(DataManager.Settings.input.inputMode is ControlTypes.Keyboard);
+
+        PassiveButton joystickModeButton = optionsMenuBehaviour.MouseAndKeyboardOptions.FindChild<PassiveButton>("JoystickModeButton");
+        PassiveButton touchModeButton = optionsMenuBehaviour.MouseAndKeyboardOptions.FindChild<PassiveButton>("TouchModeButton");
+
+        controlScheme.SetToggleOffAction(() => joystickModeButton.ReceiveClickDown());
+        controlScheme.SetToggleOnAction(() => touchModeButton.ReceiveClickDown());
         controlGameObject.transform.localPosition += new Vector3(2.25f, 2f);
         optionsMenuBehaviour.MouseAndKeyboardOptions.gameObject.SetActive(false);
+        optionsMenuBehaviour.MouseAndKeyboardOptions.gameObject.GetComponentsInChildren<Component>(true).ForEach(c => c.gameObject.SetActive(false));
 
         // ==========================================
         //     Mouse Movement Button
@@ -146,7 +155,7 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         changeKeyBindingButton.SetOffText("Change Keybindings");
         changeKeyBindingButton.SetToggleOnAction(() =>
         {
-            optionsMenuBehaviour.KeyboardOptions.GetComponentInChildren<PassiveButton>().ReceiveClickDown();
+            optionsMenuBehaviour.KeyboardOptions.GetComponentInChildren<PassiveButton>(true).ReceiveClickDown();
             changeKeyBindingButton.SetState(false, true);
         });
         keybindingObject.transform.localPosition += new Vector3(3.5f, 1.5f);

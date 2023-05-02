@@ -38,9 +38,11 @@ public class TiledToggleButton: MonoBehaviour
 
         leftButton = leftButtonObject.AddComponent<MonoToggleButton>();
         leftButton.SetToggleOnAction(SetOffState);
+        leftButton.SetToggleOffAction(() => leftButton.SetState(true, true));
 
         rightButton = rightButtonObject.AddComponent<MonoToggleButton>();
         rightButton.SetToggleOnAction(SetOnState);
+        rightButton.SetToggleOffAction(() => rightButton.SetState(true, true));
 
         leftButtonObject.transform.localPosition = new Vector3(-1.25f, 0f, 0f);
         rightButtonObject.transform.localPosition = new Vector3(1.25f, 0f, 0f);

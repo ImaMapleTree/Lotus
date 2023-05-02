@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AmongUs.GameOptions;
 using Il2CppSystem;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
@@ -90,13 +91,13 @@ public class Sheriff : Crewmate
                 .Build())
             .SubOption(sub => sub
                 .Name("Kill Cooldown")
-                .Bind(v => this.shootCooldown.Duration = Convert.ToSingle((int)v))
-                .Values(3, 10, 15, 20, 25, 30)
+                .BindFloat(this.shootCooldown.SetDuration)
+                .AddFloatRange(0, 120, 2.5f, 12, "s")
                 .Build())
             .SubOption(sub => sub
                 .Name("Total Shots")
                 .Bind(v => this.totalShots = (int)v)
-                .AddIntRange(1, 5, 1, 4)
+                .AddIntRange(1, 60, 1, 4)
                 .Build())
             .SubOption(sub => sub
                 .Name("One Shot Per Round")

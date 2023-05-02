@@ -12,7 +12,7 @@ using VentLib.Utilities.Optionals;
 namespace TOHTOR.Chat.Commands;
 
 [Localized("Commands.Stats")]
-[Command("stats", "stat")]
+[Command(CommandFlag.LobbyOnly, "stats", "stat")]
 public class StatCommand: ICommandReceiver
 {
     [Localized("PlayerNotFound")]
@@ -35,7 +35,7 @@ public class StatCommand: ICommandReceiver
 
     private void GetPlayerStats(PlayerControl requester, PlayerControl target)
     {
-        string statisticMessage = $"Statistics for Player: {target.UnalteredName()}\n";
+        string statisticMessage = $"Statistics for Player: {target.name}\n";
 
         statisticMessage = Statistics.Current().GetAllStats()
             .Aggregate(statisticMessage, (current, statistic) =>

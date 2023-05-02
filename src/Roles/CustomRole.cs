@@ -7,6 +7,7 @@ using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
@@ -40,12 +41,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
 
     public virtual bool CanVent() => BaseCanVent || GeneralOptions.MayhemOptions.AllRolesCanVent;
-    public virtual bool CanBeKilled() => !Invincible;
-    public virtual bool HasTasks() => this is Crewmate;
-    public bool IsDesyncRole() => this.DesyncRole != null;
     public virtual Relation Relationship(PlayerControl player) => this.Relationship(player.GetCustomRole());
-
-    public bool Invincible;
 
     private RemoteList<GameOptionOverride> currentOverrides = new();
     private List<RoleEditor> injections;
@@ -90,6 +86,8 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     /// </summary>
     /// <param name="optionOverride">Override to apply whenever SyncOptions is called</param>
     public Remote<GameOptionOverride> AddOverride(GameOptionOverride optionOverride) => currentOverrides.Add(optionOverride);
+
+    public GameOptionOverride? GetOverride(Override overrideType) => currentOverrides.FirstOrDefault(o => o.Option == overrideType);
     /// <summary>
     /// Removes a continuous GameOverride
     /// </summary>
@@ -114,64 +112,64 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         if (newOverrides != null) thisList.AddRange(newOverrides);
 
         IGameOptions modifiedOptions = DesyncOptions.GetModifiedOptions(thisList);
-        if (official) RpcV2.Immediate(PlayerControl.LocalPlayer.NetId, RpcCalls.SyncSettings).WriteOptions(modifiedOptions).Send(MyPlayer.GetClientId());
+        if (official) RpcV3.Immediate(PlayerControl.LocalPlayer.NetId, RpcCalls.SyncSettings).Write(modifiedOptions).Send(MyPlayer.GetClientId());
         DesyncOptions.SyncToPlayer(modifiedOptions, MyPlayer);
     }
 
 
     public void Assign()
     {
-
-        RoleTypes assignedType;
         if (!AmongUsClient.Instance.AmHost) return;
-        // Here we do a "lazy" check for (all?) conditions that'd cause a role to need to be desync
-        if (this.DesyncRole != null || this is Impostor)
+
+        bool isStartOfGame = Game.State is GameState.InIntro or GameState.InLobby;
+
+        if (RealRole.IsCrewmate())
         {
-            // Get the ACTUAL role to assign the player
-            assignedType = this.DesyncRole ?? this.VirtualRole;
+            MyPlayer.RpcSetRole(RealRole);
 
-            // Get the opposite type of this role
-            if (MyPlayer.IsHost())
-            {
-                MyPlayer.SetRole(assignedType); // Required because the rpc below doesn't target host
-            }
-            else
-            {
-                // Send information to client about their new role
-                VentLogger.Old($"Sending role ({assignedType}) information to {MyPlayer.UnalteredName()}", "");
-                RpcV2.Immediate(MyPlayer.NetId, (byte)RpcCalls.SetRole).Write((ushort)assignedType).Send(MyPlayer.GetClientId());
-            }
+            if (!isStartOfGame) goto finishAssignment;
 
-            // Determine roles that are "allied" with this one(based on method overrides)
-            PlayerControl[] allies = Game.GetAllPlayers().Where(p => Relationship(p) is Relation.FullAllies || p.PlayerId == MyPlayer.PlayerId).ToArray();
-            int[] alliesCID = allies.Select(p => p.GetClientId()).ToArray();
+            Game.GetAllPlayers().ForEach(p => p.GetTeamInfo().AddPlayer(MyPlayer.PlayerId, MyPlayer.GetVanillaRole().IsImpostor()));
 
-            allies.Select(player => player.UnalteredName()).StrJoin().DebugLog($"{this.RoleName}'s allies are: ");
-
-            int[] crewmateReceivers = Game.GetAllPlayers()
-                .Where(p => p.GetCustomRole().RealRole.IsCrewmate())
-                .Select(p => p.GetClientId()).ToArray();
-
-            //int[] allies = allies.Where(ally => ally.is)
-            // Send to all clients, excluding allies, that you're a crewmate
-            RpcV2.Immediate(MyPlayer.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).SendInclusive(include: crewmateReceivers);
-
-            RpcV2.Immediate(MyPlayer.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).SendExclusive(exclude: alliesCID.Union(crewmateReceivers).ToArray());
-            // Send to allies your real role
-            RpcV2.Immediate(MyPlayer.NetId, (byte)RpcCalls.SetRole).Write((ushort)assignedType).SendInclusive(include: alliesCID);
-            // Finally, for all players that are not your allies make them crewmates
-            Game.GetAllPlayers()
-                .Where(pc => !alliesCID.Contains(pc.GetClientId()) && pc.PlayerId != MyPlayer.PlayerId)
-                .Do(pc => RpcV2.Immediate(pc.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).Send(MyPlayer.GetClientId()));
-            ShowRoleToTeammates(allies);
-
-            if (MyPlayer.IsHost())
-                Game.GetAlivePlayers().Except(allies).Do(p => p.Data.Role.Role = RoleTypes.Crewmate);
+            goto finishAssignment;
         }
-        else MyPlayer.RpcSetRole(assignedType = this.VirtualRole);
 
-        if (MyPlayer.Relationship(PlayerControl.LocalPlayer) is Relation.FullAllies) MyPlayer.SetRole(assignedType);
-        else MyPlayer.SetRole(assignedType.IsImpostor() ? RoleTypes.Crewmate : RoleTypes.Impostor);
+
+        VentLogger.Trace($"Setting {MyPlayer.name} Role => {RealRole} | IsStartGame = {isStartOfGame}", "CustomRole::Assign");
+        if (MyPlayer.IsHost()) MyPlayer.SetRole(RealRole);
+        else RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetRole).Write((ushort)RealRole).Send(MyPlayer.GetClientId());
+
+        PlayerControl[] alliedPlayers = Game.GetAllPlayers().Where(p => Relationship(p) is Relation.FullAllies).ToArray();
+        VentLogger.Debug($"Player {MyPlayer.GetNameWithRole()} Allies: [{alliedPlayers.Select(p => p.name).Fuse()}]");
+        HashSet<byte> alliedPlayerIds = alliedPlayers.Select(p => p.PlayerId).ToHashSet();
+        int[] alliedPlayerClientIds = alliedPlayers.Select(p => p.GetClientId()).ToArray();
+
+        PlayerControl[] crewmates = Game.GetAllPlayers().Where(p => p.GetVanillaRole().IsCrewmate()).ToArray();
+        int[] crewmateClientIds = crewmates.Select(p => p.GetClientId()).ToArray();
+        VentLogger.Trace($"Current Crewmates: [{crewmates.Select(p => p.name).Fuse()}]");
+
+        PlayerControl[] nonAlliedImpostors = Game.GetAllPlayers().Where(p => p.GetVanillaRole().IsImpostor()).Where(p => !alliedPlayerIds.Contains(p.PlayerId)).ToArray();
+        int[] nonAlliedImpostorClientIds = nonAlliedImpostors.Select(p => p.GetClientId()).ToArray();
+        VentLogger.Trace($"Non Allied Impostors: [{nonAlliedImpostors.Select(p => p.name).Fuse()}]");
+
+        RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetRole).Write((ushort)RealRole).SendInclusive(alliedPlayerClientIds);
+        if (isStartOfGame) alliedPlayers.ForEach(p => p.GetTeamInfo().AddPlayer(MyPlayer.PlayerId, RealRole.IsImpostor()));
+
+        RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).SendInclusive(nonAlliedImpostorClientIds);
+        if (isStartOfGame) nonAlliedImpostors.ForEach(p => p.GetTeamInfo().AddVanillaCrewmate(MyPlayer.PlayerId));
+
+        RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).SendInclusive(crewmateClientIds);
+        if (isStartOfGame) crewmates.ForEach(p => p.GetTeamInfo().AddVanillaImpostor(MyPlayer.PlayerId));
+
+        ShowRoleToTeammates(alliedPlayers);
+
+        if (MyPlayer.IsHost()) Game.GetAlivePlayers().Except(alliedPlayers).ForEach(p => p.Data.Role.Role = RoleTypes.Crewmate);
+
+        finishAssignment:
+
+        // This is for host
+        if (MyPlayer.Relationship(PlayerControl.LocalPlayer) is Relation.FullAllies) MyPlayer.SetRole(RealRole);
+        else MyPlayer.SetRole(RealRole.IsImpostor() ? RoleTypes.Crewmate : RoleTypes.Impostor);
 
         SyncOptions(new GameOptionOverride[] { new(Override.KillCooldown, 0.1f)} , true);
         HudManager.Instance.SetHudActive(true);

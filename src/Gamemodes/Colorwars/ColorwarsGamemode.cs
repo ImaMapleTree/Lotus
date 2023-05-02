@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Utilities;
 using VentLib.Options;
@@ -102,7 +103,7 @@ public class ColorwarsGamemode: Gamemode
         allPlayers.Do(p =>
         {
             var newOption = new GameOptionBuilder()
-                .Name(p.UnalteredName())
+                .Name(p.name)
                 .Tab(ColorwarsTab)
                 .Color(_colors[p.cosmetics.bodyMatProperties.ColorId])
                 .Values(teamOptions)
@@ -185,7 +186,7 @@ public class ColorwarsGamemode: Gamemode
             {
                 GameOptionBuilder builder = new GameOptionBuilder().Name($"Player {j + 1}");
                 foreach (PlayerControl player in PlayerControl.AllPlayerControls)
-                    builder.Value(v => v.Text(player.UnalteredName()).Value((int)player.PlayerId).Build());
+                    builder.Value(v => v.Text(player.name).Value((int)player.PlayerId).Build());
                 option = builder.Build();
                 //manualTeamsOption.SubOptions.Add(option);
                 //_tempOption.Add(option);

@@ -4,6 +4,7 @@ using TOHTOR.Roles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
+using VentLib.Options.IO;
 
 namespace TOHTOR.Options.General;
 
@@ -14,7 +15,8 @@ public class MiscellaneousOptions
     private static List<GameOption> additionalOptions = new();
 
     public string AssignedPet = null!;
-    public bool CosmeticCommands;
+    public int ChangeNameUsers;
+    public int ChangeColorAndLevelUsers;
     public bool AutoDisplayResults;
     public int SuffixMode;
     public bool ColorNameMode;
@@ -22,14 +24,16 @@ public class MiscellaneousOptions
 
     public bool EnableLadderDeath => LadderDeathChance > 0;
 
+    public List<GameOption> AllOptions = new();
+
     public MiscellaneousOptions()
     {
 
-        new GameOptionTitleBuilder()
+        AllOptions.Add(new GameOptionTitleBuilder()
             .Title(MiscOptionTranslations.MiscOptionTitle)
             .Color(_optionColor)
             .Tab(DefaultTabs.GeneralTab)
-            .Build();
+            .Build());
 
         GameOptionBuilder AddPets(GameOptionBuilder b)
         {
@@ -37,41 +41,57 @@ public class MiscellaneousOptions
             return b;
         }
 
-        AddPets(Builder("Assigned Pet")
+        AllOptions.Add(AddPets(Builder("Assigned Pet")
                 .Name(MiscOptionTranslations.AssignedPetText)
                 .IsHeader(true)
                 .Tab(DefaultTabs.GeneralTab)
                 .BindString(s => AssignedPet = s))
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var cosmeticCommands = Builder("Allow Cosmetic Commands")
-            .Name(MiscOptionTranslations.CosmeticCommandText)
-            .AddOnOffValues(false)
-            .BindBool(b => CosmeticCommands = b)
-            .BuildAndRegister();
+        AllOptions.Add(Builder("Allow /name")
+            .Name(MiscOptionTranslations.AllowNameCommand)
+            .Value(v => v.Value(0).Text(GeneralOptionTranslations.OffText).Color(Color.red).Build())
+            .Value(v => v.Value(1).Text(GeneralOptionTranslations.FriendsText).Color(new Color(0.85f, 0.66f, 1f)).Build())
+            .Value(v => v.Value(2).Text(GeneralOptionTranslations.EveryoneText).Color(Color.green).Build())
+            .BindInt(b => ChangeNameUsers = b)
+            .IOSettings(io => io.UnknownValueAction = ADEAnswer.UseDefault)
+            .BuildAndRegister());
 
-        var autoDisplayResults = Builder("Auto Display Results")
+        AllOptions.Add(Builder("Allow /color and /level")
+            .Name(MiscOptionTranslations.AllowColorAndLevelCommand)
+            .Value(v => v.Value(0).Text(GeneralOptionTranslations.OffText).Color(Color.red).Build())
+            .Value(v => v.Value(1).Text(GeneralOptionTranslations.FriendsText).Color(new Color(0.85f, 0.66f, 1f)).Build())
+            .Value(v => v.Value(2).Text(GeneralOptionTranslations.EveryoneText).Color(Color.green).Build())
+            .BindInt(b => ChangeColorAndLevelUsers = b)
+            .IOSettings(io => io.UnknownValueAction = ADEAnswer.UseDefault)
+            .BuildAndRegister());
+
+        AllOptions.Add(Builder("Auto Display Results")
             .Name(MiscOptionTranslations.AutoDisplayResultsText)
             .AddOnOffValues()
             .BindBool(b => AutoDisplayResults = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
         /*var suffixMode = Builder("Suffix Mode")*/
 
-        var colorNameMode = Builder("Color Names")
+        AllOptions.Add(Builder("Color Names")
             .Name(MiscOptionTranslations.ColorNames)
             .AddOnOffValues(false)
             .BindBool(b => ColorNameMode = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var ladderDeath = Builder("Ladder Death")
+        AllOptions.Add(Builder("Ladder Death")
             .Name(MiscOptionTranslations.LadderDeathText)
             .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(-1).Color(Color.red).Build())
             .AddIntRange(10, 100, 5, suffix: "%")
             .BindInt(i => LadderDeathChance = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        additionalOptions.ForEach(o => o.Register());
+        additionalOptions.ForEach(o =>
+        {
+            o.Register();
+            AllOptions.Add(o);
+        });
     }
 
     /// <summary>
@@ -95,8 +115,11 @@ public class MiscellaneousOptions
         [Localized("AssignedPet")]
         public static string AssignedPetText = "Assigned Pet";
 
-        [Localized(nameof(CosmeticCommandText))]
-        public static string CosmeticCommandText = "Allow /name, /color, and /level";
+        [Localized(nameof(AllowNameCommand))]
+        public static string AllowNameCommand = "Allow /name";
+
+        [Localized(nameof(AllowColorAndLevelCommand))]
+        public static string AllowColorAndLevelCommand = "Allow /color and /level";
 
         [Localized("AutoDisplayResults")]
         public static string AutoDisplayResultsText = "Auto Display Results";

@@ -1,6 +1,7 @@
 using HarmonyLib;
 using TOHTOR.API;
-using TOHTOR.API.Meetings;
+using TOHTOR.API.Odyssey;
+using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.Extensions;
 using TOHTOR.Gamemodes;
 using TOHTOR.Patches.Meetings;

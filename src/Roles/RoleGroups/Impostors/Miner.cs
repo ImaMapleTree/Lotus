@@ -1,6 +1,7 @@
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Logging;
@@ -8,7 +9,7 @@ using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
 
-public class Miner : Vanilla.Impostor
+public class Miner : Impostor
 {
     [UIComponent(UI.Cooldown)]
     private Cooldown minerAbilityCooldown;
@@ -33,7 +34,6 @@ public class Miner : Vanilla.Impostor
         VentLogger.Trace($"{MyPlayer.Data.PlayerName}:{lastEnteredVentLocation}", "MinerTeleport");
         Utils.Teleport(MyPlayer.NetTransform, new Vector2(lastEnteredVentLocation.x, lastEnteredVentLocation.y + 0.3636f));
     }
-
 
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

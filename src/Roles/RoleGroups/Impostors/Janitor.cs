@@ -1,6 +1,7 @@
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
@@ -37,7 +38,7 @@ public class Janitor: Vanilla.Impostor
         if (MyPlayer.InteractWith(target, new DirectInteraction(new FakeFatalIntent(), this)) is InteractionResult.Halt) return false;
         target.RpcExileV2();
         Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
-        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{Color.red.Colorize(MyPlayer.UnalteredName())} cleaned {target.GetRoleColor().Colorize(target.UnalteredName())}."));
+        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{Color.red.Colorize(MyPlayer.name)} cleaned {target.GetRoleColor().Colorize(target.name)}."));
         return true;
     }
 

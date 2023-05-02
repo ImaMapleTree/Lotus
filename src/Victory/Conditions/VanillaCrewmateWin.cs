@@ -1,12 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.Factions.Crew;
 using TOHTOR.Factions.Interfaces;
-using TOHTOR.FactionsOLD;
 using TOHTOR.Roles;
+using TOHTOR.Roles.Interfaces;
+using VentLib.Logging;
 
 namespace TOHTOR.Victory.Conditions;
 
@@ -18,6 +19,9 @@ public class VanillaCrewmateWin: IFactionWinCondition
     public bool IsConditionMet(out List<IFaction> factions)
     {
         factions = CrewmateFaction;
+
+        if (Game.State is not GameState.Roaming) return false;
+
         winReason = WinReason.TasksComplete;
 
 
@@ -25,15 +29,22 @@ public class VanillaCrewmateWin: IFactionWinCondition
         bool hasOneTaskDoer = false;
         foreach (CustomRole role in Game.GetAllPlayers().Select(p => p.GetCustomRole()))
         {
-            if (role.MyPlayer.Data.Tasks.Count > 0) hasOneTaskDoer = true;
-            if (role.MyPlayer.IsAlive() && role.Faction is not Crewmates && role.RealRole.IsImpostor()) hasAliveImpostor = true;
+            if (role is ITaskHolderRole taskHolder && taskHolder.TasksApplyToTotal() && taskHolder.HasTasks()) hasOneTaskDoer = true;
+
+            if (role.MyPlayer.IsAlive() && role.Faction is not Crewmates && Game.VanillaRoleTracker.GetInfo(role.MyPlayer.PlayerId).MyRole.IsImpostor()) hasAliveImpostor = true;
             if (hasOneTaskDoer && hasAliveImpostor) break;
         }
 
-        if (hasAliveImpostor && hasOneTaskDoer) return GameManager.Instance.CheckTaskCompletion();
+        if (hasAliveImpostor && hasOneTaskDoer) return CheckTaskCompletion();
 
         winReason = WinReason.FactionLastStanding;
-        return true;
+        return !hasAliveImpostor;
+    }
+
+    private static bool CheckTaskCompletion()
+    {
+        GameData.Instance.RecomputeTaskCounts();
+        return GameData.Instance.TotalTasks <= GameData.Instance.CompletedTasks;
     }
 
     public WinReason GetWinReason() => winReason;

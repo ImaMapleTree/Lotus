@@ -1,4 +1,5 @@
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
 using TOHTOR.Roles.Events;
@@ -40,7 +41,7 @@ public class Demolitionist : Crewmate
             .SubOption(sub => sub
                 .Name("Demo Time")
                 .BindFloat(v => demoTime = v)
-                .AddFloatRange(0.5f, 10f, 0.5f, 2)
+                .AddFloatRange(0.5f, 10f, 0.25f, 2)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

@@ -1,5 +1,6 @@
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals.Attributes;

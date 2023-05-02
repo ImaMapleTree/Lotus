@@ -50,7 +50,7 @@ public partial class SerialKiller : Impostor, IModdable
             .SubOption(sub => sub
                 .Name("Kill Cooldown")
                 .Bind(v => killCooldown = (float)v)
-                .AddFloatRange(0.5f, 90, 0.5f, 30, "s")
+                .AddFloatRange(0f, 90, 2.5f, 4, "s")
                 .Build())
             .SubOption(sub => sub
                 .Name("Time Until Suicide")

@@ -1,5 +1,6 @@
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -45,7 +46,7 @@ public class TimeThief : Vanilla.Impostor
 
         int modifiedVotingTime = Mathf.Clamp(votingTime - totalStolenTime, minimumVotingTime, votingTime);
 
-        VentLogger.Debug($"{MyPlayer.UnalteredName()} | Time Thief | Meeting Time: {modifiedDiscussionTime} | Voting Time: {modifiedVotingTime}", "TimeThiefStolen");
+        VentLogger.Debug($"{MyPlayer.name} | Time Thief | Meeting Time: {modifiedDiscussionTime} | Voting Time: {modifiedVotingTime}", "TimeThiefStolen");
         GameOptionOverride[] overrides = { new(Override.DiscussionTime, modifiedDiscussionTime), new(Override.VotingTime, modifiedVotingTime) };
         Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions(overrides));
     }

@@ -1,5 +1,6 @@
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles;
 using TOHTOR.Roles.RoleGroups.Vanilla;

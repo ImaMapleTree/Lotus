@@ -21,7 +21,6 @@ public partial class Api
                 AmongUsClient.Instance.GetClientFromCharacter(playerData.Object)?.UpdatePlayerName(name);
             }
 
-            player.gameObject.name = name;
             player.cosmetics.nameText.text = name;
             player.cosmetics.SetNameMask(true);
         }

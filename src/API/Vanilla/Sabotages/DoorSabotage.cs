@@ -1,4 +1,5 @@
 using System.Linq;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Roles.Internals;
@@ -58,7 +59,7 @@ public class DoorSabotage : ISabotage
 
     public Optional<PlayerControl> Caller() => caller;
 
-    public void Sabotage(PlayerControl sabotageCaller)
+    public void CallSabotage(PlayerControl sabotageCaller)
     {
         ShipStatus.Instance.AllDoors.Where(d => d.Room == Room).ForEach(door => door.SetDoorway(false));
     }

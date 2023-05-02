@@ -2,12 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Options;
 using TOHTOR.Roles.Interactions;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
@@ -37,6 +40,8 @@ public class Postman: Crewmate
     private PlayerControl trackedPlayer;
     private bool completedDelivery = true;
     [NewOnSetup] private List<Remote<IndicatorComponent>> components;
+
+    public override bool TasksApplyToTotal() => false;
 
     protected override void OnTaskComplete()
     {
@@ -113,7 +118,7 @@ public class Postman: Crewmate
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
+        AddTaskOverrideOptions(base.RegisterOptions(optionStream)
             .Tab(DefaultTabs.NeutralTab)
             .SubOption(sub => sub.Name("Has Arrow To Targets")
                 .AddOnOffValues()
@@ -124,7 +129,7 @@ public class Postman: Crewmate
                 .Value(v => v.Text("Reassign in Meeting").Value(1).Build())
                 .Value(v => v.Text("Reassign in Game").Value(2).Build())
                 .BindInt(i => targetDiesMode = i)
-                .Build());
+                .Build()));
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.6f, 0.6f, 0.6f));
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.6f, 0.6f, 0.6f)).Faction(FactionInstances.Solo);
 }

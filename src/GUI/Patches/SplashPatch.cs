@@ -58,10 +58,10 @@ class SplashPatch
         FriendListButtonHasBeenMoved = true;
 
         var tohLogo = new GameObject("titleLogo_TOH");
-        tohLogo.transform.position = Vector3.up;
-        tohLogo.transform.localScale *= 1.2f;
+        tohLogo.transform.position = new Vector3(4.55f, -1.5f);
+        tohLogo.transform.localScale = new Vector3(1f, 1f, 1f);
         var renderer = tohLogo.AddComponent<SpriteRenderer>();
-        renderer.sprite = Utils.LoadSprite("TOHTOR.assets.tohtor-logo-rold.png", 300f);
+        renderer.sprite = Utils.LoadSprite("TOHTOR.assets.LotusBanner.png", 1000f);
 
         _customSplash.OrElseSet(InitializeSplash);
         PlayerParticles particles = Object.FindObjectOfType<PlayerParticles>();

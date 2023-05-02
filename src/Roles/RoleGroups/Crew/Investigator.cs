@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.GUI;
@@ -125,7 +126,7 @@ public class Investigator : Crewmate
         };
         VentLogger.Old($"{player.GetNameWithRole()} is type {role.GetType()} and falls under category \"{category}\". Player is in redRoles list? {roleIsInRoles}. Player's name should be color: {color.ToTextColor()}", "InvestigateInfo");
 
-        NameComponent nameComponent = new(new LiveString(player.UnalteredName, color), GameStates.IgnStates, ViewMode.Replace, MyPlayer);
+        NameComponent nameComponent = new(new LiveString(player.name, color), GameStates.IgnStates, ViewMode.Replace, MyPlayer);
         player.NameModel().GetComponentHolder<NameHolder>().Add(nameComponent);
     }
 

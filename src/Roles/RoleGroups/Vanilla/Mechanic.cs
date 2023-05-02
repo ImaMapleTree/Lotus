@@ -12,6 +12,7 @@ public class Mechanic : Engineer
                 .BindFloat(f => VentCooldown = f)
                 .Build())
             .SubOption(sub => sub.Name("Vent Duration")
+                .Value(1f)
                 .AddFloatRange(2, 120, 2.5f, 6, "s")
                 .BindFloat(f => VentDuration = f)
                 .Build());

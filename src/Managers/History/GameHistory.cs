@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Managers.History.Events;
+using TOHTOR.Player;
 using TOHTOR.Roles;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -10,8 +12,9 @@ namespace TOHTOR.Managers.History;
 
 public class GameHistory
 {
-    public List<CustomRole> LastWinners { get; internal set; } = new();
+    public List<FrozenPlayer> LastWinners { get; internal set; } = new();
     public List<PlayerHistory>? PlayerHistory;
+    public Dictionary<ulong, FrozenPlayer> FrozenPlayers = new();
     public readonly List<IHistoryEvent> Events = new();
 
     private readonly Dictionary<byte, IDeathEvent> causeOfDeath = new();

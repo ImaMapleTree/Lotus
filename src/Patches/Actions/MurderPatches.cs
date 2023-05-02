@@ -1,6 +1,7 @@
 using HarmonyLib;
 using Hazel;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
@@ -14,7 +15,6 @@ using VentLib.Utilities;
 
 namespace TOHTOR.Patches.Actions;
 
-// TODO: Kick under level, kick no friend code
 public static class MurderPatches
 {
     [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CheckMurder))]
@@ -23,14 +23,15 @@ public static class MurderPatches
         public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
         {
             if (!AmongUsClient.Instance.AmHost) return false;
-            var killer = __instance;
-            VentLogger.Old($"{killer.GetNameWithRole()} => {target.GetNameWithRole()}", "CheckMurder");
+            if (__instance == null || target == null) return false;
+
+            VentLogger.Old($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}", "CheckMurder");
             if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.KillPlayers)) return false;
 
             //死人はキルできない
-            if (killer.Data.IsDead)
+            if (__instance.Data.IsDead)
             {
-                VentLogger.Old($"{killer.GetNameWithRole()}は死亡しているためキャンセルされました。", "CheckMurder");
+                VentLogger.Old($"{__instance.GetNameWithRole()}は死亡しているためキャンセルされました。", "CheckMurder");
                 return false;
             }
 
@@ -51,10 +52,10 @@ public static class MurderPatches
                 return false;
             }
 
-            if (killer.PlayerId == target.PlayerId) return false;
+            if (__instance.PlayerId == target.PlayerId) return false;
 
             ActionHandle handle = ActionHandle.NoInit();
-            killer.Trigger(RoleActionType.Attack, ref handle, target);
+            __instance.Trigger(RoleActionType.Attack, ref handle, target);
             return false;
         }
     }

@@ -44,8 +44,8 @@ class RpcReporter: IReportProducer
             string timestamp = tuple.Item1.ToString("hh:mm:ss");
             RpcMeta meta = tuple.Item2;
 
-            string target = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(meta.NetId).UnalteredName();
-            string recipient = Utils.PlayerByClientId(meta.Recipient).Map(p => p.UnalteredName()).OrElse("Unknown") + $" (Id: {meta.Recipient})";
+            string target = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(meta.NetId).name;
+            string recipient = Utils.PlayerByClientId(meta.Recipient).Map(p => p.name).OrElse("Unknown") + $" (Id: {meta.Recipient})";
             string rpc = ((RpcCalls)meta.CallId).Name();
 
             content += $"[{timestamp}] (Target: {target}, Recipient: {recipient}, RPC: {rpc}, Immediate: {meta.Immediate}, SendOptions: {meta.SendOption}, RequiresHost: {meta.RequiresHost})\n";

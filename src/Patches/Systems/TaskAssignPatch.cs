@@ -7,7 +7,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Options.General;
 using TOHTOR.Roles;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Utilities;
 using VentLib.Logging;
 
@@ -37,7 +37,7 @@ class AddTasksFromListPatch
         }
         foreach (var task in disabledTasks)
         {
-            VentLogger.Info("削除: " + task.TaskType.ToString(), "AddTask");
+            VentLogger.Info("削除: " + task.TaskType, "AddTask");
             unusedTasks.Remove(task);
         }
     }
@@ -53,22 +53,22 @@ class RpcSetTasksPatch
         [HarmonyArgument(1)] ref Il2CppStructArray<byte> taskTypeIds)
     {
 
-        CustomRole role = Utils.GetPlayerById(playerId)?.GetCustomRole();
-        if (role is not Crewmate { HasOverridenTasks: true } crewmate) return;
+        CustomRole? role = Utils.GetPlayerById(playerId)?.GetCustomRole();
+        if (role is not IOverridenTaskHolderRole tasksRole || !tasksRole.OverrideTasks()) return;
 
-        bool hasCommonTasks = crewmate.HasCommonTasks; // コモンタスク(通常タスク)を割り当てるかどうか
+        bool hasCommonTasks = tasksRole.AssignCommonTasks(); // コモンタスク(通常タスク)を割り当てるかどうか
                                                                 // 割り当てる場合でも再割り当てはされず、他のクルーと同じコモンタスクが割り当てられる。
 
         //本来のRpcSetTasksの第二引数のクローン
-        Il2CppSystem.Collections.Generic.List<byte> TasksList = new();
-        foreach (var num in taskTypeIds) TasksList.Add(num);
+        Il2CppSystem.Collections.Generic.List<byte> tasksList = new();
+        foreach (var num in taskTypeIds) tasksList.Add(num);
 
         //参考:ShipStatus.Begin
         //不要な割り当て済みのタスクを削除する処理
         //コモンタスクを割り当てる設定ならコモンタスク以外を削除
         //コモンタスクを割り当てない設定ならリストを空にする
-        if (hasCommonTasks) TasksList.RemoveRange(AUSettings.NumCommonTasks(), TasksList.Count - AUSettings.NumCommonTasks());
-        else TasksList.Clear();
+        if (hasCommonTasks) tasksList.RemoveRange(AUSettings.NumCommonTasks(), tasksList.Count - AUSettings.NumCommonTasks());
+        else tasksList.Clear();
 
         //割り当て済みのタスクが入れられるHashSet
         //同じタスクが複数割り当てられるのを防ぐ
@@ -77,38 +77,39 @@ class RpcSetTasksPatch
         int start3 = 0;
 
         //割り当て可能なロングタスクのリスト
-        Il2CppSystem.Collections.Generic.List<NormalPlayerTask> LongTasks = new();
+        Il2CppSystem.Collections.Generic.List<NormalPlayerTask> longTasks = new();
+        if (longTasks == null) throw new ArgumentNullException(nameof(longTasks));
         foreach (var task in ShipStatus.Instance.LongTasks)
-            LongTasks.Add(task);
-        Shuffle(LongTasks);
+            longTasks.Add(task);
+        Shuffle(longTasks);
 
         //割り当て可能なショートタスクのリスト
-        Il2CppSystem.Collections.Generic.List<NormalPlayerTask> ShortTasks = new();
+        Il2CppSystem.Collections.Generic.List<NormalPlayerTask> shortTasks = new();
         foreach (var task in ShipStatus.Instance.NormalTasks)
-            ShortTasks.Add(task);
-        Shuffle(ShortTasks);
+            shortTasks.Add(task);
+        Shuffle(shortTasks);
 
         //実際にAmong Us側で使われているタスクを割り当てる関数を使う。
         ShipStatus.Instance.AddTasksFromList(
             ref start2,
-            crewmate.LongTasks,
-            TasksList,
+            tasksRole.LongTaskAmount(),
+            tasksList,
             usedTaskTypes,
-            LongTasks
+            longTasks
         );
         ShipStatus.Instance.AddTasksFromList(
             ref start3,
-            !hasCommonTasks && crewmate.ShortTasks == 0 && crewmate.LongTasks == 0 ? 1 : crewmate.ShortTasks,
-            TasksList,
+            !hasCommonTasks && tasksRole.ShortTaskAmount() == 0 && tasksRole.LongTaskAmount() == 0 ? 1 : tasksRole.ShortTaskAmount(),
+            tasksList,
             usedTaskTypes,
-            LongTasks
+            shortTasks
         );
 
         //タスクのリストを配列(Il2CppStructArray)に変換する
-        taskTypeIds = new Il2CppStructArray<byte>(TasksList.Count);
-        for (int i = 0; i < TasksList.Count; i++)
+        taskTypeIds = new Il2CppStructArray<byte>(tasksList.Count);
+        for (int i = 0; i < tasksList.Count; i++)
         {
-            taskTypeIds[i] = TasksList[i];
+            taskTypeIds[i] = tasksList[i];
         }
 
     }
@@ -118,7 +119,7 @@ class RpcSetTasksPatch
         {
             T obj = list[i];
             int rand = UnityEngine.Random.Range(i, list.Count);
-            list[i] = list[ rand];
+            list[i] = list[rand];
             list[rand] = obj;
         }
     }

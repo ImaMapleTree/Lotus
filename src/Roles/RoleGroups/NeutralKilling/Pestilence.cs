@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
 using TOHTOR.Roles.Interactions;

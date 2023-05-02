@@ -1,4 +1,4 @@
-using TOHTOR.API.Meetings;
+using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;

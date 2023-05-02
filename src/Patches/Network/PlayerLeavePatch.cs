@@ -1,6 +1,7 @@
 using HarmonyLib;
 using InnerNet;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Gamemodes;
@@ -29,7 +30,6 @@ class OnPlayerLeftPatch
         VentLogger.Old($"{data.PlayerName}(ClientID:{data.Id})が切断(理由:{reason}, ping:{AmongUsClient.Instance.Ping})", "Session");
         if (Game.State is GameState.InLobby) return;
         Game.Players.Remove(data.Character.PlayerId);
-        AntiBlackout.OnDisconnect(data.Character.Data);
 
         ActionHandle uselessHandle = ActionHandle.NoInit();
         if (Game.State is not GameState.InLobby) PlayerControl.AllPlayerControls.ToArray().Trigger(RoleActionType.OnDisconnect, ref uselessHandle, data.Character);

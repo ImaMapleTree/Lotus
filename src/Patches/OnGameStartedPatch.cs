@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Gamemodes;
 using TOHTOR.GUI.Menus;
@@ -33,7 +34,6 @@ namespace TOHTOR.Patches
             /*StaticOptions.UsedButtonCount = 0;*/
             TOHPlugin.VisibleTasksCount = true;
             FallFromLadder.Reset();
-            AntiBlackout.Reset();
 
             Game.State = GameState.InIntro;
             Game.GetAllPlayers().Do(p => CustomRoleManager.PlayersCustomRolesRedux[p.PlayerId] = CustomRoleManager.Default);
@@ -57,7 +57,7 @@ namespace TOHTOR.Patches
             Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
 
             List<Tuple<string, CustomRole>> debugList = CustomRoleManager.PlayersCustomRolesRedux
-                .Select(kvp => new Tuple<string, CustomRole>(Utils.GetPlayerById(kvp.Key).UnalteredName(), kvp.Value))
+                .Select(kvp => new Tuple<string, CustomRole>(Utils.GetPlayerById(kvp.Key).name, kvp.Value))
                 .ToList();
 
             VentLogger.Old($"Assignments: {String.Join(", ", debugList)}", "");

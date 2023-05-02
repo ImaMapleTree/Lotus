@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
@@ -30,7 +31,7 @@ public partial class Alchemist
     [UIComponent(UI.Name, ViewMode.Absolute, GameState.Roaming)]
     private string CraftingNameDisplay()
     {
-        if (!craftingMode) return MyPlayer.UnalteredName();
+        if (!craftingMode) return MyPlayer.name;
         ICraftable craftable = Craftables[craftingPage];
         return RoleUtils.Counter(craftingPage + 1, Craftables.Count, Color.white) + " " + craftable.Color().Colorize(craftable.Name());
     }

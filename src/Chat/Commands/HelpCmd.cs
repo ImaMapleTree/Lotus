@@ -12,16 +12,16 @@ using VentLib.Localization.Attributes;
 namespace TOHTOR.Chat.Commands;
 
 [Localized("Commands.Help")]
-[Command(new[] {"Commands.Help.Alias"}, "h", "help")]
+[Command("h", "help")]
 public class HelpCmd: ICommandReceiver
 {
-    [Command(new[] {"Commands.Help.Addons.Alias"},"a", "addons")]
+    [Command("a", "addons")]
     public static void Addons(PlayerControl source, CommandContext _)
     {
         Utils.SendMessage("Addon Info");
     }
 
-    [Command(new[] {"Commands.Help.Gamemodes.Alias"},"m", "modes")]
+    [Command("m", "modes")]
     public class Gamemodes
     {
         [Command("cw", "colorwars")]
@@ -31,7 +31,7 @@ public class HelpCmd: ICommandReceiver
         public static void NoGameEnd(PlayerControl source, CommandContext _) => Utils.SendMessage("NoGameEnd Info", source.PlayerId);
     }
 
-    [Command(new[] {"Commands.Help.Roles.Alias"}, "r", "roles")]
+    [Command("r", "roles")]
     public static void Roles(PlayerControl source, CommandContext context)
     {
         Localizer localizer = Localizer.Get();

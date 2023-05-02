@@ -1,6 +1,7 @@
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.Factions.Interfaces;
 using TOHTOR.Factions.Neutrals;
@@ -24,7 +25,7 @@ public class Swapper : CustomRole
     private PlayerControl? target;
 
     /*[DynElement(UI.Misc)]
-    private string TargetDisplay() => target == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(target.UnalteredName());
+    private string TargetDisplay() => target == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(target.name);
 
     [RoleAction(RoleActionType.RoundStart)]
     public void RoundStart()
@@ -68,5 +69,5 @@ public class Swapper : CustomRole
                 .AddOnOffValues(false).Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor("#66E666").SpecialType(SpecialType.Neutral);
+        roleModifier.RoleColor("#66E666").SpecialType(SpecialType.Neutral).Faction(FactionInstances.Solo);
 }

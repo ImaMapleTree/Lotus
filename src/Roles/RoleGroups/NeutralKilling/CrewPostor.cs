@@ -1,14 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
-using TOHTOR.FactionsOLD;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 
@@ -33,7 +34,7 @@ public class CrewPostor : Crewmate
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddTaskOverrideOptions(base.RegisterOptions(optionStream)
-            .Tab(DefaultTabs.NeutralTab)
+            .Tab(DefaultTabs.ImpostorsTab)
             .SubOption(sub => sub.Name("Warp to Target")
                 .AddOnOffValues()
                 .BindBool(b => warpToTarget = b)
@@ -43,7 +44,11 @@ public class CrewPostor : Crewmate
                 .BindBool(b => canKillAllied = b)
                 .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor("#DC6601").Faction(FactionInstances.Solo);
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
+        base.Modify(roleModifier)
+            .RoleColor(new Color(0.86f, 0.4f, 0f))
+            .SpecialType(SpecialType.Madmate)
+            .Faction(FactionInstances.Madmates);
 
     class TaskKillEvent : KillEvent, IRoleEvent
     {

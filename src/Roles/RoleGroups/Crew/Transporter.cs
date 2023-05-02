@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using AmongUs.GameOptions;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;

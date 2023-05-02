@@ -1,21 +1,31 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using VentLib.Logging;
+using VentLib.Utilities.Harmony.Attributes;
 
 namespace TOHTOR.Chat.Patches;
 
-[HarmonyPatch(typeof(ChatBubble), nameof(ChatBubble.SetRight))]
+
 class ChatBubblePatch
 {
     internal static Queue<int> SetRightQueue = new();
 
-    public static void Postfix(ChatBubble __instance)
+    [QuickPostfix(typeof(ChatBubble), nameof(ChatBubble.SetRight))]
+    public static void SetBubbleRight(ChatBubble __instance)
     {
         if (SetRightQueue.TryDequeue(out int _))
         {
             VentLogger.Fatal($"Setting left: {__instance.TextArea.text}");
             __instance.SetLeft();
         }
+
+        __instance.TextArea.richText = true;
+    }
+
+    [QuickPostfix(typeof(ChatBubble), nameof(ChatBubble.SetLeft))]
+    public static void SetBubbleLeft(ChatBubble __instance)
+    {
+        __instance.TextArea.richText = true;
     }
 }
 

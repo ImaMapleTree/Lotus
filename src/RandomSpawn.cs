@@ -111,8 +111,4 @@ public class RandomSpawn
         Utils.Teleport(player.NetTransform, usedLocations[availableLocations!.PopRandom()]);
     }
 
-        /*return StaticOptions.AirshipAdditionalSpawn
-        ? positions.ToArray().OrderBy(_ => Guid.NewGuid()).Take(1).FirstOrDefault().Value
-    : positions.ToArray()[0..6].OrderBy(_ => Guid.NewGuid()).Take(1).FirstOrDefault().Value;*/
-
 }

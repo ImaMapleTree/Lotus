@@ -1,5 +1,6 @@
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Interactions;
@@ -106,7 +107,7 @@ public class Bodyguard: Crewmate
             });
     }
 
-    private static Optional<string> GetPlayerName(byte b) => Game.GetAlivePlayers().FirstOrOptional(p => p.PlayerId == b).Map(p => p.UnalteredName());
+    private static Optional<string> GetPlayerName(byte b) => Game.GetAlivePlayers().FirstOrOptional(p => p.PlayerId == b).Map(p => p.name);
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(0.36f, 0.36f, 0.36f));

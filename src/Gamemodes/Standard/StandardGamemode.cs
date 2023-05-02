@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
+using TOHTOR.Factions.Interfaces;
 using TOHTOR.Options;
 using TOHTOR.Roles.RoleGroups.Undead;
 using TOHTOR.Victory;
@@ -26,7 +28,7 @@ public class StandardGamemode: Gamemode
 
     public override void AssignRoles(List<PlayerControl> players)
     {
-        StandardAssignRoles.StandardAssign(players);
+        StandardRoleAssignmentLogic.AssignRoles(players);
     }
 
     public override IEnumerable<GameOptionTab> EnabledTabs() => DefaultTabs.All;
@@ -57,7 +59,7 @@ public class StandardGamemode: Gamemode
         PlayerControl player = hookEvent.Player;
         if (player == null) return;
 
-        VentLogger.Trace($"Showing all name components to ghost {player.UnalteredName()}", "GhostNameViewer");
+        VentLogger.Trace($"Showing all name components to ghost {player.name}", "GhostNameViewer");
 
         Game.GetAllPlayers().Where(p => p.PlayerId != player.PlayerId)
             .SelectMany(p => p.NameModel().ComponentHolders())

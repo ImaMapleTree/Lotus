@@ -7,11 +7,11 @@ using VentLib.Commands.Attributes;
 
 namespace TOHTOR.Chat.Commands;
 
-[Command(new[] { "wordlist", "wl" }, user: CommandUser.Host)]
+[Command(CommandFlag.HostOnly, "wordlist", "wl")]
 public class WordListCommands
 {
     [Command("list")]
-    private void ListWords(PlayerControl source)
+    private static void ListWords(PlayerControl source)
     {
         Utils.SendMessage(
             ChatManager.BannedWords.Select((w, i) => $"{i+1}) {w}").Join(delimiter: "\n"),
@@ -20,18 +20,18 @@ public class WordListCommands
     }
 
     [Command("add")]
-    private void AddWord(PlayerControl source, CommandContext context, string word)
+    private static void AddWord(PlayerControl source, CommandContext context, string word)
     {
         ChatManager.AddWord(word);
     }
 
     [Command("reload")]
-    private void Reload(PlayerControl source)
+    private static void Reload(PlayerControl source)
     {
         ChatManager.Reload();
         Utils.SendMessage("Successfully Reloaded Wordlist", source.PlayerId);
     }
 
-    private ChatManager ChatManager => PluginDataManager.ChatManager;
+    private static ChatManager ChatManager => PluginDataManager.ChatManager;
 
 }

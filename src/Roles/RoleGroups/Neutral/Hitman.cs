@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;

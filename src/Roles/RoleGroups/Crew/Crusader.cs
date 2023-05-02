@@ -1,8 +1,8 @@
 using AmongUs.GameOptions;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Managers.History.Events;
-using TOHTOR.Options;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Interfaces;

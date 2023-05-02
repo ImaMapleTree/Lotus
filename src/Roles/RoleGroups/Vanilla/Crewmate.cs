@@ -1,19 +1,20 @@
 using System;
 using AmongUs.GameOptions;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
-using TOHTOR.FactionsOLD;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Managers.History.Events;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Vanilla;
 
-public class Crewmate : CustomRole
+public class Crewmate : CustomRole, IOverridenTaskHolderRole
 {
     public int TotalTasks => taskSupplier?.Invoke() ?? 0;
     public int TasksComplete;
@@ -39,6 +40,18 @@ public class Crewmate : CustomRole
         this.OnTaskComplete();
         Game.GameHistory.AddEvent(new TaskCompleteEvent(player));
     }
+
+    public bool AssignCommonTasks() => HasCommonTasks;
+
+    public int LongTaskAmount() => LongTasks;
+
+    public int ShortTaskAmount() => ShortTasks;
+
+    public bool OverrideTasks() => HasOverridenTasks;
+
+    public virtual bool HasTasks() => true;
+
+    public virtual bool TasksApplyToTotal() => true;
 
     /// <summary>
     /// Sets up the task counter for crewmate roles. If you extend this class and want this done automatically please call base.Setup()

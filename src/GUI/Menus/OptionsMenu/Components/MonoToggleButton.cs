@@ -1,3 +1,4 @@
+using System;
 using System.Linq;
 using TMPro;
 using TOHTOR.Utilities;
@@ -36,7 +37,7 @@ public class MonoToggleButton: MonoBehaviour
 
         enabledRender = enabledButton.GetComponentInChildren<SpriteRenderer>();
         enabledRender.color = Color.white;
-        enabledRender.sprite = Utils.LoadSprite("TOHTOR.assets.Settings.SelectButton.png", 450);
+        enabledRender.sprite = OptionMenuResources.ButtonOnSprite;
 
         disabledButton = Instantiate(template, transform);
         disabledButton.OnClick = new Button.ButtonClickedEvent();
@@ -44,7 +45,7 @@ public class MonoToggleButton: MonoBehaviour
 
         disabledRender = disabledButton.GetComponentInChildren<SpriteRenderer>();
         disabledRender.color = Color.white;
-        disabledRender.sprite = Utils.LoadSprite("TOHTOR.assets.Settings.UnselectButton.png", 450);
+        disabledRender.sprite = OptionMenuResources.ButtonOffSprite;
 
         enabledTextTMP = enabledButton.GetComponentInChildren<TextMeshPro>();
         enabledTextTMP.font = CustomOptionContainer.GetGeneralFont();
@@ -72,6 +73,7 @@ public class MonoToggleButton: MonoBehaviour
 
     private void SetOnState(bool noAction = false)
     {
+        state = true;
         enabledButton.gameObject.SetActive(true);
         disabledButton.gameObject.SetActive(false);
         if (!noAction) toggleOnAction();
@@ -79,6 +81,7 @@ public class MonoToggleButton: MonoBehaviour
 
     private void SetOffState(bool noAction = false)
     {
+        state = false;
         enabledButton.gameObject.SetActive(false);
         disabledButton.gameObject.SetActive(true);
         if (!noAction) toggleOffAction();
@@ -91,4 +94,11 @@ public class MonoToggleButton: MonoBehaviour
     public void SetToggleOnAction(Action action) => toggleOnAction = action;
 
     public void SetToggleOffAction(Action action) => toggleOffAction = action;
+
+    public void ConfigureAsPressButton(string text, Action action)
+    {
+        SetOffText(text);
+        toggleOffAction = action;
+        toggleOnAction = () => SetOffState();
+    }
 }

@@ -4,6 +4,7 @@ using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using VentLib.Networking.RPC;
@@ -39,8 +40,8 @@ public static class ColorwarsAssignRoles
             foreach (PlayerControl player in team)
             {
                 if (player.PlayerId == localPlayer.PlayerId) player.SetRole(RoleTypes.Impostor);
-                RpcV2.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).SendInclusive(teamClientIds);
-                RpcV2.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).SendExclusive(teamClientIds);
+                RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).SendInclusive(teamClientIds);
+                RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).SendExcluding(teamClientIds);
                 Game.AssignRole(player, CustomRoleManager.Static.SerialKiller);
             }
         }

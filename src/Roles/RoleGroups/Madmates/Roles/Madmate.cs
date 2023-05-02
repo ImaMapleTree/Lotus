@@ -10,8 +10,6 @@ namespace TOHTOR.Roles.RoleGroups.Madmates.Roles;
 
 public class Madmate : Impostor
 {
-    public override bool HasTasks() => false;
-
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Can Sabotage")

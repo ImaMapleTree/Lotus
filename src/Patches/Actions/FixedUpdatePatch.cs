@@ -1,5 +1,6 @@
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
@@ -7,6 +8,7 @@ using TOHTOR.Roles.Internals.Attributes;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches.Actions;
 

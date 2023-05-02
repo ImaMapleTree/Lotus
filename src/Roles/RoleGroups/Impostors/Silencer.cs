@@ -45,7 +45,7 @@ public class Silencer: Impostor
         blackmailingText?.Get()?.SetViewerSupplier(() => allPlayers);
         blackmailedPlayer.IfPresent(p =>
         {
-            string message = $"{RoleColor.Colorize(MyPlayer.UnalteredName())} blackmailed {p.GetRoleColor().Colorize(p.UnalteredName())}.";
+            string message = $"{RoleColor.Colorize(Myplayer.name)} blackmailed {p.GetRoleColor().Colorize(p.name)}.";
             Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, p, message));
             Utils.SendMessage(_blackmailedMessage, p.PlayerId);
         });
@@ -62,7 +62,7 @@ public class Silencer: Impostor
             return;
         }
 
-        VentLogger.Trace($"Blackmailer Killing Player: {speaker.UnalteredName()}");
+        VentLogger.Trace($"Blackmailer Killing Player: {speaker.name}");
         MyPlayer.InteractWith(speaker, new UnblockedInteraction(new FatalIntent(), this));
     }
 

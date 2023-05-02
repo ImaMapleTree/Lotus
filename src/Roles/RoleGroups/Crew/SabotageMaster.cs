@@ -1,13 +1,16 @@
 using System.Collections.Generic;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
 
@@ -22,7 +25,7 @@ public class SabotageMaster: Crewmate
     {
         if (fixer.PlayerId != MyPlayer.PlayerId || !sabotages.Contains(sabotage.SabotageType())) return;
         bool result = sabotage is DoorSabotage doorSabotage ? doorSabotage.FixRoom(MyPlayer) : sabotage.Fix(MyPlayer);
-        if (result) Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{ModConstants.HColor1.Colorize(MyPlayer.UnalteredName())} fixed {sabotage.SabotageType()}."));
+        if (result) Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{ModConstants.HColor1.Colorize(MyPlayer.name)} fixed {sabotage.SabotageType()}."));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -33,7 +36,7 @@ public class SabotageMaster: Crewmate
                 .Build())
             .SubOption(sub => sub.Name("Fast Fixes Reactor")
                 .AddOnOffValues()
-                .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Lights))
+                .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Reactor))
                 .Build())
             .SubOption(sub => sub.Name("Fast Fixes Oxygen")
                 .AddOnOffValues()

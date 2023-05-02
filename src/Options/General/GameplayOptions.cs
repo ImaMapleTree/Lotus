@@ -13,6 +13,8 @@ public class GameplayOptions
     private static Color _optionColor = new(0.81f, 1f, 0.75f);
     private static List<GameOption> additionalOptions = new();
 
+    public bool OptimizeRoleAssignment;
+
     public bool FixFirstKillCooldown;
     public bool DisableTasks;
     public DisabledTask DisabledTaskFlag;
@@ -25,108 +27,114 @@ public class GameplayOptions
 
     public bool SyncMeetings => SyncMeetingCount != -1;
 
+    public List<GameOption> AllOptions = new();
+
     public GameplayOptions()
     {
-        new GameOptionTitleBuilder()
+        AllOptions.Add(new GameOptionTitleBuilder()
             .Title(GameplayOptionTranslations.GameplayOptionTitle)
             .Color(_optionColor)
             .Tab(DefaultTabs.GeneralTab)
-            .Build();
+            .Build());
 
-        var fixFirstKillCooldown = Builder("Fix First Kill Cooldown")
+        AllOptions.Add(Builder("Optimize Role Counts for Playability")
+            .Name(GameplayOptionTranslations.OptimizeRoleAmounts)
+            .AddOnOffValues()
+            .BindBool(b => OptimizeRoleAssignment = b)
+            .IsHeader(true)
+            .BuildAndRegister());
+
+        AllOptions.Add(Builder("Fix First Kill Cooldown")
             .Name(GameplayOptionTranslations.FixFirstKillCooldownText)
             .AddOnOffValues()
             .BindBool(b => FixFirstKillCooldown = b)
-            .IsHeader(true)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var disableTasks = Builder("Disable Tasks")
+        AllOptions.Add(Builder("Disable Tasks")
             .Name(GameplayOptionTranslations.DisableTaskText)
             .AddOnOffValues(false)
             .ShowSubOptionPredicate(b => (bool)b)
             .SubOption(sub => sub
                 .Key("Disable Card Swipe")
                 .Name(GameplayOptionTranslations.DisableCardSwipe)
-                .Color(_optionColor)
                 .BindBool(FlagSetter(DisabledTask.CardSwipe))
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
                 .Key("Disable Med Scan")
                 .Name(GameplayOptionTranslations.DisableMedScan)
-                .Color(_optionColor)
                 .BindBool(FlagSetter(DisabledTask.MedScan))
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
                 .Key("Disable Unlock Safe")
                 .Name(GameplayOptionTranslations.DisableUnlockSafe)
-                .Color(_optionColor)
                 .BindBool(FlagSetter(DisabledTask.UnlockSafe))
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
                 .Key("Disable Upload Data")
                 .Name(GameplayOptionTranslations.DisableUploadData)
-                .Color(_optionColor)
                 .BindBool(FlagSetter(DisabledTask.UploadData))
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
                 .Key("Disable Start Reactor")
                 .Name(GameplayOptionTranslations.DisableStartReactor)
-                .Color(_optionColor)
                 .BindBool(FlagSetter(DisabledTask.StartReactor))
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
                 .Key("Disable Reset Breaker")
                 .Name(GameplayOptionTranslations.DisableResetBreaker)
-                .Color(_optionColor)
                 .BindBool(FlagSetter(DisabledTask.ResetBreaker))
                 .AddOnOffValues()
                 .Build())
             .BindBool(b => DisableTasks = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var disableTaskWin = Builder("Disable Task Win")
+        AllOptions.Add(Builder("Disable Task Win")
             .Name(GameplayOptionTranslations.DisableTaskWinText)
             .AddOnOffValues(false)
             .BindBool(b => DisableTaskWin = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var ghostsSeeRoles = Builder("Ghosts See Roles")
+        AllOptions.Add(Builder("Ghosts See Roles")
             .Name(GameplayOptionTranslations.GhostSeeRoles)
             .AddOnOffValues()
             .BindBool(b => GhostsSeeRoles = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var ghostsSeeIndicators = Builder("Ghosts See Indicators")
+        AllOptions.Add(Builder("Ghosts See Indicators")
             .Name(GameplayOptionTranslations.GhostSeeInfo)
             .AddOnOffValues()
             .BindBool(b => GhostsSeeInfo = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var ghostsIgnoreTasks = Builder("Ghosts Ignore Tasks")
+        AllOptions.Add(Builder("Ghosts Ignore Tasks")
             .Name(GameplayOptionTranslations.GhostIgnoreTask)
             .AddOnOffValues(false)
             .BindBool(b => GhostsIgnoreTasks = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var syncMeetings = Builder("Sync Meetings")
+        AllOptions.Add(Builder("Sync Meetings")
             .Name(GameplayOptionTranslations.SyncMeetingText)
             .Value(v => v.Text(GameplayOptionTranslations.SyncMeetingNever).Value(-1).Color(Color.red).Build())
             .AddIntRange(1, 15, 1)
             .BindInt(i => SyncMeetingCount = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var forceNoVenting = Builder("Force No Venting")
+        AllOptions.Add(Builder("Force No Venting")
             .Name(GameplayOptionTranslations.ForceNoVentingText)
             .AddOnOffValues()
             .BindBool(b => ForceNoVenting = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        additionalOptions.ForEach(o => o.Register());
+        additionalOptions.ForEach(o =>
+        {
+            o.Register();
+            AllOptions.Add(o);
+        });
     }
 
     /// <summary>
@@ -153,8 +161,12 @@ public class GameplayOptions
     [Localized("Gameplay")]
     private static class GameplayOptionTranslations
     {
+
         [Localized("SectionTitle")]
         public static string GameplayOptionTitle = "Gameplay Options";
+
+        [Localized(nameof(OptimizeRoleAmounts))]
+        public static string OptimizeRoleAmounts = "Optimize Role Counts for Playability";
 
         [Localized("FixFirstKillCooldown")]
         public static string FixFirstKillCooldownText = "Fix First Kill Cooldown";

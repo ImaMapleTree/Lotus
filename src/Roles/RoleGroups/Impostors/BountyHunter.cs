@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.GUI;
@@ -27,7 +28,7 @@ public class BountyHunter: Vanilla.Impostor
     private float punishKillCoolDown;
 
     [UIComponent(UI.Text)]
-    private string ShowTarget() => bhTarget == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(bhTarget.UnalteredName());
+    private string ShowTarget() => bhTarget == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(bhTarget.name);
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)

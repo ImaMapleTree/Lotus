@@ -1,65 +1,134 @@
 using System;
-using TOHTOR.API;
+using System.Collections.Generic;
+using System.Linq;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Factions.Neutrals;
+using TOHTOR.Managers;
+using TOHTOR.Options;
+using TOHTOR.Roles;
+using TOHTOR.Roles.Internals;
 using TOHTOR.Utilities;
+using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
-using VentLib.Commands.Interfaces;
 using VentLib.Localization.Attributes;
+using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
-using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Chat.Commands;
 
-[Command("r", "rename")]
-public class Rename: ICommandReceiver
+[Localized("Commands")]
+public class BasicCommands: CommandTranslations
 {
-    public void Receive(PlayerControl source, CommandContext context)
+    [Localized("Color.NotInRange")] public static string ColorNotInRangeMessage = "{0} is not in range of valid colors.";
+    [Localized(nameof(Winners))] public static string Winners = "Winners";
+    [Localized("Dump.Success")] public static string DumpSuccess = "Successfully dumped log to: {0}";
+
+    [Command("perc", "percentage", "percentages")]
+    public static void Percentage(PlayerControl source)
     {
-        //if (!(StaticOptions.AllowCustomizeCommands || source.IsHost())) return;
-        string name = String.Join(" ", context.Args);
-        source.RpcSetName(name);
-    }
-}
+        string? factionName = null;
+        string text = $"{HostOptionTranslations.CurrentRoles}:\n";
 
-[Command("w", "winner")]
-public class Winner : ICommandReceiver
-{
-    public void Receive(PlayerControl source, CommandContext _)
-    {
-        Utils.SendMessage($"Winners: {String.Join(", ", Game.GameHistory.LastWinners)}", source.PlayerId);
-    }
-}
+        OrderedDictionary<string, List<CustomRole>> rolesByFaction = new();
 
-[Localized("Commands.Admin")]
-[Command(new []{ "kick", "ban" }, user: CommandUser.Host)]
-public class KickCommand : ICommandReceiver
-{
-    [Localized("KickMessage")] private static string _kickedMessage = "{0} was kicked by host.";
-    [Localized("BanMessage")] private static string _banMessage = "{0} was banned by host.";
-
-    public void Receive(PlayerControl source, CommandContext context)
-    {
-        bool ban = context.Alias == "ban";
-        string message = ban ? _banMessage : _kickedMessage;
-
-        if (context.Args.Length == 0)
+        string FactionName(CustomRole role)
         {
-            Utils.SendMessage("Invalid Usage. Requires either a number or name.", source.PlayerId, "Announcement");
+            if (role.Faction is not Solo) return role.Faction.Name();
+            return role.SpecialType is SpecialType.NeutralKilling ? "Neutral Killers" : "Neutral";
+        }
+
+        CustomRoleManager.AllRoles.ForEach(r => rolesByFaction.GetOrCompute(FactionName(r), () => new List<CustomRole>()).Add(r));
+
+        rolesByFaction.GetValues().SelectMany(s => s).ForEach(r =>
+        {
+
+            if (r.Count == 0 || r.Chance == 0) return;
+
+            string fName = FactionName(r);
+            if (factionName != fName)
+            {
+                text += $"\n{HostOptionTranslations.RoleCategory.Formatted(fName)}\n";
+                factionName = fName;
+            }
+
+
+            text += $"{r.RoleName}: {r.Count} × {r.Chance}%";
+            if (r.Count > 1) text += $" (+ {r.AdditionalChance}%)\n";
+            else text += "\n";
+        });
+
+        Utils.SendMessage(text, source.PlayerId, HostOptionTranslations.RoleInfo, true);
+    }
+
+    [Command(CommandFlag.HostOnly, "dump")]
+    public static void Dump(PlayerControl source)
+    {
+        Utils.SendMessage(DumpSuccess.Formatted(VentLogger.Dump()), source.PlayerId);
+    }
+
+    [Command(CommandFlag.LobbyOnly, "name")]
+    public static void Name(PlayerControl source, string name)
+    {
+        int allowedUsers = GeneralOptions.MiscellaneousOptions.ChangeNameUsers;
+        bool permitted = (allowedUsers) switch
+        {
+            0 => source.IsHost(),
+            1 => source.IsHost() || FriendUtils.IsFriend(source),
+            2 => true,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        if (!permitted)
+        {
+            Utils.SendMessage(NotPermittedText, source.PlayerId, InvalidColor.Colorize(NotPermittedTitle), true);
             return;
         }
 
-        Optional<PlayerControl> targetPlayer = Optional<PlayerControl>.Null();
-        string text = context.Join();
-        if (int.TryParse(text, out int result)) targetPlayer = Utils.PlayerById(result);
-        else targetPlayer = PlayerControl.AllPlayerControls.ToArray()
-                .FirstOrOptional(p => p.UnalteredName().ToLowerInvariant().Equals(text.ToLowerInvariant()));
+        source.RpcSetName(name);
+    }
 
-        targetPlayer.Handle(player =>
+    [Command(CommandFlag.LobbyOnly, "winner", "w")]
+    public static void ListWinners(PlayerControl source)
+    {
+        Utils.SendMessage($"{Winners}: {Game.GameHistory.LastWinners.Select(w => w.Name + $"({w.Role.RoleName})").Fuse()}", source.PlayerId);
+    }
+
+    [Command(CommandFlag.LobbyOnly, "color", "colour")]
+    public static void SetColor(PlayerControl source, int color)
+    {
+        int allowedUsers = GeneralOptions.MiscellaneousOptions.ChangeColorAndLevelUsers;
+        bool permitted = (allowedUsers) switch
         {
-            AmongUsClient.Instance.KickPlayer(player.GetClientId(), ban);
-            Utils.SendMessage(string.Format(message, player.UnalteredName()), title: "Announcement");
-        }, () => Utils.SendMessage($"Unable to find player: {text}", source.PlayerId, "Announcement"));
+            0 => source.IsHost(),
+            1 => source.IsHost() || FriendUtils.IsFriend(source),
+            2 => true,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
+        if (!permitted)
+        {
+            Utils.SendMessage(NotPermittedText, source.PlayerId, InvalidColor.Colorize(NotPermittedTitle), true);
+            return;
+        }
+
+        if (color > Palette.PlayerColors.Length)
+        {
+            Utils.SendMessage($"{ColorNotInRangeMessage.Formatted(color)} (0-{Palette.PlayerColors.Length})", source.PlayerId, InvalidColor.Colorize(InvalidUsage), true);
+            return;
+        }
+
+        source.RpcSetColor((byte)color);
+    }
+
+    private static readonly ColorGradient HostGradient = new(new Color(1f, 0.93f, 0.98f), new Color(1f, 0.57f, 0.73f));
+
+    [Command(CommandFlag.HostOnly, "say", "s")]
+    public static void Say(PlayerControl _, string message)
+    {
+        Utils.SendMessage(message, title: HostGradient.Apply(HostMessage));
     }
 }

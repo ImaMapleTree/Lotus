@@ -1,4 +1,5 @@
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Managers.History.Events;
 
 namespace TOHTOR.Roles.Events;

@@ -1,8 +1,10 @@
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles;
 using TOHTOR.Utilities;
+using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
@@ -12,7 +14,7 @@ using VentLib.Utilities;
 
 namespace TOHTOR.Chat.Commands;
 
-[Command("m", "myrole")]
+[Command(CommandFlag.InGameOnly, "m", "myrole")]
 public class RoleInfoCommand: ICommandReceiver
 {
     private int previousLevel = 0;
@@ -26,7 +28,7 @@ public class RoleInfoCommand: ICommandReceiver
         }
         string pageString = context.Args[0];
         if (!int.TryParse(pageString, out int page) || page <= 1) ShowRoleDescription(source);
-        else ShowRoleOptions(source, page);
+        else ShowRoleOptions(source);
     }
 
     private void ShowRoleDescription(PlayerControl source)
@@ -34,10 +36,10 @@ public class RoleInfoCommand: ICommandReceiver
         CustomRole role = source.GetCustomRole();
         string output = $"{role} {role.Faction}:";
         output += $"\n{role.Description}";
-        Utils.SendMessage(output, source.PlayerId);
+        Utils.SendMessage(output, source.PlayerId, leftAlign: true);
     }
 
-    private void ShowRoleOptions(PlayerControl source, int page)
+    private void ShowRoleOptions(PlayerControl source)
     {
         CustomRole role = source.GetCustomRole();
         string output = $"{role} {role.Faction}:";
@@ -47,7 +49,7 @@ public class RoleInfoCommand: ICommandReceiver
 
         foreach (var child in optionMatch.Children) UpdateOutput(ref output, child);
 
-        Utils.SendMessage(output, source.PlayerId);
+        Utils.SendMessage(output, source.PlayerId, leftAlign: true);
     }
 
     private void UpdateOutput(ref string output, Option options)
@@ -56,7 +58,8 @@ public class RoleInfoCommand: ICommandReceiver
         if (gameOption.Level < previousLevel)
             output += "\n";
         previousLevel = gameOption.Level;
-        output += $"\n{gameOption.Name()} => {gameOption.Color.Colorize(options.GetValueText())}";
+        string valueText = gameOption.Color == Color.white ? gameOption.GetValueText() : gameOption.Color.Colorize(gameOption.GetValueText());
+        output += $"\n{gameOption.Name()} => {valueText}";
 
     }
 }

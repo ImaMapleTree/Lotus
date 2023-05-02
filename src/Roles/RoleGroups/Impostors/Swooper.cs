@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
@@ -74,9 +75,9 @@ public class Swooper: Impostor
         initialVent = Optional<Vent>.Of(vent);
 
         swoopingDuration.Start();
-        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{MyPlayer.UnalteredName()} began swooping."));
+        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{MyPlayer.name} began swooping."));
         lastEntered = DateTime.Now;
-        Async.Schedule(() => RpcV2.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive(unaffected.Select(p => p.GetClientId()).ToArray()), 0.4f);
+        Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive(unaffected.Select(p => p.GetClientId()).ToArray()), 0.4f);
         Async.Schedule(EndSwooping, swoopingDuration.Duration);
     }
 
@@ -87,7 +88,7 @@ public class Swooper: Impostor
         VentLogger.Trace("Handling Swooping Exit");
         lastEntered = DateTime.Now;
         handle.Cancel();
-        Async.Schedule(() => RpcV2.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive( GetUnaffected().Select(p => p.GetClientId()).ToArray()), 0.4f);
+        Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive( GetUnaffected().Select(p => p.GetClientId()).ToArray()), 0.4f);
     }
 
     private void EndSwooping()

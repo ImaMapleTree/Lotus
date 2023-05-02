@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Hazel;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
@@ -93,8 +94,8 @@ public class Retributionist : NeutralKillingBase
         Vector2 ventPosition = randomVent.transform.position;
         Utils.Teleport(MyPlayer.NetTransform, new Vector2(ventPosition.x, ventPosition.y + 0.3636f));
         // Important: SendOption.None is necessary to prevent kicks via anticheat. In the future if this role is kicking players this is probably why
-        Async.Schedule(() => RpcV2.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.EnterVent, SendOption.None).WritePacked(randomVent.Id).SendExclusive(MyPlayer.GetClientId()), NetUtils.DeriveDelay(0.5f));
-        Async.Schedule(() => RpcV2.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(randomVent.Id).Send(MyPlayer.GetClientId()), NetUtils.DeriveDelay(1.1f));
+        Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.EnterVent, SendOption.None).WritePacked(randomVent.Id).SendExcluding(MyPlayer.GetClientId()), NetUtils.DeriveDelay(0.5f));
+        Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(randomVent.Id).Send(MyPlayer.GetClientId()), NetUtils.DeriveDelay(1.1f));
         lastVentId = randomVent.Id;
     }
 

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
@@ -12,6 +13,7 @@ using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Chat.Patches;
 
@@ -23,10 +25,10 @@ internal static class OnChatPatch
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static void Prefix(ChatController __instance, PlayerControl sourcePlayer, string chatText)
     {
-        VentLogger.Log(LogLevel.All, $"{sourcePlayer.UnalteredName()} => {chatText}");
+        VentLogger.Log(LogLevel.All, $"{sourcePlayer.name} => {chatText}");
         if (UtilsSentList.Contains(sourcePlayer.PlayerId))
         {
-            VentLogger.Trace($"Filtered Util Message Sent By: {sourcePlayer.UnalteredName()}");
+            VentLogger.Trace($"Filtered Util Message Sent By: {sourcePlayer.name}");
             UtilsSentList.RemoveAt(UtilsSentList.FindIndex(b => b == sourcePlayer.PlayerId));
             return;
         }
@@ -39,7 +41,7 @@ internal static class OnChatPatch
             return;
         }
         AmongUsClient.Instance.KickPlayer(sourcePlayer.GetClientId(), false);
-        Utils.SendMessage($"{sourcePlayer.UnalteredName()} was kicked by AutoKick.");
+        Utils.SendMessage($"{sourcePlayer.name} was kicked by AutoKick.");
     }
 
     public static bool UseWordList() => GeneralOptions.AdminOptions.AutoKick;

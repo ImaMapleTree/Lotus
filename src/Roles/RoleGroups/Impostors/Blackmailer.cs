@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
@@ -70,7 +71,7 @@ public class Blackmailer: Shapeshifter
         blackmailingText?.Get()?.SetViewerSupplier(() => allPlayers);
         blackmailedPlayer.IfPresent(p =>
         {
-            string message = $"{RoleColor.Colorize(MyPlayer.UnalteredName())} blackmailed {p.GetRoleColor().Colorize(p.UnalteredName())}.";
+            string message = $"{RoleColor.Colorize(MyPlayer.name)} blackmailed {p.GetRoleColor().Colorize(p.name)}.";
             Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, p, message));
             Utils.SendMessage(_blackmailedMessage, p.PlayerId);
         });
@@ -94,7 +95,7 @@ public class Blackmailer: Shapeshifter
             return;
         }
 
-        VentLogger.Trace($"Blackmailer Killing Player: {speaker.UnalteredName()}");
+        VentLogger.Trace($"Blackmailer Killing Player: {speaker.name}");
         MyPlayer.InteractWith(speaker, new UnblockedInteraction(new FatalIntent(), this));
     }
 
@@ -113,7 +114,7 @@ public class Blackmailer: Shapeshifter
     {
         public void Action(PlayerControl actor, PlayerControl target)
         {
-            RpcV2.Immediate(actor.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
+            RpcV3.Immediate(actor.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
             target.RpcExileV2();
         }
 

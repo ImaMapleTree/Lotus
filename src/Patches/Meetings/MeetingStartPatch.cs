@@ -1,9 +1,10 @@
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
-using TOHTOR.API.Meetings;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
+using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using TOHTOR.Options;
@@ -20,8 +21,6 @@ namespace TOHTOR.Patches.Meetings;
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]
 public class MeetingStartPatch
 {
-
-
     public static void Prefix(MeetingHud __instance)
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -45,7 +44,6 @@ public class MeetingStartPatch
         Game.RenderAllForAll(force: true);
 
         Hooks.MeetingHooks.MeetingCalledHook.Propagate(new MeetingHookEvent(reporter, MeetingPrep.Reported, meetingDelegate));
-
         Game.GameStates.MeetingCalled++;
     }
 

@@ -11,7 +11,7 @@ using VentLib.Utilities;
 
 namespace TOHTOR.Chat.Commands;
 
-[Command(new[] { "template", "t", "templates" }, user: CommandUser.Host)]
+[Command(CommandFlag.HostOnly, new[] { "template", "t", "templates" })]
 public class TemplateCommands: ICommandReceiver
 {
     [Command("list", "l")]

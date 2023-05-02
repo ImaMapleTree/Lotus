@@ -1,7 +1,8 @@
 using HarmonyLib;
 using Hazel;
 using TOHTOR.API;
-using TOHTOR.API.Meetings;
+using TOHTOR.API.Odyssey;
+using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -19,7 +20,7 @@ public class MeetingVotePatch
     {
         PlayerControl voter = Utils.GetPlayerById(srcPlayerId)!;
         Optional<PlayerControl> voted = Utils.PlayerById(suspectPlayerId);
-        VentLogger.Trace($"{voter.GetNameWithRole()} voted for {voted.Map(v => v.UnalteredName())}");
+        VentLogger.Trace($"{voter.GetNameWithRole()} voted for {voted.Map(v => v.name)}");
 
         ActionHandle handle = ActionHandle.NoInit();
         voter.Trigger(RoleActionType.MyVote, ref handle,MeetingDelegate.Instance, voted);

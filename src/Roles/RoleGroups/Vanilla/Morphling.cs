@@ -15,6 +15,7 @@ public class Morphling : Shapeshifter
                 .BindFloat(f => ShapeshiftCooldown = f)
                 .Build())
             .SubOption(sub => sub.Name("Shapeshift Duration")
+                .Value(1f)
                 .AddFloatRange(2, 120, 2.5f, 6, "s")
                 .BindFloat(f => ShapeshiftDuration = f)
                 .Build());

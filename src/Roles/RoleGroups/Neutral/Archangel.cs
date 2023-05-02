@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
@@ -31,7 +32,7 @@ public class Archangel : CustomRole
     private PlayerControl? target;
 
     [UIComponent(UI.Text)]
-    private string TargetDisplay() => target == null ? "" : RoleColor.Colorize("Target: ") + Color.white.Colorize(target.UnalteredName());
+    private string TargetDisplay() => target == null ? "" : RoleColor.Colorize("Target: ") + Color.white.Colorize(target.name);
 
     protected override void Setup(PlayerControl player)
     {

@@ -1,6 +1,12 @@
 using HarmonyLib;
-using TOHTOR.Managers;
+using TOHTOR.API.Odyssey;
+using TOHTOR.API.Vanilla;
+using TOHTOR.API.Vanilla.Meetings;
+using TOHTOR.Extensions;
+using TOHTOR.Options;
 using VentLib.Logging;
+using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches.Meetings;
 
@@ -23,11 +29,22 @@ class MeetingHudOnDestroyPatch
     public static void Postfix()
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        AntiBlackout.SetIsDead();
         VentLogger.Debug("------------End of Meeting------------", "Phase");
-        /*if (AmongUsClient.Instance.AmHost)
+
+        MeetingDelegate.Instance.BlackscreenResolver.BeginProcess();
+        Async.Schedule(PostMeetingSetups, NetUtils.DeriveDelay(0.5f));
+    }
+
+
+    private static void PostMeetingSetups()
+    {
+        bool noVenting = GeneralOptions.GameplayOptions.ForceNoVenting;
+        bool randomSpawn = GeneralOptions.MayhemOptions.RandomSpawn;
+
+        Game.GetAllPlayers().ForEach(p =>
         {
-            Game.GetAllPlayers().Do(pc => RandomSpawn.CustomNetworkTransformPatch.NumOfTP[pc.PlayerId] = 0);
-        }*/
+            if (randomSpawn) Game.RandomSpawn.Spawn(p);
+            if (noVenting && !p.GetCustomRole().BaseCanVent) Async.Schedule(() => VentApi.ForceNoVenting(p), 0.1f);
+        });
     }
 }

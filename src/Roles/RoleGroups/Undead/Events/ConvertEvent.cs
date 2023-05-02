@@ -1,4 +1,5 @@
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.RoleGroups.Undead.Roles;
 using VentLib.Utilities;

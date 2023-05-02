@@ -15,26 +15,32 @@ public class DebugOptions
     public bool NoGameEnd;
     public bool NameBasedRoleAssignment;
 
+    public List<GameOption> AllOptions = new();
+
     public DebugOptions()
     {
-        new GameOptionTitleBuilder()
+        AllOptions.Add(new GameOptionTitleBuilder()
             .Tab(DefaultTabs.GeneralTab)
             .Title(DebugOptionTranslations.DebugOptionTitle)
             .Color(_optionColor)
-            .Build();
+            .Build());
 
-        var noGameEnd = Builder("NoGameEnd")
+        AllOptions.Add(Builder("NoGameEnd")
             .Name(DebugOptionTranslations.NoGameEndText)
             .BindBool(b => NoGameEnd = b)
             .IsHeader(true)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var nameBasedRoleAssignment = Builder("Name Based Role Assignment")
+        AllOptions.Add(Builder("Name Based Role Assignment")
             .Name(DebugOptionTranslations.NameBasedRoleAssignmentText)
             .BindBool(b => NameBasedRoleAssignment = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        additionalOptions.ForEach(o => o.Register());
+        additionalOptions.ForEach(o =>
+        {
+            o.Register();
+            AllOptions.Add(o);
+        });
     }
 
     /// <summary>

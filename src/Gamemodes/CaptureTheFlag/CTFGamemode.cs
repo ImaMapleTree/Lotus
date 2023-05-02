@@ -107,7 +107,7 @@ public class CTFGamemode: Gamemode
         Carriers[myTeam] = grabber.PlayerId;
 
         string team = myTeam == 0 ? "Red" : "Blue";
-        VentLogger.Info($"{grabber.UnalteredName()} (Team: {team}) Has stolen the flag");
+        VentLogger.Info($"{grabber.name} (Team: {team}) Has stolen the flag");
     }
 
     public override void SetupWinConditions(WinDelegate winDelegate)

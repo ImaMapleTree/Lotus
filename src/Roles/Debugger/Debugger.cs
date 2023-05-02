@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using TOHTOR.Roles.Internals.Attributes;
@@ -43,7 +44,7 @@ public class Debugger: CustomRole
     {
         Vector2 location = MyPlayer.GetTruePosition();
         foreach (PlayerControl player in Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId))
-            VentLogger.Old($"Distance from {MyPlayer.UnalteredName()} to {player.UnalteredName()} :: {Vector2.Distance(location, player.GetTruePosition())}", "DebuggerDistance");
+            VentLogger.Old($"Distance from {MyPlayer.name} to {player.name} :: {Vector2.Distance(location, player.GetTruePosition())}", "DebuggerDistance");
     }
 
     private void TestTest()

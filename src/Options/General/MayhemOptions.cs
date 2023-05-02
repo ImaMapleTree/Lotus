@@ -21,15 +21,17 @@ public class MayhemOptions
     public bool UseRandomMap => randomMapOn && RandomMaps != 0;
     private bool randomMapOn;
 
+    public List<GameOption> AllOptions = new();
+
     public MayhemOptions()
     {
-        new GameOptionTitleBuilder()
+        AllOptions.Add(new GameOptionTitleBuilder()
             .Title(MayhemOptionTranslations.MayhemOptionTitle)
             .Color(_optionColor)
             .Tab(DefaultTabs.GeneralTab)
-            .Build();
+            .Build());
 
-        var randomMapMode = Builder("Enable Random Maps")
+        AllOptions.Add(Builder("Enable Random Maps")
             .Name(MayhemOptionTranslations.RandomMapModeText)
             .BindBool(b => randomMapOn = b)
             .ShowSubOptionPredicate(b => (bool)b)
@@ -54,24 +56,28 @@ public class MayhemOptions
                 .BindBool(FlagSetter(AuMap.Airship))
                 .Build())
             .IsHeader(true)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var randomSpawn = Builder("Random Spawn")
+        AllOptions.Add(Builder("Random Spawn")
             .Name(MayhemOptionTranslations.RandomSpawnText)
             .BindBool(b => RandomSpawn = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var camoComms = Builder("Camo Comms")
+        AllOptions.Add(Builder("Camo Comms")
             .Name(MayhemOptionTranslations.CamoCommText)
             .BindBool(b => CamoComms = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var allRolesCanVent = Builder("All Roles Can Vent")
+        AllOptions.Add(Builder("All Roles Can Vent")
             .Name(MayhemOptionTranslations.AllRolesVentText)
             .BindBool(b => AllRolesCanVent = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        additionalOptions.ForEach(o => o.Register());
+        additionalOptions.ForEach(o =>
+        {
+            o.Register();
+            AllOptions.Add(o);
+        });
     }
 
     /// <summary>

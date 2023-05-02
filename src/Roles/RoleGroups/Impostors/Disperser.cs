@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals.Attributes;

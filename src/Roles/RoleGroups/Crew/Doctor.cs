@@ -1,4 +1,5 @@
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Roles.Internals.Attributes;

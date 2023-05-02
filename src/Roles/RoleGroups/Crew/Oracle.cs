@@ -1,5 +1,6 @@
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.GUI.Name.Impl;
@@ -46,7 +47,7 @@ public class Oracle: Crewmate
         {
             selectedPlayer = target.Map(p => p.PlayerId);
             selectedPlayer.Handle(
-                _ => Utils.SendMessage($"{selectRoleMsg} {target.Get().UnalteredName()}\n{skipMsg}", MyPlayer.PlayerId, "Oracle Ability"),
+                _ => Utils.SendMessage($"{selectRoleMsg} {target.Get().name}\n{skipMsg}", MyPlayer.PlayerId, "Oracle Ability"),
                 () =>
                 {
                     Utils.SendMessage("You may now vote normally", MyPlayer.PlayerId, "Oracle Ability");
@@ -66,12 +67,12 @@ public class Oracle: Crewmate
         if (selectedPlayer.Get() == target.Get().PlayerId)
         {
             selectedPlayer = Optional<byte>.Null();
-            Utils.SendMessage($"{unselectRoleMsg} {target.Get().UnalteredName()}\n{skipMsg}", MyPlayer.PlayerId, "Oracle Ability");
+            Utils.SendMessage($"{unselectRoleMsg} {target.Get().name}\n{skipMsg}", MyPlayer.PlayerId, "Oracle Ability");
             return;
         }
 
         selectedPlayer = target.Map(p => p.PlayerId);
-        Utils.SendMessage($"{selectRoleMsg} {target.Get().UnalteredName()}\n{skipMsg}", MyPlayer.PlayerId, "Oracle Ability");
+        Utils.SendMessage($"{selectRoleMsg} {target.Get().name}\n{skipMsg}", MyPlayer.PlayerId, "Oracle Ability");
     }
 
     [RoleAction(RoleActionType.MyDeath)]

@@ -1,46 +1,27 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
 using InnerNet;
 using TOHTOR.API;
-using TOHTOR.GUI;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Managers;
 using UnityEngine;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Legacy;
-using TOHTOR.Roles.RoleGroups.Coven;
-using TOHTOR.Roles.RoleGroups.Crew;
-using TOHTOR.Roles.RoleGroups.Impostors;
-using TOHTOR.Roles.RoleGroups.Neutral;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.Roles.Subroles;
-using TOHTOR.RPC;
-using TOHTOR.Utilities;
-using VentLib;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using GameStates = TOHTOR.API.GameStates;
-using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
 
 namespace TOHTOR.Extensions;
 
 public static class PlayerControlExtensions
 {
-    public static bool IsHost(this PlayerControl player) => player != null && AmongUsClient.Instance.AmHost && PlayerControl.LocalPlayer != null && PlayerControl.LocalPlayer.PlayerId == player.PlayerId;
-
-    public static ClientData? GetClient(this PlayerControl player)
-    {
-        var client = AmongUsClient.Instance.allClients.ToArray().FirstOrDefault(cd => cd.Character.PlayerId == player.PlayerId);
-        return client;
-    }
-
     public static UniquePlayerId UniquePlayerId(this PlayerControl player) => API.UniquePlayerId.From(player);
 
     public static void Trigger(this PlayerControl player, RoleActionType action, ref ActionHandle handle, params object[] parameters)
@@ -99,85 +80,51 @@ public static class PlayerControlExtensions
         return CustomRoleManager.PlayerSubroles.GetValueOrDefault(player.PlayerId, new List<CustomRole>());
     }
 
-    public static List<CustomRole> GetCustomSubRoles(this PlayerControl player)
-    {
-        if (player == null)
-        {
-            VentLogger.Warn("CustomSubRoleを取得しようとしましたが、対象がnullでした。", "getCustomSubRole");
-            // new() { Roles.Subrole };
-        }
-        //  return Main.PlayerStates[player.PlayerId].SubRoles;
-        return new();
-    }
-
-    public static string GetRoleName(this PlayerControl player) => player.GetCustomRole().RoleName;
-
-    public static string UnalteredName(this PlayerControl? player)
-    {
-        try { player = Utils.GetPlayerById(player!.PlayerId); }
-        catch { /* ignored */ }
-
-        try { return player != null ? player.NameModel().Unaltered() : "Unknown"; }
-        catch { return player != null ? player.Data.PlayerName : "Unknown"; }
-    }
-
     public static void RpcSetRoleDesync(this PlayerControl player, RoleTypes role, int clientId)
     {
-        //player: 名前の変更対象
-
         if (player == null) return;
         if (AmongUsClient.Instance.ClientId == clientId)
         {
             player.SetRole(role);
             return;
         }
-        MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(player.NetId, (byte)RpcCalls.SetRole, SendOption.Reliable, clientId);
-        writer.Write((ushort)role);
-        AmongUsClient.Instance.FinishRpcImmediately(writer);
+
+        RpcV3.Immediate(player.NetId, RpcCalls.SetRole).Write((ushort)role).Send(clientId);
     }
 
     public static void RpcGuardAndKill(this PlayerControl killer, PlayerControl? target = null, int colorId = 0)
     {
         if (target == null) target = killer;
+
         // Host
         if (killer.AmOwner)
         {
             killer.ProtectPlayer(target, colorId);
             killer.MurderPlayer(target);
         }
+
         // Other Clients
-        if (killer.PlayerId != 0)
-        {
-            var sender = CustomRpcSender.Create("GuardAndKill Sender", SendOption.None);
-            sender.StartMessage(killer.GetClientId());
-            sender.StartRpc(killer.NetId, (byte)RpcCalls.ProtectPlayer)
-                .WriteNetObject((InnerNetObject)target)
-                .Write(colorId)
-                .EndRpc();
-            sender.StartRpc(killer.NetId, (byte)RpcCalls.MurderPlayer)
-                .WriteNetObject((InnerNetObject)target)
-                .EndRpc();
-            sender.EndMessage();
-            sender.SendMessage();
-        }
+        if (killer.PlayerId == 0) return;
+
+        RpcV3.Mass()
+            .Start(killer.NetId, RpcCalls.ProtectPlayer).Write(target).Write(colorId).End()
+            .Start(killer.NetId, RpcCalls.MurderPlayer).Write(target).End()
+            .Send(killer.GetClientId());
     }
+
     public static void SetKillCooldown(this PlayerControl player, float time)
     {
-        CustomRole role = player.GetCustomRole();
-        if (!(role.IsImpostor() || player.IsNeutralKiller() || role is Arsonist or Sheriff)) return;
-        if (player.AmOwner)
-        {
-            player.SetKillTimer(time);
-        }
+        if (player.AmOwner) player.SetKillTimer(time);
         else
         {
-            TOHPlugin.AllPlayerKillCooldown[player.PlayerId] = time * 2;
+            player.GetCustomRole().SyncOptions(new List<GameOptionOverride> { new(Override.KillCooldown, time * 2)} );
             player.RpcGuardAndKill();
+            player.GetCustomRole().SyncOptions();
         }
     }
     public static void RpcSpecificMurderPlayer(this PlayerControl killer, PlayerControl? target = null)
     {
-        if (target == null) target = killer;
+        if (ReferenceEquals(target, null)) target = killer;
         if (killer.AmOwner)
             killer.MurderPlayer(target);
         else
@@ -224,7 +171,7 @@ public static class PlayerControlExtensions
     public static string? GetAllRoleName(this PlayerControl player)
     {
         if (!player) return null;
-        var text = Utils.GetRoleName(player.GetCustomRole());
+        var text = player.GetCustomRole().RoleName;
         List<CustomRole> subroles = player.GetSubroles();
         if (subroles.Count == 0) return text;
 
@@ -234,22 +181,25 @@ public static class PlayerControlExtensions
 
     public static string GetNameWithRole(this PlayerControl? player)
     {
-        return $"{player.UnalteredName()}" + (GameStates.IsInGame ? $"({player?.GetAllRoleName()})" : "");
+        if (player == null) return "";
+        return $"{player.name}" + (GameStates.IsInGame ? $"({player.GetAllRoleName()})" : "");
     }
 
     public static Color GetRoleColor(this PlayerControl player)
     {
-        return Utils.GetRoleColor(player.GetCustomRole());
+        return player.GetCustomRole().RoleColor;
     }
-    public static void ResetPlayerCam(this PlayerControl pc, float delay = 0f)
+
+    public static void ResetPlayerCam(this PlayerControl pc, float delay = 0f, PlayerControl? target = null)
     {
         if (pc == null || !AmongUsClient.Instance.AmHost || pc.AmOwner) return;
+        if (ReferenceEquals(target, null)) target = pc;
 
         var systemtypes = SystemTypes.Reactor;
         if (TOHPlugin.NormalOptions.MapId == 2) systemtypes = SystemTypes.Laboratory;
 
         Async.Schedule(() => pc.RpcDesyncRepairSystem(systemtypes, 128), 0f + delay);
-        Async.Schedule(() => pc.RpcSpecificMurderPlayer(), 0.2f + delay);
+        Async.Schedule(() => pc.RpcSpecificMurderPlayer(target), 0.2f + delay);
 
         Async.Schedule(() => {
             pc.RpcDesyncRepairSystem(systemtypes, 16);
@@ -258,70 +208,11 @@ public static class PlayerControlExtensions
         }, 0.4f + delay);
     }
 
-    public static bool CanUseKillButton(this PlayerControl pc) => pc.GetCustomRole() is Impostor i && i.CanKill();
-
-    public static void CanUseImpostorVent(this PlayerControl player)
-    {
-
-        switch (player.GetCustomRole())
-        {
-            case Amnesiac:
-            case Sheriff:
-            case Investigator:
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(false);
-                player.Data.Role.CanVent = false;
-                return;
-            case Arsonist a:
-                bool canUse = a.CanVent();
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(canUse && !player.Data.IsDead);
-                player.Data.Role.CanVent = canUse;
-                return;
-            case Juggernaut j:
-                bool jug_canUse = j.CanVent();
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(jug_canUse && !player.Data.IsDead);
-                player.Data.Role.CanVent = jug_canUse;
-                return;
-            case Sidekick:
-            case Jackal:
-                bool jackal_canUse = player.GetCustomRole().CanVent();
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(jackal_canUse && !player.Data.IsDead);
-                player.Data.Role.CanVent = jackal_canUse;
-                return;
-            case Marksman:
-                bool marks_canUse = player.GetCustomRole().CanVent();
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(marks_canUse && !player.Data.IsDead);
-                player.Data.Role.CanVent = marks_canUse;
-                return;
-            case PlagueBearer:
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(false);
-                player.Data.Role.CanVent = false;
-                return;
-            case Pestilence:
-                bool pesti_CanUse = player.GetCustomRole().CanVent();
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(pesti_CanUse && !player.Data.IsDead);
-                player.Data.Role.CanVent = pesti_CanUse;
-                return;
-            case Glitch:
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(!player.Data.IsDead);
-                player.Data.Role.CanVent = true;
-                return;
-            case Werewolf:
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(!player.Data.IsDead);
-                player.Data.Role.CanVent = true;
-                return;
-            case Traitor:
-            case Medusa:
-                DestroyableSingleton<HudManager>.Instance.ImpostorVentButton.ToggleVisible(!player.Data.IsDead);
-                player.Data.Role.CanVent = true;
-                return;
-        }
-    }
-
     public static void RpcExileV2(this PlayerControl player)
     {
         VentLogger.Trace($"Exiled (V2): {player.GetNameWithRole()}");
         player.Exiled();
-        RpcV2.Immediate(player.NetId, RpcCalls.Exiled, SendOption.None).Send();
+        RpcV3.Immediate(player.NetId, RpcCalls.Exiled, SendOption.None).Send();
     }
 
     public static void NoCheckStartMeeting(this PlayerControl reporter, GameData.PlayerInfo target)
@@ -331,7 +222,7 @@ public static class PlayerControlExtensions
         DestroyableSingleton<HudManager>.Instance.OpenMeetingRoom(reporter);
         reporter.RpcStartMeeting(target);
     }
-    public static bool IsModClient(this PlayerControl player) => TOHPlugin.PlayerVersion.ContainsKey(player.PlayerId);
+
     ///<summary>
     ///プレイヤーのRoleBehaviourのGetPlayersInAbilityRangeSortedを実行し、戻り値を返します。
     ///</summary>
@@ -355,18 +246,10 @@ public static class PlayerControlExtensions
         }
         return rangePlayers;
     }
-    public static bool IsNeutralKiller(this PlayerControl player)
-    {
-        return
-            player.GetCustomRole() is
-                Egoist or
-                Jackal;
-    }
-    // this is new
 
-    //汎用
-    public static bool Is(this PlayerControl target, CustomRole role) =>
-        role.IsSubrole ? target.GetCustomSubRoles().Contains(role) : target.GetCustomRole() == role;
-    public static bool Is(this PlayerControl target, RoleType type) { return target.GetCustomRole().GetRoleType() == type; }
+    public static RoleTypes GetVanillaRole(this PlayerControl player) => player.GetTeamInfo().MyRole;
+
+    public static VanillaRoleTracker.TeamInfo GetTeamInfo(this PlayerControl player) => Game.VanillaRoleTracker.GetInfo(player.PlayerId);
+
     public static bool IsAlive(this PlayerControl target) => target != null && !target.Data.IsDead && !target.Data.Disconnected;
 }

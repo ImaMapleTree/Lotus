@@ -4,7 +4,9 @@ using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Player;
 using TOHTOR.Roles;
 using TOHTOR.RPC;
 using VentLib.Logging;
@@ -18,7 +20,7 @@ public static class VictoryScreen
 {
     public static void ShowWinners(List<PlayerControl> winners, GameOverReason reason)
     {
-        List<CustomRole> winnerRoles = Game.GameHistory.LastWinners = winners.Select(w => w.GetCustomRole()).ToList();
+        List<FrozenPlayer> winnerRoles = Game.GameHistory.LastWinners = winners.Select(w => Game.GameHistory.FrozenPlayers[w.GetGameID()]).ToList();
         VentLogger.Info($"Setting Up Win Screen | Winners: {winnerRoles.StrJoin()}");
 
         bool impostorsWin = IsImpostorsWin(reason);

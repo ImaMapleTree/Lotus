@@ -5,6 +5,7 @@ using HarmonyLib;
 using InnerNet;
 using TOHTOR.Addons;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Gamemodes;

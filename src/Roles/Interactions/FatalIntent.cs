@@ -1,5 +1,6 @@
 using System;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Roles.Interactions.Interfaces;
@@ -30,15 +31,10 @@ public class FatalIntent : IFatalIntent
         Optional<IDeathEvent> deathEvent = CauseOfDeath();
         actor.GetCustomRole().SyncOptions();
 
-        if (!target.GetCustomRole().CanBeKilled())
-        {
-            actor.RpcGuardAndKill(target);
-            return;
-        }
-
         Optional<IDeathEvent> currentDeathEvent = Game.GameHistory.GetCauseOfDeath(target.PlayerId);
         deathEvent.IfPresent(death => Game.GameHistory.SetCauseOfDeath(target.PlayerId, death));
         KillTarget(actor, target);
+
         ActionHandle ignored = ActionHandle.NoInit();
         if (target.IsAlive()) Game.TriggerForAll(RoleActionType.SuccessfulAngelProtect, ref ignored, target, actor);
         else currentDeathEvent.IfPresent(de => Game.GameHistory.SetCauseOfDeath(target.PlayerId, de));

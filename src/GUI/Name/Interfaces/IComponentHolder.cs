@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using VentLib.Utilities.Collections;
 
 namespace TOHTOR.GUI.Name.Interfaces;

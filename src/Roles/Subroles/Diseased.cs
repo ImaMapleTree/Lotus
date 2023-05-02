@@ -12,11 +12,11 @@ public class Diseased: Subrole
     private void DiseasedDies(PlayerControl killer)
     {
         CustomRole role = killer.GetCustomRole();
-        float killCooldown = role is RoleGroups.Vanilla.Impostor imp ? imp.KillCooldown : AUSettings.KillCooldown();
+        float killCooldown = role.GetOverride(Override.KillCooldown)?.GetValue() as float? ?? AUSettings.KillCooldown();
         role.AddOverride(new GameOptionOverride(Override.KillCooldown, killCooldown * 2));
     }
 
-    public override string? Identifier() => "★";
+    public override string Identifier() => "★";
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(0.42f, 0.4f, 0.16f));

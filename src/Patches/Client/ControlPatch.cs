@@ -4,6 +4,7 @@ using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
 using TOHTOR.Managers.Reporting;
@@ -63,18 +64,15 @@ class ControllerManagerUpdatePatch
 
         if (GetKeysDown(KeyCode.LeftControl, KeyCode.Equals))
         {
-            (int width, int height) = ResolutionUtils.ResolutionsSixteenNine[ResolutionUtils.ResolutionIndex++];
+
+            (int width, int height) = ResolutionUtils.ResolutionsSixteenNine[++ResolutionUtils.ResolutionIndex];
             ResolutionUtils.SetResolution(width, height);
-            if (ResolutionUtils.ResolutionIndex >= ResolutionUtils.Resolutions.Length)
-                ResolutionUtils.ResolutionIndex = ResolutionUtils.Resolutions.Length - 1;
         }
 
         if (GetKeysDown(KeyCode.LeftControl, KeyCode.Minus))
         {
-            (int width, int height) = ResolutionUtils.ResolutionsSixteenNine[ResolutionUtils.ResolutionIndex--];
+            (int width, int height) = ResolutionUtils.ResolutionsSixteenNine[--ResolutionUtils.ResolutionIndex];
             ResolutionUtils.SetResolution(width, height);
-            if (ResolutionUtils.ResolutionIndex < 0)
-                ResolutionUtils.ResolutionIndex = 0;
         }
 
         if (GetKeysDown(KeyCode.LeftShift | KeyCode.RightShift, KeyCode.F12))

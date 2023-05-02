@@ -29,7 +29,7 @@ public class WinDelegate
     {
         if (forcedWin)
         {
-            VentLogger.Info($"Triggering Game Win by Force, winners={winners.Select(p => p.UnalteredName()).Join()}, reason={winReason}", "WinCondition");
+            VentLogger.Info($"Triggering Game Win by Force, winners={winners.Select(p => p.name).Join()}, reason={winReason}", "WinCondition");
             winNotifiers.ForEach(notify => notify(this));
             return true;
         }
@@ -41,7 +41,7 @@ public class WinDelegate
         if (forcedCancel) return false;
 
         winReason = condition.GetWinReason();
-        VentLogger.Info($"Triggering Win by \"{condition.GetType()}\", winners={winners.Select(p => p.UnalteredName()).StrJoin()}, reason={winReason}", "WinCondition");
+        VentLogger.Info($"Triggering Win by \"{condition.GetType()}\", winners={winners.Select(p => p.name).StrJoin()}, reason={winReason}", "WinCondition");
         return true;
     }
 

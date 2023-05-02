@@ -1,7 +1,10 @@
 using System;
 using System.Linq;
 using HarmonyLib;
+using TOHTOR.Roles.Interfaces;
+using TOHTOR.Roles.Legacy;
 using TOHTOR.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches.Systems;
 
@@ -14,8 +17,9 @@ public class RecomputeTaskPatch
         __instance.CompletedTasks = 0;
         __instance.AllPlayers.ToArray()
             .Where(Utils.HasTasks)
+            .Where(p => p.GetCustomRole() is ITaskHolderRole taskHolder && taskHolder.TasksApplyToTotal())
             .SelectMany(p => p?.Tasks?.ToArray() ?? Array.Empty<GameData.TaskInfo>())
-            .Do(task =>
+            .ForEach(task =>
             {
                 __instance.TotalTasks++;
                 if (task.Complete) __instance.CompletedTasks++;

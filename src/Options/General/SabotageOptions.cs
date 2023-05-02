@@ -36,15 +36,17 @@ public class SabotageOptions
     private bool disableSabotages;
     private SabotageType disabledSabotageTypes;
 
+    public List<GameOption> AllOptions = new();
+
     public SabotageOptions()
     {
-        new GameOptionTitleBuilder()
+        AllOptions.Add(new GameOptionTitleBuilder()
             .Title(SabotageOptionTranslations.SabotageOptionTitle)
             .Color(_optionColor)
             .Tab(DefaultTabs.GeneralTab)
-            .Build();
+            .Build());
 
-        var disableSabotages = new GameOptionBuilder()
+        AllOptions.Add(new GameOptionBuilder()
             .IsHeader(true)
             .Name(SabotageOptionTranslations.DisableSabotagesText)
             .Key("Disable Sabotages")
@@ -89,39 +91,43 @@ public class SabotageOptions
                 .BindBool(FlagSetter(SabotageType.Helicopter))
                 .AddOnOffValues(false)
                 .Build())
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var skeldReactorCountdown = Builder("Skeld Reactor Countdown")
+        AllOptions.Add(Builder("Skeld Reactor Countdown")
             .Name(AuMap.Skeld + " " + SabotageOptionTranslations.ReactorCountdown)
             .BindInt(i => SkeldReactorCountdown = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var skeldOxygenCountdown = Builder("Skeld Oxygen Countdown")
+        AllOptions.Add(Builder("Skeld Oxygen Countdown")
             .Name(AuMap.Skeld + " " + SabotageOptionTranslations.OxygenCountdown)
             .BindInt(i => SkeldOxygenCountdown = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var miraReactorCountdown = Builder("Mira Reactor Countdown")
+        AllOptions.Add(Builder("Mira Reactor Countdown")
             .Name(AuMap.Mira + " " + SabotageOptionTranslations.ReactorCountdown)
             .BindInt(i => MiraReactorCountdown = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var miraOxygenCountdown = Builder("Mira Oxygen Countdown")
+        AllOptions.Add(Builder("Mira Oxygen Countdown")
             .Name(AuMap.Mira + " " + SabotageOptionTranslations.OxygenCountdown)
             .BindInt(i => MiraOxygenCountdown = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var polusReactorCountdown = Builder("Polus Reactor Countdown")
+        AllOptions.Add(Builder("Polus Reactor Countdown")
             .Name(AuMap.Polus + " " + SabotageOptionTranslations.ReactorCountdown)
             .BindInt(i => PolusReactorCountdown = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var airshipReactorCountdown = Builder("Airship Reactor Countdown")
+        AllOptions.Add(Builder("Airship Reactor Countdown")
             .Name(AuMap.Airship + " " + SabotageOptionTranslations.ReactorCountdown)
             .BindInt(i => AirshipReactorCountdown = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        additionalOptions.ForEach(o => o.Register());
+        additionalOptions.ForEach(o =>
+        {
+            o.Register();
+            AllOptions.Add(o);
+        });
     }
 
     /// <summary>

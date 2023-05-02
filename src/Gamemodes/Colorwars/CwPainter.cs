@@ -1,5 +1,6 @@
 using System;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Internals.Attributes;

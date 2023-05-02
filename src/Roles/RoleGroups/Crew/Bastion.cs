@@ -19,7 +19,7 @@ public class Bastion: Engineer
     private void EnterVent(Vent vent, PlayerControl player, ActionHandle handle)
     {
         bool isBombed = bombedVents.Remove(vent.Id);
-        VentLogger.Trace($"Bombed Vent Check: (player={player.UnalteredName()}, isBombed={isBombed})", "BastionAbility");
+        VentLogger.Trace($"Bombed Vent Check: (player={player.name}, isBombed={isBombed})", "BastionAbility");
         if (isBombed) MyPlayer.InteractWith(player, CreateInteraction(player));
         else if (player.PlayerId == MyPlayer.PlayerId)
         {
@@ -41,6 +41,7 @@ public class Bastion: Engineer
             .SubOption(sub => sub
                 .Name("Plant Bomb Cooldown")
                 .BindFloat(v => VentCooldown = v)
+                .Value(1f)
                 .AddFloatRange(2, 120, 2.5f, 8, "s")
                 .Build());
 

@@ -1,3 +1,4 @@
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
@@ -37,6 +38,7 @@ public class ReactorSabotage : ISabotage
         }
 
         reactor.Countdown = 10005f;
+        reactor.IsDirty = true;
         Async.Schedule(() => VentLogger.Info($"Reactor Countdown: {reactor.Countdown}"), 1f);
         SabotagePatch.CurrentSabotage = null;
         Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
@@ -45,7 +47,7 @@ public class ReactorSabotage : ISabotage
 
     public Optional<PlayerControl> Caller() => caller;
 
-    public void Sabotage(PlayerControl sabotageCaller)
+    public void CallSabotage(PlayerControl sabotageCaller)
     {
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.SabotageStarted, ref handle, this, sabotageCaller);

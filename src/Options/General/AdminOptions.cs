@@ -22,57 +22,62 @@ public class AdminOptions
     public int AutoStart;
 
     public bool AutoStartEnabled => AutoStart != -1;
+    public List<GameOption> AllOptions = new();
 
     public AdminOptions()
     {
-        new GameOptionTitleBuilder()
+        AllOptions.Add(new GameOptionTitleBuilder()
             .Tab(DefaultTabs.GeneralTab)
             .Title(AdminOptionTranslations.AdminTitle)
             .Color(_optionColor)
             .IsHeader(false)
-            .Build();
+            .Build());
 
-        var hostGameMaster = Builder("HostGM")
+        AllOptions.Add(Builder("HostGM")
             .Name(AdminOptionTranslations.HostGmText)
             .AddOnOffValues()
             .BindBool(b => HostGM = b)
             .IsHeader(true)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
         // TODO: repeat offenders
-        var autoKick = Builder("Chat AutoKick")
+        AllOptions.Add(Builder("Chat AutoKick")
             .Name(AdminOptionTranslations.AutoKickText)
             .AddEnableDisabledValues()
             .BindBool(b => AutoKick = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var autoKickNoFriendcode = Builder("Kick Players Without Friendcode")
+        AllOptions.Add(Builder("Kick Players Without Friendcode")
             .Name(AdminOptionTranslations.AutoKickNoFriendCodeText)
             .AddEnableDisabledValues(false)
             .BindBool(b => KickPlayersWithoutFriendcodes = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var autoKickUnderLevel = Builder("Kick Players Under Level")
+        AllOptions.Add(Builder("Kick Players Under Level")
             .Name(AdminOptionTranslations.AutoKickUnderLevel)
             .Value(v => v.Text(GeneralOptionTranslations.DisabledText).Value(0).Color(Color.red).Build())
             .AddIntRange(1, 100, 1)
             .BindInt(i => KickPlayersUnderLevel = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var autoKickMobile = Builder("Kick Mobile Players")
+        AllOptions.Add(Builder("Kick Mobile Players")
             .Name(AdminOptionTranslations.AutoKickMobile)
             .AddEnableDisabledValues(false)
             .BindBool(b => KickMobilePlayers = b)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        var autoStart = Builder("AutoStart")
+        AllOptions.Add(Builder("AutoStart")
             .Name(AdminOptionTranslations.AutoStartText)
             .Value(v => v.Text(GeneralOptionTranslations.DisabledText).Value(-1).Color(Color.red).Build())
             .AddIntRange(5, 15, suffix: " " + AdminOptionTranslations.AutoStartSuffix)
             .BindInt(i => AutoStart = i)
-            .BuildAndRegister();
+            .BuildAndRegister());
 
-        additionalOptions.ForEach(o => o.Register());
+        additionalOptions.ForEach(o =>
+        {
+            o.Register();
+            AllOptions.Add(o);
+        });
     }
 
     /// <summary>

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.Extensions;
 using TOHTOR.GUI.Name.Interfaces;
@@ -55,7 +56,7 @@ public class NameUpdateProcess
         Il2CppArrayBase<PlayerControl> allPlayers = PlayerControl.AllPlayerControls.ToArray();
         if (allPlayers.Length == 0) return;
 
-        Profiler.Sample sample = Profilers.Global.Sampler.StartQ();
+        Profiler.Sample sample = Profilers.Global.Sampler.Sampled();
         allPlayers.ForEach(p => nameModel.RenderFor(p));
         sample.Stop();
 

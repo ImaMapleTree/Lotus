@@ -1,5 +1,12 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using HarmonyLib;
+using Il2CppSystem.ComponentModel;
+using UnityEngine;
 using VentLib.Logging;
+using VentLib.Utilities.Extensions;
+using Component = UnityEngine.Component;
 
 namespace TOHTOR.Extensions;
 
@@ -9,5 +16,22 @@ public static class DebugExtensions
     {
         LogLevel tempLevel = new("OBJ", 0, color);
         VentLogger.Log(tempLevel,$"{prefixText}{obj}", tag);
+    }
+
+    public static void Debug(this IEnumerable<Component> components)
+    {
+        components.Select(c => (c.TypeName(), c.name)).Join().DebugLog();
+    }
+
+    public static void Debug(this MonoBehaviour monoBehaviour, bool noChildren = false, bool includeInactive = false)
+    {
+        if (noChildren) monoBehaviour.GetComponents<Component>().Debug();
+        else monoBehaviour.GetComponentsInChildren<Component>(includeInactive).Debug();
+    }
+
+    public static void Debug(this GameObject gameObject, bool noChildren = false,  bool includeInactive = false)
+    {
+        if (noChildren) gameObject.GetComponents<Component>().Debug();
+        else gameObject.GetComponentsInChildren<Component>(includeInactive).Debug();
     }
 }

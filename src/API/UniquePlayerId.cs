@@ -29,6 +29,8 @@ public class UniquePlayerId
 
     public static UniquePlayerId From(ClientData clientData) => new(clientData.FriendCode);
 
+    public static UniquePlayerId FromFriendCode(string friendCode) => new(friendCode);
+
     private UniquePlayerId()
     {
     }

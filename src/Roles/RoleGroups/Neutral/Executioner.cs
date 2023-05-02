@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.Factions.Interfaces;
@@ -38,7 +39,7 @@ public class Executioner : CustomRole
             if (!canTargetImpostors && faction is ImpostorFaction) return false;
             return canTargetNeutrals || faction is not Solo;
         }).ToList().GetRandom();
-        VentLogger.Trace($"Executioner ({MyPlayer.UnalteredName()}) Target: {target}");
+        VentLogger.Trace($"Executioner ({MyPlayer.name}) Target: {target}");
 
         target.NameModel().GetComponentHolder<NameHolder>().Add(new ColoredNameComponent(target, RoleColor, GameStates.IgnStates, MyPlayer));
     }

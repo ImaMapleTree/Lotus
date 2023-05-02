@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
@@ -45,7 +46,7 @@ public class PlagueBearer: NeutralKillingBase
         if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         MyPlayer.RpcGuardAndKill(target);
 
-        Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{MyPlayer.UnalteredName()} infected {target.UnalteredName()}."));
+        Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{MyPlayer.name} infected {target.name}."));
 
         infectedPlayers.Add(target.PlayerId);
 

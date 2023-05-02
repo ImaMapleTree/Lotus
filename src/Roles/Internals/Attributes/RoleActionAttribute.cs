@@ -1,10 +1,14 @@
+extern alias JBAnnotations;
 using System;
 using System.Collections.Generic;
+using JBAnnotations::JetBrains.Annotations;
+using TOHTOR.API.Odyssey;
 
 // ReSharper disable InvalidXmlDocComment
 
 namespace TOHTOR.Roles.Internals.Attributes;
 
+[MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)]
 public class RoleActionAttribute: Attribute
 {
@@ -24,7 +28,7 @@ public class RoleActionAttribute: Attribute
     public RoleActionAttribute(RoleActionType actionType, bool triggerAfterDeath = false, bool blockable = true, Priority priority = Priority.NoPriority)
     {
         this.ActionType = actionType;
-        this.WorksAfterDeath = triggerAfterDeath || actionType is RoleActionType.MyDeath;
+        this.WorksAfterDeath = triggerAfterDeath || actionType is RoleActionType.MyDeath or RoleActionType.SelfExiled;
         this.Priority = priority;
         this.Blockable = blockable && actionType is not RoleActionType.MyVote;
     }
@@ -154,7 +158,7 @@ public enum RoleActionType
     /// </summary>
     /// <param name="sender"><see cref="PlayerControl"/> the player who sent the chat message</param>
     /// <param name="message"><see cref="string"/> the message sent</param>
-    /// <param name="state"><see cref="TOHTOR.API.GameState"/> the current state of the game (for checking in meeting)</param>
+    /// <param name="state"><see cref="GameState"/> the current state of the game (for checking in meeting)</param>
     /// <param name="isAlive"><see cref="bool"/> if the chatting player is alive</param>
     Chat,
     /// <summary>

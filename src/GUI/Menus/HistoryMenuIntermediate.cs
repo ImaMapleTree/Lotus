@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.Managers.History.Events;
 using VentLib.Logging;

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
@@ -80,9 +81,9 @@ public class SimpleNameModel : INameModel
         cacheString = renders.Select(s => s.Join(delimiter: " ".Repeat(spacing - 1))).Join(delimiter: "\n").TrimStart('\n').TrimEnd('\n').Replace("\n\n", "\n");
         if (sendToPlayer)
         {
-            /*VentLogger.Fatal($"Sending Name for {player.UnalteredName()}: {cacheString} to: {rPlayer.UnalteredName()}");*/
+            /*VentLogger.Fatal($"Sending Name for {player.name}: {cacheString} to: {rplayer.name}");*/
             if (rPlayer.IsHost()) Api.Local.SetName(player, cacheString);
-            else RpcV2.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(rPlayer.GetClientId());
+            else RpcV3.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(rPlayer.GetClientId());
         }
         Profilers.Global.Sampler.Stop(id);
         return cacheString;

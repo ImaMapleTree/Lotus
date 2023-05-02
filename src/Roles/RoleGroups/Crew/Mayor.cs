@@ -1,11 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
-using TOHTOR.API.Meetings;
+using TOHTOR.API.Odyssey;
+using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Holders;
+using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
@@ -46,6 +48,7 @@ public class Mayor: Crewmate
     [RoleAction(RoleActionType.OnPet)]
     private void MayorPocketMeeting()
     {
+        if (SabotagePatch.CurrentSabotage != null) return;
         if (!hasPocketMeeting || remainingVotes <= 0) return;
         remainingVotes--;
         MyPlayer.CmdReportDeadBody(null);
@@ -60,7 +63,7 @@ public class Mayor: Crewmate
             if (!voted.Map(p => p.PlayerId == MyPlayer.PlayerId).OrElse(false)) return;
             handle.Cancel();
             revealed = true;
-            Utils.SendMessage($"{MyPlayer.UnalteredName()} revealed themself as Mayor!", title: "Mayor Reveal");
+            Utils.SendMessage($"{MyPlayer.name} revealed themself as Mayor!", title: "Mayor Reveal");
             List<PlayerControl> allPlayers = Game.GetAllPlayers().ToList();
             MyPlayer.NameModel().GetComponentHolder<RoleHolder>()[0].SetViewerSupplier(() => allPlayers);
             return;

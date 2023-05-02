@@ -1,4 +1,5 @@
 using HarmonyLib;
+using VentLib.Utilities.Harmony.Attributes;
 
 namespace TOHTOR.GUI.Menus.OptionsMenu.Patches;
 
@@ -11,4 +12,7 @@ public class GameOptionMenuOpenPatch
         customOptionContainer = __instance.gameObject.AddComponent<CustomOptionContainer>();
         customOptionContainer.PassMenu(__instance);
     }
+
+    [QuickPrefix(typeof(OptionsMenuBehaviour), nameof(OptionsMenuBehaviour.ResetText))]
+    public static bool DisableResetTextFunc(OptionsMenuBehaviour __instance) => false;
 }

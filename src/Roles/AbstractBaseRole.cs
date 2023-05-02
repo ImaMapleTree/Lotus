@@ -7,6 +7,7 @@ using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
@@ -29,6 +30,7 @@ using VentLib.Localization;
 using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Options.Game;
+using VentLib.Options.IO;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
@@ -118,23 +120,30 @@ public abstract class AbstractBaseRole
             if (!RoleFlags.HasFlag(RoleFlag.Hidden) && Options.Tab == null)
             {
                 if (this.GetType() == typeof(Impostor)) Options.Tab = DefaultTabs.HiddenTab;
-                if (this.GetType() == typeof(Engineer)) Options.Tab = DefaultTabs.HiddenTab;
-                if (this.GetType() == typeof(Scientist)) Options.Tab = DefaultTabs.HiddenTab;
-                if (this.GetType() == typeof(Crewmate)) Options.Tab = DefaultTabs.HiddenTab;
-
-                if (this is GM) { /*ignored*/ }
-                if (this is Subrole)
-                    Options.Tab = DefaultTabs.MiscTab;
-                else if (this.Faction is ImpostorFaction)
-                    Options.Tab = DefaultTabs.ImpostorsTab;
-                else if (this.Faction is Crewmates)
-                    Options.Tab = DefaultTabs.CrewmateTab;
-                else if (this.Faction is TheUndead)
-                    Options.Tab = DefaultTabs.NeutralTab;
-                else if (this.SpecialType is SpecialType.NeutralKilling or SpecialType.Neutral)
-                    Options.Tab = DefaultTabs.NeutralTab;
+                else if (this.GetType() == typeof(Engineer)) Options.Tab = DefaultTabs.HiddenTab;
+                else if (this.GetType() == typeof(Scientist)) Options.Tab = DefaultTabs.HiddenTab;
+                else if (this.GetType() == typeof(Crewmate)) Options.Tab = DefaultTabs.HiddenTab;
                 else
-                    Options.Tab = DefaultTabs.MiscTab;
+                {
+
+                    if (this is GM)
+                    {
+                        /*ignored*/
+                    }
+
+                    else if (this is Subrole)
+                        Options.Tab = DefaultTabs.MiscTab;
+                    else if (this.Faction is ImpostorFaction)
+                        Options.Tab = DefaultTabs.ImpostorsTab;
+                    else if (this.Faction is Crewmates)
+                        Options.Tab = DefaultTabs.CrewmateTab;
+                    else if (this.Faction is TheUndead)
+                        Options.Tab = DefaultTabs.NeutralTab;
+                    else if (this.SpecialType is SpecialType.NeutralKilling or SpecialType.Neutral)
+                        Options.Tab = DefaultTabs.NeutralTab;
+                    else
+                        Options.Tab = DefaultTabs.MiscTab;
+                }
             }
             Options.Register(CustomRoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
         }
@@ -344,6 +353,7 @@ public abstract class AbstractBaseRole
         if (!RoleFlags.HasFlag(RoleFlag.RemoveRolePercent))
         {
             return new GameOptionBuilder()
+                .IOSettings(io => io.UnknownValueAction = ADEAnswer.UseDefault)
                 .BindInt(val => this.Chance = val)
                 .AddIntRange(0, 100, RoleFlags.HasFlag(RoleFlag.IncrementChanceByFives) ? 5 : 10, 0, "%")
                 .ShowSubOptionPredicate(value => ((int)value) > 0);
@@ -359,6 +369,7 @@ public abstract class AbstractBaseRole
         }
 
         return new GameOptionBuilder()
+                .IOSettings(io => io.UnknownValueAction = ADEAnswer.UseDefault)
                 .Value(v => v.Text(onText).Value(true).Color(Color.cyan).Build())
                 .Value(v => v.Text(offText).Value(false).Color(Color.red).Build())
                 .ShowSubOptionPredicate(b => (bool)b);

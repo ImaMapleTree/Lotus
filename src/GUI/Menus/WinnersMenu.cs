@@ -3,12 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Il2CppSystem.Threading;
 using TMPro;
-using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Stats;
 using TOHTOR.Managers.History;
 using TOHTOR.Roles;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -63,7 +62,7 @@ public class WinnersMenu
     {
         Async.Schedule(() =>
         {
-            List<PlayerHistory>? allPlayers = Game.GameHistory?.PlayerHistory;
+            List<PlayerHistory>? allPlayers = Game.GameHistory.PlayerHistory;
             if (lastPlayers != allPlayers) Async.Schedule(() => GeneratePlayers(allPlayers), 0.1f);
             lastPlayers = allPlayers!;
             GameObject.IfPresent(gameObject => gameObject.SetActive(true));
@@ -81,9 +80,7 @@ public class WinnersMenu
 
     private void GeneratePlayers(List<PlayerHistory>? allPlayers)
     {
-        HashSet<byte> winners = Game.GameHistory?.LastWinners != null
-            ? Game.GameHistory.LastWinners.Select(p => p.MyPlayer.PlayerId).ToHashSet()
-            : new HashSet<byte>();
+        HashSet<byte> winners = Game.GameHistory.LastWinners.Select(p => p.MyPlayer.PlayerId).ToHashSet();
 
         poolablePlayers.ForEach(pw => pw.IfPresent(pp => pp.gameObject.SetActive(false)));
         poolablePlayers.Clear();
@@ -102,8 +99,7 @@ public class WinnersMenu
             PoolablePlayer newPlayer = Object.Instantiate(prefabPlayer, prefabPlayer.transform.parent);
             newPlayer.gameObject.SetActive(true);
             newPlayer.cosmetics.initialized = false;
-            HistoryMenuIntermediate.GetOutfit(playerHistory.PlayerId).IfPresent(outfit =>
-                newPlayer.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.ComplexUI, false, false));
+            newPlayer.UpdateFromPlayerOutfit(playerHistory.Outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
 
             int row = Mathf.FloorToInt(index / 5f);
 
@@ -117,7 +113,7 @@ public class WinnersMenu
                 .Map(stat => $"{stat.Name()}: {stat.GetGenericValue(playerHistory.UniquePlayerId)}")
                 .OrElse("");
 
-            string name = playerHistory.RealName + "\n" + role.RoleColor.Colorize(role.RoleName) + "\n" + bestStat;
+            string name = playerHistory.Name + "\n" + role.RoleColor.Colorize(role.RoleName) + "\n" + bestStat;
             newPlayer.SetName(name);
 
             TextMeshPro aboveNameTmp = Object.Instantiate(newPlayer.cosmetics.nameText, newPlayer.transform);

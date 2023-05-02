@@ -1,4 +1,5 @@
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.GUI.Name;
@@ -29,7 +30,7 @@ public class Mare: Vanilla.Impostor
     protected override void Setup(PlayerControl player)
     {
         activationSabo = abilityLightsOnly ? SabotageType.Lights : activationSabo;
-        coloredName = new NameComponent(new LiveString(MyPlayer.UnalteredName, new Color(0.36f, 0f, 0.58f)), GameState.Roaming, ViewMode.Absolute);
+        coloredName = new NameComponent(new LiveString(MyPlayer.name, new Color(0.36f, 0f, 0.58f)), GameState.Roaming, ViewMode.Absolute);
     }
 
     [RoleAction(RoleActionType.Attack)]
@@ -70,7 +71,7 @@ public class Mare: Vanilla.Impostor
                 .SubOption(sub2 => sub2
                     .Name("Normal Kill Cooldown")
                     .Bind(v => normalKillCooldown = (float)v)
-                    .AddFloatRange(10, 120, 5, 4, "s")
+                    .AddFloatRange(0, 120, 2.5f, 10, "s")
                     .Build())
                 .Build())
             .SubOption(sub => sub

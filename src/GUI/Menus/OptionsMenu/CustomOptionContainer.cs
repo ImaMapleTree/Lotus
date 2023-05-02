@@ -30,8 +30,13 @@ public class CustomOptionContainer: MonoBehaviour
     public PassiveButton ventLibButton;
     public PassiveButton addonsButton;
 
+    public PassiveButton returnButton;
+    public PassiveButton exitButton;
+
     private GeneralMenu generalMenu;
     private GraphicsMenu graphicsMenu;
+    private SoundMenu soundMenu;
+    private VentLibMenu ventLibMenu;
 
     private MonoToggleButton monoToggleButton;
 
@@ -45,57 +50,71 @@ public class CustomOptionContainer: MonoBehaviour
         VentLogger.Fatal("Ctor");
         transform.localPosition += new Vector3(1f, 0f);
         background = gameObject.AddComponent<SpriteRenderer>();
-        background.sprite = Utils.LoadSprite("TOHTOR.assets.Settings.MenuBackground.png", 525);
+        background.sprite = OptionMenuResources.BackgroundSprite;
+
 
         generalMenu = gameObject.AddComponent<GeneralMenu>();
         graphicsMenu = gameObject.AddComponent<GraphicsMenu>();
-
-        gameObject.AddComponent<Components.SimpleDropdownButton>();
+        soundMenu = gameObject.AddComponent<SoundMenu>();
+        ventLibMenu = gameObject.AddComponent<VentLibMenu>();
     }
 
     public void PassMenu(OptionsMenuBehaviour menuBehaviour)
     {
         generalMenu.PassMenu(menuBehaviour);
         graphicsMenu.PassMenu(menuBehaviour);
-
-        menuBehaviour.GetComponentsInChildren<PassiveButton>().Select(c => (c.name, c.TypeName())).Join().DebugLog();
+        soundMenu.PassMenu(menuBehaviour);
+        ventLibMenu.PassMenu(menuBehaviour);
 
         var buttonFunc = CreateButton(menuBehaviour);
-        generalButton = buttonFunc(Utils.LoadSprite("TOHTOR.assets.Settings.GeneralButton.png", ButtonPpu));
+        generalButton = buttonFunc(OptionMenuResources.GeneralButton);
         generalButton.transform.localPosition += new Vector3(2.6f, 0f);
 
-        graphicButton = buttonFunc(Utils.LoadSprite("TOHTOR.assets.Settings.GraphicsButton.png", ButtonPpu));
+        graphicButton = buttonFunc(OptionMenuResources.GraphicsButton);
         graphicButton.transform.localPosition += new Vector3(2.6f, -0.5f);
 
-        soundButton = buttonFunc(Utils.LoadSprite("TOHTOR.assets.Settings.SoundButton.png", ButtonPpu));
+        soundButton = buttonFunc(OptionMenuResources.SoundButton);
         soundButton.transform.localPosition += new Vector3(2.6f, -1f);
 
-        ventLibButton = buttonFunc(Utils.LoadSprite("TOHTOR.assets.Settings.VentButton.png", ButtonPpu));
+        ventLibButton = buttonFunc(OptionMenuResources.VentLibButton);
         ventLibButton.transform.localPosition += new Vector3(2.6f, -1.5f);
 
-        addonsButton = buttonFunc(Utils.LoadSprite("TOHTOR.assets.Settings.AddonButton.png", ButtonPpu));
+        addonsButton = buttonFunc(OptionMenuResources.AddonsButton);
         addonsButton.transform.localPosition += new Vector3(2.6f, -2f);
-        addonsButton.GetComponentsInChildren<Component>().Select(c => (c.name, c.TypeName())).Join().DebugLog();
 
-        //menuBehaviour.GetComponentsInChildren<PassiveButton>().ForEach(b => b.OnClick = new Button.ButtonClickedEvent());
+        returnButton = buttonFunc(OptionMenuResources.ReturnButton);
+        returnButton.transform.localPosition += new Vector3(2.6f, -4f);
+        returnButton.OnClick.AddListener(((Action)((menuBehaviour.Close))));
+
+        exitButton = buttonFunc(OptionMenuResources.ExitButton);
+        exitButton.transform.localPosition += new Vector3(2.6f, -4.5f);
+        menuBehaviour.FindChildOrEmpty<PassiveButton>("LeaveGameButton").Handle(exitPassiveButton =>
+        {
+            exitPassiveButton.gameObject.SetActive(false);
+            exitButton.OnClick.AddListener(((Action)(exitPassiveButton.ReceiveClickDown)));
+        }, () =>
+        {
+            exitButton.gameObject.SetActive(false);
+            returnButton.gameObject.SetActive(false);
+        });
+
         menuBehaviour.FindChild<PassiveButton>("Background").OnClick = new Button.ButtonClickedEvent();
         menuBehaviour.Background.enabled = false;
-        //menuBehaviour.Tabs.ForEach(t => t.gameObject.SetActive(false));
 
-        menuBehaviour.SoundSlider.gameObject.SetActive(false);
-        menuBehaviour.GetComponentsInChildren<TextMeshPro>().Select(c => (c.name)).Join().DebugLog();
-        TextMeshPro[] meshPros = menuBehaviour.GetComponentsInChildren<TextMeshPro>();
-        meshPros[0].gameObject.SetActive(false);
-        meshPros[1].gameObject.SetActive(false);
-
-        menuBehaviour.BackButton.transform.localPosition += new Vector3(-1f, 1f);
+        menuBehaviour.Tabs.ForEach(t => t.gameObject.SetActive(false));
+        menuBehaviour.Tabs[0].Content.SetActive(false);
+        menuBehaviour.Tabs[0].Content.transform.localPosition += new Vector3(0f, 1000f);
+        menuBehaviour.BackButton.transform.localPosition += new Vector3(-1.2f, 0.17f);
         CreateButtonBehaviour();
         generalMenu.Open();
     }
 
     private void CreateButtonBehaviour()
     {
-        boundButtons = new List<(PassiveButton, IBaseOptionMenuComponent)> { (generalButton, generalMenu), (graphicButton, graphicsMenu) };
+        boundButtons = new List<(PassiveButton, IBaseOptionMenuComponent)>
+        {
+            (generalButton, generalMenu), (graphicButton, graphicsMenu), (soundButton, soundMenu), (ventLibButton, ventLibMenu)
+        };
 
         Func<int, UnityAction> actionFunc = i => (Action)(() =>
         {
@@ -108,6 +127,8 @@ public class CustomOptionContainer: MonoBehaviour
 
         generalButton.OnClick.AddListener(actionFunc(0));
         graphicButton.OnClick.AddListener(actionFunc(1));
+        soundButton.OnClick.AddListener(actionFunc(2));
+        ventLibButton.OnClick.AddListener(actionFunc(3));
     }
 
 

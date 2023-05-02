@@ -13,18 +13,18 @@ using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Chat.Commands;
 
-[Command(new [] {"combos", "combo"}, null, CommandUser.Host)]
+[Command(CommandFlag.HostOnly, "combos", "combo")]
 public class PreventCommand
 {
     [Command("list", "l")]
-    public void ListIllegalCombos(PlayerControl source, CommandContext _)
+    public static void ListIllegalCombos(PlayerControl source, CommandContext _)
     {
         string illegalRoleText = IllegalRoleCombos.GetCurrentCombos().Select((li, i) => $"{i}) {GeneralExtensions.Join<string>(li)}").Join(delimiter: "\n");
         Utils.SendMessage("Current Banned Combos:\n" + illegalRoleText, source.PlayerId);
     }
 
     [Command("ban", "add", "b")]
-    public void AddIllegalCombo(PlayerControl source, CommandContext ctx)
+    public static void AddIllegalCombo(PlayerControl source, CommandContext ctx)
     {
         string input = Regex.Replace(ctx.Args.Join(delimiter: " "), "\\s*,\\s*", ",");
         List<string> roleNames = input.Split(",").ToList();
@@ -48,7 +48,7 @@ public class PreventCommand
     }
 
     [Command("allow", "remove", "a")]
-    public void RemoveIllegalCombo(PlayerControl source, CommandContext _, int index)
+    public static void RemoveIllegalCombo(PlayerControl source, CommandContext _, int index)
     {
         List<string> currentCombo = IllegalRoleCombos.GetCurrentCombos()[index];
         IllegalRoleCombos.RemoveIllegalCombo(index);

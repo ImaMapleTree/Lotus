@@ -1,14 +1,13 @@
 using System;
-using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using BepInEx.Unity.IL2CPP.Utils;
 using Hazel;
 using InnerNet;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Chat.Patches;
 using TOHTOR.Extensions;
 using TOHTOR.GUI.Name.Holders;
@@ -16,9 +15,9 @@ using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Extra;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Legacy;
 using UnityEngine;
-using VentLib;
 using VentLib.Localization;
 using VentLib.Logging;
 using VentLib.Utilities;
@@ -34,24 +33,17 @@ public static class Utils
         return GetPlayerById(player.PlayerId)?.GetNameWithRole() ?? "";
     }
 
-    public static string GetRoleName(CustomRole role)
-    {
-        // return GetRoleString(Enum.GetName(typeof(CustomRoles), role));
-        return role.RoleName;
-    }
-
-    public static Color GetRoleColor(CustomRole role)
-    {
-        return role.RoleColor;
-    }
-
     public static Color ConvertHexToColor(string hex)
     {
         ColorUtility.TryParseHtmlString(hex, out Color c);
         return c;
     }
 
-    public static bool HasTasks(GameData.PlayerInfo p) => p.GetCustomRole().HasTasks();
+    public static bool HasTasks(GameData.PlayerInfo p)
+    {
+        if (p.GetCustomRole().RealRole.IsImpostor()) return false;
+        return p.GetCustomRole() is ITaskHolderRole taskHolderRole && taskHolderRole.HasTasks();
+    }
 
     // GM.Ref<GM>()
     public static void ShowActiveSettingsHelp(byte PlayerId = byte.MaxValue)
@@ -212,7 +204,7 @@ public static class Utils
         if (!AmongUsClient.Instance.AmHost) return;
         if (title == "") title = "<color=#aaaaff>" + Localizer.Translate("Announcements.SystemMessage") + "</color>";
         text = text.Replace("\\n", "\n");
-        ChatUpdatePatch.MessagesToSend.Enqueue((text.RemoveHtmlTags(), sendTo, title, leftAlign));
+        ChatUpdatePatch.MessagesToSend.Enqueue((text, sendTo, title, leftAlign && PlayerById(sendTo).Map(p => p.IsHost()).OrElse(false)));
     }
 
     public static PlayerControl? GetPlayerById(int playerId) => PlayerControl.AllPlayerControls.ToArray().FirstOrDefault(pc => pc.PlayerId == playerId);

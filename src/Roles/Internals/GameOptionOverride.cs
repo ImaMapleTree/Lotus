@@ -91,7 +91,7 @@ public class GameOptionOverride
         VentLogger.Trace($"Applying Override: {Option} => {_debugValue}", "Override::ApplyTo");
     }
 
-    private object? GetValue() => _debugValue = supplier == null ? value : supplier.Invoke();
+    public object? GetValue() => _debugValue = supplier == null ? value : supplier.Invoke();
 
     public override bool Equals(object? obj)
     {

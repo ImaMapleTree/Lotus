@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
@@ -73,7 +74,7 @@ public static class RoleUtils
     {
         if (SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Reactor) return;
         byte reactorId = GameOptionsManager.Instance.CurrentGameOptions.MapId == 2 ? (byte)21 : (byte)3;
-        RpcV2.Immediate(ShipStatus.Instance.NetId, RpcCalls.RepairSystem).Write(reactorId)
+        RpcV3.Immediate(ShipStatus.Instance.NetId, RpcCalls.RepairSystem).Write(reactorId)
             .Write(player).Write((byte)128).Send(player.GetClientId());
     }
 
@@ -81,9 +82,9 @@ public static class RoleUtils
     {
         if (SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Reactor) return;
         byte reactorId = GameOptionsManager.Instance.CurrentGameOptions.MapId == 2 ? (byte)21 : (byte)3;
-        RpcV2.Immediate(ShipStatus.Instance.NetId, RpcCalls.RepairSystem).Write(reactorId)
+        RpcV3.Immediate(ShipStatus.Instance.NetId, RpcCalls.RepairSystem).Write(reactorId)
             .Write(player).Write((byte)16).Send(player.GetClientId());
-        RpcV2.Immediate(ShipStatus.Instance.NetId, RpcCalls.RepairSystem).Write(reactorId)
+        RpcV3.Immediate(ShipStatus.Instance.NetId, RpcCalls.RepairSystem).Write(reactorId)
             .Write(player).Write((byte)17).Send(player.GetClientId());
     }
 
@@ -130,8 +131,8 @@ public static class RoleUtils
         PlayerControl? randomPlayer = Game.GetAllPlayers().FirstOrDefault(p => p.PlayerId != target.PlayerId);
         if (randomPlayer == null) return;
 
-        RpcV2.Immediate(target.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).Send(target.GetClientId());
-        Async.Schedule(() => RpcV2.Immediate(randomPlayer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId()), NetUtils.DeriveDelay(0.1f));
+        RpcV3.Immediate(target.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).Send(target.GetClientId());
+        Async.Schedule(() => RpcV3.Immediate(randomPlayer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId()), NetUtils.DeriveDelay(0.1f));
     }
 
 

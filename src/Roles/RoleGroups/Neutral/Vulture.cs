@@ -1,7 +1,9 @@
 using System.Collections.Generic;
 using AmongUs.GameOptions;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
@@ -65,6 +67,7 @@ public class Vulture : CustomRole
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.RoleColor("#a36727")
+            .Faction(FactionInstances.Solo)
         .VanillaRole(canUseVents ? RoleTypes.Engineer : RoleTypes.Crewmate)
         .SpecialType(SpecialType.Neutral)
         .OptionOverride(Override.CrewLightMod,

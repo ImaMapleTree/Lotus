@@ -1,83 +1,81 @@
+using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Roles.Legacy;
 using VentLib.Logging;
+using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using static GameData;
 
 namespace TOHTOR.Managers;
 
 public static class AntiBlackoutLogic
 {
-
-
-    public static void PatchedDataLogic()
+    public static HashSet<byte> PatchedData(byte exiledPlayer)
     {
         VentLogger.Debug("Patching GameData", "AntiBlackout");
-        int aliveCrew = GameStates.CountRealCrew();
-        int aliveImpostors = GameStates.CountRealImpostors();
+        IEnumerable<PlayerControl> players = PlayerControl.AllPlayerControls.ToArray().Sorted(p => p.IsHost());
+        VanillaRoleTracker roleTracker = Game.VanillaRoleTracker;
 
-        if (AntiBlackout.FakeExiled != null)
+        HashSet<byte> unpatchable = new();
+
+        PlayerInfo[] allPlayers = Instance.AllPlayers.ToArray();
+
+        foreach (PlayerControl player in players)
         {
-            if (AntiBlackout.FakeExiled.GetCustomRole().RealRole.IsImpostor()) aliveImpostors--;
-            else aliveCrew--;
-        }
-
-        VentLogger.Debug($"Real Crew: {aliveCrew} | Real Impostors: {aliveImpostors}", "AntiBlackout");
-        //if (aliveCrew > aliveImpostors) AntiBlackoutManager.RestoreIsDead();
-        GameData.PlayerInfo[] allPlayers = GameData.Instance.AllPlayers.ToArray();
-
-        foreach (PlayerControl player in Game.GetAllPlayers().Sorted(p => p.IsHost()))
-        {
-            int localImpostors = aliveImpostors;
-            /*CustomRole playerRole = player.GetCustomRole();
-            if (playerRole.IsDesyncRole() && playerRole.RealRole.IsImpostor())
-                localImpostors = Math.Max(localImpostors, playerRole.Factions.GetAllies().Count);*/
+            if (player.IsHost() || player.IsModded()) continue;
+            VentLogger.Trace($"Patching For: {player.name}", "AntiBlackout");
             ReviveEveryone();
-            VentLogger.Trace($"Patching for {player.UnalteredName()}");
-            foreach (var info in allPlayers.Where(p => AntiBlackout.FakeExiled != p).Sorted(p => p.Object.IsHost()))
-            {
-                if (localImpostors < aliveCrew) continue;
-                if (player.PlayerId == info.PlayerId) continue;
 
-                if (info.Object == null) continue;
-                if (info.Object.GetCustomRole().RealRole.IsCrewmate() || info.Object.Relationship(player) is Relation.FullAllies) continue;
-                if (info.Object.IsHost())
-                {
-                    VentLogger.Trace($"Set {info.Object.UnalteredName()} => isDead = true");
-                    info.Disconnected = true;
-                }
-                else
-                {
-                    VentLogger.Trace($"Set {info.Object.UnalteredName()} => Disconnected = true");
-                    info.Disconnected = true;
-                }
-                VentLogger.Trace($"Local Impostors {localImpostors} => {localImpostors - 1}");
-                localImpostors--;
+            HashSet<byte> impostorIds = roleTracker.GetAllImpostorIds(player.PlayerId).Where(id => exiledPlayer != id && id != 0).ToHashSet();
+            PlayerInfo[] impostorInfo = allPlayers.Where(info => impostorIds.Contains(info.PlayerId)).ToArray();
+            VentLogger.Trace($"Impostors: {impostorInfo.Select(i => i.Object).Where(o => o != null).Select(o => o.name).Fuse()}");
+
+            HashSet<byte> crewIds = roleTracker.GetAllCrewmateIds(player.PlayerId).Where(id => exiledPlayer != id).ToHashSet();
+            PlayerInfo[] crewInfo = allPlayers.Where(info => crewIds.Contains(info.PlayerId)).ToArray();
+            VentLogger.Trace($"Crew: {crewInfo.Select(i => i.Object).Where(o => o != null).Select(o => o.name).Fuse()}");
+
+            int aliveImpostorCount = impostorInfo.Length;
+            int aliveCrewCount = crewInfo.Length;
+
+            if (player.PlayerId == exiledPlayer) { }
+            else if (player.IsAlive() && player.GetVanillaRole().IsImpostor()) aliveImpostorCount++;
+            else if (player.IsAlive()) aliveCrewCount++;
+
+            bool IsFailure()
+            {
+                bool failure = false;
+                if (aliveCrewCount == 0) failure = unpatchable.Add(player.PlayerId);
+                if (aliveImpostorCount == 0) failure |= unpatchable.Add(player.PlayerId);
+                return failure;
             }
-            AntiBlackout.SendGameData(player.GetClientId());
+
+            // Go until failure, or aliveCrew > aliveImpostor
+            int index = 0;
+            while (!IsFailure() && index < impostorInfo.Length)
+            {
+                if (aliveCrewCount > aliveImpostorCount) break;
+                PlayerInfo info = impostorInfo[index++];
+                if (info.Object != null) VentLogger.Trace($"Set {info.Object.name} => Disconnect = true | Impostors: {aliveImpostorCount - 1} | Crew: {aliveCrewCount}");
+                info.Disconnected = true;
+                aliveImpostorCount--;
+            }
+
+            // No matter what, if crew is less than impostor alive, we're unpatchable
+            if (aliveCrewCount <= aliveImpostorCount) unpatchable.Add(player.PlayerId);
+
+            GeneralRPC.SendGameData(player.GetClientId());
         }
+
+        return unpatchable;
     }
 
     private static void ReviveEveryone() {
-        foreach (var info in GameData.Instance.AllPlayers)
+        foreach (var info in Instance.AllPlayers)
         {
             info.IsDead = false;
             info.Disconnected = false;
         }
-    }
-
-    public static bool IsFakeable(GameData.PlayerInfo? checkedPlayer)
-    {
-        if (checkedPlayer == null || checkedPlayer.Object == null) return false;
-        int aliveCrew = GameStates.CountRealCrew();
-        int aliveImpostors = GameStates.CountRealImpostors();
-
-        if (checkedPlayer.Object.GetCustomRole().RealRole.IsImpostor()) aliveImpostors -= 1;
-        else aliveCrew -= 1;
-
-        return aliveCrew > aliveImpostors && aliveImpostors != 0;
     }
 }

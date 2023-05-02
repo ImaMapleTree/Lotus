@@ -1,8 +1,8 @@
 using AmongUs.GameOptions;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
-using TOHTOR.FactionsOLD;
 using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles.Interfaces;
@@ -24,7 +24,7 @@ public class Amnesiac : CustomRole, ISabotagerRole
     [RoleAction(RoleActionType.AnyReportedBody)]
     public void AmnesiacRememberAction(PlayerControl reporter, GameData.PlayerInfo reported, ActionHandle handle)
     {
-        VentLogger.Old($"Reporter: {reporter.UnalteredName()} | Reported: {reported.GetNameWithRole()} | Self: {MyPlayer.UnalteredName()}", "");
+        VentLogger.Old($"Reporter: {reporter.name} | Reported: {reported.GetNameWithRole()} | Self: {MyPlayer.name}", "");
 
         if (reporter.PlayerId != MyPlayer.PlayerId) return;
         CustomRole newRole = reported.GetCustomRole();

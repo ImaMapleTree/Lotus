@@ -38,8 +38,8 @@ public class CTFAssignRoles
             foreach (PlayerControl player in team)
             {
                 if (player.PlayerId == localPlayer.PlayerId) player.SetRole(RoleTypes.Impostor);
-                RpcV2.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).SendInclusive(teamClientIds);
-                RpcV2.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).SendExclusive(teamClientIds);
+                RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).SendInclusive(teamClientIds);
+                RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).SendExclusive(teamClientIds);
                 Game.AssignRole(player, CTFGamemode.Striker);
             }
         }

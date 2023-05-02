@@ -5,6 +5,7 @@ using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Victory.Conditions;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.Neutral;
@@ -17,6 +18,7 @@ public class Jester : CustomRole
     [RoleAction(RoleActionType.SelfExiled)]
     public void JesterWin()
     {
+        VentLogger.Fatal("Forcing Win by Jester");
         ManualWin jesterWin = new(MyPlayer, WinReason.SoloWinner, 999);
         jesterWin.Activate();
     }

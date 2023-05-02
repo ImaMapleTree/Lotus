@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
@@ -28,7 +29,7 @@ public class Hacker: CustomRole
     {
         if (fixer.PlayerId != MyPlayer.PlayerId || !sabotages.Contains(sabotage.SabotageType())) return;
         sabotage.Fix(MyPlayer);
-        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{ModConstants.HColor1.Colorize(MyPlayer.UnalteredName())} fixed {sabotage.SabotageType()}."));
+        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{ModConstants.HColor1.Colorize(MyPlayer.name)} fixed {sabotage.SabotageType()}."));
         sabotageCount++;
         CheckHackerWin();
     }

@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
 using TOHTOR.API;
+using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using VentLib.Options.Game;
+using VentLib.Options.IO;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Impostors;
@@ -46,7 +48,7 @@ public class Manipulator : Impostor
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Kill Cooldown")
-                .AddFloatRange(2f, 120f, 2.5f, 16, "s")
+                .AddFloatRange(0f, 120f, 2.5f, 16, "s")
                 .BindFloat(f => KillCooldown = f)
                 .Build())
             .SubOption(sub => sub.Name("Discussion Time Decrease")
