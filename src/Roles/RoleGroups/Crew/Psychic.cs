@@ -29,7 +29,7 @@ public class Psychic: Crewmate
     private void MarkMeetingPlayers()
     {
         bool IsEvil(PlayerControl player) => nonImpostorAreEvil
-            ? MyPlayer.Relationship(player) is not Relation.None
+            ? MyPlayer.Relationship(player) is Relation.None
             : player.GetCustomRole().Faction is ImpostorFaction;
 
         List<PlayerControl> eligiblePlayers = Game.GetAlivePlayers().Where(IsEvil).ToList();

@@ -23,7 +23,6 @@ public class GeneralOptions
     static GeneralOptions()
     {
         AdminOptions = new AdminOptions();
-        AllOptions.AddRange(AdminOptions.AllOptions);
 
         GameplayOptions = new GameplayOptions();
         AllOptions.AddRange(GameplayOptions.AllOptions);

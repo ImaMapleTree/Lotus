@@ -1,6 +1,7 @@
 using System.Linq;
 using HarmonyLib;
 using TOHTOR.Managers;
+using TOHTOR.Managers.Templates;
 using TOHTOR.Roles;
 using TOHTOR.Utilities;
 using VentLib.Commands;
@@ -15,6 +16,12 @@ namespace TOHTOR.Chat.Commands;
 [Command("h", "help")]
 public class HelpCmd: ICommandReceiver
 {
+    static HelpCmd()
+    {
+        PluginDataManager.TemplateManager.RegisterTag("help-role",
+            "This tag is for the message shown when players use /h r. By default there is no template set for this tag, and the game uses a built-in formatting. But you may utilize this tag if you'd like to customize how this help is shown to the player.");
+    }
+    
     [Command("a", "addons")]
     public static void Addons(PlayerControl source, CommandContext _)
     {
@@ -48,9 +55,15 @@ public class HelpCmd: ICommandReceiver
 
             Language? language = localizer.FindLanguageFromTranslation(roleName, $"Roles.{matchingRole.EnglishRoleName}.RoleName");
 
-            Utils.SendMessage(
-                language == null ? Localizer.Translate($"Roles.{matchingRole.EnglishRoleName}.Description")
-                    : language.Translate($"Roles.{matchingRole.EnglishRoleName}.Description"), source.PlayerId, leftAlign: true);
+
+            string description = language == null
+                ? Localizer.Translate($"Roles.{matchingRole.EnglishRoleName}.Description")
+                : language.Translate($"Roles.{matchingRole.EnglishRoleName}.Description");
+            
+            if (!PluginDataManager.TemplateManager.TryFormat(matchingRole, "help-role", out string formatted))
+                formatted = $"{matchingRole.RoleName} ({matchingRole.Faction.Name()})\n{matchingRole.Blurb}\n{matchingRole.Description}\n\nOptions:\n{OptionUtils.OptionText(matchingRole.Options)}";
+            
+            ChatHandler.Of(formatted).LeftAlign().Send(source);
         }
     }
 

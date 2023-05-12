@@ -7,6 +7,7 @@ using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Utilities;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -102,7 +103,7 @@ public class Ninja : Vanilla.Impostor
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .VanillaRole(activationType is ActivationType.Shapeshift ? RoleTypes.Shapeshifter : RoleTypes.Impostor)
-            .OptionOverride(Override.KillCooldown, KillCooldown * 2, () => Mode is NinjaMode.Hunting);
+            .OptionOverride(new IndirectKillCooldown(KillCooldown, () => Mode is NinjaMode.Hunting));
 
     public enum NinjaMode
     {

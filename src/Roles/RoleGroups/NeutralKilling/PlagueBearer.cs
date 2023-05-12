@@ -3,15 +3,20 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
+using TOHTOR.Factions.Neutrals;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Managers.History.Events;
+using TOHTOR.Options;
+using TOHTOR.Options.Roles;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Options;
@@ -31,6 +36,10 @@ public class PlagueBearer: NeutralKillingBase
     private float customCooldown;
     private int alivePlayers;
 
+    public override bool CanSabotage() => false;
+
+    protected override void PostSetup() => RelatedRoles.Add(typeof(Pestilence));
+
     [UIComponent(UI.Counter)]
     private string InfectionCounter() => RoleUtils.Counter(infectedPlayers.Count, alivePlayers, RoleColor);
 
@@ -46,7 +55,7 @@ public class PlagueBearer: NeutralKillingBase
         if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         MyPlayer.RpcGuardAndKill(target);
 
-        Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{MyPlayer.name} infected {target.name}."));
+        Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{MyPlayer.name} infected {target.name}."));
 
         infectedPlayers.Add(target.PlayerId);
 
@@ -64,14 +73,18 @@ public class PlagueBearer: NeutralKillingBase
     public void CheckPestilenceTransform(ActionHandle? handle = null)
     {
         handle ??= ActionHandle.NoInit();
-        if (handle.ActionType is RoleActionType.RoundStart or RoleActionType.RoundEnd) alivePlayers = Game.GetAlivePlayers().Count() - 1;
-        if (!Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).All(p => infectedPlayers.Contains(p.PlayerId))) return;
+        CustomRole[] aliveRoles = Game.GetAliveRoles()
+            .Where(r => !ReferenceEquals(r, this))
+            .Where(r => Relationship(r) is not Relation.FullAllies)
+            .ToArray();
+        if (handle.ActionType is RoleActionType.RoundStart or RoleActionType.RoundEnd) alivePlayers = aliveRoles.Length;
+        if (aliveRoles.Count(r => infectedPlayers.Contains(r.MyPlayer.PlayerId)) != alivePlayers) return;
 
         indicatorRemotes.ForEach(remote => remote.Delete());
         MyPlayer.NameModel().GetComponentHolder<CounterHolder>().RemoveAt(0);
-        Game.AssignRole(MyPlayer, Static.Pestilence);
+        Api.Roles.AssignRole(MyPlayer, Static.Pestilence);
 
-        Game.GameHistory.AddEvent(new RoleChangeEvent(MyPlayer, Static.Pestilence));
+        Game.MatchData.GameHistory.AddEvent(new RoleChangeEvent(MyPlayer, Static.Pestilence));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -138,9 +151,9 @@ public class PlagueBearer: NeutralKillingBase
         base.Modify(roleModifier)
             .RoleColor(new Color(0.9f, 1f, 0.7f))
             .CanVent(false)
-            .OptionOverride(Override.KillCooldown, () => KillCooldown * 2, () => cooldownSetting == 0)
-            .OptionOverride(Override.KillCooldown, () => KillCooldown, () => cooldownSetting == 1)
-            .OptionOverride(Override.KillCooldown, () => customCooldown * 2, () => cooldownSetting == 2);
+            .OptionOverride(new IndirectKillCooldown(KillCooldown, () => cooldownSetting == 0))
+            .OptionOverride(new IndirectKillCooldown(KillCooldown / 2, () => cooldownSetting == 1))
+            .OptionOverride(new IndirectKillCooldown(customCooldown, () => cooldownSetting == 2));
 
 
     private class InfectEvent : TargetedAbilityEvent

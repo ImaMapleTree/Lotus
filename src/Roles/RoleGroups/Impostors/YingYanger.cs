@@ -13,6 +13,7 @@ using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -99,5 +100,5 @@ public class YingYanger : Vanilla.Impostor
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, YingYangCD * 2, () => InYingMode);
+            .OptionOverride(new IndirectKillCooldown(KillCooldown, () => InYingMode));
 }

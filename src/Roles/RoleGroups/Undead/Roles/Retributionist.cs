@@ -82,21 +82,24 @@ public class Retributionist : NeutralKillingBase
         handle.Cancel();
         attacker = actor;
         remote = attacker.NameModel().GetComponentHolder<NameHolder>().Add(new ColoredNameComponent(attacker, new Color(1f, 0.53f, 0f), GameState.Roaming, MyPlayer));
-        revengeDuration.StartThenRun(CheckRevenge);
-        if (invisibleRevenge) DoInvisibility();
+        revengeDuration.StartThenRun(CheckRevenge); 
+        DoRevengeTeleport();
     }
 
-    private void DoInvisibility()
+    private void DoRevengeTeleport()
     {
         List<Vent> vents = Object.FindObjectsOfType<Vent>().ToList();
         if (vents.Count == 0) return;
         Vent randomVent = vents.GetRandom();
         Vector2 ventPosition = randomVent.transform.position;
         Utils.Teleport(MyPlayer.NetTransform, new Vector2(ventPosition.x, ventPosition.y + 0.3636f));
+        lastVentId = randomVent.Id;
+        
+        if (!invisibleRevenge) return;
+
         // Important: SendOption.None is necessary to prevent kicks via anticheat. In the future if this role is kicking players this is probably why
         Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.EnterVent, SendOption.None).WritePacked(randomVent.Id).SendExcluding(MyPlayer.GetClientId()), NetUtils.DeriveDelay(0.5f));
         Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(randomVent.Id).Send(MyPlayer.GetClientId()), NetUtils.DeriveDelay(1.1f));
-        lastVentId = randomVent.Id;
     }
 
     [RoleAction(RoleActionType.RoundEnd)]
@@ -106,7 +109,6 @@ public class Retributionist : NeutralKillingBase
         remote?.Delete();
         remote = null;
         attacker.InteractWith(MyPlayer, new UnblockedInteraction(new FatalIntent(true), attacker.GetCustomRole()));
-        MyPlayer.MyPhysics.RpcBootFromVent(lastVentId);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -120,7 +122,7 @@ public class Retributionist : NeutralKillingBase
                 .BindBool(b => invisibleRevenge = b)
                 .Build())
             .SubOption(sub => sub.Name("Number of Revenges")
-                .Value(v => v.Text("∞").Value(-1).Build())
+                .Value(v => v.Text("∞").Color(ModConstants.Palette.InfinityColor).Value(-1).Build())
                 .AddIntRange(1, 20, 1, 0)
                 .BindInt(i => retributionLimit = i)
                 .Build());

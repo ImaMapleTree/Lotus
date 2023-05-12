@@ -14,13 +14,21 @@ using TOHTOR.Utilities;
 using VentLib.Localization;
 using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches.Meetings;
 
+[LoadStatic]
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]
 public class MeetingStartPatch
 {
+    static MeetingStartPatch()
+    {
+        PluginDataManager.TemplateManager.RegisterTag("meeting-first", "Tag for the template to be shown during the first meeting.");
+        PluginDataManager.TemplateManager.RegisterTag("meeting-start", "Tag for the template to be shown during each meeting.");
+    }
+
     public static void Prefix(MeetingHud __instance)
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -31,7 +39,7 @@ public class MeetingStartPatch
 
         Game.GetAlivePlayers().Do(p =>
         {
-            if (Game.GameStates.MeetingCalled == 0 && PluginDataManager.TemplateManager.TryFormat(p, "meeting-first", out string msg))
+            if (Game.MatchData.MeetingsCalled == 0 && PluginDataManager.TemplateManager.TryFormat(p, "meeting-first", out string msg))
                 Utils.SendMessage(msg, p.PlayerId);
 
             if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-start", out string message))
@@ -44,7 +52,7 @@ public class MeetingStartPatch
         Game.RenderAllForAll(force: true);
 
         Hooks.MeetingHooks.MeetingCalledHook.Propagate(new MeetingHookEvent(reporter, MeetingPrep.Reported, meetingDelegate));
-        Game.GameStates.MeetingCalled++;
+        Game.MatchData.MeetingsCalled++;
     }
 
     public static void Postfix(MeetingHud __instance)

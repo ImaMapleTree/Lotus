@@ -7,7 +7,6 @@ using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Victory;
 using VentLib.Logging;
 using VentLib.Utilities;
 
@@ -71,14 +70,14 @@ static class ExileControllerWrapUpPatch
         VentLogger.Debug("Start Task Phase", "Phase");
 
         Game.State = GameState.Roaming;
+        Game.RenderAllForAll(force: true);
         //if (GeneralOptions.GameplayOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
         Async.Schedule(() =>
         {
             ActionHandle handle = ActionHandle.NoInit();
             Game.TriggerForAll(RoleActionType.RoundStart, ref handle, false);
-            Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent());
-            Game.RenderAllForAll(force: true);
-        }, 0.5f);
+            Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
+        }, 1f);
 
 
 

@@ -1,8 +1,11 @@
+using TOHTOR.Managers.Hotkeys;
 using UnityEngine;
+using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Utilities;
 
+[LoadStatic]
 public class ResolutionUtils
 {
     public static bool IsFullscreen = Screen.fullScreen;
@@ -27,5 +30,23 @@ public class ResolutionUtils
     }
     private static int _resolutionIndex = -1;
 
+    static ResolutionUtils()
+    {
+        HotkeyManager.Bind(KeyCode.LeftControl, KeyCode.Minus).Do(ShrinkScreen);
+        HotkeyManager.Bind(KeyCode.LeftControl, KeyCode.Equals).Do(GrowScreen);
+    }
+    
     public static void SetResolution(int width, int height, bool fullscreen = false) => ResolutionManager.SetResolution(width, height, fullscreen);
+
+    private static void ShrinkScreen()
+    {
+        (int width, int height) = ResolutionsSixteenNine[--ResolutionIndex];
+        SetResolution(width, height);
+    }
+
+    private static void GrowScreen()
+    {
+        (int width, int height) = ResolutionsSixteenNine[++ResolutionIndex];
+        SetResolution(width, height);
+    }
 }

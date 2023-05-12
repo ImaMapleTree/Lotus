@@ -48,14 +48,9 @@ public class BloodKnight : NeutralKillingBase
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-         base.RegisterOptions(optionStream)
+         AddKillCooldownOptions(base.RegisterOptions(optionStream))
              .Tab(DefaultTabs.NeutralTab)
              .SubOption(opt =>
-                opt.Name("Kill Cooldown")
-                .BindFloat(v => KillCooldown = v)
-                .AddFloatRange(2.5f, 180f, 2.5f, 11, "s")
-                .Build())
-            .SubOption(opt =>
                 opt.Name("Protection Duration")
                 .BindFloat(v => protectionAmt = v)
                 .AddFloatRange(2.5f, 180, 2.5f, 5, "s")

@@ -4,8 +4,11 @@ using System.Linq;
 using HarmonyLib;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Managers.History;
+using TOHTOR.Managers.Hotkeys;
 using TOHTOR.Options;
+using TOHTOR.Utilities;
 using TOHTOR.Victory.Conditions;
+using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
@@ -17,13 +20,26 @@ public class CheckEndGamePatch
 {
     public static bool Deferred;
     private static DateTime slowDown = DateTime.Now;
+    private static FixedUpdateLock _fixedUpdateLock = new FixedUpdateLock(0.1f);
+
+    static CheckEndGamePatch()
+    {
+        HotkeyManager.Bind(KeyCode.LeftShift, KeyCode.L, KeyCode.Return)
+            .If(p => p.HostOnly().State(Game.IgnStates))
+            .Do(() =>
+            {
+                Deferred = false;
+                ManualWin manualWin = new(new List<PlayerControl>(), WinReason.HostForceEnd);
+                manualWin.Activate();
+                GameManager.Instance.LogicFlow.CheckEndCriteria();
+            });
+    }
 
     public static bool Prefix()
     {
-        if (Game.State is GameState.InLobby or GameState.InIntro) return false;
-        if (DateTime.Now.Subtract(slowDown).TotalSeconds < 0.1f) return false;
-        slowDown = DateTime.Now;
         if (!AmongUsClient.Instance.AmHost) return true;
+        if (Game.State is GameState.InLobby or GameState.InIntro) return false;
+        if (!_fixedUpdateLock.AcquireLock()) return false;
         if (Deferred) return false;
 
         uint id = Profilers.Global.Sampler.Start("CheckEndGamePatch");
@@ -54,8 +70,8 @@ public class CheckEndGamePatch
             WinReason.SoloWinner => GameOverReason.ImpostorByKill,
         };
 
-
-        Game.GameHistory.PlayerHistory = Game.GameHistory.FrozenPlayers.Values.Select(p => new PlayerHistory(p)).ToList();
+        
+        Game.MatchData.GameHistory.PlayerHistory = Game.MatchData.FrozenPlayers.Values.Select(p => new PlayerHistory(p)).ToList();
         VictoryScreen.ShowWinners(winDelegate.GetWinners(), reason);
 
         Deferred = true;

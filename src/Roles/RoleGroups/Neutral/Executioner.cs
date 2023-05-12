@@ -4,6 +4,7 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.Factions.Interfaces;
 using TOHTOR.Factions.Neutrals;
@@ -45,7 +46,7 @@ public class Executioner : CustomRole
     }
 
     [RoleAction(RoleActionType.AnyExiled)]
-    private void CheckExecutionerWin(PlayerControl exiled)
+    private void CheckExecutionerWin(GameData.PlayerInfo exiled)
     {
         if (target == null || target.PlayerId != exiled.PlayerId) return;
         List<PlayerControl> winners = new() { MyPlayer };
@@ -61,16 +62,16 @@ public class Executioner : CustomRole
         switch ((ExeRoleChange)roleChangeWhenTargetDies)
         {
             case ExeRoleChange.Jester:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
+                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
                 break;
             case ExeRoleChange.Opportunist:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
+                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
             case ExeRoleChange.SchrodingerCat:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
+                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
                 break;
             case ExeRoleChange.Crewmate:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
+                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
                 break;
             case ExeRoleChange.None:
             default:
@@ -82,7 +83,7 @@ public class Executioner : CustomRole
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-        .Tab(DefaultTabs.NeutralTab)
+            .Tab(DefaultTabs.NeutralTab)
             .SubOption(sub => sub
                 .Name("Can Target Impostors")
                 .Bind(v => canTargetImpostors = (bool)v)
@@ -102,7 +103,7 @@ public class Executioner : CustomRole
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor(new Color(0.55f, 0.17f, 0.33f));
+        roleModifier.RoleColor(new Color(0.55f, 0.17f, 0.33f)).Faction(FactionInstances.Solo).RoleFlags(RoleFlag.CannotWinAlone);
 
     private enum ExeRoleChange
     {

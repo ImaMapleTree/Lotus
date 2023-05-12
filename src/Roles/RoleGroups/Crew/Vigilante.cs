@@ -146,7 +146,7 @@ public class Vigilante: CustomRole
             .Tab(DefaultTabs.CrewmateTab);
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor(Color.cyan);
+        roleModifier.RoleColor(new Color(0.89f, 0.88f, 0.52f));
 
     private enum VotingState
     {

@@ -31,13 +31,13 @@ public class FatalIntent : IFatalIntent
         Optional<IDeathEvent> deathEvent = CauseOfDeath();
         actor.GetCustomRole().SyncOptions();
 
-        Optional<IDeathEvent> currentDeathEvent = Game.GameHistory.GetCauseOfDeath(target.PlayerId);
-        deathEvent.IfPresent(death => Game.GameHistory.SetCauseOfDeath(target.PlayerId, death));
+        Optional<IDeathEvent> currentDeathEvent = Game.MatchData.GameHistory.GetCauseOfDeath(target.PlayerId);
+        deathEvent.IfPresent(death => Game.MatchData.GameHistory.SetCauseOfDeath(target.PlayerId, death));
         KillTarget(actor, target);
 
         ActionHandle ignored = ActionHandle.NoInit();
         if (target.IsAlive()) Game.TriggerForAll(RoleActionType.SuccessfulAngelProtect, ref ignored, target, actor);
-        else currentDeathEvent.IfPresent(de => Game.GameHistory.SetCauseOfDeath(target.PlayerId, de));
+        else currentDeathEvent.IfPresent(de => Game.MatchData.GameHistory.SetCauseOfDeath(target.PlayerId, de));
     }
 
     public void KillTarget(PlayerControl actor, PlayerControl target)

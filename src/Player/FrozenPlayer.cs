@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Roles;
 using TOHTOR.Utilities;
 using VentLib.Utilities.Extensions;
@@ -33,6 +34,7 @@ public class FrozenPlayer
         Role = player.GetCustomRole();
         Subroles = player.GetSubroles();
         GameID = player.GetGameID();
+        
 
         this.NullablePlayer = player;
     }

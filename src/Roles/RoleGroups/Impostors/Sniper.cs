@@ -10,6 +10,7 @@ using TOHTOR.Options;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Logging;

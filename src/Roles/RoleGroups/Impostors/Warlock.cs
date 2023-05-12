@@ -8,6 +8,7 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
 using VentLib.Options.Game;
@@ -80,7 +81,7 @@ public class Warlock : Shapeshifter
         FatalIntent fatalIntent = new(false, () => playerDeathEvent);
 
         bool isDead = player.InteractWith(target, new ManipulatedInteraction(fatalIntent, player.GetCustomRole(), MyPlayer)) is InteractionResult.Proceed;
-        Game.GameHistory.AddEvent(new ManipulatedPlayerKillEvent(player, target, MyPlayer, isDead));
+        Game.MatchData.GameHistory.AddEvent(new ManipulatedPlayerKillEvent(player, target, MyPlayer, isDead));
 
         return isDead;
     }
@@ -98,6 +99,5 @@ public class Warlock : Shapeshifter
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, KillCooldown * 2, () => !Shapeshifted);
+        base.Modify(roleModifier).OptionOverride(new IndirectKillCooldown(KillCooldown, () => !Shapeshifted));
 }

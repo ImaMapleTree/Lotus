@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using TOHTOR.API.Odyssey;
+using TOHTOR.Managers.Hotkeys;
+using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options;
 using VentLib.Options.Interfaces;
@@ -15,19 +18,26 @@ public class OptionShower
 {
     [QuickPostfix(typeof(GameOptionsManager), nameof(GameOptionsManager.SaveNormalHostOptions))]
     public static void VanillaUpdateShower() => GetOptionShower().Update();
-
+    
     private static Optional<OptionShower> Instance = Optional<OptionShower>.Null();
 
+    
     [Localized("ActiveRolesList")]
     private static string ActiveRolesList = "Active Role List";
     [Localized("NextPage")]
     private static string NextPageString = "Press (Tab) To Advance Page";
 
     private List<ShowerPage> pages = new();
-    private List<string> pageContent;
+    private List<string> pageContent = null!;
 
     private int currentPage;
     private bool updated;
+
+    private OptionShower()
+    {
+        HotkeyManager.Bind(KeyCode.Tab, KeyCode.RightControl).If(p => p.State(GameState.InLobby)).Do(Previous);
+        HotkeyManager.Bind(KeyCode.Tab).If(p => p.State(GameState.InLobby)).Do(Next);
+    }
 
     public static OptionShower GetOptionShower()
     {

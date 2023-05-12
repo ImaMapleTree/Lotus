@@ -1,73 +1,169 @@
-using System.Linq;
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.GUI;
+using System.Collections.Generic;
+using TOHTOR.API.Odyssey;
+using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.GUI.Name;
-using TOHTOR.Options;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
+using TOHTOR.GUI.Name.Impl;
+using TOHTOR.Patches.Meetings;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using UnityEngine;
+using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
+using VentLib.Localization.Attributes;
+using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
+using static TOHTOR.Roles.RoleGroups.Neutral.Swapper.SwapperTranslations;
 
 namespace TOHTOR.Roles.RoleGroups.Neutral;
 
-public class Swapper : CustomRole
+[Localized("Roles")]
+public class Swapper : Crewmate
 {
-    private bool canTargetImpostors;
-    private bool canTargetNeutrals;
+    private byte target1 = byte.MaxValue;
+    private byte target2 = byte.MaxValue;
+    private bool skippedAbility;
+    private int swapsPerGame;
+    private int currentSwaps;
 
-    private PlayerControl? target;
-
-    /*[DynElement(UI.Misc)]
-    private string TargetDisplay() => target == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(target.name);
-
-    [RoleAction(RoleActionType.RoundStart)]
-    public void RoundStart()
+    protected override void PostSetup()
     {
-        target = Game.GetAllPlayers().Where(p =>
+        currentSwaps = swapsPerGame;
+        if (swapsPerGame == -1) return;
+        CounterComponent counter = new(new LiveString(() => RoleUtils.Counter(currentSwaps, swapsPerGame)), new[] { GameState.InMeeting }, ViewMode.Additive, MyPlayer);
+        MyPlayer.NameModel().GetComponentHolder<CounterHolder>().Add(counter);
+    }
+
+    [RoleAction(RoleActionType.RoundEnd, triggerAfterDeath: true)]
+    private void SendSwappingMessage()
+    {
+        target1 = byte.MaxValue;
+        target2 = byte.MaxValue;
+        skippedAbility = false;
+        Async.Schedule(() => Utils.SendMessage(SwapperInfoMessage, MyPlayer.PlayerId, RoleColor.Colorize(SwapperAbility), true), 1f);
+    }
+    
+    [RoleAction(RoleActionType.MyVote)]
+    private void SwapperVoteSelection(Optional<PlayerControl> votedPlayer, MeetingDelegate meetingDelegate, ActionHandle handle)
+    {
+        if (currentSwaps == 0) return;
+        // If target2 is selected then we're voting normally
+        if (target2 != byte.MaxValue || skippedAbility) return;
+        // If target 1 is selected then select target 2
+        if (target1 != byte.MaxValue)
         {
-            if (p.PlayerId == MyPlayer.PlayerId) return false;
-            IFaction faction = p.GetCustomRole().Faction;
-            if (!canTargetImpostors && faction is ImpostorFaction) return false;
-            return canTargetNeutrals || faction is not Solo;
-        }).ToList().GetRandom();
+            votedPlayer.Handle(player =>
+            {
+                handle.Cancel();
+                // If the new voted player is target 1 then cancel swapping target 1
+                if (player.PlayerId == target1)
+                {
+                    Utils.SendMessage(SwapperUnselectMessage.Formatted(Utils.GetPlayerById(target1)?.name), MyPlayer.PlayerId, RoleColor.Colorize(SwapperAbility));
+                    target1 = byte.MaxValue;
+                    return;
+                }
+
+                currentSwaps--;
+                target2 = player.PlayerId;
+                Utils.SendMessage(SwapperSelectMessage2.Formatted(Utils.GetPlayerById(target2)?.name, Utils.GetPlayerById(target1)?.name), MyPlayer.PlayerId, RoleColor.Colorize(SwapperAbility));
+            }, () => meetingDelegate.AddVote(MyPlayer, Utils.PlayerById(target1)));
+        }
+        // Target 1 is not selected yet so this is either a complete skip or 
+        else
+        {
+            handle.Cancel();
+            votedPlayer.Handle(player =>
+            {
+                target1 = player.PlayerId;
+                Utils.SendMessage(SwapperSelectMessage1.Formatted(target1 == byte.MaxValue ? "No One" : player.name), MyPlayer.PlayerId, RoleColor.Colorize(SwapperAbility));
+            }, () => skippedAbility = true);
+        }
     }
 
-
-    [RoleAction(RoleActionType.OtherExiled)]
-    private void CheckExecutionerWin(PlayerControl exiled)
+    [RoleAction(RoleActionType.VotingComplete)]
+    private void SwapVotes(MeetingDelegate meetingDelegate)
     {
-        if (target == null || target.PlayerId == exiled.PlayerId) return;
-        // TODO: Add non-instant win
-        //OldRPC.SwapperWin(MyPlayer.PlayerId);
+        if (target1 == byte.MaxValue || target2 == byte.MaxValue) return;
+        VentLogger.Trace($"Swapping Votes for {Utils.GetPlayerById(target1)?.name} <=> {Utils.GetPlayerById(target2)?.name}", "Swapper");
+        Async.Schedule(() => Utils.SendMessage(SwapperPublicMessage.Formatted(Utils.GetPlayerById(target1)?.name, Utils.GetPlayerById(target2)?.name), title: RoleColor.Colorize($"↔ {SwapperAbility} ↔")), 0.1f);
+        
+        List<byte> votesForPlayer1 = new();
+        List<byte> votesForPlayer2 = new();
+        meetingDelegate.CurrentVotes().ForEach(kv =>
+        {
+            // For each vote that player has cast
+            kv.Value.ForEach(b =>
+            {
+                // If that vote exists (not-skip)
+                b.IfPresent(bb =>
+                {
+                    // If the vote is for target1 or target2 add this player to that respective list
+                    if (target1 == bb) votesForPlayer1.Add(kv.Key);
+                    else if (target2 == bb) votesForPlayer2.Add(kv.Key);
+                });
+            });
+        });
+        
+        Optional<byte> player1Optional = Optional<byte>.NonNull(target1);
+        Optional<byte> player2Optional = Optional<byte>.NonNull(target2);
+        
+        votesForPlayer1.ForEach(player =>
+        {
+            meetingDelegate.RemoveVote(player, player1Optional);
+            meetingDelegate.AddVote(player, player2Optional);
+        });
+        
+        votesForPlayer2.ForEach(player =>
+        {
+            meetingDelegate.RemoveVote(player, player2Optional);
+            meetingDelegate.AddVote(player, player1Optional);
+        });
+        
+        (byte exiledPlayer, bool isTie) = CheckForEndVotingPatch.CalculateExiledPlayer(meetingDelegate);
+        meetingDelegate.ExiledPlayer = Utils.GetPlayerById(exiledPlayer)?.Data;
+        meetingDelegate.IsTie = isTie;
     }
 
-    [RoleAction(RoleActionType.AnyDeath)]
-    private void CheckChangeRole(PlayerControl dead)
-    {
-        if (target == null || target.PlayerId != dead.PlayerId) return;
-        target = null;
-        MyPlayer.GetDynamicName().Render();
-    }*/
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-        .Tab(DefaultTabs.NeutralTab)
             .SubOption(sub => sub
-                .Name("Can Target Impostors")
-                .Bind(v => canTargetImpostors = (bool)v)
-                .AddOnOffValues(false).Build())
-            .SubOption(sub => sub
-                .Name("Can Target Neutrals")
-                .Bind(v => canTargetNeutrals = (bool)v)
-                .AddOnOffValues(false).Build());
+                .Name(TranslationUtil.Colorize(SwapsPerGame, RoleColor))
+                .Key("Swaps Per Game")
+                .Description("The number of times the Swapper can swap per game")
+                .Value(v => v.Text("∞").Color(ModConstants.Palette.InfinityColor).Value(-1).Build())
+                .AddIntRange(1, 20, 1)
+                .BindInt(i => swapsPerGame = i)
+                .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor("#66E666").SpecialType(SpecialType.Neutral).Faction(FactionInstances.Solo);
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor("#66E666");
+
+    [Localized("Swapper")]
+    internal static class SwapperTranslations
+    {
+        [Localized(nameof(SwapperInfoMessage))]
+        public static string SwapperInfoMessage =
+            "You are Swapper. To swap two players, vote two separate players.\nYou may change the first swapped person by re-voting them.\nAdditionally, you may bypass this ability completely by initially skipping.";
+
+        [Localized(nameof(SwapperSelectMessage1))]
+        public static string SwapperSelectMessage1 = "You've selected to swap {0}'s votes.";
+    
+        [Localized(nameof(SwapperSelectMessage2))]
+        public static string SwapperSelectMessage2 = "You've selected to swap {0}'s votes. {1} and {0} will now have their votes swapped.";
+    
+        [Localized(nameof(SwapperUnselectMessage))]
+        public static string SwapperUnselectMessage = "You've unselected {0}.";
+
+        [Localized(nameof(SwapperPublicMessage))]
+        public static string SwapperPublicMessage = "Swapper has swapped the votes of {0} and {1}!";
+
+        [Localized(nameof(SwapperAbility))]
+        public static string SwapperAbility = "Swapper Ability";
+
+        [Localized("Options.SwapsPerGame")] 
+        public static string SwapsPerGame = "Swaps::0 Per Game";
+    }
 }

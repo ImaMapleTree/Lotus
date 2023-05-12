@@ -13,7 +13,8 @@ namespace TOHTOR.API.Vanilla.Meetings;
 public class MeetingDelegate
 {
     public static MeetingDelegate Instance = null!;
-    public GameData.PlayerInfo? ExiledPlayer { get; internal set; }
+    public GameData.PlayerInfo? ExiledPlayer { get; set; }
+    public bool IsTie { get; set; }
     internal BlackscreenResolver BlackscreenResolver { get; }
 
 
@@ -30,13 +31,20 @@ public class MeetingDelegate
     public void AddVote(PlayerControl player, Optional<PlayerControl> target)
     {
         VentLogger.Trace($"{player.GetNameWithRole()} casted vote for {target.Map(p => p.GetNameWithRole()).OrElse("No One")}");
-        currentVotes.GetOrCompute(player.PlayerId, () => new List<Optional<byte>>()).Add(target.Map(p => p.PlayerId));
+        AddVote(player.PlayerId, target.Map(p => p.PlayerId));
     }
 
-    public void RemoveVote(PlayerControl player, Optional<PlayerControl> target)
+    public void AddVote(byte playerId, Optional<byte> target)
     {
-        List<Optional<byte>> votes = currentVotes.GetOrCompute(player.PlayerId, () => new List<Optional<byte>>());
-        int index = target.Map(p => p.PlayerId).Transform(
+        currentVotes.GetOrCompute(playerId, () => new List<Optional<byte>>()).Add(target);
+    }
+
+    public void RemoveVote(PlayerControl player, Optional<PlayerControl> target) => RemoveVote(player.PlayerId, target.Map(p => p.PlayerId));
+
+    public void RemoveVote(byte playerId, Optional<byte> target)
+    {
+        List<Optional<byte>> votes = currentVotes.GetOrCompute(playerId, () => new List<Optional<byte>>());
+        int index = target.Transform(
             tId => votes.FindIndex(opt => opt.Map(b => b == tId).OrElse(false)),
             () => votes.Count - 1);
         if (index == -1) return;

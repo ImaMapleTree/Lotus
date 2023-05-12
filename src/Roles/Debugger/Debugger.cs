@@ -6,6 +6,7 @@ using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Managers;
+using TOHTOR.Options;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Utilities;
 using TOHTOR.Victory.Conditions;
@@ -66,6 +67,7 @@ public class Debugger: CustomRole
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
+            .Tab(DefaultTabs.HiddenTab)
             .Name("<b><color=#FF0000>D</color><color=#FFBF00>e</color><color=#7FFF00>b</color><color=#00FF3F>u</color><color=#00FEFF>g</color><color=#003FFF>g</color><color=#7F00FF>e</color><color=#FF00BF>r</color></b>")
             .SubOption(sub => sub
                 .Name("Base Role")

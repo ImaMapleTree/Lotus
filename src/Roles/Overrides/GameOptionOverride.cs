@@ -2,41 +2,39 @@
 using System;
 using AmongUs.GameOptions;
 using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.Options;
 using UnityEngine;
 using VentLib.Logging;
 
-namespace TOHTOR.Roles.Internals;
+namespace TOHTOR.Roles.Overrides;
 
 public class GameOptionOverride
 {
     public readonly Override Option;
+    protected readonly Func<bool>? Condition;
     private readonly object? value;
     private readonly Func<object>? supplier;
-    private readonly Func<bool>? condition;
 
-    private object? _debugValue;
+    protected object? DebugValue;
 
     public GameOptionOverride(Override option, object? value, Func<bool>? condition = null)
     {
         this.Option = option;
         this.value = value;
-        this.condition = condition;
+        this.Condition = condition;
     }
 
     public GameOptionOverride(Override option, Func<object> valueSupplier, Func<bool>? condition = null)
     {
         this.Option = option;
         this.supplier = valueSupplier;
-        this.condition = condition;
+        this.Condition = condition;
     }
 
 
     // TODO figure out applyto
-    public void ApplyTo(IGameOptions options)
+    public virtual void ApplyTo(IGameOptions options)
     {
-        if (condition != null && !condition.Invoke()) return;
+        if (!Condition?.Invoke() ?? false) return;
 
         switch (Option)
         {
@@ -50,7 +48,7 @@ public class GameOptionOverride
                 options.SetInt(Int32OptionNames.VotingTime, (int)(GetValue() ?? AUSettings.VotingTime()));
                 break;
             case Override.PlayerSpeedMod:
-                options.SetFloat(FloatOptionNames.PlayerSpeedMod, (float)(GetValue() ?? AUSettings.PlayerSpeedMod()));
+                options.SetFloat(FloatOptionNames.PlayerSpeedMod, Mathf.Clamp((float)(GetValue() ?? AUSettings.PlayerSpeedMod()), 0 , ModConstants.MaxPlayerSpeed));
                 break;
             case Override.CrewLightMod:
                 options.SetFloat(FloatOptionNames.CrewLightMod, (float)(GetValue() ?? AUSettings.CrewLightMod()));
@@ -88,10 +86,10 @@ public class GameOptionOverride
                 break;
         }
 
-        VentLogger.Trace($"Applying Override: {Option} => {_debugValue}", "Override::ApplyTo");
+        VentLogger.Trace($"Applying Override: {Option} => {DebugValue}", "Override::ApplyTo");
     }
 
-    public object? GetValue() => _debugValue = supplier == null ? value : supplier.Invoke();
+    public virtual object? GetValue() => DebugValue = supplier == null ? value : supplier.Invoke();
 
     public override bool Equals(object? obj)
     {
@@ -108,31 +106,4 @@ public class GameOptionOverride
     {
         return $"GameOptionOverride(override={Option}, value={value})";
     }
-}
-
-public enum Override
-{
-    // Role overrides
-    CanUseVent,
-
-
-    // Game override
-    AnonymousVoting,
-    DiscussionTime,
-    VotingTime,
-    PlayerSpeedMod,
-    CrewLightMod,
-    ImpostorLightMod,
-    KillCooldown,
-    KillDistance,
-
-    // Role specific overrides
-    ShapeshiftDuration,
-    ShapeshiftCooldown,
-
-    GuardianAngelDuration,
-    GuardianAngelCooldown,
-
-    EngVentCooldown,
-    EngVentDuration,
 }

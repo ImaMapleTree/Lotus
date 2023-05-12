@@ -35,6 +35,6 @@ public class IngredientDeath: Ingredient, IWorldIngredient
 
     public override void Collect()
     {
-        if (deadBody != null) Game.GameStates.UnreportableBodies.Add(deadBody.ParentId);
+        if (deadBody != null) Game.MatchData.UnreportableBodies.Add(deadBody.ParentId);
     }
 }

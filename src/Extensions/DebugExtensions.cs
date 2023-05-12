@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Il2CppSystem.ComponentModel;
+using TOHTOR.Logging;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
@@ -20,7 +21,7 @@ public static class DebugExtensions
 
     public static void Debug(this IEnumerable<Component> components)
     {
-        components.Select(c => (c.TypeName(), c.name)).Join().DebugLog();
+        DevLogger.Log(components.Select(c => (c.TypeName(), c.name)).Join());
     }
 
     public static void Debug(this MonoBehaviour monoBehaviour, bool noChildren = false, bool includeInactive = false)

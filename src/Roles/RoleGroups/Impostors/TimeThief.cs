@@ -4,6 +4,7 @@ using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Reflection;
 using BepInEx;
@@ -6,7 +5,6 @@ using HarmonyLib;
 using UnityEngine;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP;
-using Discord;
 using TOHTOR.Addons;
 using TOHTOR.API;
 using TOHTOR.Gamemodes;
@@ -27,10 +25,10 @@ using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Version;
 using VentLib.Version.Git;
+using VentLib.Version.Updater;
 using Version = VentLib.Version.Version;
 
-[assembly: AssemblyFileVersion(TOHTOR.TOHPlugin.PluginVersion)]
-[assembly: AssemblyInformationalVersion(TOHTOR.TOHPlugin.PluginVersion)]
+[assembly: AssemblyVersion("1.0.*")]
 namespace TOHTOR;
 
 [BepInPlugin(PluginGuid, "TOHTOR", PluginVersion)]
@@ -41,14 +39,14 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
     public const string PluginVersion = "1.0.0";
     public readonly GitVersion CurrentVersion = new();
 
-    public static readonly string ModName = "Town Of Host: The Other Roles";
+    public static readonly string ModName = "Project: Lotus";
     public static readonly string ModColor = "#4FF918";
 
     public static readonly bool ShowDiscordButton = true;
     public static readonly string DiscordInviteUrl = "https://discord.gg/tohtor";
 
     public static readonly bool DevVersion = true;
-    public static readonly string DevVersionStr = "dev 1";
+    public static readonly string DevVersionStr = "Alpha 12.05.2023";
 
     public Harmony Harmony { get; } = new(PluginGuid);
     public static string CredentialsText;
@@ -63,11 +61,17 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
         Vents.Initialize();
         VersionControl versionControl = ModVersion.VersionControl = VersionControl.For(this);
         versionControl.AddVersionReceiver(ReceiveVersion);
+        PluginDataManager.TemplateManager.RegisterTag("lobby-join", "Tag for the template shown to players joining the lobby.");
+        
+        
+        
+        
+        
+        ModUpdater.Default();
     }
 
 
     public static NormalGameOptionsV07 NormalOptions => GameOptionsManager.Instance.currentNormalGameOptions;
-    public static Dictionary<byte, Version> PlayerVersion = new();
 
 
     public static float RefixCooldownDelay = 0f;
@@ -121,6 +125,7 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
     public HandshakeResult HandshakeFilter(Version handshake)
     {
         if (handshake is NoVersion) return HandshakeResult.FailDoNothing;
+        if (handshake is AmongUsMenuVersion) return HandshakeResult.Ban;
         if (handshake is not GitVersion git) return HandshakeResult.DisableRPC;
         if (git.MajorVersion != CurrentVersion.MajorVersion && git.MinorVersion != CurrentVersion.MinorVersion) return HandshakeResult.FailDoNothing;
         return HandshakeResult.PassDoNothing;
@@ -128,8 +133,6 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
 
     private static void ReceiveVersion(Version version, PlayerControl player)
     {
-        PlayerVersion[player.PlayerId] = version;
-
         if (version is not NoVersion)
         {
             ModRPC rpc = Vents.FindRPC((uint)ModCalls.SendOptionPreview)!;

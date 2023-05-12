@@ -11,5 +11,5 @@ public abstract class HistoryEvent
 
     public abstract string CreateReport();
 
-    public string RelativeTimestamp() => $"[{(timestamp - Game.StartTime):mm\\:ss\\.ff]}";
+    public string RelativeTimestamp() => $"[{(timestamp - Game.MatchData.StartTime):mm\\:ss\\.ff]}";
 }

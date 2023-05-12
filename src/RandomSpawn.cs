@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.Utilities;
 using UnityEngine;
+using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR;
@@ -109,6 +110,12 @@ public class RandomSpawn
         // ReSharper disable once MergeIntoNegatedPattern
         if (availableLocations == null || availableLocations.Count <= 0) ResetLocations();
         Utils.Teleport(player.NetTransform, usedLocations[availableLocations!.PopRandom()]);
+    }
+
+    public MonoRpc SpawnDeferred(PlayerControl player)
+    {
+        if (availableLocations == null || availableLocations.Count <= 0) ResetLocations();
+        return Utils.TeleportDeferred(player.NetTransform, usedLocations[availableLocations!.PopRandom()]);
     }
 
 }

@@ -2,16 +2,19 @@ using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
+using TOHTOR.API.Vanilla.Sabotages;
 using TOHTOR.Extensions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.GUI.Name.Impl;
+using TOHTOR.Logging;
 using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -41,7 +44,7 @@ public class Escort: Crewmate
 
         blockedPlayers[target.PlayerId] = BlockDelegate.Block(target, MyPlayer, roleblockDuration);
         MyPlayer.RpcGuardAndKill(target);
-        Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{RoleColor.Colorize(MyPlayer.name)} role blocked {target.GetRoleColor().Colorize(target.name)}."));
+        Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{RoleColor.Colorize(MyPlayer.name)} role blocked {target.GetRoleColor().Colorize(target.name)}."));
 
         if (roleblockDuration > 0) Async.Schedule(() => blockedPlayers.Remove(target.PlayerId), roleblockDuration);
     }
@@ -60,6 +63,7 @@ public class Escort: Crewmate
     [RoleAction(RoleActionType.AnyPlayerAction)]
     private void BlockAction(PlayerControl source, ActionHandle handle, RoleAction action)
     {
+        DevLogger.Log($"Action: {action}");
         if (action.Blockable) Block(source, handle);
     }
 
@@ -67,6 +71,26 @@ public class Escort: Crewmate
     private void Block(PlayerControl source, ActionHandle handle)
     {
         BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(source.PlayerId);
+        if (blockDelegate == null) return;
+
+        handle.Cancel();
+        blockDelegate.UpdateDelegate();
+    }
+
+    [RoleAction(RoleActionType.SabotageStarted)]
+    private void BlockSabotage(PlayerControl caller, ActionHandle handle)
+    {
+        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(caller.PlayerId);
+        if (blockDelegate == null) return;
+
+        handle.Cancel();
+        blockDelegate.UpdateDelegate();
+    }
+
+    [RoleAction(RoleActionType.AnyReportedBody)]
+    private void BlockReport(PlayerControl reporter, ActionHandle handle)
+    {
+        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(reporter.PlayerId);
         if (blockDelegate == null) return;
 
         handle.Cancel();
@@ -86,7 +110,8 @@ public class Escort: Crewmate
                 .AddFloatRange(5, 120, 5, suffix: "s")
                 .Build());
 
-
+    protected override RoleModifier Modify(RoleModifier roleModifier) => 
+        base.Modify(roleModifier).RoleColor(new Color(1f, 0.73f, 0.92f));
 
 
     public class BlockDelegate
@@ -94,13 +119,13 @@ public class Escort: Crewmate
         public Remote<IndicatorComponent> BlockedIndicator;
         public Remote<IndicatorComponent>? BlockedCounter;
         public PlayerControl Blocker;
-        public PlayerControl Player;
+        public byte Player;
         public bool HasUsedAction;
         public Cooldown? BlockDuration;
 
         private BlockDelegate(PlayerControl target, PlayerControl blocker, float duration)
         {
-            Player = target;
+            Player = target.PlayerId;
             Blocker = blocker;
 
             IndicatorHolder indicatorHolder = target.NameModel().GetComponentHolder<IndicatorHolder>();
@@ -124,13 +149,15 @@ public class Escort: Crewmate
             HasUsedAction = usedAction;
             if (!HasUsedAction) return;
 
-            TextComponent component = new(new LiveString("BLOCKED!", Color.red), GameState.Roaming, ViewMode.Absolute, Player);
-            Remote<TextComponent> text = Player.NameModel().GetComponentHolder<TextHolder>().Add(component);
+            PlayerControl? thisPlayer = Utils.GetPlayerById(Player);
+            if (thisPlayer == null) return;
+            TextComponent component = new(new LiveString("BLOCKED!", Color.red), GameState.Roaming, ViewMode.Absolute, thisPlayer);
+            Remote<TextComponent> text = thisPlayer.NameModel().GetComponentHolder<TextHolder>().Add(component);
             Async.Schedule(() => text.Delete(), 1f);
 
             if (BlockedCounter != null) return;
             LiveString liveString = new(() => RelRbIndicator(BlockDuration!.TimeRemaining()));
-            BlockedCounter = Player.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: Player));
+            BlockedCounter = thisPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: thisPlayer));
         }
 
         private string RelRbIndicator(float timeRemaining)

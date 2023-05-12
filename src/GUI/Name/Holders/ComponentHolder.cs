@@ -46,7 +46,8 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
         if (player.IsShapeshifted() && this is not NameHolder) return "";
         List<string> endString = new();
         ViewMode lastMode = ViewMode.Absolute;
-        foreach (T component in this.Where(p => p.GameStates().Contains(state)).Where(p => p.Viewers().Any(pp => pp.PlayerId == player.PlayerId)))
+        // TODO: if laggy investigate ways to circumvent ToArray() call here
+        foreach (T component in this.Where(p => p.GameStates().Contains(state)).ToArray().Where(p => p.Viewers().Any(pp => pp.PlayerId == player.PlayerId)))
         {
             ViewMode newMode = component.ViewMode();
             if (newMode is ViewMode.Replace or ViewMode.Absolute || lastMode is ViewMode.Overriden) endString.Clear();

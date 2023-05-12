@@ -18,7 +18,7 @@ public class CwPainter: SerialKillerModifier
     [ModifiedAction(RoleActionType.FixedUpdate)]
     public void FixedUpdate()
     {
-        double timeElapsed = ((DateTime.Now - Game.StartTime).TotalSeconds);
+        double timeElapsed = (DateTime.Now - Game.MatchData.StartTime).TotalSeconds;
         if (timeElapsed < ColorwarsGamemode.GracePeriod) {
             this.DeathTimer.Start();
             return;
@@ -29,7 +29,7 @@ public class CwPainter: SerialKillerModifier
     [ModifiedAction(RoleActionType.Attack)]
     public void ColorwarsKill(PlayerControl target)
     {
-        double timeElapsed = ((DateTime.Now - Game.StartTime).TotalSeconds);
+        double timeElapsed = (DateTime.Now - Game.MatchData.StartTime).TotalSeconds;
         if (timeElapsed < ColorwarsGamemode.GracePeriod) return;
         if (ColorwarsGamemode.ConvertColorMode) SplatoonConvert(target);
         else {

@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 
 namespace TOHTOR.Gamemodes.Standard;
@@ -11,7 +12,7 @@ public interface IAdditionalAssignmentLogic
     /// <b>Important</b>
     /// <br/>
     /// You should have a rough understanding of how role assignment works and roles should <b>ALWAYS</b> call <see cref="TOHTOR.Roles.CustomRole.Instantiate"/>
-    /// Additionally, the standard-algorithm uses <see cref="Game.AssignRole"/> for actually applying the role to players. You should replicate
+    /// Additionally, the standard-algorithm uses <see cref="Api.Roles.AssignRole"/> for actually applying the role to players. You should replicate
     /// this behaviour but DO NOT set sendToClient=true
     /// </summary>
     /// <param name="allPlayers">a list of all the players</param>

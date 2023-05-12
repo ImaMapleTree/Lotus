@@ -4,6 +4,7 @@ using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Components;
@@ -35,10 +36,10 @@ public class Arsonist : NeutralKillingBase
     [NewOnSetup] private Dictionary<byte, int> douseProgress;
 
     [UIComponent(UI.Counter)]
-    private string DouseCounter() => RoleUtils.Counter(dousedPlayers.Count, knownAlivePlayers - 1);
+    private string DouseCounter() => RoleUtils.Counter(dousedPlayers.Count, knownAlivePlayers);
 
     [UIComponent(UI.Text)]
-    private string DisplayWin() => dousedPlayers.Count >= knownAlivePlayers - 1 ? RoleColor.Colorize("Press Ignite to Win") : "";
+    private string DisplayWin() => dousedPlayers.Count >= knownAlivePlayers ? RoleColor.Colorize("Press Ignite to Win") : "";
 
     [RoleAction(RoleActionType.Attack)]
     public new bool TryKill(PlayerControl target)
@@ -54,7 +55,7 @@ public class Arsonist : NeutralKillingBase
 
         dousedPlayers.Add(target.PlayerId);
         MyPlayer.RpcGuardAndKill(target);
-        Game.GameHistory.AddEvent(new PlayerDousedEvent(MyPlayer, target));
+        Game.MatchData.GameHistory.AddEvent(new PlayerDousedEvent(MyPlayer, target));
 
         MyPlayer.NameModel().Render();
 
@@ -76,7 +77,7 @@ public class Arsonist : NeutralKillingBase
     [RoleAction(RoleActionType.OnPet)]
     private void KillDoused() => dousedPlayers.Filter(p => Utils.PlayerById(p)).Where(p => p.IsAlive()).Do(p =>
     {
-        if (dousedPlayers.Count < knownAlivePlayers - 1 && !canIgniteAnyitme) return;
+        if (dousedPlayers.Count < knownAlivePlayers && !canIgniteAnyitme) return;
         FatalIntent intent = new(true, () => new IncineratedDeathEvent(p, MyPlayer));
         IndirectInteraction interaction = new(intent, this);
         MyPlayer.InteractWith(p, interaction);
@@ -85,7 +86,7 @@ public class Arsonist : NeutralKillingBase
     [RoleAction(RoleActionType.RoundStart)]
     private void UpdatePlayerCounts()
     {
-        knownAlivePlayers = Game.GetAlivePlayers().Count();
+        knownAlivePlayers = Game.GetAlivePlayers().Count(p => p.PlayerId != MyPlayer.PlayerId && Relationship(p) is not Relation.FullAllies);
         dousedPlayers.RemoveWhere(p => Utils.PlayerById(p).Transform(pp => !pp.IsAlive(), () => true));
     }
 

@@ -14,15 +14,12 @@ public class GameHistory
 {
     public List<FrozenPlayer> LastWinners { get; internal set; } = new();
     public List<PlayerHistory>? PlayerHistory;
-    public Dictionary<ulong, FrozenPlayer> FrozenPlayers = new();
     public readonly List<IHistoryEvent> Events = new();
 
     private readonly Dictionary<byte, IDeathEvent> causeOfDeath = new();
     private static readonly List<Action<IHistoryEvent>> EventSubscribers = new();
 
     public static void AddEventSubscriber(Action<IHistoryEvent> eventSubscriber) => EventSubscribers.Add(eventSubscriber);
-
-    public DateTime StartTime = DateTime.Now;
 
     public void AddEvent(IHistoryEvent historyEvent)
     {

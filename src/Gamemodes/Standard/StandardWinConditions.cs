@@ -28,22 +28,7 @@ public static class StandardWinConditions
         public WinReason GetWinReason() => WinReason.FactionLastStanding;
     }
 
-    public class SoloKillingWin : IWinCondition
-    {
-        public bool IsConditionMet(out List<PlayerControl> winners)
-        {
-            winners = null;
-            List<PlayerControl> alivePlayers = Game.GetAlivePlayers().ToList();
-            if (alivePlayers.Count > 2 || GameStates.CountAliveImpostors() > 0) return false;
-
-            List<PlayerControl> soloKilling = alivePlayers.Where(p => p.GetCustomRole().Faction is Solo && p.GetVanillaRole().IsImpostor()).ToList();
-            if (soloKilling.Count != 1) return false;
-            winners = new List<PlayerControl> { soloKilling[0] };
-            return true;
-        }
-
-        public WinReason GetWinReason() => WinReason.FactionLastStanding;
-    }
+    
 
     public class LoversWin : IWinCondition
     {

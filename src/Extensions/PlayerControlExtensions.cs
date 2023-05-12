@@ -6,11 +6,13 @@ using Hazel;
 using InnerNet;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
+using TOHTOR.Logging;
 using TOHTOR.Managers;
 using UnityEngine;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.Subroles;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
@@ -26,6 +28,7 @@ public static class PlayerControlExtensions
 
     public static void Trigger(this PlayerControl player, RoleActionType action, ref ActionHandle handle, params object[] parameters)
     {
+        if (player == null) return;
         CustomRole role = player.GetCustomRole();
         List<CustomRole> subroles = player.GetSubroles();
         role.Trigger(action, ref handle, parameters);
@@ -49,7 +52,7 @@ public static class PlayerControlExtensions
             return CustomRoleManager.Static.Crewmate;
         }
 
-        CustomRole? role = CustomRoleManager.PlayersCustomRolesRedux.GetValueOrDefault(player.PlayerId);
+        CustomRole? role = Game.MatchData.Roles.MainRoles.GetValueOrDefault(player.PlayerId);
         return role ?? (player.Data.Role == null ? CustomRoleManager.Default
             : player.Data.Role.Role switch
             {
@@ -65,7 +68,7 @@ public static class PlayerControlExtensions
 
     public static CustomRole? GetSubrole(this PlayerControl player)
     {
-        List<CustomRole>? role = CustomRoleManager.PlayerSubroles.GetValueOrDefault(player.PlayerId);
+        List<CustomRole>? role = Game.MatchData.Roles.SubRoles.GetValueOrDefault(player.PlayerId);
         if (role == null || role.Count == 0) return null;
         return role[0] as Subrole;
     }
@@ -77,7 +80,7 @@ public static class PlayerControlExtensions
 
     public static List<CustomRole> GetSubroles(this PlayerControl player)
     {
-        return CustomRoleManager.PlayerSubroles.GetValueOrDefault(player.PlayerId, new List<CustomRole>());
+        return Game.MatchData.Roles.SubRoles.GetValueOrDefault(player.PlayerId, new List<CustomRole>());
     }
 
     public static void RpcSetRoleDesync(this PlayerControl player, RoleTypes role, int clientId)
@@ -122,9 +125,11 @@ public static class PlayerControlExtensions
             player.GetCustomRole().SyncOptions();
         }
     }
+
+
     public static void RpcSpecificMurderPlayer(this PlayerControl killer, PlayerControl? target = null)
     {
-        if (ReferenceEquals(target, null)) target = killer;
+        if (target == null) target = killer;
         if (killer.AmOwner)
             killer.MurderPlayer(target);
         else
@@ -249,7 +254,7 @@ public static class PlayerControlExtensions
 
     public static RoleTypes GetVanillaRole(this PlayerControl player) => player.GetTeamInfo().MyRole;
 
-    public static VanillaRoleTracker.TeamInfo GetTeamInfo(this PlayerControl player) => Game.VanillaRoleTracker.GetInfo(player.PlayerId);
+    public static VanillaRoleTracker.TeamInfo GetTeamInfo(this PlayerControl player) => Game.MatchData.VanillaRoleTracker.GetInfo(player.PlayerId);
 
     public static bool IsAlive(this PlayerControl target) => target != null && !target.Data.IsDead && !target.Data.Disconnected;
 }

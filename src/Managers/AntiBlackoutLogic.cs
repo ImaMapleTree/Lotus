@@ -16,7 +16,7 @@ public static class AntiBlackoutLogic
     {
         VentLogger.Debug("Patching GameData", "AntiBlackout");
         IEnumerable<PlayerControl> players = PlayerControl.AllPlayerControls.ToArray().Sorted(p => p.IsHost());
-        VanillaRoleTracker roleTracker = Game.VanillaRoleTracker;
+        VanillaRoleTracker roleTracker = Game.MatchData.VanillaRoleTracker;
 
         HashSet<byte> unpatchable = new();
 
@@ -42,6 +42,7 @@ public static class AntiBlackoutLogic
             if (player.PlayerId == exiledPlayer) { }
             else if (player.IsAlive() && player.GetVanillaRole().IsImpostor()) aliveImpostorCount++;
             else if (player.IsAlive()) aliveCrewCount++;
+            if (PlayerControl.LocalPlayer.GetVanillaRole().IsImpostor() && PlayerControl.LocalPlayer.PlayerId != exiledPlayer) aliveImpostorCount++;
 
             bool IsFailure()
             {
@@ -50,6 +51,7 @@ public static class AntiBlackoutLogic
                 if (aliveImpostorCount == 0) failure |= unpatchable.Add(player.PlayerId);
                 return failure;
             }
+            
 
             // Go until failure, or aliveCrew > aliveImpostor
             int index = 0;
@@ -64,6 +66,7 @@ public static class AntiBlackoutLogic
 
             // No matter what, if crew is less than impostor alive, we're unpatchable
             if (aliveCrewCount <= aliveImpostorCount) unpatchable.Add(player.PlayerId);
+            
 
             GeneralRPC.SendGameData(player.GetClientId());
         }

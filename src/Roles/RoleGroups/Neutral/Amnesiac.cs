@@ -39,7 +39,7 @@ public class Amnesiac : CustomRole, ISabotagerRole
                 newRole = Ref<Traitor>();
         }
 
-        Game.AssignRole(MyPlayer, newRole);
+        Api.Roles.AssignRole(MyPlayer, newRole);
 
         CustomRole role = MyPlayer.GetCustomRole();
         role.DesyncRole = RoleTypes.Impostor;

@@ -4,6 +4,7 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.GUI.Name.Impl;
+using TOHTOR.Logging;
 using TOHTOR.Roles;
 
 namespace TOHTOR.GUI.Name.Components;

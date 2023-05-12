@@ -22,10 +22,13 @@ public class ReportDeadBodyPatch
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.ReportBody) && target != null) return false;
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.CallMeeting) && target == null) return false;
         if (!AmongUsClient.Instance.AmHost) return true;
-        if (target == null) return true;
-        if (Game.GameStates.UnreportableBodies.Contains(target.PlayerId)) return false;
-
+        
         ActionHandle handle = ActionHandle.NoInit();
+        Game.TriggerForAll(RoleActionType.MeetingCalled, ref handle, __instance);
+
+        if (handle.IsCanceled || target == null) return true;
+        if (Game.MatchData.UnreportableBodies.Contains(target.PlayerId)) return false;
+
         __instance.Trigger(RoleActionType.SelfReportBody, ref handle, target);
         if (handle.IsCanceled) return false;
         Game.TriggerForAll(RoleActionType.AnyReportedBody, ref handle, __instance, target);

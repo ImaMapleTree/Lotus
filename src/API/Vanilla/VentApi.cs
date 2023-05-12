@@ -3,6 +3,7 @@ using System.Linq;
 using Hazel;
 using TOHTOR.Utilities;
 using UnityEngine;
+using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -20,12 +21,13 @@ public class VentApi
             if (vents.Count == 0) return;
             ventId = vents.Sorted(v => Vector2.Distance(originalPos, v.transform.position)).First().Id;
         }
-
-        MessageWriter messageWriter = AmongUsClient.Instance.StartRpc(player.MyPhysics.NetId, (byte)RpcCalls.EnterVent, SendOption.None);
-        messageWriter.WritePacked(ventId);
-        messageWriter.EndMessage();
-
-        Async.Schedule(() => player.MyPhysics.RpcBootFromVent(ventId), NetUtils.DeriveDelay(0.05f));
-        Async.Schedule(() => Utils.Teleport(player.NetTransform, originalPos), 0.5f);
+        
+        
+        RpcV3.Mass()
+            .Start(player.MyPhysics.NetId, RpcCalls.EnterVent).WritePacked(ventId).End()
+            .Start(player.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(ventId).End()
+            .Send();
+        
+        Async.Schedule(() => Utils.Teleport(player.NetTransform, originalPos), 0.3f);
     }
 }

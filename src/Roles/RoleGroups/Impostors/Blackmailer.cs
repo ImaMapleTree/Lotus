@@ -54,7 +54,7 @@ public class Blackmailer: Shapeshifter
         blackmailingText = target.NameModel().GetComponentHolder<TextHolder>().Add(textComponent);
     }
 
-    [RoleAction(RoleActionType.RoundStart)]
+    [RoleAction(RoleActionType.RoundStart, triggerAfterDeath: true)]
     public void ClearBlackmail()
     {
         blackmailedPlayer = Optional<PlayerControl>.Null();
@@ -68,11 +68,11 @@ public class Blackmailer: Shapeshifter
         List<PlayerControl> allPlayers = showBlackmailedToAll
             ? Game.GetAllPlayers().ToList()
             : blackmailedPlayer.Transform(p => new List<PlayerControl> { p, MyPlayer }, () => new List<PlayerControl> { MyPlayer });
-        blackmailingText?.Get()?.SetViewerSupplier(() => allPlayers);
+        if (!blackmailingText?.IsDeleted() ?? false) blackmailingText?.Get().SetViewerSupplier(() => allPlayers);
         blackmailedPlayer.IfPresent(p =>
         {
             string message = $"{RoleColor.Colorize(MyPlayer.name)} blackmailed {p.GetRoleColor().Colorize(p.name)}.";
-            Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, p, message));
+            Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, p, message));
             Utils.SendMessage(_blackmailedMessage, p.PlayerId);
         });
     }
@@ -98,6 +98,8 @@ public class Blackmailer: Shapeshifter
         VentLogger.Trace($"Blackmailer Killing Player: {speaker.name}");
         MyPlayer.InteractWith(speaker, new UnblockedInteraction(new FatalIntent(), this));
     }
+
+    public override void HandleDisconnect() => ClearBlackmail();
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)

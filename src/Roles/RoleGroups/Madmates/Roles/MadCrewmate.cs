@@ -4,6 +4,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;

@@ -28,13 +28,13 @@ internal static class OnChatPatch
         VentLogger.Log(LogLevel.All, $"{sourcePlayer.name} => {chatText}");
         if (UtilsSentList.Contains(sourcePlayer.PlayerId))
         {
-            VentLogger.Trace($"Filtered Util Message Sent By: {sourcePlayer.name}");
             UtilsSentList.RemoveAt(UtilsSentList.FindIndex(b => b == sourcePlayer.PlayerId));
             return;
         }
         Hooks.PlayerHooks.PlayerMessageHook.Propagate(new PlayerMessageHookEvent(sourcePlayer, chatText));
         if (!UseWordList() || !PluginDataManager.ChatManager.HasBannedWord(chatText) || sourcePlayer.IsHost())
         {
+            if (PluginDataManager.TemplateCommandManager.CheckAndRunCommand(sourcePlayer, chatText)) return;
             if (Game.State is GameState.InLobby) return;
             ActionHandle handle = ActionHandle.NoInit();
             Game.TriggerForAll(RoleActionType.Chat, ref handle, sourcePlayer, chatText, Game.State, sourcePlayer.IsAlive());

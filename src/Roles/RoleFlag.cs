@@ -11,6 +11,7 @@ public enum RoleFlag
     IncrementChanceByFives = 8,
     RemoveRolePercent = 16,
     RemoveRoleMaximum = 32,
+    CannotWinAlone = 64,
 
     VariationRole = Hidden | Unassignable | IncrementChanceByFives | RemoveRoleMaximum | DontRegisterOptions,
     TransformationRole = Hidden | Unassignable | RemoveRolePercent | RemoveRoleMaximum | DontRegisterOptions,

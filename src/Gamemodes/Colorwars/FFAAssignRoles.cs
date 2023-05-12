@@ -22,7 +22,7 @@ public static class FFAAssignRoles
         {
             RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).Send(player.GetClientId());
             RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).SendExcluding(player.GetClientId());
-            Game.AssignRole(player, CustomRoleManager.Static.SerialKiller);
+            Api.Roles.AssignRole(player, CustomRoleManager.Static.SerialKiller);
         }
 
         players.Where(p => p.PlayerId != localPlayer.PlayerId).Do(p => p.SetRole(RoleTypes.Crewmate));

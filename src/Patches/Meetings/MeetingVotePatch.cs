@@ -18,6 +18,7 @@ public class MeetingVotePatch
 {
     public static void Prefix(MeetingHud __instance, byte srcPlayerId, byte suspectPlayerId)
     {
+        if (!AmongUsClient.Instance.AmHost) return;
         PlayerControl voter = Utils.GetPlayerById(srcPlayerId)!;
         Optional<PlayerControl> voted = Utils.PlayerById(suspectPlayerId);
         VentLogger.Trace($"{voter.GetNameWithRole()} voted for {voted.Map(v => v.name)}");

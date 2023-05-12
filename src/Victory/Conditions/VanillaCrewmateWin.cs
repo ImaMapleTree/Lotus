@@ -25,20 +25,28 @@ public class VanillaCrewmateWin: IFactionWinCondition
         winReason = WinReason.TasksComplete;
 
 
-        bool hasAliveImpostor = false;
+        bool hasAliveEnemy = false;
         bool hasOneTaskDoer = false;
         foreach (CustomRole role in Game.GetAllPlayers().Select(p => p.GetCustomRole()))
         {
             if (role is ITaskHolderRole taskHolder && taskHolder.TasksApplyToTotal() && taskHolder.HasTasks()) hasOneTaskDoer = true;
-
-            if (role.MyPlayer.IsAlive() && role.Faction is not Crewmates && Game.VanillaRoleTracker.GetInfo(role.MyPlayer.PlayerId).MyRole.IsImpostor()) hasAliveImpostor = true;
-            if (hasOneTaskDoer && hasAliveImpostor) break;
+            if (IsEligibleEnemy(role)) hasAliveEnemy = true;
+            if (hasOneTaskDoer && hasAliveEnemy) break;
         }
 
-        if (hasAliveImpostor && hasOneTaskDoer) return CheckTaskCompletion();
+        if (hasAliveEnemy && hasOneTaskDoer) return CheckTaskCompletion();
 
         winReason = WinReason.FactionLastStanding;
-        return !hasAliveImpostor;
+        return !hasAliveEnemy;
+    }
+
+    // Determines if the given role is an "enemy role"
+    private static bool IsEligibleEnemy(AbstractBaseRole role)
+    {
+        PlayerControl player = role.MyPlayer;
+        if (!player.IsAlive()) return false;
+        if (role.Faction is Crewmates) return false;
+        return player.GetVanillaRole().IsImpostor() && !role.RoleFlags.HasFlag(RoleFlag.CannotWinAlone);
     }
 
     private static bool CheckTaskCompletion()

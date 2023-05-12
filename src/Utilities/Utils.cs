@@ -20,6 +20,8 @@ using TOHTOR.Roles.Legacy;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
+using VentLib.Networking.RPC;
+using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -138,14 +140,14 @@ public static class Utils
         SendMessage(text, PlayerId);
     }*/
 
-    public static void Teleport(CustomNetworkTransform nt, Vector2 location)
+    public static void Teleport(CustomNetworkTransform nt, Vector2 location) => TeleportDeferred(nt, location).Send();
+
+    public static MonoRpc TeleportDeferred(PlayerControl player, Vector2 location) => TeleportDeferred(player.NetTransform, location);
+
+    public static MonoRpc TeleportDeferred(CustomNetworkTransform transform, Vector2 location)
     {
-        if (AmongUsClient.Instance.AmHost) nt.SnapTo(location);
-        MessageWriter writer =
-            AmongUsClient.Instance.StartRpcImmediately(nt.NetId, (byte)RpcCalls.SnapTo, SendOption.None);
-        NetHelpers.WriteVector2(location, writer);
-        writer.Write(nt.lastSequenceId);
-        AmongUsClient.Instance.FinishRpcImmediately(writer);
+        if (AmongUsClient.Instance.AmHost) transform.SnapTo(location);
+        return RpcV3.Immediate(transform.NetId, RpcCalls.SnapTo, SendOption.None).Write(location).Write(transform.lastSequenceId);
     }
 
     /*public static void ShowLastResult(byte PlayerId = byte.MaxValue)
@@ -213,8 +215,7 @@ public static class Utils
 
     public static Optional<PlayerControl> PlayerByClientId(int clientId)
     {
-        Optional<ClientData> client = AmongUsClient.Instance.allClients.ToArray().FirstOrOptional(c => c.Id == clientId);
-        return client.FlatMap(cl => UnityOptional<PlayerControl>.Of(cl.Character));
+        return PlayerControl.AllPlayerControls.ToArray().FirstOrOptional(c => c.GetClientId() == clientId);
     }
 
     public static string GetVoteName(byte num)

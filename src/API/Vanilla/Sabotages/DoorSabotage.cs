@@ -28,7 +28,7 @@ public class DoorSabotage : ISabotage
     public bool Fix(PlayerControl? fixer = null)
     {
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? Optional<PlayerControl>.Null() : Optional<PlayerControl>.Of(fixer));
+        Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? PlayerControl.LocalPlayer : fixer);
         if (handle.IsCanceled) return false;
 
         Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
@@ -48,7 +48,7 @@ public class DoorSabotage : ISabotage
         if (sendAction)
         {
             ActionHandle handle = ActionHandle.NoInit();
-            Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? Optional<PlayerControl>.Null() : Optional<PlayerControl>.Of(fixer));
+            Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? PlayerControl.LocalPlayer : fixer);
             Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
             if (handle.IsCanceled) return false;
         }

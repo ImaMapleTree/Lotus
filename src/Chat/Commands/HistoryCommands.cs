@@ -14,7 +14,7 @@ public class HistoryCommands : ICommandReceiver
 {
     public void Receive(PlayerControl source, CommandContext context)
     {
-        if (Game.GameHistory == null!) return;
-        Utils.SendMessage(Game.GameHistory.Events.Where(e => e.IsCompletion()).Select(e => e.GenerateMessage()).Join(delimiter: "\n"), source.PlayerId);
+        if (Game.MatchData.GameHistory == null!) return;
+        Utils.SendMessage(Game.MatchData.GameHistory.Events.Where(e => e.IsCompletion()).Select(e => e.GenerateMessage()).Join(delimiter: "\n"), source.PlayerId);
     }
 }

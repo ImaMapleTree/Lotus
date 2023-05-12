@@ -1,6 +1,6 @@
 using AmongUs.GameOptions;
-using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 
 namespace TOHTOR.Roles.RoleGroups.Vanilla;

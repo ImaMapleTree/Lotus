@@ -61,12 +61,13 @@ public class Veteran : Crewmate
             case Transporter.TransportInteraction when !canKillWhileTransported:
             case IRangedInteraction when !canKillRangedAttackers:
             case IDelayedInteraction:
+            case IndirectInteraction:
                 return;
         }
 
         if (actor.GetCustomRole().Faction.Relationship(this.Faction) is Relation.FullAllies && !canKillCrewmates) return;
         handle.Cancel();
-        Game.GameHistory.AddEvent(new VettedEvent(MyPlayer, actor));
+        Game.MatchData.GameHistory.AddEvent(new VettedEvent(MyPlayer, actor));
         MyPlayer.InteractWith(actor, new DirectInteraction(new FatalIntent(interaction is not DirectInteraction), this));
     }
 
@@ -93,7 +94,7 @@ public class Veteran : Crewmate
                 .AddOnOffValues().Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier
+        base.Modify(roleModifier)
             .VanillaRole(RoleTypes.Crewmate)
             .RoleColor(new Color(0.6f, 0.5f, 0.25f));
 

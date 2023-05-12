@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using TOHTOR.Managers.Friends;
 using TOHTOR.Managers.Templates;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
@@ -10,15 +11,23 @@ namespace TOHTOR.Managers;
 [LoadStatic]
 public static class PluginDataManager
 {
-    public const string ModifiableDataDirectoryPath = "./TOHTOR_DATA";
-    public static string HiddenDataDirectoryPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "/TownOfHostTheOtherRoles");
-    public const string TemplateFile = "Templates.json";
-    public const string WordListFile = "BannedWords.txt";
+    private const string ModifiableDataDirectoryPath = "./TOHTOR_DATA";
+    private static readonly string HiddenDataDirectoryPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "/TownOfHostTheOtherRoles");
+    
+    private const string TemplateFile = "Templates.txt";
+    private const string WordListFile = "BannedWords.txt";
+    private const string FriendListFile = "Friends.txt";
+    private const string LastKnownAsFile = "LastKnownAs.json";
+    private const string TemplateCommandFile = "TemplateCommands.txt";
 
     public static readonly DirectoryInfo ModifiableDataDirectory;
     public static readonly DirectoryInfo HiddenDataDirectory;
+
+    public static TemplateCommandManager TemplateCommandManager;
     public static TemplateManager TemplateManager;
     public static ChatManager ChatManager;
+    public static LastKnownAs LastKnownAs;
+    public static FriendManager FriendManager;
 
     static PluginDataManager()
     {
@@ -26,7 +35,13 @@ public static class PluginDataManager
         HiddenDataDirectory = new DirectoryInfo(HiddenDataDirectoryPath);
         if (!ModifiableDataDirectory.Exists) ModifiableDataDirectory.Create();
         if (!HiddenDataDirectory.Exists) HiddenDataDirectory.Create();
+        
+        
         TemplateManager = new TemplateManager(ModifiableDataDirectory.GetFile(TemplateFile));
         ChatManager = new ChatManager(ModifiableDataDirectory.GetFile(WordListFile));
+        FriendManager = new FriendManager(ModifiableDataDirectory.GetFile(FriendListFile));
+        TemplateCommandManager = new TemplateCommandManager(ModifiableDataDirectory.GetFile(TemplateCommandFile));
+
+        LastKnownAs = new LastKnownAs(HiddenDataDirectory.GetFile(LastKnownAsFile));
     }
 }

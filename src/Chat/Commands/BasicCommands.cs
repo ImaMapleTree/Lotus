@@ -5,6 +5,7 @@ using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions.Neutrals;
 using TOHTOR.Managers;
+using TOHTOR.Managers.Friends;
 using TOHTOR.Options;
 using TOHTOR.Roles;
 using TOHTOR.Roles.Internals;
@@ -26,6 +27,7 @@ public class BasicCommands: CommandTranslations
     [Localized("Color.NotInRange")] public static string ColorNotInRangeMessage = "{0} is not in range of valid colors.";
     [Localized(nameof(Winners))] public static string Winners = "Winners";
     [Localized("Dump.Success")] public static string DumpSuccess = "Successfully dumped log to: {0}";
+    [Localized("Ids.PlayerIdMessage")] public static string PlayerIdMessage = "{0}'s player ID is {1}";
 
     [Command("perc", "percentage", "percentages")]
     public static void Percentage(PlayerControl source)
@@ -74,50 +76,51 @@ public class BasicCommands: CommandTranslations
     public static void Name(PlayerControl source, string name)
     {
         int allowedUsers = GeneralOptions.MiscellaneousOptions.ChangeNameUsers;
-        bool permitted = (allowedUsers) switch
+        bool permitted = allowedUsers switch
         {
             0 => source.IsHost(),
-            1 => source.IsHost() || FriendUtils.IsFriend(source),
+            1 => source.IsHost() || PluginDataManager.FriendManager.IsFriend(source),
             2 => true,
             _ => throw new ArgumentOutOfRangeException()
         };
 
         if (!permitted)
         {
-            Utils.SendMessage(NotPermittedText, source.PlayerId, InvalidColor.Colorize(NotPermittedTitle), true);
+            Utils.SendMessage(NotPermittedText, source.PlayerId, ModConstants.Palette.InvalidUsage.Colorize(NotPermittedTitle), true);
             return;
         }
 
         source.RpcSetName(name);
+        PluginDataManager.LastKnownAs.SetName(source.FriendCode, name);
     }
 
     [Command(CommandFlag.LobbyOnly, "winner", "w")]
     public static void ListWinners(PlayerControl source)
     {
-        Utils.SendMessage($"{Winners}: {Game.GameHistory.LastWinners.Select(w => w.Name + $"({w.Role.RoleName})").Fuse()}", source.PlayerId);
+        Utils.SendMessage($"{Winners}: {Game.MatchData.GameHistory.LastWinners.Select(w => w.Name + $"({w.Role.RoleName})").Fuse()}", source.PlayerId);
     }
 
     [Command(CommandFlag.LobbyOnly, "color", "colour")]
     public static void SetColor(PlayerControl source, int color)
     {
         int allowedUsers = GeneralOptions.MiscellaneousOptions.ChangeColorAndLevelUsers;
-        bool permitted = (allowedUsers) switch
+        bool permitted = allowedUsers switch
         {
             0 => source.IsHost(),
-            1 => source.IsHost() || FriendUtils.IsFriend(source),
+            1 => source.IsHost() || PluginDataManager.FriendManager.IsFriend(source),
             2 => true,
             _ => throw new ArgumentOutOfRangeException()
         };
 
         if (!permitted)
         {
-            Utils.SendMessage(NotPermittedText, source.PlayerId, InvalidColor.Colorize(NotPermittedTitle), true);
+            Utils.SendMessage(NotPermittedText, source.PlayerId, ModConstants.Palette.InvalidUsage.Colorize(NotPermittedTitle), true);
             return;
         }
 
         if (color > Palette.PlayerColors.Length)
         {
-            Utils.SendMessage($"{ColorNotInRangeMessage.Formatted(color)} (0-{Palette.PlayerColors.Length})", source.PlayerId, InvalidColor.Colorize(InvalidUsage), true);
+            Utils.SendMessage($"{ColorNotInRangeMessage.Formatted(color)} (0-{Palette.PlayerColors.Length})", source.PlayerId, ModConstants.Palette.InvalidUsage.Colorize(InvalidUsage), true);
             return;
         }
 
@@ -129,6 +132,25 @@ public class BasicCommands: CommandTranslations
     [Command(CommandFlag.HostOnly, "say", "s")]
     public static void Say(PlayerControl _, string message)
     {
-        Utils.SendMessage(message, title: HostGradient.Apply(HostMessage));
+        ChatHandler.Of(message).Title(HostGradient.Apply(HostMessage)).Send();
     }
+
+    [Command(CommandFlag.HostOnly, "id", "ids", "pid", "pids")] // eur mom is 😣
+    public static void PlayerIds(PlayerControl source, CommandContext context)
+    {
+        if (context.Args.Length == 0)
+        {
+            string playerIds = "★ Player IDs ★\n-=-=-=-=-=-=-=-=-\n";
+            playerIds += PlayerControl.AllPlayerControls.ToArray().Select(p => $"{p.PlayerId} - {p.name} ({ModConstants.ColorNames[p.cosmetics.ColorId]})").Fuse("\n");
+            Utils.SendMessage(playerIds, source.PlayerId, leftAlign: true);
+            return;
+        }
+
+        string name = context.Join();
+        PlayerControl? player = PlayerControl.AllPlayerControls.ToArray().FirstOrDefault(p => p.name == name);
+        Utils.SendMessage(player == null ? PlayerNotFoundText.Formatted(name) : PlayerIdMessage.Formatted(name, player.PlayerId), source.PlayerId, leftAlign: true);
+    }
+
+    [Command("view", "v")]
+    public static void View(PlayerControl source, int id) => TemplateCommands.Preview(source, id);
 }

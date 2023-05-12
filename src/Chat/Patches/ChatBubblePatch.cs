@@ -8,16 +8,12 @@ namespace TOHTOR.Chat.Patches;
 
 class ChatBubblePatch
 {
-    internal static Queue<int> SetRightQueue = new();
+    internal static Queue<int> SetLeftQueue = new();
 
     [QuickPostfix(typeof(ChatBubble), nameof(ChatBubble.SetRight))]
     public static void SetBubbleRight(ChatBubble __instance)
     {
-        if (SetRightQueue.TryDequeue(out int _))
-        {
-            VentLogger.Fatal($"Setting left: {__instance.TextArea.text}");
-            __instance.SetLeft();
-        }
+        if (SetLeftQueue.TryDequeue(out int _)) __instance.SetLeft();
 
         __instance.TextArea.richText = true;
     }

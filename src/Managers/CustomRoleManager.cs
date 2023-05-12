@@ -32,12 +32,11 @@ namespace TOHTOR.Managers;
 public static class CustomRoleManager
 {
     public static OptionManager RoleOptionManager = OptionManager.GetManager(file: "role_options.txt");
-    public static Dictionary<byte, CustomRole> PlayersCustomRolesRedux = new();
-    public static Dictionary<byte, CustomRole> LastRoundCustomRoles = new();
-
-    public static Dictionary<byte, List<CustomRole>> PlayerSubroles = new();
+    /*public static Dictionary<byte, CustomRole> PlayerRoles = new();
+    public static Dictionary<byte, List<CustomRole>> PlayerSubroles = new();*/
 
     public static StaticRoles Static = new();
+    public static Modifiers Mods = new();
     public static ExtraRoles Special = new();
     public static CustomRole Default = Static.Crewmate;
 
@@ -45,15 +44,20 @@ public static class CustomRoleManager
 
     public static readonly List<CustomRole> MainRoles = Static.GetType()
         .GetFields()
-        .Select(f => (CustomRole)f.GetValue(Static))
+        .Select(f => (CustomRole)f.GetValue(Static)!)
+        .ToList();
+    
+    public static readonly List<CustomRole> ModifierRoles = Mods.GetType()
+        .GetFields()
+        .Select(f => (CustomRole)f.GetValue(Mods)!)
         .ToList();
 
     public static readonly List<CustomRole> SpecialRoles = Special.GetType()
         .GetFields()
-        .Select(f => (CustomRole)f.GetValue(Special))
+        .Select(f => (CustomRole)f.GetValue(Special)!)
         .ToList();
 
-    public static readonly List<CustomRole> AllRoles = MainRoles.Concat(SpecialRoles).Concat(_lazyInitializeList!).ToList();
+    public static readonly List<CustomRole> AllRoles = MainRoles.Concat(SpecialRoles).Concat(ModifierRoles).Concat(_lazyInitializeList!).ToList();
 
     public static void AddRole(CustomRole staticRole)
     {
@@ -80,19 +84,7 @@ public static class CustomRoleManager
         if (id == -1) id = 0;
         return AllRoles[id];
     }
-
-    public static void AddPlayerSubrole(byte playerId, Subrole subrole)
-    {
-        if (!PlayerSubroles.ContainsKey(playerId)) PlayerSubroles[playerId] = new List<CustomRole>();
-        PlayerSubroles[playerId].Add(subrole);
-    }
-
-    public static void AddPlayerSubrole(byte playerId, CustomRole subrole)
-    {
-        if (!PlayerSubroles.ContainsKey(playerId)) PlayerSubroles[playerId] = new List<CustomRole>();
-        PlayerSubroles[playerId].Add(subrole);
-    }
-
+    
     internal static void LinkEditor(Type editorType)
     {
         if (!editorType.IsAssignableTo(typeof(RoleEditor)))
@@ -193,7 +185,6 @@ public static class CustomRoleManager
         public Alchemist Alchemist = new Alchemist();
         public Bastion Bastion = new Bastion();
         public Bodyguard Bodyguard = new Bodyguard();
-        public Child Child = new Child();
         public Crewmate Crewmate = new Crewmate();
         public Crusader Crusader = new Crusader();
         public Demolitionist Demolitionist = new Demolitionist();
@@ -257,6 +248,20 @@ public static class CustomRoleManager
         public Terrorist Terrorist = new Terrorist();
         public Vulture Vulture = new Vulture();
         public Werewolf Werewolf = new Werewolf();
+
+        public CustomRole LOAD_MODIFIER_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadSubroleOptions());
+    }
+
+    public class Modifiers
+    {
+        public Bait Bait = new Bait();
+        public Bewilder Bewilder = new Bewilder();
+        public Diseased Diseased = new Diseased();
+        public Flash Flash = new Flash();
+        public Oblivious Oblivious = new Oblivious();
+        public Psychopath Psychopath = new Psychopath();
+        public Sleuth Sleuth = new Sleuth();
+        public Torch Torch = new Torch();
     }
 
     public class ExtraRoles
@@ -264,11 +269,9 @@ public static class CustomRoleManager
         public IllegalRole IllegalRole = new IllegalRole();
 
         public GM GM = new GM();
-        public Bait Bait = new Bait();
-        public Bewilder Bewilder = new Bewilder();
         public Coven Coven = new Coven();
         public Debugger Debugger = new Debugger();
-        public Diseased Diseased = new Diseased();
+        
         //double shot
         //flash
         public Fox Fox = new();

@@ -2,6 +2,8 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.GUI.Name;
+using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Roles.Internals;
@@ -10,6 +12,7 @@ using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
+using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
@@ -17,6 +20,8 @@ namespace TOHTOR.Roles.RoleGroups.Crew;
 [Localized($"Roles.{nameof(Oracle)}")]
 public class Oracle: Crewmate
 {
+    private static ColorGradient _oracleGradient = new(new Color(0.49f, 0.57f, 0.84f), new Color(0.67f, 0.36f, 0.76f));
+    
     private Optional<byte> selectedPlayer = Optional<byte>.Null();
     private bool targetLockedIn;
     private bool initialSkip;
@@ -81,9 +86,13 @@ public class Oracle: Crewmate
         if (!selectedPlayer.Exists()) return;
         PlayerControl target = Utils.GetPlayerById(selectedPlayer.Get())!;
         target.NameModel().GetComponentHolder<RoleHolder>().Last(c => c.ViewMode() is ViewMode.Replace).SetViewerSupplier(() => Game.GetAllPlayers().ToList());
+
+        string roleName = _oracleGradient.Apply(target.GetCustomRole().RoleName);
+
+        target.NameModel().GetComponentHolder<RoleHolder>().Add(new RoleComponent(new LiveString(() => roleName), GameStates.IgnStates, ViewMode.Replace));
     }
 
-    [RoleAction(RoleActionType.OnDisconnect)]
+    [RoleAction(RoleActionType.Disconnect)]
     private void TargetDisconnected(PlayerControl dcPlayer)
     {
         if (!selectedPlayer.Exists() || selectedPlayer.Get() != dcPlayer.PlayerId) return;

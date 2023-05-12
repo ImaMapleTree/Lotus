@@ -1,117 +1,122 @@
-using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
-using AmongUs.Data;
-using HarmonyLib;
-using InnerNet;
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
-using VentLib.Options;
+using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Managers.Templates;
 
 public class TemplateManager
 {
+    private FileInfo templateFile;
+    private List<Template> templates;
+    private Dictionary<string, Template> taggedTemplates;
+    private Dictionary<string, string> registeredTags = new();
 
-    private TemplateData templateData;
-
-    internal List<Template> Templates;
-    private readonly FileInfo templateFile;
-    private readonly Regex regex = new("(?:\\$|@|%)((?:[A-Za-z0-9]|\\.\\S)*)");
-
-    private Dictionary<string, List<Template>> taggedTemplates;
-
-    public TemplateManager(FileInfo templateFile)
+    internal TemplateManager(FileInfo templateFile)
     {
         this.templateFile = templateFile;
-        Reload();
+        LoadTemplates();
     }
 
-    public void Reload()
+    public int CreateTemplate(string template)
     {
-        templateData = JsonUtils.ReadJson<TemplateData>(templateFile).OrElseGet(() => new TemplateData());
-        SaveReload();
+        int id = templates.Count;
+        templates.Add(new Template(template));
+        SaveTemplates();
+        return id;
     }
 
-    public void SaveReload()
+    public bool EditTemplate(int id, string template)
     {
-        Save();
-        taggedTemplates = templateData.Tags.Select(kv =>
-                (kv.Key, kv.Value
-                    .Select(v => templateData.Templates[v])
-                    .Where(t => t.Profiles.Contains(templateData.ActiveProfile))
-                    .ToList()))
-            .ToDict(tuple => tuple.Key, tuple => tuple.Item2);
-    }
-
-    public void Save() => JsonUtils.WriteJson(templateData, templateFile);
-
-    public void SetProfile(string profile)
-    {
-        templateData.ActiveProfile = profile;
-        SaveReload();
-    }
-
-    public string GetProfile() => templateData.ActiveProfile;
-
-    public List<Template> GetAllTemplates() => templateData.Templates;
-
-    public Template GetTemplate(int templateId) => templateData.Templates[templateId];
-
-    public void TagTemplate(int templateId, string tag)
-    {
-        List<int> tags = templateData.Tags.GetOrCompute(tag, () => new List<int>());
-        if (!tags.Contains(templateId)) tags.Add(templateId);
-        SaveReload();
-    }
-
-    public void UntagTemplate(int templateId, string tag)
-    {
-        bool reload = templateData.Tags.GetOptional(tag).Map(tags => tags.RemoveAll(id => id == templateId) > 0).OrElse(false);
-        if (reload) SaveReload();
-    }
-
-    public void DeleteTag(string tag)
-    {
-        if (templateData.Tags.Remove(tag)) SaveReload();
-    }
-
-    public void CreateTemplate(string text)
-    {
-        templateData.Templates.Add(new Template(text));
-        SaveReload();
-    }
-
-    // Costly
-    public void DeleteTemplate(int templateId)
-    {
-        Dictionary<Template, int> originalIds = templateData.Templates
-            .Select((t, i) => (t, i))
-            .ToDict(t => t.t, t => t.i);
-
-        templateData.Templates.RemoveAt(templateId);
-
-        Dictionary<int, int> remapping = originalIds
-            .Select(kv => (kv.Value, templateData.Templates.IndexOf(kv.Key)))
-            .ToDict(t => t.Value, t => t.Item2);
-
-        templateData.Tags = templateData.Tags.ToDict(kv => kv.Key, kv => kv.Value.Select(i => remapping[i]).ToList());
-        SaveReload();
-    }
-
-    public bool TryFormat(PlayerControl player, string tag, out string formatted)
-    {
-        formatted = "";
-        if (!taggedTemplates.ContainsKey(tag)) return false;
-
-        formatted = taggedTemplates[tag]
-            .Select(template => template.Format(player).Replace("\\n", "\n"))
-            .Join(delimiter: "\n\n");
-
+        if (templates.Count <= id || id < 0) return false;
+        templates[id].Text = template;
+        SaveTemplates();
         return true;
     }
+
+    public bool DeleteTemplate(int id)
+    {
+        if (templates.Count <= id || id < 0) return false;
+        string? oldTag = templates[id].Tag;
+        if (oldTag != null) taggedTemplates.Remove(oldTag);
+        templates.RemoveAt(id);
+        SaveTemplates();
+        return true;
+    }
+    
+    public bool TagTemplate(int id, string tag)
+    {
+        if (templates.Count <= id || id < 0) return false;
+        string? oldTag = templates[id].Tag;
+        if (oldTag != null) taggedTemplates.Remove(oldTag);
+        Template? oldTemplate = taggedTemplates.GetValueOrDefault(tag);
+        if (oldTemplate != null) oldTemplate.Tag = null;
+        (taggedTemplates[tag] = templates[id]).Tag = tag;
+        SaveTemplates();
+        return true;
+    }
+
+    public bool UntagTemplate(int id)
+    {
+        if (templates.Count <= id || id < 0) return false;
+        string? oldTag = templates[id].Tag;
+        templates[id].Tag = null;
+        if (oldTag != null) taggedTemplates.Remove(oldTag);
+        SaveTemplates();
+        return true;
+    }
+
+    public bool TryFormat(object obj, string tag, out string formatted)
+    {
+        formatted = "";
+        if (!registeredTags.ContainsKey(tag)) VentLogger.Warn($"Tag \"{tag}\" is not registered. Please ensure all template tags have been registered through TemplateManager.RegisterTag().", "TemplateManager");
+        if (!taggedTemplates.ContainsKey(tag)) return false;
+        formatted = taggedTemplates[tag].Format(obj).Replace("\\n", "\n");
+        return true;
+    }
+
+    public bool TryFormat(object obj, int id, out string formatted)
+    {
+        formatted = "";
+        if (templates.Count <= id || id < 0) return false;
+        formatted = templates[id].Format(obj).Replace("\\n", "\n");
+        return true;
+    }
+
+    public bool RegisterTag(string tag, string description)
+    {
+        if (registeredTags.ContainsKey(tag) && registeredTags[tag] != description)
+        {
+            VentLogger.Warn($"Could not register template tag \"{tag}\". A tag of the same name already exists.", "TemplateManager");
+            return false;
+        }
+
+        registeredTags[tag] = description;
+        return true;
+    }
+
+    public List<Template> ListTemplates => templates.ToList();
+
+    public List<(string tag, string description)> AllTags() => registeredTags.Select(rt => (rt.Key, rt.Value)).ToList();
+
+    public void Reload() => LoadTemplates();
+    
+    private void LoadTemplates()
+    {
+        StreamReader reader = new StreamReader(templateFile.Open(FileMode.OpenOrCreate));
+        string[] lines = reader.ReadToEnd().Split("\n").Where(l => l != "\n").Where(l => l != "").Select(l => l.Replace("\r", "")).ToArray();
+        reader.Close();
+        templates = lines.Select(l => new Template(l)).ToList();
+        taggedTemplates = templates.Where(t => t.Tag != null).ToDict(t => t.Tag!, t => t)!;
+    }
+
+    private void SaveTemplates()
+    {
+        StreamWriter writer = new(templateFile.Open(FileMode.Create));
+        templates.ForEach(t => writer.Write(t.Tag == null ? t.Text : $"{t.Tag} | {t.Text.Replace("|", "\\|")}\n"));
+        writer.Close();
+    }
+    
+    
 }

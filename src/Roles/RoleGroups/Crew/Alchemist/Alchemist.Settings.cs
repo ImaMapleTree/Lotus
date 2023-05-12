@@ -4,6 +4,7 @@ using System.Linq;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.RoleGroups.Crew.Potions;
 using VentLib.Options.Game;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
@@ -33,7 +34,8 @@ public partial class Alchemist
         PotionConstructors.Select(p => p(0)).ForEach(p =>
         {
             builder = builder.SubOption(sub => sub
-                .Name(p.Name())
+                .Name(p.Color().Colorize(p.Name()))
+                .Key(p.GetType().Name)
                 .AddOnOffValues()
                 .BindBool(b =>
                 {

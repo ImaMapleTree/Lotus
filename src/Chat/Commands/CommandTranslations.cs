@@ -10,12 +10,12 @@ namespace TOHTOR.Chat.Commands;
 [SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible")]
 public class CommandTranslations
 {
-    public static Color InvalidColor = new(1f, 0.67f, 0.11f);
-
     [Localized(nameof(InvalidUsage))] protected static string InvalidUsage = "⚠ Invalid Usage ⚠";
     [Localized(nameof(NotPermittedTitle))] protected static string NotPermittedTitle = "⚠ Not Permitted ⚠";
     [Localized(nameof(NotPermittedText))] protected static string NotPermittedText = "You are not permitted to use this command.";
     [Localized("Say.MessageTitle")] protected static string HostMessage = "Host Message";
+    [Localized(nameof(PlayerNotFoundText))] protected static string PlayerNotFoundText = "Player \"{0}\" not found.";
+    [Localized(nameof(CommandError))] protected static string CommandError = "⚠ Command Error ⚠";
 
     [Localized("HostOptions")]
     protected static class HostOptionTranslations

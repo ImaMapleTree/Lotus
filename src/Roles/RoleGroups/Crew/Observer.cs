@@ -3,6 +3,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -89,7 +90,7 @@ public class Observer: Crewmate
                 .AddOnOffValues().Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier
+        base.Modify(roleModifier)
             .RoleColor("#eee5be")
             .OptionOverride(Override.CrewLightMod, () => currentVisionMod);
 }

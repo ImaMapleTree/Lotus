@@ -4,9 +4,9 @@ public class RoleDistribution
 {
     public int Impostors;
 
-    public int NeutralKillingSlots;
-    public int NeutralPassiveSlots;
+    public int MinimumNeutralPassive;
+    public int MaximumNeutralPassive;
 
-    public int FlexImpostorSlots;
-    public int OpenFlexSlot;
+    public int MinimumNeutralKilling;
+    public int MaximumNeutralKilling;
 }

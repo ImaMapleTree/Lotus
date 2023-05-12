@@ -11,8 +11,10 @@ using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 using VentLib.Logging;
+using VentLib.Networking.RPC;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -36,9 +38,11 @@ public class Janitor: Vanilla.Impostor
         if (!cleanOnKill) return base.TryKill(target);
 
         if (MyPlayer.InteractWith(target, new DirectInteraction(new FakeFatalIntent(), this)) is InteractionResult.Halt) return false;
+        MyPlayer.RpcGuardAndKill(target);
+        RpcV3.Standard(MyPlayer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
         target.RpcExileV2();
-        Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
-        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{Color.red.Colorize(MyPlayer.name)} cleaned {target.GetRoleColor().Colorize(target.name)}."));
+        Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
+        Game.MatchData.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{Color.red.Colorize(MyPlayer.name)} cleaned {target.GetRoleColor().Colorize(target.name)}."));
         return true;
     }
 
@@ -54,7 +58,7 @@ public class Janitor: Vanilla.Impostor
         foreach (DeadBody deadBody in Object.FindObjectsOfType<DeadBody>())
             if (deadBody.ParentId == playerId)
                 if (ModVersion.AllClientsModded()) CleanBody(playerId);
-                else Game.GameStates.UnreportableBodies.Add(playerId);
+                else Game.MatchData.UnreportableBodies.Add(playerId);
 
         MyPlayer.RpcGuardAndKill(MyPlayer);
     }
@@ -75,7 +79,7 @@ public class Janitor: Vanilla.Impostor
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, () => cleanCooldown.Duration * 2, () => cleanCooldown.NotReady());
+            .OptionOverride(new IndirectKillCooldown(KillCooldown, () => cleanOnKill || cleanCooldown.NotReady()));
 
     private class FakeFatalIntent : IFatalIntent
     {

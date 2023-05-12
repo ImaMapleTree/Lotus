@@ -97,7 +97,7 @@ public class Transporter : Shapeshifter
         target1.NetTransform.enabled = true;
         target2.NetTransform.enabled = true;
 
-        Game.GameHistory.AddEvent(new TransportedEvent(MyPlayer, target1, target2));
+        Game.MatchData.GameHistory.AddEvent(new TransportedEvent(MyPlayer, target1, target2));
     }
 
     private void Deselect(PlayerControl target)

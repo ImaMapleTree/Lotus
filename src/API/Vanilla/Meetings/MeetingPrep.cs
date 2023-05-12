@@ -2,6 +2,7 @@ using System;
 using TOHTOR.API.Odyssey;
 using TOHTOR.API.Processes;
 using TOHTOR.API.Reactive;
+using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Victory;
 using VentLib.Logging;
@@ -48,6 +49,8 @@ internal class MeetingPrep
         if (reporter != null) Async.Schedule(() => QuickStartMeeting(reporter), NetUtils.DeriveDelay(0.2f));
 
         CheckEndGamePatch.Deferred = true;
+        Hooks.GameStateHooks.RoundEndHook.Propagate(new GameStateHookEvent(Game.MatchData));
+        Game.SyncAll();
         return _meetingDelegate;
     }
 

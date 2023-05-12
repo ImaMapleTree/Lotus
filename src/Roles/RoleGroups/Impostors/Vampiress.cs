@@ -6,6 +6,7 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
 using VentLib.Logging;
@@ -72,7 +73,7 @@ public class Vampiress : Impostor
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
+        AddKillCooldownOptions(base.RegisterOptions(optionStream))
             .SubOption(sub => sub
                 .Name("Kill Delay")
                 .BindFloat(v => killDelay = v)
@@ -81,7 +82,7 @@ public class Vampiress : Impostor
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, KillCooldown * 2, () => mode is VampireMode.Biting)
+            .OptionOverride(new IndirectKillCooldown(KillCooldown, () => mode is VampireMode.Biting))
             .RoleFlags(RoleFlag.VariationRole);
 
     public enum VampireMode

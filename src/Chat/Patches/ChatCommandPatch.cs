@@ -5,10 +5,12 @@ using HarmonyLib;
 using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.Extensions;
 using TOHTOR.Utilities;
+using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Harmony.Attributes;
 
 namespace TOHTOR.Chat.Patches;
 
@@ -17,8 +19,10 @@ public class ChatUpdatePatch
 {
     public static bool DoBlockChat = false;
     public static Queue<(string, byte, string, bool)> MessagesToSend = new();
+    
     public static void Postfix(ChatController __instance)
     {
+        __instance.TextArea.AllowPaste = true;
         __instance.chatBubPool.Prefab.Cast<ChatBubble>().TextArea.overrideColorTags = false;
         __instance.TimeSinceLastMessage = 3f;
         if (!AmongUsClient.Instance.AmHost) return;
@@ -29,7 +33,7 @@ public class ChatUpdatePatch
         var player = PlayerControl.AllPlayerControls.ToArray().OrderBy(x => x.PlayerId).FirstOrDefault(x => !x.Data.IsDead);
         if (player == null) return;
         (string msg, byte sendTo, string title, bool leftAlign) = MessagesToSend.Dequeue();
-        if (leftAlign) ChatBubblePatch.SetRightQueue.Enqueue(0);
+        if (leftAlign) ChatBubblePatch.SetLeftQueue.Enqueue(0);
         int clientId = sendTo == byte.MaxValue ? -1 : Utils.GetPlayerById(sendTo).GetClientId();
         var name = player.name;
 
@@ -47,7 +51,6 @@ public class ChatUpdatePatch
             if (p.AmOwner && clientId == -1) return;
 
             string message = p.IsModded() ? msg : msg.RemoveHtmlTags();
-            VentLogger.Fatal($"Message: {message}");
 
             RpcV3.Mass()
                 .Start(player.NetId, RpcCalls.SetName)
@@ -61,6 +64,21 @@ public class ChatUpdatePatch
                     .End()
                 .Send(p.GetClientId());
         });
+
         __instance.TimeSinceLastMessage = 0f;
+    }
+
+
+    [QuickPostfix(typeof(ChatController), nameof(ChatController.UpdateCharCount))]
+    public static void UpdateCharCount(ChatController __instance)
+    {
+        int length = __instance.TextArea.text.Length;
+        __instance.CharCount.text = $"{length}/{__instance.TextArea.characterLimit}";
+        if (length < (AmongUsClient.Instance.AmHost ? 1750 : 250))
+            __instance.CharCount.color = Color.black;
+        else if (length < (AmongUsClient.Instance.AmHost ? 2000 : 300))
+            __instance.CharCount.color = new Color(1f, 1f, 0.0f, 1f);
+        else
+            __instance.CharCount.color = Color.red;
     }
 }

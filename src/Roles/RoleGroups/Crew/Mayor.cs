@@ -32,6 +32,8 @@ public class Mayor: Crewmate
     private bool revealToVote;
     private bool revealed;
 
+    private FixedUpdateLock updateLock = new(0.25f);
+    
     [Localized("RevealMessage")]
     private static string _mayorRevealMessage = "Mr. Mayor, you must reveal yourself to gain additional votes. Currently you can vote normally, but if you vote yourself you'll reveal your role to everyone and gain more votes!";
 
@@ -48,6 +50,7 @@ public class Mayor: Crewmate
     [RoleAction(RoleActionType.OnPet)]
     private void MayorPocketMeeting()
     {
+        if (!updateLock.AcquireLock()) return;
         if (SabotagePatch.CurrentSabotage != null) return;
         if (!hasPocketMeeting || remainingVotes <= 0) return;
         remainingVotes--;

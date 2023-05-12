@@ -13,6 +13,8 @@ using TOHTOR.Roles;
 using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.Utilities;
 using VentLib.Logging;
+using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Patches
 {
@@ -36,7 +38,7 @@ namespace TOHTOR.Patches
             FallFromLadder.Reset();
 
             Game.State = GameState.InIntro;
-            Game.GetAllPlayers().Do(p => CustomRoleManager.PlayersCustomRolesRedux[p.PlayerId] = CustomRoleManager.Default);
+            Game.GetAllPlayers().Do(p => Game.MatchData.Roles.MainRoles[p.PlayerId] = CustomRoleManager.Default);
             Game.CurrentGamemode.Setup();
         }
     }
@@ -56,11 +58,13 @@ namespace TOHTOR.Patches
 
             Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
 
-            List<Tuple<string, CustomRole>> debugList = CustomRoleManager.PlayersCustomRolesRedux
-                .Select(kvp => new Tuple<string, CustomRole>(Utils.GetPlayerById(kvp.Key).name, kvp.Value))
-                .ToList();
-
-            VentLogger.Old($"Assignments: {String.Join(", ", debugList)}", "");
+            TextTable textTable = new TextTable("Player", "Role", "SubRoles");
+            Game.GetAllPlayers().Where(p => p != null).ForEach(p =>
+            {
+                textTable.AddEntry(p.name, p.GetCustomRole().RoleName, p.GetSubroles().Fuse());
+            });
+            VentLogger.Debug($"Role Assignments\n{textTable}", "RoleManager::SelectRoles~Postfix");
+            
 
             TOHPlugin.ResetCamPlayerList.AddRange(Game.GetAllPlayers().Where(p => p.GetCustomRole() is Arsonist).Select(p => p.PlayerId));
             Game.RenderAllForAll(state: GameState.InIntro);

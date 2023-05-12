@@ -4,6 +4,8 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using HarmonyLib;
+using TOHTOR.Managers.Hotkeys;
+using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Options.IO;
@@ -19,6 +21,7 @@ public static class ReportManager
     private static readonly DirectoryInfo ReportingDirectory;
     private static readonly Dictionary<ReportTag, OrderedSet<IReportProducer>> ReportProducers = new();
     private static readonly LogLevel ReportLevel = LogLevel.High.Similar("REPORT", ConsoleColor.Green);
+    private static Hotkey _hotkey;
 
     static ReportManager()
     {
@@ -33,6 +36,7 @@ public static class ReportManager
         if (!ReportingDirectory.Exists) ReportingDirectory.Create();
 
         Enum.GetValues<ReportTag>().ForEach(t => ReportProducers.Add(t, new OrderedSet<IReportProducer>()));
+        _hotkey = HotkeyManager.Bind(KeyCode.F3).Do(() => GenerateReport());
     }
 
     public static void AddProducer(IReportProducer reportProducer, params ReportTag[] tags)

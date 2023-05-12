@@ -32,7 +32,7 @@ public class Demolitionist : Crewmate
 
         var interaction = new DelayedInteraction(new FatalIntent(true, () => new BombedEvent(killer, MyPlayer)), demoTime, this);
         bool dead = MyPlayer.InteractWith(killer, interaction) is InteractionResult.Proceed;
-        Game.GameHistory.AddEvent(new DemolitionistBombEvent(MyPlayer, killer, dead));
+        Game.MatchData.GameHistory.AddEvent(new DemolitionistBombEvent(MyPlayer, killer, dead));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -41,7 +41,7 @@ public class Demolitionist : Crewmate
             .SubOption(sub => sub
                 .Name("Demo Time")
                 .BindFloat(v => demoTime = v)
-                .AddFloatRange(0.5f, 10f, 0.25f, 2)
+                .AddFloatRange(0.5f, 10f, 0.25f, 2, "s")
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

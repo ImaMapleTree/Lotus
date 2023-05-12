@@ -34,4 +34,10 @@ public static class GeneralOptionTranslations
 
     [Localized(nameof(EveryoneText))]
     public static string EveryoneText = "Everyone";
+
+    [Localized(nameof(DurationText))]
+    public static string DurationText = "Duration";
+
+    [Localized(nameof(AllText))]
+    public static string AllText = "All";
 }

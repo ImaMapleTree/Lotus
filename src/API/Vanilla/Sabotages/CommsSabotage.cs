@@ -25,7 +25,7 @@ public class CommsSabotage : ISabotage
     {
 
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? Optional<PlayerControl>.Null() : Optional<PlayerControl>.Of(fixer));
+        Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? PlayerControl.LocalPlayer : fixer);
         if (handle.IsCanceled) return false;
         fixer = fixer == null ? PlayerControl.LocalPlayer : fixer;
 

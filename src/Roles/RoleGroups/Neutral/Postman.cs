@@ -18,6 +18,7 @@ using TOHTOR.Victory.Conditions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
+using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 using Object = UnityEngine.Object;
@@ -89,7 +90,7 @@ public class Postman: Crewmate
     private void AnnounceGameWin()
     {
         if (!completedDelivery || TasksComplete != TotalTasks) return;
-        Utils.SendMessage(_postmanAnnouncement);
+        Async.Schedule(() => Utils.SendMessage(_postmanAnnouncement), 1f); 
     }
 
     [RoleAction(RoleActionType.RoundStart)]

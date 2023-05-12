@@ -14,14 +14,13 @@ using VentLib.Utilities;
 
 namespace TOHTOR.Chat.Commands;
 
-[Command(CommandFlag.InGameOnly, "m", "myrole")]
-public class RoleInfoCommand: ICommandReceiver
+public class RoleInfoCommand
 {
-    private int previousLevel = 0;
-
-    public void Receive(PlayerControl source, CommandContext context)
+    private static int _previousLevel = 0;
+    
+    [Command(CommandFlag.InGameOnly, "m", "myrole")]
+    public static void MyRole(PlayerControl source, CommandContext context)
     {
-        if (Game.State is GameState.InLobby) return;
         if (context.Args.Length == 0) {
             ShowRoleDescription(source);
             return;
@@ -31,33 +30,36 @@ public class RoleInfoCommand: ICommandReceiver
         else ShowRoleOptions(source);
     }
 
-    private void ShowRoleDescription(PlayerControl source)
+    
+    [Command(CommandFlag.InGameOnly, "desc", "description")]
+    private static void ShowRoleDescription(PlayerControl source)
     {
         CustomRole role = source.GetCustomRole();
-        string output = $"{role} {role.Faction}:";
+        string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.FactionColor().Colorize(role.Faction.Name())}):";
         output += $"\n{role.Description}";
         Utils.SendMessage(output, source.PlayerId, leftAlign: true);
     }
 
-    private void ShowRoleOptions(PlayerControl source)
+    [Command(CommandFlag.InGameOnly, "o", "option", "options")]
+    private static void ShowRoleOptions(PlayerControl source)
     {
         CustomRole role = source.GetCustomRole();
-        string output = $"{role} {role.Faction}:";
+        string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.FactionColor().Colorize(role.Faction.Name())}):";
 
         Option? optionMatch = OptionManager.GetManager(file: "role_options.txt").GetOptions().FirstOrDefault(h => h.Name().RemoveHtmlTags() == role.RoleName);
         if (optionMatch == null) { ShowRoleDescription(source); return; }
 
         foreach (var child in optionMatch.Children) UpdateOutput(ref output, child);
 
-        Utils.SendMessage(output, source.PlayerId, leftAlign: true);
+        ChatHandler.Of(output).LeftAlign().Send(source);
     }
 
-    private void UpdateOutput(ref string output, Option options)
+    private static void UpdateOutput(ref string output, Option options)
     {
         if (options is not GameOption gameOption) return;
-        if (gameOption.Level < previousLevel)
+        if (gameOption.Level < _previousLevel)
             output += "\n";
-        previousLevel = gameOption.Level;
+        _previousLevel = gameOption.Level;
         string valueText = gameOption.Color == Color.white ? gameOption.GetValueText() : gameOption.Color.Colorize(gameOption.GetValueText());
         output += $"\n{gameOption.Name()} => {valueText}";
 

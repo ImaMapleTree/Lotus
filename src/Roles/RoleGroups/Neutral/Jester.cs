@@ -1,8 +1,11 @@
 using AmongUs.GameOptions;
+using TOHTOR.API;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Victory.Conditions;
 using UnityEngine;
 using VentLib.Logging;
@@ -36,13 +39,13 @@ public class Jester : CustomRole
     protected override RoleModifier Modify(RoleModifier roleModifier)
     {
         return roleModifier
+            .Faction(FactionInstances.Solo)
             .VanillaRole(canUseVents ? RoleTypes.Engineer : RoleTypes.Crewmate)
             .SpecialType(SpecialType.Neutral)
             .CanVent(canUseVents)
+            .RoleFlags(RoleFlag.CannotWinAlone)
             .RoleColor(new Color(0.93f, 0.38f, 0.65f))
-            .OptionOverride(Override.CrewLightMod,
-                () => GameOptionsManager.Instance.CurrentGameOptions.AsNormalOptions()!.ImpostorLightMod,
-                () => impostorVision)
+            .OptionOverride(Override.CrewLightMod, () => AUSettings.ImpostorLightMod(), () => impostorVision)
             .OptionOverride(Override.EngVentDuration, 100f)
             .OptionOverride(Override.EngVentCooldown, 0.1f);
     }

@@ -10,6 +10,7 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Victory.Conditions;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
@@ -20,6 +21,7 @@ public class Hacker: CustomRole
     private List<SabotageType> sabotages = new();
     private int sabotageTotal;
     private int sabotageCount;
+    private bool fixingDoorsGivesPoint;
 
     [UIComponent(UI.Counter)]
     private string HackerCounter() => RoleUtils.Counter(sabotageCount, sabotageTotal, RoleColor);
@@ -28,9 +30,15 @@ public class Hacker: CustomRole
     private void HackerFixes(ISabotage sabotage, PlayerControl fixer)
     {
         if (fixer.PlayerId != MyPlayer.PlayerId || !sabotages.Contains(sabotage.SabotageType())) return;
-        sabotage.Fix(MyPlayer);
-        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{ModConstants.HColor1.Colorize(MyPlayer.name)} fixed {sabotage.SabotageType()}."));
-        sabotageCount++;
+        bool result = sabotage is DoorSabotage doorSabotage ? doorSabotage.FixRoom(MyPlayer) : sabotage.Fix(MyPlayer);
+        if (result) Game.MatchData.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{ModConstants.HColor1.Colorize(MyPlayer.name)} fixed {sabotage.SabotageType()}."));
+    }
+
+    [RoleAction(RoleActionType.SabotageFixed)]
+    private void HackerAcquirePoints(ISabotage sabotage, PlayerControl fixer)
+    {
+        if (fixer.PlayerId != MyPlayer.PlayerId) return;
+        if (fixingDoorsGivesPoint || sabotage.SabotageType() is not SabotageType.Door) sabotageCount++;
         CheckHackerWin();
     }
 
@@ -44,7 +52,7 @@ public class Hacker: CustomRole
             .Tab(DefaultTabs.NeutralTab)
             .SubOption(sub => sub.Name("Hacker Sabotage Amount")
                 .BindInt(i => sabotageTotal = i)
-                .AddIntRange(1, 30, 1, 7)
+                .AddIntRange(1, 60, 1, 7)
                 .Build())
             .SubOption(sub => sub.Name("Fast Fixes Lights")
                 .AddOnOffValues()
@@ -52,7 +60,7 @@ public class Hacker: CustomRole
                 .Build())
             .SubOption(sub => sub.Name("Fast Fixes Reactor")
                 .AddOnOffValues()
-                .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Lights))
+                .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Reactor))
                 .Build())
             .SubOption(sub => sub.Name("Fast Fixes Oxygen")
                 .AddOnOffValues()
@@ -69,6 +77,10 @@ public class Hacker: CustomRole
             .SubOption(sub => sub.Name("Fast Fixes Helicopter")
                 .AddOnOffValues()
                 .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Helicopter))
+                .Build())
+            .SubOption(sub => sub.Name("Fixing Doors Gives Point")
+                .AddOnOffValues(false)
+                .BindBool(b => fixingDoorsGivesPoint = b)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

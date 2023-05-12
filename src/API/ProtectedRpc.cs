@@ -1,4 +1,5 @@
 using TOHTOR.Extensions;
+using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
@@ -8,6 +9,7 @@ public class ProtectedRpc
 {
     public static void CheckMurder(PlayerControl killer, PlayerControl target)
     {
+        VentLogger.Trace("Protected Check Murder", "ProtectedRpc::CheckMurder");
         if (AmongUsClient.Instance.IsGameOver || !AmongUsClient.Instance.AmHost) return;
         if (target == null) return;
         GameData.PlayerInfo data = target.Data;
@@ -20,6 +22,7 @@ public class ProtectedRpc
             return;
         }
 
-        killer.RpcMurderPlayer(target);
+        if (AmongUsClient.Instance.AmHost) killer.MurderPlayer(target);
+        RpcV3.Immediate(killer.NetId, RpcCalls.MurderPlayer).Write(target).Send();
     }
 }

@@ -34,6 +34,8 @@ class EndGamePatch
             if (killerId != byte.MaxValue && killerId != targetId)
                 KillLog += $"\n\t\t⇐ {TOHPlugin.AllPlayerNames[killerId]}({Utils.GetDisplayRoleName(killerId)}{Utils.GetSubRolesText(killerId)})";
         }*/
+
+        KillLog = "asdoksdoksadpsako";
         VentLogger.Old("-----------ゲーム終了-----------", "Phase");
         TOHPlugin.VisibleTasksCount = false;
     }

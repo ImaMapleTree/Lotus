@@ -13,6 +13,7 @@ using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
@@ -72,6 +73,5 @@ public class NeutWitch : NeutralKillingBase
     }
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, KillCooldown * 2);
+        base.Modify(roleModifier).OptionOverride(new IndirectKillCooldown(KillCooldown));
 }

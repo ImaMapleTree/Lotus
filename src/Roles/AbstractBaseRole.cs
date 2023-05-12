@@ -17,11 +17,13 @@ using TOHTOR.Factions.Impostors;
 using TOHTOR.Factions.Interfaces;
 using TOHTOR.Factions.Undead;
 using TOHTOR.GUI;
+using TOHTOR.Logging;
 using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles.Extra;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Roles.Subroles;
 using TOHTOR.Utilities;
@@ -70,7 +72,7 @@ public abstract class AbstractBaseRole
     public RoleTypes RealRole => DesyncRole ?? VirtualRole;
     public RoleTypes? DesyncRole;
     public RoleTypes VirtualRole;
-    public IFaction Faction { get; set; } = FactionInstances.Crewmates;
+    public IFaction Faction { get; set; } = FactionInstances.Solo;
     public SpecialType SpecialType = SpecialType.None;
     public Color RoleColor = Color.white;
     public bool IsSubrole { get; private set; }
@@ -119,10 +121,11 @@ public abstract class AbstractBaseRole
         {
             if (!RoleFlags.HasFlag(RoleFlag.Hidden) && Options.Tab == null)
             {
-                if (this.GetType() == typeof(Impostor)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (this.GetType() == typeof(Engineer)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (this.GetType() == typeof(Scientist)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (this.GetType() == typeof(Crewmate)) Options.Tab = DefaultTabs.HiddenTab;
+                if (GetType() == typeof(Impostor)) Options.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(Engineer)) Options.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(Scientist)) Options.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(Crewmate)) Options.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(GuardianAngel)) Options.Tab = DefaultTabs.HiddenTab;
                 else
                 {
 
@@ -157,7 +160,7 @@ public abstract class AbstractBaseRole
     private void SetupRoleActions()
     {
         Enum.GetValues<RoleActionType>().Do(action => this.roleActions.Add(action, new List<RoleAction>()));
-        this.GetType().GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
+        this.GetType().GetMethods(AccessFlags.InstanceAccessFlags)
             .SelectMany(method => method.GetCustomAttributes<RoleActionAttribute>().Select(a => (a, method)))
             .Where(t => t.a.Subclassing || t.method.DeclaringType == this.GetType())
             .Select(t => new RoleAction(t.Item1, t.method))
@@ -188,7 +191,7 @@ public abstract class AbstractBaseRole
 
     public void Trigger(RoleActionType actionType, ref ActionHandle handle, params object[] parameters)
     {
-        if (!AmongUsClient.Instance.AmHost) return;
+        if (!AmongUsClient.Instance.AmHost || Game.State is GameState.InLobby) return;
 
         uint id = Profilers.Global.Sampler.Start("Action: " + actionType);
         if (actionType == RoleActionType.FixedUpdate)
@@ -211,12 +214,12 @@ public abstract class AbstractBaseRole
         foreach (var action in roleActions[actionType].Sorted(a => (int)a.Priority))
         {
             if (handle.IsCanceled) continue;
-            if (MyPlayer != null && !MyPlayer.IsAlive() && !action.TriggerWhenDead) continue;
-
+            if (MyPlayer == null || !MyPlayer.IsAlive() && !action.TriggerWhenDead) continue;
+            
             if (actionType.IsPlayerAction())
             {
-                Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(MyPlayer!, action, parameters));
-                Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer!, action, parameters);
+                Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(MyPlayer, action, parameters));
+                Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer, action, parameters);
             }
 
             if (handle.IsCanceled) continue;
@@ -250,6 +253,13 @@ public abstract class AbstractBaseRole
         FieldInfo field = setupRules.FieldInfo;
         object? currentValue = field.GetValue(this);
         object newValue;
+
+        if (setupRules.UseCloneIfPresent && currentValue is ICloneOnSetup cos)
+        {
+            field.SetValue(this, cos.CloneIndiscriminate());
+            return;
+        }
+        
         MethodInfo? cloneMethod = field.FieldType.GetMethod("Clone", AccessFlags.InstanceAccessFlags, Array.Empty<Type>());
         if (currentValue == null || cloneMethod == null || !setupRules.UseCloneIfPresent)
             try {
@@ -271,7 +281,6 @@ public abstract class AbstractBaseRole
 
     private void CreateCooldown(FieldInfo fieldInfo)
     {
-        VentLogger.Fatal("Hi HI hi hi I am creating a cooldown");
         Cooldown? value = (Cooldown)fieldInfo.GetValue(this);
         Cooldown setValue = value == null ? new Cooldown() : value.Clone();
         value?.TimeRemaining();
@@ -376,8 +385,6 @@ public abstract class AbstractBaseRole
     }
 
 
-    public bool Is(CustomRole role) => this.GetType() == role.GetType();
-
     public override string ToString()
     {
         return this.RoleName;
@@ -437,7 +444,6 @@ public abstract class AbstractBaseRole
 
         public RoleModifier OptionOverride(Override option, Func<object> valueSupplier, Func<bool>? condition = null)
         {
-            $"Setting Option Override For {option}".DebugLog();
             myRole.roleSpecificGameOptionOverrides.Add(new GameOptionOverride(option, valueSupplier, condition));
             return this;
         }
@@ -530,6 +536,11 @@ public abstract class AbstractBaseRole
         public virtual GameOptionBuilder HookOptions(GameOptionBuilder optionStream) {
             return optionStream;
         }
+        
+        public virtual void AddAction(RoleAction action)
+        {
+            FrozenRole.roleActions[action.ActionType].Add(action);
+        }
 
         public abstract void OnLink();
 
@@ -546,6 +557,8 @@ public abstract class AbstractBaseRole
             baseMethod.InvokeAligned(args);
             action.method.InvokeAligned(args);
         }
+
+        
 
         private void SetupActions()
         {
@@ -575,6 +588,17 @@ public abstract class AbstractBaseRole
                         ModdedRole.roleActions[action.ActionType] = currentActions;
                     }
                 });
+        }
+    }
+
+    public class BasicRoleEditor : RoleEditor
+    {
+        public BasicRoleEditor(AbstractBaseRole baseRole) : base(baseRole)
+        {
+        }
+
+        public override void OnLink()
+        {
         }
     }
 }

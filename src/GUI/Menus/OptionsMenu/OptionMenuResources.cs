@@ -26,13 +26,13 @@ internal class OptionMenuResources
         PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(ButtonOnSprite), "TOHTOR.assets.Settings.SelectButton.png", 450);
         PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(ButtonOffSprite), "TOHTOR.assets.Settings.UnselectButton.png", 450);
 
-        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(GeneralButton), "TOHTOR.assets.Settings.GeneralButton.png", ButtonPpu);
-        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(GraphicsButton), "TOHTOR.assets.Settings.GraphicsButton.png", ButtonPpu);
-        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(SoundButton), "TOHTOR.assets.Settings.SoundButton.png", ButtonPpu);
-        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(VentLibButton), "TOHTOR.assets.Settings.VentButton.png", ButtonPpu);
-        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(AddonsButton), "TOHTOR.assets.Settings.AddonButton.png", ButtonPpu);
-        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(ReturnButton), "TOHTOR.assets.Settings.ReturnButton.png", ButtonPpu);
-        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(ExitButton), "TOHTOR.assets.Settings.ExitButton.png", ButtonPpu);
+        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(GeneralButton), "TOHTOR.assets.Settings.GeneralBlank.png", ButtonPpu);
+        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(GraphicsButton), "TOHTOR.assets.Settings.GraphicBlank.png", ButtonPpu);
+        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(SoundButton), "TOHTOR.assets.Settings.SoundBlank.png", ButtonPpu);
+        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(VentLibButton), "TOHTOR.assets.Settings.VentLibBlank.png", ButtonPpu);
+        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(AddonsButton), "TOHTOR.assets.Settings.AddonBlank.png", ButtonPpu);
+        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(ReturnButton), "TOHTOR.assets.Settings.ReturnBlank.png", ButtonPpu);
+        PersistentAssetLoader.RegisterSprite(nameof(OptionMenuResources) + nameof(ExitButton), "TOHTOR.assets.Settings.ExitBlank.png", ButtonPpu);
     }
 
 }

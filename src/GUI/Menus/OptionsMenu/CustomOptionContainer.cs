@@ -6,20 +6,33 @@ using TMPro;
 using TOHTOR.Extensions;
 using TOHTOR.GUI.Menus.OptionsMenu.Components;
 using TOHTOR.GUI.Menus.OptionsMenu.Submenus;
+using TOHTOR.Logging;
 using TOHTOR.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
+using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
+// ReSharper disable InconsistentNaming
 
 namespace TOHTOR.GUI.Menus.OptionsMenu;
 
+[Localized("GUI")]
 [RegisterInIl2Cpp]
 public class CustomOptionContainer: MonoBehaviour
 {
+    [Localized(nameof(GeneralButton))] private static string GeneralButton = "General";
+    [Localized(nameof(GraphicsButton))] private static string GraphicsButton = "Graphics";
+    [Localized(nameof(SoundButton))] private static string SoundButton = "Sound";
+    [Localized(nameof(VentLibButton))] private static string VentLibButton = "VentLib";
+    [Localized(nameof(AddonsButton))] private static string AddonsButton = "Addons";
+    [Localized(nameof(ReturnButton))] private static string ReturnButton = "Return";
+    [Localized(nameof(LeaveGameButton))] private static string LeaveGameButton = "Leave Game";
+    
+    
     public static UnityOptional<TMP_FontAsset> CustomOptionFont = UnityOptional<TMP_FontAsset>.Null();
 
     public SpriteRenderer background;
@@ -66,32 +79,32 @@ public class CustomOptionContainer: MonoBehaviour
         soundMenu.PassMenu(menuBehaviour);
         ventLibMenu.PassMenu(menuBehaviour);
 
-        var buttonFunc = CreateButton(menuBehaviour);
-        generalButton = buttonFunc(OptionMenuResources.GeneralButton);
+        Func<Sprite, string, PassiveButton> buttonFunc = CreateButton(menuBehaviour);
+        generalButton = buttonFunc(OptionMenuResources.GeneralButton, GeneralButton);
         generalButton.transform.localPosition += new Vector3(2.6f, 0f);
 
-        graphicButton = buttonFunc(OptionMenuResources.GraphicsButton);
+        graphicButton = buttonFunc(OptionMenuResources.GraphicsButton, GraphicsButton);
         graphicButton.transform.localPosition += new Vector3(2.6f, -0.5f);
 
-        soundButton = buttonFunc(OptionMenuResources.SoundButton);
+        soundButton = buttonFunc(OptionMenuResources.SoundButton, SoundButton);
         soundButton.transform.localPosition += new Vector3(2.6f, -1f);
 
-        ventLibButton = buttonFunc(OptionMenuResources.VentLibButton);
+        ventLibButton = buttonFunc(OptionMenuResources.VentLibButton, VentLibButton);
         ventLibButton.transform.localPosition += new Vector3(2.6f, -1.5f);
 
-        addonsButton = buttonFunc(OptionMenuResources.AddonsButton);
+        addonsButton = buttonFunc(OptionMenuResources.AddonsButton, AddonsButton);
         addonsButton.transform.localPosition += new Vector3(2.6f, -2f);
 
-        returnButton = buttonFunc(OptionMenuResources.ReturnButton);
-        returnButton.transform.localPosition += new Vector3(2.6f, -4f);
-        returnButton.OnClick.AddListener(((Action)((menuBehaviour.Close))));
+        returnButton = buttonFunc(OptionMenuResources.ReturnButton, ReturnButton);
+        returnButton.transform.localPosition += new Vector3(2.6f, -4.5f);
+        returnButton.OnClick.AddListener((Action)menuBehaviour.Close);
 
-        exitButton = buttonFunc(OptionMenuResources.ExitButton);
-        exitButton.transform.localPosition += new Vector3(2.6f, -4.5f);
+        exitButton = buttonFunc(OptionMenuResources.ExitButton, LeaveGameButton);
+        exitButton.transform.localPosition += new Vector3(2.6f, -4f);
         menuBehaviour.FindChildOrEmpty<PassiveButton>("LeaveGameButton").Handle(exitPassiveButton =>
         {
             exitPassiveButton.gameObject.SetActive(false);
-            exitButton.OnClick.AddListener(((Action)(exitPassiveButton.ReceiveClickDown)));
+            exitButton.OnClick.AddListener((Action)exitPassiveButton.ReceiveClickDown);
         }, () =>
         {
             exitButton.gameObject.SetActive(false);
@@ -104,6 +117,8 @@ public class CustomOptionContainer: MonoBehaviour
         menuBehaviour.Tabs.ForEach(t => t.gameObject.SetActive(false));
         menuBehaviour.Tabs[0].Content.SetActive(false);
         menuBehaviour.Tabs[0].Content.transform.localPosition += new Vector3(0f, 1000f);
+        
+
         menuBehaviour.BackButton.transform.localPosition += new Vector3(-1.2f, 0.17f);
         CreateButtonBehaviour();
         generalMenu.Open();
@@ -116,30 +131,33 @@ public class CustomOptionContainer: MonoBehaviour
             (generalButton, generalMenu), (graphicButton, graphicsMenu), (soundButton, soundMenu), (ventLibButton, ventLibMenu)
         };
 
-        Func<int, UnityAction> actionFunc = i => (Action)(() =>
-        {
-            boundButtons.ForEach((b, i1) =>
+        UnityAction ActionFunc(int i) =>
+            (Action)(() =>
             {
-                if (i == i1) b.Item2.Open();
-                else b.Item2.Close();
+                boundButtons.ForEach((b, i1) =>
+                {
+                    if (i == i1)
+                        b.Item2.Open();
+                    else
+                        b.Item2.Close();
+                });
             });
-        });
 
-        generalButton.OnClick.AddListener(actionFunc(0));
-        graphicButton.OnClick.AddListener(actionFunc(1));
-        soundButton.OnClick.AddListener(actionFunc(2));
-        ventLibButton.OnClick.AddListener(actionFunc(3));
+        generalButton.OnClick.AddListener(ActionFunc(0));
+        graphicButton.OnClick.AddListener(ActionFunc(1));
+        soundButton.OnClick.AddListener(ActionFunc(2));
+        ventLibButton.OnClick.AddListener(ActionFunc(3));
     }
 
 
 
-    private Func<Sprite, PassiveButton> CreateButton(OptionsMenuBehaviour menuBehaviour)
+    private Func<Sprite, string, PassiveButton> CreateButton(OptionsMenuBehaviour menuBehaviour)
     {
-        return sprite =>
+        return (sprite, text) =>
         {
 
             PassiveButton button = Instantiate(template ??= menuBehaviour.GetComponentsInChildren<PassiveButton>().Last(), transform);
-            button.GetComponentInChildren<TextMeshPro>().gameObject.SetActive(false);
+            TextMeshPro tmp = button.GetComponentInChildren<TextMeshPro>();
             SpriteRenderer render = button.GetComponentInChildren<SpriteRenderer>();
             render.sprite = sprite;
             render.color = Color.white;
@@ -149,6 +167,14 @@ public class CustomOptionContainer: MonoBehaviour
             var buttonTransform = button.transform;
             buttonTransform.localScale -= new Vector3(0.33f, 0f, 0f);
             buttonTransform.localPosition += new Vector3(-4.6f, 2.5f, 0f);
+            
+            /*GameObject generalText = button.gameObject.CreateChild($"{text}_TextTMP", new Vector3(9.6f, -2.34f));
+            tmp = generalText.AddComponent<TextMeshPro>();*/
+            tmp.font = GetGeneralFont();
+            tmp.fontSize = 2.8f;
+            tmp.text = text;
+            tmp.color = Color.white;
+            tmp.transform.localPosition += new Vector3(0.13f, 0f);
 
             return button;
         };

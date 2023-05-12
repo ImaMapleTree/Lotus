@@ -12,6 +12,7 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -47,7 +48,7 @@ public class Witch: Vanilla.Impostor
         mode = WitchMode.Killing;
         if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
-        Game.GameHistory.AddEvent(new CursedEvent(MyPlayer, target));
+        Game.MatchData.GameHistory.AddEvent(new CursedEvent(MyPlayer, target));
         cursedPlayers.Add(target);
         remotes.GetValueOrDefault(target.PlayerId)?.Delete();
         LiveString liveString = new("†", Color.red);
@@ -88,8 +89,7 @@ public class Witch: Vanilla.Impostor
                 .AddOnOffValues().Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, KillCooldown * 2, () => mode == WitchMode.Cursing);
+        base.Modify(roleModifier).OptionOverride(new IndirectKillCooldown(KillCooldown, () => mode is WitchMode.Cursing));
 
     private enum WitchMode
     {

@@ -25,13 +25,16 @@ public class VanillaImpostorWin: IFactionWinCondition
         foreach (CustomRole role in Game.GetAlivePlayers().Select(p => p.GetCustomRole()))
         {
             if (role.Faction.Relationship(FactionInstances.Impostors) is Relation.FullAllies or Relation.SharedWinners) aliveImpostors++;
-            else aliveOthers++;
-
-            if (role.Faction.Relationship(FactionInstances.Crewmates) is Relation.FullAllies) continue;
-            if (role.MyPlayer.GetVanillaRole().IsImpostor()) aliveKillers++;
+            else
+            {
+                aliveOthers++;
+                if (role.Faction.Relationship(FactionInstances.Crewmates) is Relation.FullAllies) continue;
+                if (role.MyPlayer.GetVanillaRole().IsImpostor()) aliveKillers++;
+            }
+            
         }
 
-        return aliveImpostors > 0 && aliveImpostors >= aliveOthers;
+        return aliveImpostors > 0 && aliveImpostors >= aliveOthers && aliveImpostors > aliveKillers;
     }
 
     public WinReason GetWinReason() => WinReason.FactionLastStanding;

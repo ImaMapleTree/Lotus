@@ -85,7 +85,7 @@ public partial class Alchemist
             return;
         }
 
-        if (currentlyCrafting != null) progressBar = RoleUtils.ProgressBar(times - 2, 4, RoleColor);
+        if (currentlyCrafting != null) progressBar = RoleUtils.ProgressBar(times - 2, 3, RoleColor);
 
         switch (times)
         {
@@ -94,7 +94,7 @@ public partial class Alchemist
                 break;
             case 2:
                 ToggleCrafting();
-                if (currentlyCrafting != null) progressBar = RoleUtils.ProgressBar(times - 2, 4, RoleColor);
+                if (currentlyCrafting != null) progressBar = RoleUtils.ProgressBar(times - 2, 3, RoleColor);
                 if (currentlyCrafting != null) VentLogger.Trace($"{MyPlayer.GetNameWithRole()} => Currently Crafting: {currentlyCrafting.Name()}");
                 advancePage = false;
                 break;

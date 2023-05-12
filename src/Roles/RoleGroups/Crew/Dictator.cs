@@ -29,11 +29,11 @@ public class Dictator: Crewmate
     {
         if (!target.Exists()) return;
         meetingDelegate.EndVoting(target.Get().Data);
-        Game.GameHistory.AddEvent(new DictatorVoteEvent(MyPlayer, target.Get()));
+        Game.MatchData.GameHistory.AddEvent(new DictatorVoteEvent(MyPlayer, target.Get()));
         if (--currentDictates > 0) return;
 
         ProtectedRpc.CheckMurder(MyPlayer, MyPlayer);
-        Game.GameHistory.AddEvent(new SuicideEvent(MyPlayer));
+        Game.MatchData.GameHistory.AddEvent(new SuicideEvent(MyPlayer));
 
     }
 

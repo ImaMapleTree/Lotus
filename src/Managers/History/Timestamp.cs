@@ -14,7 +14,7 @@ public class Timestamp
 
     public Timestamp()
     {
-        time = DateTime.Now.Subtract(Game.GameHistory.StartTime);
+        time = DateTime.Now.Subtract(Game.MatchData.StartTime);
     }
 
     public bool IsBefore(Timestamp other) => time.CompareTo(other.time) < 0;

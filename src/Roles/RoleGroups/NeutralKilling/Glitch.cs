@@ -49,7 +49,7 @@ public class Glitch: NeutralKillingBase
 
         blockedPlayers[target.PlayerId] = BlockDelegate.Block(target, MyPlayer, roleblockDuration);
         MyPlayer.RpcGuardAndKill(target);
-        Game.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{RoleColor.Colorize(MyPlayer.name)} hacked {target.GetRoleColor().Colorize(target.name)}."));
+        Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{RoleColor.Colorize(MyPlayer.name)} hacked {target.GetRoleColor().Colorize(target.name)}."));
 
         if (roleblockDuration > 0) Async.Schedule(() => blockedPlayers.Remove(target.PlayerId), roleblockDuration);
         return false;
@@ -76,6 +76,26 @@ public class Glitch: NeutralKillingBase
     private void Block(PlayerControl source, ActionHandle handle)
     {
         BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(source.PlayerId);
+        if (blockDelegate == null) return;
+
+        handle.Cancel();
+        blockDelegate.UpdateDelegate();
+    }
+    
+    [RoleAction(RoleActionType.SabotageStarted)]
+    private void BlockSabotage(PlayerControl caller, ActionHandle handle)
+    {
+        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(caller.PlayerId);
+        if (blockDelegate == null) return;
+
+        handle.Cancel();
+        blockDelegate.UpdateDelegate();
+    }
+
+    [RoleAction(RoleActionType.AnyReportedBody)]
+    private void BlockReport(PlayerControl reporter, ActionHandle handle)
+    {
+        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(reporter.PlayerId);
         if (blockDelegate == null) return;
 
         handle.Cancel();

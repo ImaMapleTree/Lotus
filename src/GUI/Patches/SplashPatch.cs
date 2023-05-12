@@ -27,7 +27,6 @@ class SplashPatch
     [SuppressMessage("ReSharper", "Unity.InefficientPropertyAccess")]
     static void Postfix(MainMenuManager __instance)
     {
-        Application.targetFrameRate = 165;
         if ((AmongUsLogo = GameObject.Find("bannerLogo_AmongUs")) != null)
         {
             AmongUsLogo.transform.localScale *= 0.4f;

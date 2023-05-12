@@ -3,6 +3,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;
 
@@ -17,25 +18,20 @@ public class Jackal : NeutralKillingBase
     public new bool TryKill(PlayerControl target) => base.TryKill(target);
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
-            .SubOption(sub => sub
-                .Name("Kill Cooldown")
-                .Bind(v => KillCooldown = (float)v)
-                .AddFloatRange(0, 180, 2.5f, 12, "s")
-                .Build())
+        AddKillCooldownOptions(base.RegisterOptions(optionStream))
             .SubOption(sub => sub
                 .Name("Can Vent")
-                .Bind(v => canVent = (bool)v)
+                .BindBool(v => canVent = v)
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
                 .Name("Can Sabotage")
-                .Bind(v => canSabotage = (bool)v)
+                .BindBool(v => canSabotage = v)
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
                 .Name("Impostor Vision")
-                .Bind(v => impostorVision = (bool)v)
+                .BindBool(v => impostorVision = v)
                 .AddOnOffValues()
                 .Build());
 

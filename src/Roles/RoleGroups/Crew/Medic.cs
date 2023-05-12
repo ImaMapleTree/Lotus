@@ -35,7 +35,7 @@ public class Medic: Crewmate
         guardedOnce = guardedOnce || guardedPlayer.Exists();
         guardedPlayer.IfPresent(player =>
         {
-            Game.GameHistory.AddEvent(new ProtectEvent(MyPlayer, Utils.GetPlayerById(player)!));
+            Game.MatchData.GameHistory.AddEvent(new ProtectEvent(MyPlayer, Utils.GetPlayerById(player)!));
         });
     }
 
@@ -56,6 +56,12 @@ public class Medic: Crewmate
     {
         // ReSharper disable once ConvertIfStatementToSwitchStatement
         if (guardedOnce && mode is GuardMode.Never) return;
+        if (guardedOnce && mode is GuardMode.OnDeath)
+        {
+            
+        }
+        
+        
         if (guardedOnce && guardedPlayer.Exists() && mode is GuardMode.OnDeath) return;
         if (this.castVote) return;
         this.castVote = true;
@@ -80,7 +86,15 @@ public class Medic: Crewmate
         if (interaction.Intent() is not (IHostileIntent or IFatalIntent)) return;
 
         handle.Cancel();
-        Game.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, killer));
+        Game.MatchData.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, killer));
+    }
+
+    [RoleAction(RoleActionType.Disconnect)]
+    private void HandleDisconnect(PlayerControl player)
+    {
+        if (!guardedPlayer.Exists() || guardedPlayer.Get() != player.PlayerId) return;
+        guardedPlayer = Optional<byte>.Null();
+        guardedOnce = false;
     }
 
     private static Optional<string> GetPlayerName(byte b) => Game.GetAlivePlayers().FirstOrOptional(p => p.PlayerId == b).Map(p => p.name);
@@ -91,7 +105,7 @@ public class Medic: Crewmate
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub
                 .Name("Change Guarded Player")
-                .Value(v => v.Text("When Guarded Player Dies").Value(0).Build())
+                .Value(v => v.Text("Their Death").Value(0).Build())
                 .Value(v => v.Text("Any Meeting").Value(1).Build())
                 .Value(v => v.Text("Never").Value(2).Build())
                 .BindInt(o => mode = (GuardMode)o)

@@ -10,6 +10,7 @@ public class FriendUtils
 
     public static bool IsFriend(PlayerControl player)
     {
+        if (AmongUsClient.Instance.NetworkMode is NetworkModes.LocalGame) return true;
         if (player == null || player.FriendCode == null) return false;
         FriendsListManager friendsListManager = FriendsListManager.Instance;
         if (friendsListManager == null) return Friends.Contains(player.FriendCode);

@@ -33,4 +33,5 @@ public static class GameOptionBuilderExtensions
                     .Build());
     }
 
+    public static GameOptionBuilder KeyName(this GameOptionBuilder builder, string key, string name) => builder.Key(key).Name(name);
 }

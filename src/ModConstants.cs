@@ -22,11 +22,33 @@ public static class ModConstants
 
     public const int RecursiveDepthLimit = 200;
 
+    public const float MaxPlayerSpeed = 3f;
+
     public static string[] ColorNames = new[]
     {
         "Red", "Blue", "Green", "Pink", "Orange", "Yellow", "Black", "White", "Purple", "Brown", "Cyan", "Lime",
         "Maroon", "Rose", "Banana", "Gray", "Tan", "Coral"
     };
+
+
+    public const string Infinity = "∞";
+
+    public static class Palette
+    {
+        public static Color InfinityColor = new(0.77f, 0.71f, 1f);
+        public static Color NeutralColor = new(1f, 0.67f, 0.11f);
+        public static Color PassiveColor = new(1f, 0.87f, 0.91f);
+        public static Color KillingColor = new(1f, 0.27f, 0.18f);
+
+        public static Color GeneralColor1 = new(0.15f, 0.27f, 0.33f);
+        public static Color GeneralColor2 = new(0.16f, 0.62f, 0.56f);
+        public static Color GeneralColor3 = new(0.91f, 0.77f, 0.42f);
+        public static Color GeneralColor4 = new(0.96f, 0.64f, 0.38f);
+        public static Color GeneralColor5 = new(0.91f, 0.44f, 0.32f);
+
+
+        public static Color InvalidUsage = new(1f, 0.67f, 0.11f);
+    }
 
     public static class DeathNames
     {

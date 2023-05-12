@@ -7,6 +7,7 @@ using TOHTOR.Extensions;
 using TOHTOR.GUI.Name.Components;
 using TOHTOR.GUI.Name.Holders;
 using TOHTOR.GUI.Name.Interfaces;
+using TOHTOR.Logging;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;

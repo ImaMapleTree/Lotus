@@ -1,9 +1,12 @@
 using System;
+using System.Linq;
 using AmongUs.Data;
 using TMPro;
 using TOHTOR.GUI.Menus.OptionsMenu.Components;
+using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Logging;
+using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
@@ -61,9 +64,9 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         censorChatButton = censorGameObject.AddComponent<MonoToggleButton>();
         censorChatButton.SetOnText("Censor Chat: ON");
         censorChatButton.SetOffText("Censor Chat: OFF");
-        censorChatButton.SetToggleOnAction(() => optionsMenuBehaviour.CensorChatButton.UpdateText(true));
-        censorChatButton.SetToggleOffAction(() => optionsMenuBehaviour.CensorChatButton.UpdateText(false));
-        censorChatButton.SetState(optionsMenuBehaviour.CensorChatButton.onState);
+        censorChatButton.SetToggleOnAction(() => DataManager.Settings.Multiplayer.CensorChat = true);
+        censorChatButton.SetToggleOffAction(() => DataManager.Settings.Multiplayer.CensorChat = false);
+        censorChatButton.SetState(DataManager.Settings.Multiplayer.CensorChat);
         censorGameObject.transform.localPosition += new Vector3(0.5f, 0.25f);
 
         optionsMenuBehaviour.CensorChatButton.gameObject.SetActive(false);
@@ -74,9 +77,9 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         friendInviteButton = fIGameObject.AddComponent<MonoToggleButton>();
         friendInviteButton.SetOnText("Friend & Lobby Invites: ON");
         friendInviteButton.SetOffText("Friend & Lobby Invites: OFF");
-        friendInviteButton.SetToggleOnAction(() => optionsMenuBehaviour.EnableFriendInvitesButton.UpdateText(true));
-        friendInviteButton.SetToggleOffAction(() => optionsMenuBehaviour.EnableFriendInvitesButton.UpdateText(false));
-        friendInviteButton.SetState(optionsMenuBehaviour.EnableFriendInvitesButton.onState);
+        friendInviteButton.SetToggleOnAction(() => DataManager.Settings.Multiplayer.AllowFriendInvites = true);
+        friendInviteButton.SetToggleOffAction(() => DataManager.Settings.Multiplayer.AllowFriendInvites = false);
+        friendInviteButton.SetState(DataManager.Settings.Multiplayer.AllowFriendInvites);
         fIGameObject.transform.localPosition += new Vector3(0.5f, -1.25f);
 
         optionsMenuBehaviour.EnableFriendInvitesButton.gameObject.SetActive(false);
@@ -87,9 +90,9 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         colorblindTextButton = colorblindGameObject.AddComponent<MonoToggleButton>();
         colorblindTextButton.SetOnText("Colorblind Mode: ON");
         colorblindTextButton.SetOffText("Colorblind Mode: OFF");
-        colorblindTextButton.SetToggleOnAction(() => optionsMenuBehaviour.ColorBlindButton.UpdateText(true));
-        colorblindTextButton.SetToggleOffAction(() => optionsMenuBehaviour.ColorBlindButton.UpdateText(false));
-        colorblindTextButton.SetState(optionsMenuBehaviour.ColorBlindButton.onState);
+        colorblindTextButton.SetToggleOnAction(() => DataManager.Settings.Accessibility.ColorBlindMode = true);
+        colorblindTextButton.SetToggleOffAction(() => DataManager.Settings.Accessibility.ColorBlindMode = false);
+        colorblindTextButton.SetState(DataManager.Settings.Accessibility.ColorBlindMode);
         colorblindGameObject.transform.localPosition += new Vector3(0.5f, -0.25f);
 
         optionsMenuBehaviour.ColorBlindButton.gameObject.SetActive(false);
@@ -100,9 +103,9 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         streamerModeButton = streamerGameObject.AddComponent<MonoToggleButton>();
         streamerModeButton.SetOnText("Streamer Mode: ON");
         streamerModeButton.SetOffText("Streamer Mode: OFF");
-        streamerModeButton.SetToggleOnAction(() => optionsMenuBehaviour.StreamerModeButton.UpdateText(true));
-        streamerModeButton.SetToggleOffAction(() => optionsMenuBehaviour.StreamerModeButton.UpdateText(false));
-        streamerModeButton.SetState(optionsMenuBehaviour.StreamerModeButton.onState);
+        streamerModeButton.SetToggleOnAction(() => DataManager.Settings.Gameplay.StreamerMode = true);
+        streamerModeButton.SetToggleOffAction(() => DataManager.Settings.Gameplay.StreamerMode = false);
+        streamerModeButton.SetState(DataManager.Settings.Gameplay.StreamerMode);
         streamerGameObject.transform.localPosition += new Vector3(0.5f, -0.75f);
 
         optionsMenuBehaviour.StreamerModeButton.gameObject.SetActive(false);

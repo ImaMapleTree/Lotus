@@ -1,4 +1,3 @@
-using TOHTOR.Extensions;
 using TOHTOR.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -24,7 +23,7 @@ public class KickBanCommand : ICommandReceiver
 
         if (context.Args.Length == 0)
         {
-            Utils.SendMessage("Invalid Usage. Requires either a number or name.", source.PlayerId, "Announcement");
+            BasicCommands.PlayerIds(source, context);
             return;
         }
 

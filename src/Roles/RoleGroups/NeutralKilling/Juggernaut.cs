@@ -2,7 +2,9 @@ using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
 
 namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
@@ -16,44 +18,39 @@ public class Juggernaut : NeutralKillingBase
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        bool flag = base.TryKill(target);
-        if (!flag) return false;
-        if (KillCooldown - decreaseBy >= 1f) KillCooldown -= decreaseBy;
-        else KillCooldown = 1f;
-        return flag;
+        if (!base.TryKill(target)) return false;
+        VentLogger.Trace($"Juggernaut Kill Cooldown {KillCooldown} => {KillCooldown - decreaseBy}");
+        KillCooldown = Mathf.Clamp(KillCooldown - decreaseBy, 0f, int.MaxValue);
+        SyncOptions();
+        return true;
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
-            .SubOption(sub => sub
-                .Name("Kill Cooldown")
-                .Bind(v => KillCooldown = (float)v)
-                .AddFloatRange(0, 180, 2.5f, 12, "s")
-                .Build())
+        AddKillCooldownOptions(base.RegisterOptions(optionStream))
             .SubOption(sub => sub
                 .Name("Decrease Amount Each Kill")
-                .Bind(v => decreaseBy = (float)v)
-                .AddFloatRange(0, 30, 2.5f, 1)
+                .BindFloat(v => decreaseBy = v)
+                .AddFloatRange(0, 30, 0.5f, 5)
                 .Build())
             .SubOption(sub => sub
                 .Name("Can Vent")
-                .Bind(v => canVent = (bool)v)
+                .BindBool(v => canVent = v)
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
                 .Name("Can Sabotage")
-                .Bind(v => canSabotage = (bool)v)
+                .BindBool(v => canSabotage = v)
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
                 .Name("Impostor Vision")
-                .Bind(v => impostorVision = (bool)v)
+                .BindBool(v => impostorVision = v)
                 .AddOnOffValues()
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .RoleColor(new Color(0f, 0.71f, 0.92f))
+            .RoleColor(new Color(0.55f, 0f, 0.3f, 1f))
             .CanVent(canVent)
             .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod(), () => !impostorVision);
 }

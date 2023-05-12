@@ -9,11 +9,15 @@
     <Nullable>enable</Nullable>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <Deterministic>false</Deterministic>
   </PropertyGroup>
   
   <PropertyGroup>
     <debug>true</debug>
   </PropertyGroup>
+  
+  
   
   <ItemGroup>
     <!--<Reference Include="E:\SteamLibrary\steamapps\common\Among Us\dump\Assembly-CSharp-2023.3.28.dll" />-->

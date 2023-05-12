@@ -16,6 +16,7 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
 using UnityEngine;
@@ -49,7 +50,7 @@ public class Swooper: Impostor
         if (!remainInvisibleOnKill || swoopingDuration.IsReady()) return base.TryKill(target);
         InteractionResult result = MyPlayer.InteractWith(target, new DirectInteraction(new FatalIntent(true), this));
         MyPlayer.RpcGuardAndKill(MyPlayer);
-        Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
+        Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }
 
@@ -75,7 +76,7 @@ public class Swooper: Impostor
         initialVent = Optional<Vent>.Of(vent);
 
         swoopingDuration.Start();
-        Game.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{MyPlayer.name} began swooping."));
+        Game.MatchData.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{MyPlayer.name} began swooping."));
         lastEntered = DateTime.Now;
         Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive(unaffected.Select(p => p.GetClientId()).ToArray()), 0.4f);
         Async.Schedule(EndSwooping, swoopingDuration.Duration);
@@ -139,5 +140,5 @@ public class Swooper: Impostor
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, () => KillCooldown * 2, () => remainInvisibleOnKill && swoopingDuration.NotReady());
+            .OptionOverride(new IndirectKillCooldown(KillCooldown, () => remainInvisibleOnKill && swoopingDuration.NotReady()));
 }

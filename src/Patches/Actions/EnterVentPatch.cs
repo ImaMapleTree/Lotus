@@ -22,6 +22,7 @@ class EnterVentPatch
 
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
+        if (!AmongUsClient.Instance.AmHost) return;
         VentLogger.Trace($"{pc.GetNameWithRole()} Entered Vent (ID: {__instance.Id})", "CoEnterVent");
         CustomRole role = pc.GetCustomRole();
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.EnterVent)) pc.MyPhysics.RpcBootFromVent(__instance.Id);
@@ -40,18 +41,6 @@ class EnterVentPatch
             Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.4f);
         else lastVentLocation[pc.PlayerId] = new Vector2(__instance.Offset.x, __instance.Offset.y);
     }
-
-    public static void CheckVentSwap(PlayerControl player)
-    {
-        Vector2? lastLocation = lastVentLocation.GetValueOrDefault(player.PlayerId);
-        if (lastLocation == null) return;
-        float distance = Vector2.Distance(lastLocation.Value, player.GetTruePosition());
-        if (distance < 1) return;
-        VentLogger.Fatal($"Player {player.GetNameWithRole()} Swapped Vents!");
-        lastVentLocation[player.PlayerId] = player.GetTruePosition();
-
-        // Run Code here
-    }
 }
 
 [HarmonyPatch(typeof(Vent), nameof(Vent.ExitVent))]
@@ -59,7 +48,7 @@ class ExitVentPatch
 {
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
-
+        if (!AmongUsClient.Instance.AmHost) return;
         ActionHandle exitVent = ActionHandle.NoInit();
         pc.Trigger(RoleActionType.VentExit, ref exitVent, __instance);
         //if (exitVent.IsCanceled) Async.Schedule(() => pc.MyPhysics.RpcEnterVent(__instance.Id), 0.0f);

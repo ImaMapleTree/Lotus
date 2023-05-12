@@ -1,10 +1,11 @@
 using System;
 using System.Globalization;
+using TOHTOR.Roles.Internals;
 using UnityEngine;
 
 namespace TOHTOR.GUI;
 
-public class Cooldown
+public class Cooldown: ICloneOnSetup<Cooldown>
 {
     public float Duration;
     private float remaining;

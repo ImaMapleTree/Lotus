@@ -29,6 +29,7 @@ public class Camouflager: Shapeshifter
         Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcShapeshift(target, true));
     }
 
+    [RoleAction(RoleActionType.MeetingCalled)]
     [RoleAction(RoleActionType.Unshapeshift)]
     private void CamouflagerUnshapeshift()
     {

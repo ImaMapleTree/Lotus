@@ -28,7 +28,7 @@ public class HistoryMenuIntermediate
         HistoryMenuButton = HistoryMenuButton.Exists() ? HistoryMenuButton : Menus.HistoryMenuButton.Create();
         HistoryMenu = HistoryMenu.Exists() ? HistoryMenu : Menus.HistoryMenu.Create();
         VentLogger.Trace("Initialized History Menu");
-        if (Game.GameHistory != null!) AddHistoryEvents(Game.GameHistory.Events);
+        if (Game.MatchData.GameHistory != null!) AddHistoryEvents(Game.MatchData.GameHistory.Events);
     }
 
     public static void StoreOutfits()

@@ -1,18 +1,25 @@
+using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
+using Hazel;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.API.Reactive;
 using TOHTOR.API.Reactive.HookEvents;
+using TOHTOR.API.Vanilla;
 using TOHTOR.Extensions;
+using TOHTOR.Logging;
 using TOHTOR.Options;
 using TOHTOR.Player;
-using TOHTOR.Roles.Extra;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals;
+using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.RPC;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
+using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -31,26 +38,28 @@ class IntroDestroyPatch
         if (TOHPlugin.NormalOptions.MapId != 4)
         {
             PlayerControl.AllPlayerControls.ToArray().Do(pc => pc.RpcResetAbilityCooldown());
-            if (GeneralOptions.GameplayOptions.FixFirstKillCooldown) Async.Schedule(FixFirstKillCooldown, 2f);
+            if (GeneralOptions.GameplayOptions.FixFirstKillCooldown) FixFirstKillCooldown();
         }
 
-        if (PlayerControl.LocalPlayer.GetCustomRole() is GM) PlayerControl.LocalPlayer.RpcExileV2();
-
-        if (GeneralOptions.MayhemOptions.RandomSpawn) Game.GetAllPlayers().Do(p => Game.RandomSpawn.Spawn(p));
+        DisperseAndPreventVenting();
 
         Async.Schedule(SetShapeshifters, NetUtils.DeriveDelay(0.15f));
         Async.Schedule(ForceApplyPets, 0.3f);
         Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.6f));
-        Game.GetAllPlayers().Select(p => new FrozenPlayer(p)).ForEach(p => Game.GameHistory.FrozenPlayers[p.GameID] = p);
+        Game.GetAllPlayers().Select(p => new FrozenPlayer(p)).ForEach(p => Game.MatchData.FrozenPlayers[p.GameID] = p);
 
         VentLogger.Trace("Intro Scene Ending", "IntroCutscene");
-        Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent());
+        ActionHandle handle = ActionHandle.NoInit();
+        Game.TriggerForAll(RoleActionType.RoundStart, ref handle, true);
+
+        Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
+        Game.SyncAll();
     }
 
     private static void FixFirstKillCooldown()
     {
-        PlayerControl.AllPlayerControls.ToArray()
-            .Where(p => p != null)
+        VentLogger.Trace("Fixing First Kill Cooldown", "FixFirstKillCooldown");
+        Game.GetAllPlayers().Where(p => p != null)
             .Where(p => p.GetVanillaRole().IsImpostor())
             .ForEach(p => p.SetKillCooldown(p.GetCustomRole().GetOverride(Override.KillCooldown)?.GetValue() as float? ?? AUSettings.KillCooldown()));
     }
@@ -70,15 +79,37 @@ class IntroDestroyPatch
         {
             if (pi?.Object == null) return;
 
-            if (pi.Object.AmOwner) {
-                pi.Object.SetPet(pet);
-                return;
+            if (pi.Object.GetCustomRole() is not ITaskHolderRole taskHolder || !taskHolder.TasksApplyToTotal())
+            {
+                VentLogger.Trace($"Clearing Tasks For: {pi.Object.name}", "SyncTasks");
+                pi.Tasks.Clear();
             }
+
+            if (pi.Object.AmOwner) pi.Object.SetPet(pet);
 
             var outfit = pi.Outfits[PlayerOutfitType.Default];
             outfit.PetId = pet;
         });
         GeneralRPC.SendGameData();
         Game.GetAllPlayers().ForEach(p => p.CRpcShapeshift(p, false));
+    }
+
+    private static void DisperseAndPreventVenting()
+    {
+        if (GeneralOptions.MayhemOptions.RandomSpawn) Game.GetAllPlayers().Do(p => Game.RandomSpawn.Spawn(p));
+        if (GeneralOptions.GameplayOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
+
+        bool isRandomSpawn = GeneralOptions.MayhemOptions.RandomSpawn;
+        bool isForceVenting = GeneralOptions.GameplayOptions.ForceNoVenting;
+
+        if (!isRandomSpawn && !isForceVenting) return;
+
+        Game.GetAllPlayers().ForEach(p =>
+        {
+            
+            if (isRandomSpawn) Game.RandomSpawn.Spawn(p);
+            if (!isForceVenting || p.GetCustomRole().BaseCanVent) return;
+            Async.Schedule(() => VentApi.ForceNoVenting(p), NetUtils.DeriveDelay(0.1f));
+        });
     }
 }

@@ -137,19 +137,20 @@ public class VanillaStatistics
             _firstMurder = true;
             DeathTimes.Clear();
         });
-        Hooks.GameStateHooks.GameEndHook.Bind(StatisticsHookKey, _ =>
+        Hooks.GameStateHooks.GameEndHook.Bind(StatisticsHookKey, gameStateEvent =>
         {
+            MatchData matchData = gameStateEvent.MatchData;
             Game.GetAllPlayers().ForEach(p => Games.Update(p.PlayerId, i => i + 1));
-            Game.GetAllPlayers().ForEach(p => TotalTime.Update(p.PlayerId, DateTime.Now.Subtract(Game.StartTime).TotalSeconds));
+            Game.GetAllPlayers().ForEach(p => TotalTime.Update(p.PlayerId, DateTime.Now.Subtract(matchData.StartTime).TotalSeconds));
             HashSet<byte> allPlayerIds = Game.GetAllPlayers().Select(p => p.PlayerId).ToHashSet();
-            allPlayerIds.Except(DeathTimes.Keys).ForEach(ap => TimeAlive.Update(ap, DateTime.Now.Subtract(Game.StartTime).TotalSeconds));
+            allPlayerIds.Except(DeathTimes.Keys).ForEach(ap => TimeAlive.Update(ap, DateTime.Now.Subtract(matchData.StartTime).TotalSeconds));
             DeathTimes.ForEach(dt => TimeDead.Update(dt.Key, DateTime.Now.Subtract(dt.Value).TotalSeconds));
         });
         Hooks.PlayerHooks.PlayerMurderHook.Bind(StatisticsHookKey, murderEvent =>
         {
             Kills.Update(murderEvent.Killer.UniquePlayerId(), i => i + 1);
             Deaths.Update(murderEvent.Victim.UniquePlayerId(), i => i + 1);
-            TimeAlive.Update(murderEvent.Victim.UniquePlayerId(), DateTime.Now.Subtract(Game.StartTime).TotalSeconds);
+            TimeAlive.Update(murderEvent.Victim.UniquePlayerId(), DateTime.Now.Subtract(Game.MatchData.StartTime).TotalSeconds);
             DeathTimes[murderEvent.Victim.PlayerId] = DateTime.Now;
             if (!_firstMurder) return;
             FirstKills.Update(murderEvent.Killer.UniquePlayerId(), i => i + 1);

@@ -77,7 +77,7 @@ public class Sheriff : Crewmate
 
         if (!canKillCrewmates) return;
         bool killed = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
-        Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target, killed));
+        Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, killed));
     }
     // OPTIONS
 
@@ -113,7 +113,7 @@ public class Sheriff : Crewmate
 
     // Sheriff is not longer a desync role for simplicity sake && so that they can do tasks
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier
+        base.Modify(roleModifier)
             .VanillaRole(RoleTypes.Crewmate)
             .DesyncRole(!isSheriffDesync ? null : RoleTypes.Impostor)
             .CanVent(false)

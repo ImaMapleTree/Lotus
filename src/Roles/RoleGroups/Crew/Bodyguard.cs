@@ -14,10 +14,13 @@ using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
+using static TOHTOR.ModConstants;
+using static TOHTOR.Roles.RoleGroups.Crew.Bodyguard.BodyguardTranslations;
+using static TOHTOR.Roles.RoleGroups.Crew.Bodyguard.BodyguardTranslations.BodyguardOptions;
+using static TOHTOR.Utilities.TranslationUtil;
 
 namespace TOHTOR.Roles.RoleGroups.Crew;
 
-[Localized($"Roles.{nameof(Bodyguard)}")]
 public class Bodyguard: Crewmate
 {
     private Optional<byte> guardedPlayer = Optional<byte>.Null();
@@ -27,19 +30,13 @@ public class Bodyguard: Crewmate
     private bool castVote;
     private bool guardedOnce;
 
-    [Localized("ProtectingMessage")]
-    private static string protectingMessage = "You are currently protecting:";
-
-    [Localized("VotePlayerInfo")]
-    private static string votePlayerMessage = "Vote to select a player to guard.";
-
     [RoleAction(RoleActionType.RoundStart)]
     private void SwapGuard()
     {
         guardedOnce = guardedOnce || guardedPlayer.Exists();
         guardedPlayer.IfPresent(player =>
         {
-            Game.GameHistory.AddEvent(new ProtectEvent(MyPlayer, Utils.GetPlayerById(player)!));
+            Game.MatchData.GameHistory.AddEvent(new ProtectEvent(MyPlayer, Utils.GetPlayerById(player)!));
         });
     }
 
@@ -52,7 +49,7 @@ public class Bodyguard: Crewmate
             if (Game.GetAlivePlayers().All(p => p.PlayerId != b)) guardedPlayer = Optional<byte>.Null();
         });
 
-        Utils.SendMessage($"{protectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}\n{votePlayerMessage}", MyPlayer.PlayerId);
+        Utils.SendMessage($"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}\n{VotePlayerMessage}", MyPlayer.PlayerId);
     }
 
     [RoleAction(RoleActionType.MyVote)]
@@ -71,7 +68,7 @@ public class Bodyguard: Crewmate
         else if (!guardedPlayer.Exists()) guardedPlayer = votedPlayer.Map(p => p.PlayerId);
         else guardedPlayer = guardedPlayer.Exists() ? new Optional<byte>() : new Optional<byte>(guardedPlayer.Get());
 
-        Utils.SendMessage($"{protectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}", MyPlayer.PlayerId);
+        Utils.SendMessage($"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}", MyPlayer.PlayerId);
     }
 
     [RoleAction(RoleActionType.AnyInteraction)]
@@ -93,24 +90,34 @@ public class Bodyguard: Crewmate
         handle.Cancel();
 
         RoleUtils.SwapPositions(target, MyPlayer);
-        Game.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, actor));
+        Game.MatchData.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, actor));
         InteractionResult result = MyPlayer.InteractWith(actor, DirectInteraction.FatalInteraction.Create(this));
 
-        if (result is InteractionResult.Proceed) Game.GameHistory.AddEvent(new KillEvent(MyPlayer, actor));
+        if (result is InteractionResult.Proceed) Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, actor));
+        
+        
         actor.GetCustomRole().GetActions(RoleActionType.Attack)
             .FirstOrOptional()
             .Handle(t => t.Item1.Execute(t.Item2, new object[] { MyPlayer} ),
             () =>
             {
                 if (actor.InteractWith(MyPlayer, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed)
-                    Game.GameHistory.AddEvent(new KillEvent(actor, MyPlayer));
+                    Game.MatchData.GameHistory.AddEvent(new KillEvent(actor, MyPlayer));
             });
+    }
+    
+    [RoleAction(RoleActionType.Disconnect)]
+    private void HandleDisconnect(PlayerControl player)
+    {
+        if (!guardedPlayer.Exists() || guardedPlayer.Get() != player.PlayerId) return;
+        guardedPlayer = Optional<byte>.Null();
+        guardedOnce = false;
     }
 
     private static Optional<string> GetPlayerName(byte b) => Game.GetAlivePlayers().FirstOrOptional(p => p.PlayerId == b).Map(p => p.name);
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier).RoleColor(new Color(0.36f, 0.36f, 0.36f));
+        base.Modify(roleModifier).RoleColor(new Color(0.25f, 0.36f, 0.3f));
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
@@ -121,19 +128,40 @@ public class Bodyguard: Crewmate
                 .Value(v => v.Text("Never").Value(2).Build())
                 .BindInt(o => guardMode = (GuardMode)o)
                 .Build())
-            .SubOption(sub => sub.Name("Protect against Beneficial Interactions")
+            .SubOption(sub => sub.KeyName("Protect against Beneficial Interactions", Colorize(BeneficialInteractionProtection, ModConstants.Palette.PassiveColor))
                 .BindBool(b => protectAgainstHelpfulInteraction = b)
                 .AddOnOffValues(false)
                 .Build())
-            .SubOption(sub => sub.Name("Protect against Neutral Interactions")
+            .SubOption(sub => sub.KeyName("Protect against Neutral Interactions", Colorize(NeutralInteractionProtection, ModConstants.Palette.NeutralColor))
                 .BindBool(b => protectAgainstNeutralInteraction = b)
                 .AddOnOffValues()
                 .Build());
+            /*.SubOption(sub => sub.Name(""));*/
 
     private enum GuardMode
     {
         OnDeath,
         PerRound,
         Never
+    }
+
+    [Localized(nameof(Bodyguard))]
+    internal static class BodyguardTranslations
+    {
+        [Localized(nameof(ProtectingMessage))]
+        public static string ProtectingMessage = "You are currently protecting:";
+
+        [Localized("VotePlayerInfo")]
+        public static string VotePlayerMessage = "Vote to select a player to guard.";
+        
+        [Localized("Options")]
+        public static class BodyguardOptions
+        {
+            [Localized(nameof(BeneficialInteractionProtection))]
+            public static string BeneficialInteractionProtection = "Protect against Beneficial::0 Interactions";
+            
+            [Localized(nameof(NeutralInteractionProtection))]
+            public static string NeutralInteractionProtection = "Protect against Neutral::0 Interactions";
+        }
     }
 }

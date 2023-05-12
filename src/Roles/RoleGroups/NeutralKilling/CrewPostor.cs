@@ -29,7 +29,7 @@ public class CrewPostor : Crewmate
         var interaction = new RangedInteraction(new FatalIntent(!warpToTarget, () => new TaskDeathEvent(target, MyPlayer)), 0, this);
 
         bool death = MyPlayer.InteractWith(target, interaction) is InteractionResult.Proceed;
-        Game.GameHistory.AddEvent(new TaskKillEvent(MyPlayer, target, death));
+        Game.MatchData.GameHistory.AddEvent(new TaskKillEvent(MyPlayer, target, death));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

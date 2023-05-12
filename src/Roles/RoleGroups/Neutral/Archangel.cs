@@ -12,6 +12,7 @@ using TOHTOR.Managers;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -75,16 +76,16 @@ public class Archangel : CustomRole
         switch (roleChangeWhenTargetDies)
         {
             case GARoleChange.Jester:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
+                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
                 break;
             case GARoleChange.Opportunist:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
+                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
             case GARoleChange.SchrodingerCat:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
+                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
                 break;
             case GARoleChange.Crewmate:
-                Game.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
+                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
                 break;
             case GARoleChange.None:
             default:

@@ -1,36 +1,52 @@
-using System.Collections.Generic;
 using AmongUs.GameOptions;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
+using TOHTOR.GUI;
+using TOHTOR.GUI.Name;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Victory.Conditions;
+using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
+using VentLib.Utilities;
 
 namespace TOHTOR.Roles.RoleGroups.Neutral;
 
+[Localized($"Roles.{nameof(Vulture)}")]
 public class Vulture : CustomRole
 {
-    private int bodyCount = 0;
-    // option
+    private static Color _modeColor = new(0.73f, 0.18f, 0.02f);
+    
+    private int bodyCount;
     private int bodyAmount;
     private bool canUseVents;
     private bool impostorVision;
     private bool canSwitchMode;
     private bool isEatMode = true;
+    
+    [Localized("EatingModeText")]
+    private static string _eatingModeText = "Feasting";
 
+    [Localized("ReportingModeText")]
+    private static string _reportingModeText = "Reporting";
+
+    [UIComponent(UI.Counter)]
+    private string BodyCounter() => RoleUtils.Counter(bodyCount, bodyAmount, RoleColor);
+    
+    [UIComponent(UI.Text)]
+    private string DisplayModeText() => canSwitchMode ? _modeColor.Colorize(isEatMode ? _eatingModeText : _reportingModeText) : "";
+    
     [RoleAction(RoleActionType.SelfReportBody)]
     private void EatBody(GameData.PlayerInfo body, ActionHandle handle)
     {
-        List<byte> blockedBodies = Game.GameStates.UnreportableBodies;
-        if (!isEatMode || blockedBodies.Contains(body.PlayerId)) return;
-        blockedBodies.Add(body.PlayerId);
+        Game.MatchData.UnreportableBodies.Add(body.PlayerId);
 
-        if (++bodyCount >= bodyAmount)
-           new ManualWin(MyPlayer, WinReason.RoleSpecificWin).Activate();
+        if (++bodyCount >= bodyAmount) ManualWin.Activate(MyPlayer, WinReason.RoleSpecificWin, 100);
 
         handle.Cancel();
     }
@@ -66,10 +82,10 @@ public class Vulture : CustomRole
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor("#a36727")
+        roleModifier.RoleColor(new Color(0.64f, 0.46f, 0.13f))
             .Faction(FactionInstances.Solo)
-        .VanillaRole(canUseVents ? RoleTypes.Engineer : RoleTypes.Crewmate)
-        .SpecialType(SpecialType.Neutral)
-        .OptionOverride(Override.CrewLightMod,
-            () => GameOptionsManager.Instance.CurrentGameOptions.AsNormalOptions()!.ImpostorLightMod, () => impostorVision);
+            .VanillaRole(canUseVents ? RoleTypes.Engineer : RoleTypes.Crewmate)
+            .CanVent(canUseVents)
+            .SpecialType(SpecialType.Neutral)
+            .OptionOverride(Override.CrewLightMod, () => AUSettings.ImpostorLightMod(), () => impostorVision);
 }

@@ -1,11 +1,10 @@
-using System.Collections.Generic;
 using System.Linq;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 
 namespace TOHTOR.API;
 
-public class GameStates
+public static class GameStates
 {
     public static GameState[] IgnStates = { GameState.InMeeting, GameState.Roaming };
 
@@ -23,7 +22,6 @@ public class GameStates
     public static int CountRealImpostors() => Game.GetAllPlayers().Count(p => p.GetCustomRole().RealRole.IsImpostor());
     public static int CountAliveRealCrew() => Game.GetAlivePlayers().Count(p => p.GetCustomRole().RealRole.IsCrewmate());
     public static int CountRealCrew() => Game.GetAllPlayers().Count(p => p.GetCustomRole().RealRole.IsCrewmate());
-
-    public List<byte> UnreportableBodies = new();
-    public int MeetingCalled;
+    
+    
 }

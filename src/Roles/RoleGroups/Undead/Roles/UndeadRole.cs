@@ -41,7 +41,7 @@ public class UndeadRole : Impostor
         CustomRole role = target.GetCustomRole();
         role.Faction = new TheUndead.Unconverted(role.Faction, nameComponent);
         role.SpecialType = SpecialType.Undead;
-        Game.GameHistory.AddEvent(new ConvertEvent(MyPlayer, target));
+        Game.MatchData.GameHistory.AddEvent(new ConvertEvent(MyPlayer, target));
     }
 
     public void InitiateUndead(PlayerControl target)
@@ -82,7 +82,7 @@ public class UndeadRole : Impostor
             }
         });
 
-        Game.GameHistory.AddEvent(new InitiateEvent(MyPlayer, target));
+        Game.MatchData.GameHistory.AddEvent(new InitiateEvent(MyPlayer, target));
     }
 
     protected static bool IsUnconvertedUndead(PlayerControl player) => player.GetCustomRole().Faction is TheUndead.Unconverted;

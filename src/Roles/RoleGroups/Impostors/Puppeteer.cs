@@ -13,6 +13,7 @@ using TOHTOR.Roles.Events;
 using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -34,7 +35,7 @@ public class Puppeteer: Vanilla.Impostor
     {
         if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
-        Game.GameHistory.AddEvent(new ManipulatedEvent(MyPlayer, target));
+        Game.MatchData.GameHistory.AddEvent(new ManipulatedEvent(MyPlayer, target));
         cursedPlayers.Add(target);
 
         playerRemotes!.GetValueOrDefault(target.PlayerId, null)?.Delete();
@@ -64,7 +65,7 @@ public class Puppeteer: Vanilla.Impostor
             ManipulatedPlayerDeathEvent playerDeathEvent = new(target, player);
             FatalIntent fatalIntent = new(false, () => playerDeathEvent);
             bool isDead = player.InteractWith(target, new ManipulatedInteraction(fatalIntent, player.GetCustomRole(), MyPlayer)) is InteractionResult.Proceed;
-            Game.GameHistory.AddEvent(new ManipulatedPlayerKillEvent(player, target, MyPlayer, isDead));
+            Game.MatchData.GameHistory.AddEvent(new ManipulatedPlayerKillEvent(player, target, MyPlayer, isDead));
             RemovePuppet(player);
         }
 
@@ -78,6 +79,5 @@ public class Puppeteer: Vanilla.Impostor
     }
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, KillCooldown * 2);
+        base.Modify(roleModifier).OptionOverride(new IndirectKillCooldown(KillCooldown));
 }

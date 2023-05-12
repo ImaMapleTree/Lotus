@@ -8,6 +8,7 @@ using TOHTOR.GUI.Name;
 using TOHTOR.GUI.Name.Impl;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
 using TOHTOR.Roles.RoleGroups.Crew.Potions;
 using TOHTOR.Roles.RoleGroups.Vanilla;

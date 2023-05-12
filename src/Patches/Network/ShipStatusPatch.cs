@@ -34,6 +34,7 @@ class ShipFixedUpdatePatch
         }
     }
 }
+
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.RepairSystem))]
 class RepairSystemPatch
 {

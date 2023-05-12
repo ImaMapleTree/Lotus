@@ -7,6 +7,7 @@ using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 

@@ -3,15 +3,10 @@ using System.Linq;
 using HarmonyLib;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla;
 using TOHTOR.Extensions;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
-using VentLib.Utilities.Extensions;
 using VentLib.Version;
 using Version = VentLib.Version.Version;
 
@@ -59,13 +54,5 @@ class CoBeginPatch
         //PlayerControl.AllPlayerControls.ToArray().Do(x => TOHPlugin.PlayerStates[x.PlayerId].InitTask(x));
 
         GameStates.InGame = true;
-    }
-
-    public static void Postfix()
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-        if (GeneralOptions.GameplayOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
-        ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.RoundStart, ref handle, true);
     }
 }

@@ -2,8 +2,11 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using TOHTOR.API.Odyssey;
 using TOHTOR.API.Vanilla.Meetings;
 using TOHTOR.Extensions;
+using TOHTOR.Roles.Internals;
+using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
@@ -22,6 +25,53 @@ public class CheckForEndVotingPatch
         MeetingDelegate meetingDelegate = MeetingDelegate.Instance;
         if (!meetingDelegate.IsForceEnd() && __instance.playerStates.Any(ps => !ps.AmDead && !ps.DidVote)) return false;
         VentLogger.Debug("Beginning End Voting", "CheckEndVotingPatch");
+
+        // Calculate the exiled player once so that we can send the voting complete signal
+        VentLogger.Trace($"End Vote Count: {meetingDelegate.CurrentVoteCount().Select(kv => $"{Utils.GetPlayerById(kv.Key).GetNameWithRole()}: {kv.Value}").Join()}");
+        (byte exiledPlayer, bool isTie) = CalculateExiledPlayer(meetingDelegate);
+        VentLogger.Trace($"Player With Most Votes: {Utils.PlayerById(exiledPlayer)}");
+        
+        // Set the meeting delegate exiled player since this is what we use to cascade information
+        GameData.PlayerInfo? playerInfo = GameData.Instance.AllPlayers.ToArray().FirstOrDefault(info => !isTie && info.PlayerId == exiledPlayer);
+        meetingDelegate.ExiledPlayer = playerInfo;
+        meetingDelegate.IsTie = isTie;
+        
+        ActionHandle handle = ActionHandle.NoInit();
+        Game.TriggerForAll(RoleActionType.VotingComplete, ref handle, meetingDelegate);
+
+        // WE DO NOT RECALCULATE THE EXILED PLAYER!
+        // This means its up to roles that modify the meeting delegate to properly update the exiled player
+
+        
+        // Generate voter states to reflect voting
+        List<VoterState> votingStates = GenerateVoterStates(meetingDelegate);
+        
+        __instance.RpcVotingComplete(votingStates.ToArray(), meetingDelegate.ExiledPlayer, meetingDelegate.IsTie);
+        return false;
+    }
+    
+    public static (byte exiledPlayer, bool isTie) CalculateExiledPlayer(MeetingDelegate meetingDelegate)
+    {
+        List<KeyValuePair<byte, int>> sortedVotes = meetingDelegate.CurrentVoteCount().Sorted(kvp => kvp.Value).Reverse().ToList();
+        bool isTie = false;
+        byte exiledPlayer = byte.MaxValue;
+        switch (sortedVotes.Count)
+        {
+            case 0: break;
+            case 1:
+                exiledPlayer = sortedVotes[0].Key;
+                break; 
+            case >= 2:
+                isTie = sortedVotes[0].Value == sortedVotes[1].Value;
+                exiledPlayer = sortedVotes[0].Key;
+                break;
+        }
+
+        return (exiledPlayer, isTie);
+    }
+
+    private static List<VoterState> GenerateVoterStates(MeetingDelegate meetingDelegate)
+    {
         List<VoterState> votingStates = new();
         meetingDelegate.CurrentVotes().ForEach(kv =>
         {
@@ -38,35 +88,12 @@ public class CheckForEndVotingPatch
                 });
             });
         });
-
-        VentLogger.Trace($"End Vote Count: {meetingDelegate.CurrentVoteCount().Select(kv => $"{Utils.GetPlayerById(kv.Key).GetNameWithRole()}: {kv.Value}").Join()}");
-
-        List<KeyValuePair<byte, int>> sortedVotes = meetingDelegate.CurrentVoteCount().Sorted(kvp => kvp.Value).Reverse().ToList();
-        bool isTie = false;
-        byte exiledPlayer = byte.MaxValue;
-        switch (sortedVotes.Count)
-        {
-            case 0: break;
-            case 1:
-                exiledPlayer = sortedVotes[0].Key;
-                break;
-            case >= 2:
-                isTie = sortedVotes[0].Value == sortedVotes[1].Value;
-                exiledPlayer = sortedVotes[0].Key;
-                break;
-        }
-
-        VentLogger.Trace($"Player With Most Votes: {Utils.PlayerById(exiledPlayer)}");
-
-        GameData.PlayerInfo? playerInfo = GameData.Instance.AllPlayers.ToArray().FirstOrDefault(info => !isTie && info.PlayerId == exiledPlayer);
-        MeetingDelegate.Instance.ExiledPlayer = playerInfo;
-        __instance.RpcVotingComplete(votingStates.ToArray(), playerInfo, isTie);
-        return false;
+        return votingStates;
     }
-
+    
     [QuickPrefix(typeof(MeetingHud), nameof(MeetingHud.VotingComplete))]
     public static void VotingCompletePatch(MeetingHud __instance, [HarmonyArgument(1)] GameData.PlayerInfo? playerInfo)
     {
-        MeetingDelegate.Instance.ExiledPlayer = playerInfo;
+        if (AmongUsClient.Instance.AmHost) MeetingDelegate.Instance.ExiledPlayer = playerInfo;
     }
 }

@@ -20,7 +20,7 @@ public static class VictoryScreen
 {
     public static void ShowWinners(List<PlayerControl> winners, GameOverReason reason)
     {
-        List<FrozenPlayer> winnerRoles = Game.GameHistory.LastWinners = winners.Select(w => Game.GameHistory.FrozenPlayers[w.GetGameID()]).ToList();
+        List<FrozenPlayer> winnerRoles = Game.MatchData.GameHistory.LastWinners = winners.Select(w => Game.MatchData.FrozenPlayers[w.GetGameID()]).ToList();
         VentLogger.Info($"Setting Up Win Screen | Winners: {winnerRoles.StrJoin()}");
 
         bool impostorsWin = IsImpostorsWin(reason);

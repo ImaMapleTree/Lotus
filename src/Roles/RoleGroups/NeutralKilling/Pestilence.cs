@@ -1,7 +1,11 @@
 using System;
 using System.Collections.Generic;
-using TOHTOR.API;
+using System.Linq;
 using TOHTOR.API.Odyssey;
+using TOHTOR.Extensions;
+using TOHTOR.Factions;
+using TOHTOR.GUI.Name.Components;
+using TOHTOR.GUI.Name.Holders;
 using TOHTOR.Managers.History.Events;
 using TOHTOR.Options;
 using TOHTOR.Roles.Interactions;
@@ -10,6 +14,7 @@ using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
 
@@ -32,6 +37,7 @@ public class Pestilence: NeutralKillingBase
 
     public Pestilence()
     {
+        RelatedRoles.Add(typeof(PlagueBearer));
         DefaultSetters = new List<Action>
         {
             () => ImmuneToManipulated = false, () => ImmuneToRangedAttacks = false,
@@ -39,12 +45,18 @@ public class Pestilence: NeutralKillingBase
         };
     }
 
+    protected override void PostSetup()
+    {
+        RoleComponent rc = MyPlayer.NameModel().GetComponentHolder<RoleHolder>()[0];
+        Game.GetAllPlayers().Where(p => !p.IsAlive() || Relationship(p) is Relation.FullAllies).ForEach(p => rc.AddViewer(p));
+    }
+
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
         if (!UnblockableAttacks) return base.TryKill(target);
         MyPlayer.InteractWith(target, new UnblockedInteraction(new FatalIntent(), this));
-        Game.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
+        Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
         return true;
     }
 

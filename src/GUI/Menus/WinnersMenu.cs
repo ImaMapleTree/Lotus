@@ -62,7 +62,7 @@ public class WinnersMenu
     {
         Async.Schedule(() =>
         {
-            List<PlayerHistory>? allPlayers = Game.GameHistory.PlayerHistory;
+            List<PlayerHistory>? allPlayers = Game.MatchData.GameHistory.PlayerHistory;
             if (lastPlayers != allPlayers) Async.Schedule(() => GeneratePlayers(allPlayers), 0.1f);
             lastPlayers = allPlayers!;
             GameObject.IfPresent(gameObject => gameObject.SetActive(true));
@@ -80,7 +80,7 @@ public class WinnersMenu
 
     private void GeneratePlayers(List<PlayerHistory>? allPlayers)
     {
-        HashSet<byte> winners = Game.GameHistory.LastWinners.Select(p => p.MyPlayer.PlayerId).ToHashSet();
+        HashSet<byte> winners = Game.MatchData.GameHistory.LastWinners.Select(p => p.MyPlayer.PlayerId).ToHashSet();
 
         poolablePlayers.ForEach(pw => pw.IfPresent(pp => pp.gameObject.SetActive(false)));
         poolablePlayers.Clear();

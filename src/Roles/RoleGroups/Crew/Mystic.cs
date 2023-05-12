@@ -3,6 +3,7 @@ using TOHTOR.Extensions;
 using TOHTOR.Patches.Systems;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;

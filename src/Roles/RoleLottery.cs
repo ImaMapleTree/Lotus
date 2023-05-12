@@ -7,7 +7,7 @@ using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles;
 
-public class RoleLottery: IEnumerator<CustomRole>
+public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
 {
     private UuidList<CustomRole> roles = new();
     private List<Ticket> tickets = new();
@@ -50,7 +50,11 @@ public class RoleLottery: IEnumerator<CustomRole>
     }
 
 
-    public bool MoveNext() => tickets.Count > 0 || priorityTickets.Count > 0;
+    public bool MoveNext()
+    {
+        current = Next();
+        return tickets.Count > 0 || priorityTickets.Count > 0;
+    }
 
     public void Reset()
     {
@@ -99,4 +103,8 @@ public class RoleLottery: IEnumerator<CustomRole>
     public void Dispose()
     {
     }
+
+    public IEnumerator<CustomRole> GetEnumerator() => this;
+
+    IEnumerator IEnumerable.GetEnumerator() => this;
 }

@@ -22,7 +22,7 @@ public partial class Medium: Crewmate, IModdable
     private void MediumDetermineRole(PlayerControl reporter, GameData.PlayerInfo reported)
     {
         if (reporter.PlayerId != MyPlayer.PlayerId) return;
-        IDeathEvent? deathEvent = Game.GameHistory.GetEvents<IDeathEvent>().FirstOrDefault(e => e.Player().PlayerId == reported.PlayerId);
+        IDeathEvent? deathEvent = Game.MatchData.GameHistory.GetEvents<IDeathEvent>().FirstOrDefault(e => e.Player().PlayerId == reported.PlayerId);
         deathEvent?.InstigatorRole().IfPresent(killerRole => Async.Schedule(() => MediumSendMessage(killerRole), 2f));
     }
 

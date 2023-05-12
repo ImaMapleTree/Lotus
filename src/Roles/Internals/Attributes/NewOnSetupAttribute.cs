@@ -1,3 +1,4 @@
+extern alias JBAnnotations;
 using System;
 
 namespace TOHTOR.Roles.Internals.Attributes;

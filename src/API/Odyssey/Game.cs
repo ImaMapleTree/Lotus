@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -7,64 +6,47 @@ using TOHTOR.API.Reactive.HookEvents;
 using TOHTOR.Extensions;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.Gamemodes;
+using TOHTOR.GUI.Name.Impl;
 using TOHTOR.GUI.Name.Interfaces;
 using TOHTOR.Managers;
-using TOHTOR.Managers.History;
 using TOHTOR.Player;
 using TOHTOR.Roles;
+using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Subroles;
-using TOHTOR.RPC;
 using TOHTOR.Victory;
-using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.API.Odyssey;
 
 public static class Game
 {
+    private static readonly Dictionary<byte, ulong> GameIDs = new();
     private static ulong _gameID;
-
-    public static DateTime StartTime;
-    public static Dictionary<byte, PlayerPlus> Players = new();
-    public static GameHistory GameHistory = null!;
-    public static GameStates GameStates = null!;
+    
+    public static MatchData? LastMatch;
+    public static MatchData MatchData = new();
+    public static Dictionary<byte, INameModel> NameModels = new();
     public static RandomSpawn RandomSpawn = null!;
     public static int RecursiveCallCheck;
 
-    public static VanillaRoleTracker VanillaRoleTracker = null!;
+    public static GameState[] IgnStates => new[] { GameState.Roaming, GameState.InMeeting };
 
-    private static readonly Dictionary<byte, ulong> GameIDs = new();
+    public static INameModel NameModel(this PlayerControl playerControl) => NameModels.GetOrCompute(playerControl.PlayerId, () => new SimpleNameModel(playerControl));
 
-    [ModRPC((uint) ModCalls.SetCustomRole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
-    public static void AssignRole(PlayerControl player, CustomRole role, bool sendToClient = false)
-    {
-        CustomRole assigned = CustomRoleManager.PlayersCustomRolesRedux[player.PlayerId] = role.Instantiate(player);
-        if (State is GameState.InLobby or GameState.InIntro) player.GetTeamInfo().MyRole = role.RealRole;
-        if (sendToClient) assigned.Assign();
-    }
-
-    [ModRPC((uint) ModCalls.SetSubrole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
-    public static void AssignSubrole(PlayerControl player, Subrole role, bool sendToClient = false)
-    {
-        Dictionary<byte, List<CustomRole>> playerSubroles = CustomRoleManager.PlayerSubroles;
-        byte playerId = player.PlayerId;
-
-        if (!playerSubroles.ContainsKey(playerId)) playerSubroles[playerId] = new List<CustomRole>();
-        playerSubroles[playerId].Add((Subrole)role.Instantiate(player));
-        if (sendToClient) role.Assign();
-    }
-
-    public static INameModel NameModel(this PlayerControl playerControl) => Players.GetValueOrDefault(playerControl.PlayerId, new PlayerPlus(playerControl)).NameModel;
-
-
-    public static void RenderAllForAll(GameState? state = null, bool force = false) => Players.Values
-        .Select(p => p.NameModel)
-        .ForEach(n => Players.Values.ForEach(pp => n.RenderFor(pp.MyPlayer, state, true, force)));
+    public static void RenderAllForAll(GameState? state = null, bool force = false) => NameModels.Values
+        .ForEach(n => GetAllPlayers().ForEach(pp => n.RenderFor(pp, state, true, force)));
 
     public static IEnumerable<PlayerControl> GetAllPlayers() => PlayerControl.AllPlayerControls.ToArray();
-    public static IEnumerable<PlayerControl> GetAlivePlayers() => GetAllPlayers().Where(p => !p.Data.IsDead && !p.Data.Disconnected);
+    public static IEnumerable<PlayerControl> GetAlivePlayers() => GetAllPlayers().Where(p => p.IsAlive());
+
+    public static IEnumerable<CustomRole> GetAliveRoles(bool includePhantomRoles = false)
+    {
+        IEnumerable<CustomRole> roles = GetAlivePlayers().Select(p => p.GetCustomRole());
+        return includePhantomRoles ? roles : roles.Where(r => r is not IPhantomRole pr || pr.IsCountedAsPlayer());
+    }
+
+
     public static IEnumerable<PlayerControl> GetDeadPlayers(bool disconnected = false) => GetAllPlayers().Where(p => p.Data.IsDead || (disconnected && p.Data.Disconnected));
     public static List<PlayerControl> GetAliveImpostors()
     {
@@ -73,7 +55,7 @@ public static class Game
 
     public static IEnumerable<PlayerControl> FindAlivePlayersWithRole(params CustomRole[] roles) =>
         GetAllPlayers()
-            .Where(p => roles.Any(r => r.Is(p.GetCustomRole()) || p.GetSubroles().Any(s => s.Is(r))));
+            .Where(p => roles.Any(r => r.GetType() == p.GetCustomRole().GetType()) || p.GetSubroles().Any(s => s.GetType() == roles.GetType()));
 
     public static void SyncAll() => GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
 
@@ -94,7 +76,7 @@ public static class Game
             actionList.Sort((a1, a2) => a1.Item1.Priority.CompareTo(a2.Item1.Priority));
             foreach ((RoleAction roleAction, AbstractBaseRole role) in actionList)
             {
-                if (role.MyPlayer != null && !role.MyPlayer.IsAlive() && !roleAction.TriggerWhenDead) return;
+                if (role.MyPlayer == null || !role.MyPlayer.IsAlive() && !roleAction.TriggerWhenDead) return;
                 roleAction.Execute(role, parameters);
             }
 
@@ -107,6 +89,9 @@ public static class Game
     }
 
     public static ulong GetGameID(this PlayerControl player) => GameIDs.GetOrCompute(player.PlayerId, () => _gameID++);
+    public static ulong GetGameID(byte playerId) => GameIDs.GetOrCompute(playerId, () => _gameID++);
+
+    public static ulong NextMatchID() => MatchData.MatchID++;
 
     public static IGamemode CurrentGamemode => TOHPlugin.GamemodeManager.CurrentGamemode;
 
@@ -118,26 +103,23 @@ public static class Game
 
     public static void Setup()
     {
-        VanillaRoleTracker = new VanillaRoleTracker();
+        LastMatch = MatchData;
+        MatchData = new MatchData();
         _winDelegate = new WinDelegate();
         RandomSpawn = new RandomSpawn();
-        StartTime = DateTime.Now;
-        GameHistory = new();
-        GameStates = new();
-        Players.Clear();
-        GetAllPlayers().Do(p => Players.Add(p.PlayerId, new PlayerPlus(p)));
+        NameModels.Clear();
+        GetAllPlayers().Do(p => NameModels.Add(p.PlayerId, new SimpleNameModel(p)));
 
-        Hooks.GameStateHooks.GameStartHook.Propagate(new GameStateHookEvent());
+        Hooks.GameStateHooks.GameStartHook.Propagate(new GameStateHookEvent(MatchData));
         CurrentGamemode.SetupWinConditions(_winDelegate);
     }
 
-    public static void Cleanup()
+    public static void Cleanup(bool newLobby = false)
     {
-        Players.Clear();
-        CustomRoleManager.PlayersCustomRolesRedux.Clear();
-        CustomRoleManager.PlayerSubroles.Clear();
-        Hooks.GameStateHooks.GameEndHook.Propagate(new GameStateHookEvent());
-        GameIDs.Clear();
+        NameModels.Clear();
+        if (newLobby) MatchData = new MatchData();
+        Hooks.GameStateHooks.GameEndHook.Propagate(new GameStateHookEvent(MatchData));
+        State = GameState.InLobby;
     }
 }
 

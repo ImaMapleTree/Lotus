@@ -24,7 +24,7 @@ public class ElectricSabotage : ISabotage
 
     public bool Fix(PlayerControl? fixer = null) {
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? Optional<PlayerControl>.Null() : Optional<PlayerControl>.Of(fixer));
+        Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? PlayerControl.LocalPlayer : fixer);
         if (handle.IsCanceled) return false;
 
         if (!ShipStatus.Instance.TryGetSystem(SabotageType().ToSystemType(), out ISystemType? systemInstance)) return false;
@@ -39,6 +39,7 @@ public class ElectricSabotage : ISabotage
         Async.Schedule(() =>
         {
             electrical.ActualSwitches = electrical.ExpectedSwitches;
+            electrical.IsDirty = true;
             SabotagePatch.CurrentSabotage = null;
         }, 0.05f);
 

@@ -35,7 +35,7 @@ public static class SabotagePatch
         {
             case SystemTypes.Sabotage:
                 if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.CallSabotage)) return false;
-                if (player.GetCustomRole() is ISabotagerRole sabotager && !sabotager.CanSabotage()) return false;
+                if (player.GetCustomRole() is not ISabotagerRole sabotager || !sabotager.CanSabotage()) return false;
                 SabotageCountdown = -1;
                 SabotageType sabotage = (SystemTypes)amount switch
                 {
@@ -81,6 +81,7 @@ public static class SabotagePatch
                 if (!__instance.TryGetSystem(systemType, out systemInstance)) break;
                 if (systemInstance.TryCast<HudOverrideSystemType>() != null && amount == 0)
                 {
+                    Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
                     Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                     Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                     CurrentSabotage = null;

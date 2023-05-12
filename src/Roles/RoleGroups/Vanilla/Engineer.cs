@@ -1,5 +1,6 @@
 using AmongUs.GameOptions;
 using TOHTOR.Roles.Internals;
+using TOHTOR.Roles.Overrides;
 
 namespace TOHTOR.Roles.RoleGroups.Vanilla;
 

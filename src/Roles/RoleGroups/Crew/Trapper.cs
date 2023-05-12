@@ -3,6 +3,7 @@ using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -44,5 +45,5 @@ public class Trapper : Crewmate
                 .AddFloatRange(1, 10, 0.5f, 8, "s")
                 .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier.RoleColor(new Color(0.35f, 0.56f, 0.82f));
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.35f, 0.56f, 0.82f));
 }

@@ -37,11 +37,7 @@ public class PickPocket : Impostor
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
-            .SubOption(sub => sub.Name("Kill Cooldown")
-                .AddFloatRange(0, 120, 2.5f, 16, "s")
-                .BindFloat(f => KillCooldown = f)
-                .Build())
+        AddKillCooldownOptions(base.RegisterOptions(optionStream))
             .SubOption(sub => sub.Name("Maximum Additional Votes")
                 .AddIntRange(1, 14, 1, 4)
                 .BindInt(i => maximumVotes = i)

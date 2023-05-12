@@ -4,12 +4,14 @@ using System.Linq;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
+using TOHTOR.Factions;
 using TOHTOR.Factions.Impostors;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Options;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
@@ -28,7 +30,7 @@ public class BountyHunter: Vanilla.Impostor
     private float punishKillCoolDown;
 
     [UIComponent(UI.Text)]
-    private string ShowTarget() => bhTarget == null ? "" : Color.red.Colorize("Target: ") + Color.white.Colorize(bhTarget.name);
+    private string ShowTarget() => Color.red.Colorize("Target: ") + Color.white.Colorize(bhTarget == null ? "None" : bhTarget.name);
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
@@ -53,9 +55,13 @@ public class BountyHunter: Vanilla.Impostor
     private void BountyHunterAcquireTarget()
     {
         List<PlayerControl> eligiblePlayers = Game.GetAlivePlayers()
-            .Where(p => p.GetCustomRole().Faction is not ImpostorFaction)
+            .Where(p => p.Relationship(MyPlayer) is not Relation.FullAllies)
             .ToList();
-        if (eligiblePlayers.Count == 0) return;
+        if (eligiblePlayers.Count == 0)
+        {
+            bhTarget = null;
+            return;
+        }
 
         // Small function to assign a NEW random target unless there's only one eligible target alive
         PlayerControl newTarget = eligiblePlayers.PopRandom();
@@ -69,7 +75,6 @@ public class BountyHunter: Vanilla.Impostor
     private void SendKillCooldown(bool decreased)
     {
         float cooldown = decreased ? bountyKillCoolDown : punishKillCoolDown;
-        cooldown.DebugLog("Sending Cooldown: ");
         GameOptionOverride[] modifiedCooldown = { new(Override.KillCooldown, cooldown) };
         DesyncOptions.SendModifiedOptions(modifiedCooldown, MyPlayer);
     }

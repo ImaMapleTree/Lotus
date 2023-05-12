@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using AmongUs.GameOptions;
 using TOHTOR.API;
 using TOHTOR.API.Odyssey;
@@ -13,16 +16,23 @@ using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using TOHTOR.Roles.Overrides;
+using TOHTOR.Roles.RoleGroups.NeutralKilling;
 using TOHTOR.RPC;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace TOHTOR.Roles.RoleGroups.Neutral;
 
 public class Copycat: CustomRole, ISabotagerRole
 {
+    /// <summary>
+    /// A dict of role types and roles for the cat to fallback upon if the role cannot be copied properly (ex: Crewpostor bc Copycat cannot gain tasks)
+    /// </summary>
+    public static readonly Dictionary<Type, Func<CustomRole>> FallbackTypes = new() { {typeof(CrewPostor), () => CustomRoleManager.Static.Madmate} };
+    
     private bool copyIdentity;
     private bool copyRoleProgress;
     private bool copyKillersRole;
@@ -33,11 +43,10 @@ public class Copycat: CustomRole, ISabotagerRole
     [RoleAction(RoleActionType.Interaction)]
     private void CopycatAttacked(PlayerControl actor, Interaction interaction, ActionHandle handle)
     {
-        if (turned) return;
-        if (interaction.Intent() is not IFatalIntent) return;
+        if (turned || interaction.Intent() is not IFatalIntent) return;
         turned = true;
         if (!copyKillersRole) AssignFaction(actor.GetCustomRole().Faction);
-        else Game.AssignRole(MyPlayer, actor.GetCustomRole());
+        else AssignRole(actor);
         handle.Cancel();
     }
 
@@ -47,25 +56,25 @@ public class Copycat: CustomRole, ISabotagerRole
     private void AssignRole(PlayerControl attacker)
     {
         CustomRole attackerRole = attacker.GetCustomRole();
+        FallbackTypes.GetOptional(attackerRole.GetType()).IfPresent(r => attackerRole = r());
         CustomRole role = copyRoleProgress ? attackerRole : CustomRoleManager.GetCleanRole(attackerRole);
-        Game.AssignRole(MyPlayer, role);
-        Game.GameHistory.AddEvent(new RoleChangeEvent(MyPlayer, role, this));
+        Api.Roles.AssignRole(MyPlayer, role);
+        Game.MatchData.GameHistory.AddEvent(new RoleChangeEvent(MyPlayer, role, this));
 
-        if (role is Impostor impostor)
+        float killCooldown = role.GetOverride(Override.KillCooldown)?.GetValue() as float? ?? AUSettings.KillCooldown();
+        role.SyncOptions(new[] { new GameOptionOverride(Override.KillCooldown, killCooldown * 2) });
+        Async.Schedule(() =>
         {
-            impostor.KillCooldown *= 2;
-            role.SyncOptions();
-            MyPlayer.RpcGuardAndKill(MyPlayer);
-            impostor.KillCooldown /= 2;
-            impostor.SyncOptions();
-        }
-        else
-        {
-            role.SyncOptions(new []{ new GameOptionOverride(Override.KillCooldown, AUSettings.KillCooldown() * 2)});
             MyPlayer.RpcGuardAndKill(MyPlayer);
             role.SyncOptions();
-        }
+        }, NetUtils.DeriveDelay(0.05f));
+        
 
+        if (!role.GetActions(RoleActionType.Shapeshift).Any())
+        {
+            role.Editor = new BasicRoleEditor(role);
+            role.Editor!.AddAction(this.GetActions(RoleActionType.Shapeshift).First().Item1);
+        }
 
         if (copyIdentity) Async.Schedule(() => MyPlayer.CRpcShapeshift(attacker, false), 2);
     }

@@ -165,7 +165,7 @@ public class SabotageOptions
         public static string DefaultValue = "Default";
 
         [Localized("DisableSabotages")]
-        public static string DisableSabotagesText = "DisableSabotages";
+        public static string DisableSabotagesText = "Disable Sabotages";
 
         [Localized(nameof(ReactorCountdown))]
         public static string ReactorCountdown = "Reactor Countdown";

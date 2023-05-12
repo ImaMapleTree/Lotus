@@ -1,10 +1,10 @@
-using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Factions;
 using TOHTOR.GUI;
 using TOHTOR.GUI.Name;
 using TOHTOR.Options;
+using TOHTOR.Roles.Interactions.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
 using TOHTOR.Victory;
@@ -21,29 +21,34 @@ public class Survivor : CustomRole
     private Cooldown vestDuration;
 
     private int vestUsages;
-    private int reaminingVests;
+    private int remainingVests;
 
     [UIComponent(UI.Counter)]
-    private string VestCounter() => RoleUtils.Counter(reaminingVests, vestUsages, RoleColor);
+    private string VestCounter() => vestUsages == -1 ? "" : RoleUtils.Counter(remainingVests, vestUsages, RoleColor);
 
     [UIComponent(UI.Indicator)]
     private string GetVestString() => vestDuration.IsReady() ? "" : RoleColor.Colorize("♣");
 
-    public virtual bool CanBeKilled() => vestDuration.IsReady();
-
-    protected override void Setup(PlayerControl player)
+    
+    protected override void PostSetup()
     {
-        base.Setup(player);
-        vestDuration.Start(10f);
-        reaminingVests = vestUsages;
+        remainingVests = vestUsages;
         Game.GetWinDelegate().AddSubscriber(GameEnd);
+    }
+
+    [RoleAction(RoleActionType.Interaction)]
+    private void SurvivorProtection(Interaction interaction, ActionHandle handle)
+    {
+        if (vestDuration.IsReady()) return;
+        if (interaction.Intent() is not IFatalIntent) return;
+        handle.Cancel();
     }
 
     [RoleAction(RoleActionType.OnPet)]
     public void OnPet()
     {
-        if (reaminingVests == 0 || vestDuration.NotReady() || vestCooldown.NotReady()) return;
-        reaminingVests--;
+        if (remainingVests == 0 || vestDuration.NotReady() || vestCooldown.NotReady()) return;
+        remainingVests--;
         vestDuration.StartThenRun(() => vestCooldown.Start());;
     }
 
@@ -68,7 +73,7 @@ public class Survivor : CustomRole
                 .Build())
             .SubOption(sub => sub.Name("Vest Usages")
                 .BindInt(i => vestUsages = i)
-                .Value(v => v.Value(-1).Text("∞").Build())
+                .Value(v => v.Value(-1).Text("∞").Color(ModConstants.Palette.InfinityColor).Build())
                 .AddIntRange(1, 60, 1)
                 .Build());
 

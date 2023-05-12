@@ -23,9 +23,9 @@ class PingTrackerPatch
 
         deltaTime += (Time.deltaTime - deltaTime) * 0.1f;
         float fps = Mathf.Ceil(1.0f / deltaTime);
-        if (fps < 55 && !dipped && Game.State is GameState.Roaming)
+        if (fps < 30 && !dipped && Game.State is GameState.Roaming)
         {
-            VentLogger.High($"FPS Dipped Below 60 => {fps}");
+            VentLogger.High($"FPS Dipped Below 30 => {fps}");
             dipped = true;
         }
         else dipped = false;
@@ -33,9 +33,8 @@ class PingTrackerPatch
         __instance.text.text += " " + fps + " fps";
         __instance.text.sortingOrder = -1;
 
-
-        if (ControllerManagerUpdatePatch.showPing)
-            __instance.text.text += TOHPlugin.CredentialsText;
+        
+        __instance.text.text += TOHPlugin.CredentialsText;
         if (GeneralOptions.DebugOptions.NoGameEnd) __instance.text.text += $"\r\n" + Utils.ColorString(Color.red, Localizer.Translate("StaticOptions.NoGameEnd"));
         __instance.text.text += $"\r\n" + Game.CurrentGamemode.GetName();
 
@@ -47,7 +46,5 @@ class PingTrackerPatch
         __instance.GetComponent<AspectPosition>().DistanceFromEdge = new Vector3(offsetX, 0f, 0f);
 
         if (!GameStates.IsLobby) return;
-        if (!ControllerManagerUpdatePatch.showPing)
-            __instance.text.text = "";
     }
 }

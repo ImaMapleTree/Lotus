@@ -6,7 +6,7 @@ namespace TOHTOR.Factions;
 
 public static class FactionExtensions
 {
-    public static Relation Relationship(this PlayerControl player, PlayerControl other) => player.Relationship(other.GetCustomRole());
+    public static Relation Relationship(this PlayerControl player, PlayerControl other) => player.GetCustomRole().Relationship(other);
 
     public static Relation Relationship(this PlayerControl player, CustomRole other) => player.Relationship(other.Faction);
 

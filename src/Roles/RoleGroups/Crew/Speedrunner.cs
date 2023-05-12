@@ -1,6 +1,7 @@
 using TOHTOR.API;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -20,7 +21,13 @@ public class Speedrunner : Crewmate
 
     private float totalSpeedBoost;
 
-    private float currentSpeedBoost = AUSettings.PlayerSpeedMod();
+    private float currentSpeedBoost;
+
+    protected override void Setup(PlayerControl player)
+    {
+        base.Setup(player);
+        currentSpeedBoost = AUSettings.PlayerSpeedMod();
+    }
 
     protected override void OnTaskComplete()
     {
@@ -82,6 +89,6 @@ public class Speedrunner : Crewmate
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor("#00ffff").OptionOverride(Override.PlayerSpeedMod, () => currentSpeedBoost);
+        base.Modify(roleModifier).RoleColor(new Color(0.4f, 0.17f, 0.93f)).OptionOverride(Override.PlayerSpeedMod, () => currentSpeedBoost);
 }
 

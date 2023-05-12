@@ -17,9 +17,9 @@ public class Egoist: Shapeshifter
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target) => base.TryKill(target);
 
-    public override Relation Relationship(PlayerControl player)
+    public override Relation Relationship(CustomRole role)
     {
-        return player.GetCustomRole().Faction is ImpostorFaction ? Relation.FullAllies : base.Relationship(player);
+        return role.Faction is ImpostorFaction ? Relation.FullAllies : base.Relationship(role);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

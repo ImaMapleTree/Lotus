@@ -46,11 +46,7 @@ internal class BlackscreenResolver
         if (unpatchable.Count == 0) return;
 
         bool updated = !TryGetDeadPlayer(out PlayerControl? deadPlayer);
-        if (deadPlayer == null)
-        {
-            deadPlayer = PlayerControl.LocalPlayer; // This is a really bad scenario, this means we have to kill host
-            SendIneligibleDeadPlayerWarning();
-        }
+        if (deadPlayer == null) deadPlayer = EmergencyKillHost();
 
         if (updated)
         {
@@ -65,13 +61,7 @@ internal class BlackscreenResolver
     private void PerformCameraReset(PlayerControl deadPlayer)
     {
         VentLogger.Debug("Performing Camera Reset", "BlackscreenResolver");
-        if (deadPlayer == null)
-        {
-            deadPlayer = PlayerControl.LocalPlayer;
-            resetCameraPosition = PlayerControl.LocalPlayer.GetTruePosition();
-            SendIneligibleDeadPlayerWarning();
-            PlayerControl.LocalPlayer.MurderPlayer(PlayerControl.LocalPlayer);
-        }
+        if (deadPlayer == null) deadPlayer = EmergencyKillHost();
 
         unpatchable.Filter(b => Utils.PlayerById(b)).ForEach(p =>
         {
@@ -102,7 +92,7 @@ internal class BlackscreenResolver
             if (!playerStates.TryGetValue(info.PlayerId, out var val)) return;
             info.IsDead = val.isDead;
             info.Disconnected = val.isDisconnected;
-            info.PlayerName = info.Object != null ? info.Object.name : "Player";
+            if (info.Object != null) info.PlayerName = info.Object.name;
         });
         GeneralRPC.SendGameData();
         CheckEndGamePatch.Deferred = false;
@@ -151,12 +141,14 @@ internal class BlackscreenResolver
         return unpatchable;
     }
 
-    private static void SendIneligibleDeadPlayerWarning()
+    private PlayerControl EmergencyKillHost()
     {
-        VentLogger.Warn("Unable to get an eligible dead player for blackscreen patching. " +
-                        "Unfortunately there's nothing further we can do at this point other than killing (you) the host." +
-                        "The reasons for this are very complicated, but a lot of code went into preventing this from happening, but it's never guarantees this scenario won't occur.", "BlackscreenResolver");
+        resetCameraPosition = PlayerControl.LocalPlayer.GetTruePosition();
+        VentLogger.SendInGame("Unable to get an eligible dead player for blackscreen patching. " +
+                              "Unfortunately there's nothing further we can do at this point other than killing (you) the host." +
+                              "The reasons for this are very complicated, but a lot of code went into preventing this from happening, but it's never guarantees this scenario won't occur.");
+        PlayerControl.LocalPlayer.MurderPlayer(PlayerControl.LocalPlayer);
+        return PlayerControl.LocalPlayer;
     }
-
 
 }

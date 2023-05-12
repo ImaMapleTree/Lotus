@@ -7,6 +7,7 @@ using TOHTOR.API;
 using TOHTOR.API.Odyssey;
 using TOHTOR.Extensions;
 using TOHTOR.Roles.Internals;
+using TOHTOR.Roles.Overrides;
 
 namespace TOHTOR.Options;
 
@@ -17,6 +18,7 @@ public static class DesyncOptions
     public static void SyncToPlayer(IGameOptions options, PlayerControl player)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+        if (player == null) return;
         if (!player.AmOwner)
         {
             SyncToClient(options, AmongUsClient.Instance.GetClientFromCharacter(player).Id);

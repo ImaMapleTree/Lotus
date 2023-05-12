@@ -7,6 +7,7 @@ using TOHTOR.Roles.Interactions;
 using TOHTOR.Roles.Interfaces;
 using TOHTOR.Roles.Internals;
 using TOHTOR.Roles.Internals.Attributes;
+using TOHTOR.Roles.Overrides;
 using TOHTOR.Roles.RoleGroups.Vanilla;
 using TOHTOR.Utilities;
 using UnityEngine;
@@ -31,7 +32,7 @@ public class Vampire : Impostor, IVariableRole
 
         MyPlayer.RpcGuardAndKill(target);
         bitten.Add(target.PlayerId);
-        Game.GameHistory.AddEvent(new BittenEvent(MyPlayer, target));
+        Game.MatchData.GameHistory.AddEvent(new BittenEvent(MyPlayer, target));
 
         Async.Schedule(() =>
         {
@@ -68,7 +69,7 @@ public class Vampire : Impostor, IVariableRole
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .OptionOverride(Override.KillCooldown, KillCooldown * 2)
+            .OptionOverride(new IndirectKillCooldown(KillCooldown))
             .LinkedRoles(_vampiress);
 
     /*case Vampire:
