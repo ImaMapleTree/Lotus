@@ -26,6 +26,7 @@ using VentLib.Utilities.Collections;
 using VentLib.Version;
 using VentLib.Version.Git;
 using VentLib.Version.Updater;
+using VentLib.Version.Updater.Bridge.Lib2Sharp;
 using Version = VentLib.Version.Version;
 
 [assembly: AssemblyVersion("1.0.*")]
@@ -63,11 +64,9 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
         versionControl.AddVersionReceiver(ReceiveVersion);
         PluginDataManager.TemplateManager.RegisterTag("lobby-join", "Tag for the template shown to players joining the lobby.");
         
+        ModUpdater updater = ModUpdater.Default();
+        updater.EstablishConnection();
         
-        
-        
-        
-        ModUpdater.Default();
     }
 
 
