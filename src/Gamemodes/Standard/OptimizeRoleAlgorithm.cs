@@ -1,8 +1,8 @@
 using Il2CppSystem;
-using TOHTOR.Options;
+using Lotus.Options;
 using UnityEngine;
 
-namespace TOHTOR.Gamemodes.Standard;
+namespace Lotus.Gamemodes.Standard;
 
 public class OptimizeRoleAlgorithm
 {

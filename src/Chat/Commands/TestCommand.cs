@@ -2,7 +2,7 @@ using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Command(CommandFlag.HostOnly, "test")]
 public class TestCommand: ICommandReceiver

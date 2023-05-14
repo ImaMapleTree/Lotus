@@ -6,17 +6,17 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Hazel;
 using InnerNet;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Chat.Patches;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Extra;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Legacy;
+using Lotus.API.Odyssey;
+using Lotus.Chat.Patches;
+using Lotus.GUI.Name.Holders;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles.Extra;
+using Lotus.Roles.Interfaces;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Roles;
+using Lotus.Roles.Legacy;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
@@ -26,7 +26,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Utilities;
+namespace Lotus.Utilities;
 
 public static class Utils
 {
@@ -237,27 +237,6 @@ public static class Utils
         return t?.PadRight(Mathf.Max(num - (bc - t.Length), 0));
     }
 
-    public static void DumpLog()
-    {
-        string t = DateTime.Now.ToString("yyyy-MM-dd_HH.mm.ss");
-        string filename =
-            $"{System.Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}/TOHTOR-v{TOHPlugin.PluginVersion}{(TOHPlugin.DevVersion ? TOHPlugin.DevVersionStr : "")}-{t}.log";
-        FileInfo file = new(@$"{System.Environment.CurrentDirectory}/BepInEx/LogOutput.log");
-        file.CopyTo(@filename);
-        System.Diagnostics.Process.Start(
-            @$"{System.Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}");
-        if (PlayerControl.LocalPlayer != null)
-            HudManager.Instance?.Chat?.AddChat(PlayerControl.LocalPlayer,
-                "デスクトップにログを保存しました。バグ報告チケットを作成してこのファイルを添付してください。");
-    }
-
-    /*public static string SummaryTexts(byte id, bool disableColor = true)
-    {
-        var RolePos = TranslationController.Instance.currentLanguage.languageID == SupportedLangs.English ? 47 : 37;
-        string summary =
-            $"{ColorString(TOHPlugin.PlayerColors[id], TOHPlugin.AllPlayerNames[id])}<pos=22%> {GetProgressText(id)}</pos><pos=29%> {GetVitalText(id)}</pos><pos={RolePos}%> {GetDisplayRoleName(id)}{GetSubRolesText(id)}</pos>";
-        return disableColor ? summary.RemoveHtmlTags() : summary;
-    }*/
 
     public static string RemoveHtmlTags(this string str) => Regex.Replace(str, "<[^>]*?>", "");
 
@@ -333,7 +312,7 @@ public static class Utils
         return null;
 
         /* Usage example:
-        AudioClip exampleClip = Helpers.loadAudioClipFromResources("TOHTOR.assets.exampleClip.raw");
+        AudioClip exampleClip = Helpers.loadAudioClipFromResources("Lotus.assets.exampleClip.raw");
         if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(exampleClip, false, 0.8f);
         */
     }

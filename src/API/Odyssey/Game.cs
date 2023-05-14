@@ -1,23 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Gamemodes;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.GUI.Name.Interfaces;
-using TOHTOR.Managers;
-using TOHTOR.Player;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Victory;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Factions.Impostors;
+using Lotus.Gamemodes;
+using Lotus.GUI.Name.Impl;
+using Lotus.GUI.Name.Interfaces;
+using Lotus.Roles;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Victory;
+using Lotus.Extensions;
+using Lotus.Managers;
+using Lotus.Player;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Odyssey;
+namespace Lotus.API.Odyssey;
 
 public static class Game
 {
@@ -93,7 +93,7 @@ public static class Game
 
     public static ulong NextMatchID() => MatchData.MatchID++;
 
-    public static IGamemode CurrentGamemode => TOHPlugin.GamemodeManager.CurrentGamemode;
+    public static IGamemode CurrentGamemode => ProjectLotus.GamemodeManager.CurrentGamemode;
 
     //public static void ResetNames() => players.Values.Select(p => p.DynamicName).Do(name => name.ClearComponents());
     public static GameState State = GameState.InLobby;

@@ -1,4 +1,4 @@
-namespace TOHTOR.GUI.Hud;
+namespace Lotus.GUI.Hud;
 
 //TODO Rethink for fairness
 /*[HarmonyPatch(typeof(HudManager), nameof(HudManager.SetHudActive), typeof(bool))]

@@ -1,7 +1,7 @@
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.GUI.Name.Components;
+using Lotus.Factions.Interfaces;
+using Lotus.GUI.Name.Components;
 
-namespace TOHTOR.Factions.Undead;
+namespace Lotus.Factions.Undead;
 
 public partial class TheUndead
 {

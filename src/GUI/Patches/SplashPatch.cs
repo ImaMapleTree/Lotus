@@ -2,10 +2,12 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
+using Lotus.Utilities;
 using TMPro;
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.Extensions;
+using Lotus.GUI.Menus;
 using UnityEngine;
+using UnityEngine.Events;
 using UnityEngine.UI;
 using VentLib.Logging;
 using VentLib.Utilities;
@@ -13,7 +15,7 @@ using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.GUI.Patches;
+namespace Lotus.GUI.Patches;
 
 [HarmonyPatch(typeof(MainMenuManager), nameof(MainMenuManager.Start))]
 class SplashPatch
@@ -21,8 +23,11 @@ class SplashPatch
     public static GameObject AmongUsLogo = null!;
     private static UnityOptional<GameObject> _customSplash = UnityOptional<GameObject>.Null();
     internal static bool FriendListButtonHasBeenMoved;
+    internal static ModUpdateMenu ModUpdateMenu;
+    internal static UnityOptional<GameObject> UpdateButton;
 
     private static GameObject howToPlayButton;
+
 
     [SuppressMessage("ReSharper", "Unity.InefficientPropertyAccess")]
     static void Postfix(MainMenuManager __instance)
@@ -60,11 +65,33 @@ class SplashPatch
         tohLogo.transform.position = new Vector3(4.55f, -1.5f);
         tohLogo.transform.localScale = new Vector3(1f, 1f, 1f);
         var renderer = tohLogo.AddComponent<SpriteRenderer>();
-        renderer.sprite = Utils.LoadSprite("TOHTOR.assets.LotusBanner.png", 1000f);
+        renderer.sprite = Utils.LoadSprite("Lotus.assets.LotusBanner.png", 1000f);
 
         _customSplash.OrElseSet(InitializeSplash);
         PlayerParticles particles = Object.FindObjectOfType<PlayerParticles>();
         particles.gameObject.SetActive(false);
+        
+        ModUpdateMenu = __instance.gameObject.AddComponent<ModUpdateMenu>();
+        
+        GameObject updateButton = Object.Instantiate(playLocalButton, __instance.transform);
+        Async.Schedule(() =>
+        {
+            TextMeshPro tmp = updateButton.GetComponentInChildren<TextMeshPro>();
+            tmp.text = "Update Found!";
+            tmp.enableWordWrapping = true;
+        }, 0.1f);
+        updateButton.transform.localPosition += new Vector3(0f, 1.85f);
+        updateButton.transform.localScale -= new Vector3(0f, 0.25f);
+        updateButton.GetComponentInChildren<ButtonRolloverHandler>().OutColor = ModConstants.Palette.GeneralColor5;
+        updateButton.GetComponentInChildren<SpriteRenderer>().color = ModConstants.Palette.GeneralColor5;
+        Button.ButtonClickedEvent buttonClickedEvent = new();
+        updateButton.GetComponentInChildren<PassiveButton>().OnClick = buttonClickedEvent;
+        buttonClickedEvent.AddListener((UnityAction)(Action)(() => ModUpdateMenu.Open()));
+        
+        UpdateButton = UnityOptional<GameObject>.Of(updateButton);
+        
+        if (!ProjectLotus.ModUpdater.HasUpdate) updateButton.gameObject.SetActive(false);
+        
     }
 
     private static GameObject InitializeSplash()
@@ -72,7 +99,7 @@ class SplashPatch
         GameObject splashArt = new("SplashArt");
         splashArt.transform.position = new Vector3(0, 0.40f, 600f);
         var spriteRenderer = splashArt.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = Utils.LoadSprite("TOHTOR.assets.TOHTORBackground.png", 200f);
+        spriteRenderer.sprite = Utils.LoadSprite("Lotus.assets.TOHTORBackground.png", 200f);
         return splashArt;
     }
 

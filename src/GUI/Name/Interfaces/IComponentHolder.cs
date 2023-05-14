@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
+using Lotus.API;
 using VentLib.Utilities.Collections;
 
-namespace TOHTOR.GUI.Name.Interfaces;
+namespace Lotus.GUI.Name.Interfaces;
 
 public interface IComponentHolder<T> : IComponentHolder where T: INameModelComponent
 {

@@ -1,10 +1,10 @@
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.RoleGroups.Undead.Roles;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Events;
+using Lotus.Roles.RoleGroups.Undead.Roles;
+using Lotus.API;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Undead.Events;
+namespace Lotus.Roles.RoleGroups.Undead.Events;
 
 public class InitiateEvent : TargetedAbilityEvent
 {

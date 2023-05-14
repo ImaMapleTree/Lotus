@@ -1,17 +1,17 @@
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Victory.Conditions;
+using Lotus.API;
+using Lotus.Factions;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Jester : CustomRole
 {
@@ -41,7 +41,7 @@ public class Jester : CustomRole
         return roleModifier
             .Faction(FactionInstances.Solo)
             .VanillaRole(canUseVents ? RoleTypes.Engineer : RoleTypes.Crewmate)
-            .SpecialType(SpecialType.Neutral)
+            .SpecialType(Internals.SpecialType.Neutral)
             .CanVent(canUseVents)
             .RoleFlags(RoleFlag.CannotWinAlone)
             .RoleColor(new Color(0.93f, 0.38f, 0.65f))

@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace TOHTOR;
+namespace Lotus;
 
 public static class ModConstants
 {

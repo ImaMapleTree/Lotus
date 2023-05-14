@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Il2CppSystem.Threading;
+using Lotus.API.Odyssey;
+using Lotus.API.Stats;
+using Lotus.Managers.History;
+using Lotus.Roles;
 using TMPro;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Stats;
-using TOHTOR.Managers.History;
-using TOHTOR.Roles;
 using UnityEngine;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.GUI.Menus;
+namespace Lotus.GUI.Menus;
 
 public class WinnersMenu
 {

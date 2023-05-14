@@ -1,9 +1,9 @@
 using System;
 using HarmonyLib;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Options;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Options;
 
-namespace TOHTOR.Patches.Systems;
+namespace Lotus.Patches.Systems;
 //参考
 //https://github.com/Koke1024/Town-Of-Moss/blob/main/TownOfMoss/Patches/MeltDownBoost.cs
 

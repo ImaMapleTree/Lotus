@@ -1,11 +1,10 @@
 extern alias JBAnnotations;
 using System;
 using JBAnnotations::JetBrains.Annotations;
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Impl;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name;
 
-namespace TOHTOR.GUI;
+namespace Lotus.GUI;
 
 [MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method)]

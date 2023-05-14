@@ -1,4 +1,4 @@
-namespace TOHTOR.Options.General;
+namespace Lotus.Options.General;
 
 public class VoteOptions
 {

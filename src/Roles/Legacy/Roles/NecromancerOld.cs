@@ -1,14 +1,14 @@
 /*using System.Collections.Generic;
-using TOHTOR.Extensions;
-using TOHTOR.Options;
-using TOHTOR.Roles.RoleGroups.Coven;
-using TOHTOR.Roles.RoleGroups.Crew;
-using TOHTOR.Roles.RoleGroups.Impostors;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Utilities;
+using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Roles.RoleGroups.Coven;
+using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Roles.RoleGroups.Impostors;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Utilities;
 using VentLib.Logging;
 
-namespace TOHTOR.Roles.Legacy.Roles
+namespace Lotus.Roles.Legacy.Roles
 {
     public static class NecromancerOld
     {

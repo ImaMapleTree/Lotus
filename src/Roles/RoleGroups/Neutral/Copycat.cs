@@ -2,29 +2,30 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Managers;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.RPC;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Interfaces;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.Managers;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Extensions;
+using Lotus.GUI.Name;
+using Lotus.RPC;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Copycat: CustomRole, ISabotagerRole
 {
@@ -106,5 +107,5 @@ public class Copycat: CustomRole, ISabotagerRole
         roleModifier.RoleColor(new Color(1f, 0.7f, 0.67f))
             .VanillaRole(copyKillersRole ? RoleTypes.Shapeshifter : RoleTypes.Crewmate)
             .Faction(FactionInstances.Solo)
-            .SpecialType(SpecialType.Neutral);
+            .SpecialType(Internals.SpecialType.Neutral);
 }

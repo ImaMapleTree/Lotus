@@ -1,7 +1,7 @@
 using AmongUs.GameOptions;
-using TOHTOR.Options;
+using Lotus.Options;
 
-namespace TOHTOR.Roles.Debugger;
+namespace Lotus.Roles.Debugger;
 
 public class CustomSyncOptions
 {

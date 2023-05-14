@@ -1,7 +1,7 @@
 using HarmonyLib;
 using InnerNet;
 
-namespace TOHTOR.Managers.Reporting;
+namespace Lotus.Managers.Reporting;
 
 [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleDisconnect))]
 public class AnticheatReporter

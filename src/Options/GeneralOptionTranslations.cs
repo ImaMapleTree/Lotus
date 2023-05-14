@@ -1,6 +1,6 @@
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 [Localized("Options.General")]
 public static class GeneralOptionTranslations

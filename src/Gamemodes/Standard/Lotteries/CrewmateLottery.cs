@@ -1,10 +1,10 @@
 using System.Linq;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
+using Lotus.Factions.Crew;
+using Lotus.Managers;
+using Lotus.Roles;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes.Standard.Lotteries;
+namespace Lotus.Gamemodes.Standard.Lotteries;
 
 public class CrewmateLottery: RoleLottery
 {

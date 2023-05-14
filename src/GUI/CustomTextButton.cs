@@ -7,7 +7,7 @@ using UnityEngine.Events;
 using Button = UnityEngine.UI.Button;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.GUI;
+namespace Lotus.GUI;
 
 public class CustomTextButton
 {

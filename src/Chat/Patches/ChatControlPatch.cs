@@ -1,9 +1,9 @@
 /*using HarmonyLib;
 using UnityEngine;
 using AmongUs.Data;
-using TOHTOR.Patches.Chat;
+using Lotus.Patches.Chat;
 
-namespace TOHTOR;
+namespace Lotus;
 
 [HarmonyPatch(typeof(ChatController), nameof(ChatController.Update))]
 class ChatControllerUpdatePatch

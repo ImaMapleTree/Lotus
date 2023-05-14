@@ -1,8 +1,8 @@
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Crew;
+using Lotus.Factions.Crew;
+using Lotus.Extensions;
 
-namespace TOHTOR.Patches.Intro;
+namespace Lotus.Patches.Intro;
 
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginImpostor))]
 class BeginImpostorPatch

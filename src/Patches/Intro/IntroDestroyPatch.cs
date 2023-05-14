@@ -3,27 +3,27 @@ using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.API.Vanilla;
-using TOHTOR.Extensions;
-using TOHTOR.Logging;
-using TOHTOR.Options;
-using TOHTOR.Player;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.RPC;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.API.Vanilla;
+using Lotus.Options;
+using Lotus.Player;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.RPC;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Patches.Intro;
+namespace Lotus.Patches.Intro;
 
 
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.OnDestroy))]
@@ -35,7 +35,7 @@ class IntroDestroyPatch
         if (!GameStates.IsInGame) return;
         if (!AmongUsClient.Instance.AmHost) return;
 
-        if (TOHPlugin.NormalOptions.MapId != 4)
+        if (ProjectLotus.NormalOptions.MapId != 4)
         {
             PlayerControl.AllPlayerControls.ToArray().Do(pc => pc.RpcResetAbilityCooldown());
             if (GeneralOptions.GameplayOptions.FixFirstKillCooldown) FixFirstKillCooldown();

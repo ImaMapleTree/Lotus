@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
-using TOHTOR.Utilities;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes.Standard;
+namespace Lotus.Gamemodes.Standard;
 
 public static class IllegalRoleCombos
 {

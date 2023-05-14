@@ -1,6 +1,6 @@
 using System;
 
-namespace TOHTOR.API.Reactive;
+namespace Lotus.API.Reactive;
 
 // ReSharper disable once InconsistentNaming
 public interface Hook<T>: Hook where T: IHookEvent

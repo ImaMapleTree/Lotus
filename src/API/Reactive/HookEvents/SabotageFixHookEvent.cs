@@ -1,7 +1,7 @@
-using TOHTOR.API.Vanilla.Sabotages;
+using Lotus.API.Vanilla.Sabotages;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.API.Reactive.HookEvents;
+namespace Lotus.API.Reactive.HookEvents;
 
 public class SabotageFixHookEvent : SabotageHookEvent
 {

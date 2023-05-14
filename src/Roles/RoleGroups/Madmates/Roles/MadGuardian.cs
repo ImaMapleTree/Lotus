@@ -1,8 +1,8 @@
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
 
-namespace TOHTOR.Roles.RoleGroups.Madmates.Roles;
+namespace Lotus.Roles.RoleGroups.Madmates.Roles;
 
 public class MadGuardian : MadCrewmate
 {

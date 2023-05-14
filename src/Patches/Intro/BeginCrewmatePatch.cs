@@ -1,22 +1,22 @@
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Extra;
-using TOHTOR.Roles.Legacy;
-using TOHTOR.Roles.RoleGroups.Crew;
-using TOHTOR.Roles.RoleGroups.Impostors;
-using TOHTOR.Roles.RoleGroups.Neutral;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Utilities;
+using Lotus.Factions.Crew;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Roles.Extra;
+using Lotus.Roles.Legacy;
+using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Roles.RoleGroups.Impostors;
+using Lotus.Roles.RoleGroups.Neutral;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
 
-namespace TOHTOR.Patches.Intro;
+namespace Lotus.Patches.Intro;
 
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
 class BeginCrewmatePatch
@@ -107,7 +107,7 @@ class BeginCrewmatePatch
         {
             __instance.TeamTitle.text = "Town Of Host:\nThe Other Roles";
             __instance.ImpostorText.gameObject.SetActive(true);
-            __instance.ImpostorText.text = "https://github.com/music-discussion/TOHTOR-TheOtherRoles--TOH-TOR" +
+            __instance.ImpostorText.text = "https://github.com/music-discussion/Lotus-TheOtherRoles--TOH-TOR" +
                                            "\r\nv0.9.4 - Out Now on Github";
             __instance.TeamTitle.color = Utils.ConvertHexToColor("#73fa73");
             StartFadeIntro(__instance, Color.cyan, Color.yellow);
@@ -116,7 +116,7 @@ class BeginCrewmatePatch
         {
             __instance.TeamTitle.text = "Town Of Host:\nThe Other Roles";
             __instance.ImpostorText.gameObject.SetActive(true);
-            __instance.ImpostorText.text = "https://github.com/music-discussion/TOHTOR-TheOtherRoles--TOH-TOR" +
+            __instance.ImpostorText.text = "https://github.com/music-discussion/Lotus-TheOtherRoles--TOH-TOR" +
                                            "\r\nv0.9.4 - Coming Soon on Github";
             __instance.TeamTitle.color = Utils.ConvertHexToColor("#73fa73");
             StartFadeIntro(__instance, Color.cyan, Color.yellow);

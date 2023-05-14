@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Utilities;
+using Lotus.API;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options;
@@ -13,7 +13,7 @@ using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 [Localized("OptionShower")]
 public class ShowerPages

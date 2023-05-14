@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.RoleGroups.Madmates.Roles;
+namespace Lotus.Roles.RoleGroups.Madmates.Roles;
 
 public class MadSnitch : MadCrewmate
 {

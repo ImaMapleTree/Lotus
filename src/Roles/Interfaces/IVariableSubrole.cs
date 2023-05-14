@@ -1,7 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
-using TOHTOR.Roles.Subroles;
+using Lotus.Roles.Subroles;
 
-namespace TOHTOR.Roles.Interfaces;
+namespace Lotus.Roles.Interfaces;
 
 public interface IVariableSubrole
 {

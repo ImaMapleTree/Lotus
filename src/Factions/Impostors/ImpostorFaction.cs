@@ -1,10 +1,10 @@
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.Factions.Undead;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Neutrals;
+using Lotus.Factions.Undead;
 using UnityEngine;
 
-namespace TOHTOR.Factions.Impostors;
+namespace Lotus.Factions.Impostors;
 
 public class ImpostorFaction : Faction<ImpostorFaction>
 {

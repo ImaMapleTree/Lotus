@@ -1,7 +1,7 @@
 using System.Reflection;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Attributes;
 
-namespace TOHTOR.Roles.Internals;
+namespace Lotus.Roles.Internals;
 
 public class RoleAction
 {

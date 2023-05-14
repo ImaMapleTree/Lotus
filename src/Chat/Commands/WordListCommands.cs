@@ -1,11 +1,11 @@
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.Managers;
-using TOHTOR.Utilities;
+using Lotus.Managers;
+using Lotus.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Command(CommandFlag.HostOnly, "wordlist", "wl")]
 public class WordListCommands

@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using TOHTOR.Options.General;
+using Lotus.Options.General;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 [Localized("Options")]
 [LoadStatic]

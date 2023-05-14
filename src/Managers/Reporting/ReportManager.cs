@@ -4,7 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.Managers.Hotkeys;
+using Lotus.Managers.Hotkeys;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options;
@@ -13,7 +13,7 @@ using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers.Reporting;
+namespace Lotus.Managers.Reporting;
 
 [LoadStatic]
 public static class ReportManager

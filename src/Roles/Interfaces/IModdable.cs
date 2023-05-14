@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.Interfaces;
+namespace Lotus.Roles.Interfaces;
 
 public interface IModdable {
 }

@@ -3,18 +3,18 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Player;
-using TOHTOR.Roles;
-using TOHTOR.RPC;
+using Lotus.API.Odyssey;
+using Lotus.Player;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Roles;
+using Lotus.RPC;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 // ReSharper disable ConvertIfStatementToSwitchStatement
 
-namespace TOHTOR.Victory;
+namespace Lotus.Victory;
 
 public static class VictoryScreen
 {

@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
-using TOHTOR.Managers;
-using TOHTOR.Managers.History;
-using TOHTOR.Player;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Overrides;
+using Lotus.Managers;
+using Lotus.Managers.History;
+using Lotus.Player;
+using Lotus.Roles;
+using Lotus.Roles.Overrides;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Odyssey;
+namespace Lotus.API.Odyssey;
 
 public class MatchData
 {

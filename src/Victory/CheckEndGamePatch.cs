@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers.History;
-using TOHTOR.Managers.Hotkeys;
-using TOHTOR.Options;
-using TOHTOR.Utilities;
-using TOHTOR.Victory.Conditions;
+using Lotus.API.Odyssey;
+using Lotus.Managers.History;
+using Lotus.Managers.Hotkeys;
+using Lotus.Options;
+using Lotus.Utilities;
+using Lotus.Victory.Conditions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
 
-namespace TOHTOR.Victory;
+namespace Lotus.Victory;
 
 [HarmonyPatch(typeof(LogicGameFlowNormal), nameof(LogicGameFlowNormal.CheckEndCriteria))]
 public class CheckEndGamePatch

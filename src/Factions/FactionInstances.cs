@@ -1,9 +1,9 @@
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.Factions.Undead;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Impostors;
+using Lotus.Factions.Neutrals;
+using Lotus.Factions.Undead;
 
-namespace TOHTOR.Factions;
+namespace Lotus.Factions;
 
 public class FactionInstances
 {

@@ -1,10 +1,10 @@
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 
-namespace TOHTOR.Patches.Meetings;
+namespace Lotus.Patches.Meetings;
 
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Update))]
 class MeetingUpdatePatch

@@ -1,13 +1,13 @@
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.Managers.History.Events;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.Managers.History.Events;
+using Lotus.API;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.GUI.Menus;
+namespace Lotus.GUI.Menus;
 
 public class HistoryMenuIntermediate
 {

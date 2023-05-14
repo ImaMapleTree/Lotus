@@ -1,9 +1,9 @@
-using TOHTOR.Managers.Hotkeys;
+using Lotus.Managers.Hotkeys;
 using UnityEngine;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Utilities;
+namespace Lotus.Utilities;
 
 [LoadStatic]
 public class ResolutionUtils

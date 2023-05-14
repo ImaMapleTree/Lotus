@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Options;
-using TOHTOR.Victory.Conditions;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
+using Lotus.Options;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
 
-namespace TOHTOR.Victory;
+namespace Lotus.Victory;
 
 public class WinDelegate
 {

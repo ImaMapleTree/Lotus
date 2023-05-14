@@ -1,7 +1,7 @@
 using System;
 using VentLib.Logging;
 
-namespace TOHTOR.Logging;
+namespace Lotus.Logging;
 
 public static class DevLogger
 {

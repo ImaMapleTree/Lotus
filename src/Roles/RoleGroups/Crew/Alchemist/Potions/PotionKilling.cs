@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Factions;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Potions;
 
 public class PotionKilling: Potion
 {

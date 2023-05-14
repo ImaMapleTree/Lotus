@@ -1,16 +1,16 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Chat.Patches;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Chat.Patches;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat;
+namespace Lotus.Chat;
 
 [Localized("Announcements")]
 [SuppressMessage("ReSharper", "ParameterHidesMember")]
@@ -41,7 +41,7 @@ public class ChatHandler
     public ChatHandler Message(string message, params object[] args)
     {
         if (args.Length > 0) message = message.Formatted(args);
-        this.message = message;
+        this.message = message.Replace("\\n", "\n");
         return this;
     }
 
@@ -77,7 +77,7 @@ public class ChatHandler
     public static ChatHandler Of(string? message = null, string? title = null)
     {
         ChatHandler ch = new ChatHandler();
-        ch.message = message;
+        ch.message = message?.Replace("\\n", "\n");
         if (title != null) ch.title = title;
         return ch;
     }

@@ -1,21 +1,21 @@
 using System;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
-using TOHTOR.Gamemodes;
-using TOHTOR.Options;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Gamemodes;
+using Lotus.Options;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.API;
+using Lotus.Extensions;
 using VentLib.Logging;
-using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
+using Impostor = Lotus.Roles.RoleGroups.Vanilla.Impostor;
 
-namespace TOHTOR.Patches.Systems;
+namespace Lotus.Patches.Systems;
 
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.RepairSystem))]
 public static class SabotagePatch

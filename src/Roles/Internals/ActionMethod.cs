@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.Internals;
+namespace Lotus.Roles.Internals;
 
 
 public static class MethodInfoExtension

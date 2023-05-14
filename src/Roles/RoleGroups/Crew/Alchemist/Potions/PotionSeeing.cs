@@ -1,14 +1,14 @@
 using System;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
-using TOHTOR.Patches.Systems;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.API.Reactive;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Patches.Systems;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Potions;
 
 public class PotionSeeing: Potion
 {

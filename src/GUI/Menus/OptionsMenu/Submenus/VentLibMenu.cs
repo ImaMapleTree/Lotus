@@ -1,13 +1,13 @@
 using System;
+using Lotus.GUI.Menus.OptionsMenu.Components;
 using TMPro;
-using TOHTOR.GUI.Menus.OptionsMenu.Components;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Networking;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Submenus;
+namespace Lotus.GUI.Menus.OptionsMenu.Submenus;
 
 [RegisterInIl2Cpp]
 public class VentLibMenu: MonoBehaviour, IBaseOptionMenuComponent

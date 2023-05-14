@@ -1,6 +1,6 @@
-using TOHTOR.Factions.Interfaces;
+using Lotus.Factions.Interfaces;
 
-namespace TOHTOR.Factions.Impostors;
+namespace Lotus.Factions.Impostors;
 
 public class Madmates : ImpostorFaction, ISubFaction<ImpostorFaction>
 {

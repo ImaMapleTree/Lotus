@@ -1,13 +1,13 @@
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Utilities;
+using Lotus.API;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Command("history")]
 public class HistoryCommands : ICommandReceiver

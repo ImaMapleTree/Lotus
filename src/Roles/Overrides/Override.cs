@@ -2,7 +2,7 @@ using System;
 using AmongUs.GameOptions;
 using UnityEngine;
 
-namespace TOHTOR.Roles.Overrides;
+namespace Lotus.Roles.Overrides;
 
 public enum Override
 {

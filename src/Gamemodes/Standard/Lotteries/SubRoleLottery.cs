@@ -1,7 +1,7 @@
-using TOHTOR.Managers;
-using TOHTOR.Roles;
+using Lotus.Managers;
+using Lotus.Roles;
 
-namespace TOHTOR.Gamemodes.Standard.Lotteries;
+namespace Lotus.Gamemodes.Standard.Lotteries;
 
 public class SubRoleLottery: RoleLottery
 {

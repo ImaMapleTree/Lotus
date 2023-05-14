@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.Gamemodes.CaptureTheFlag;
-using TOHTOR.Gamemodes.Colorwars;
-using TOHTOR.Gamemodes.Debug;
-using TOHTOR.Gamemodes.Standard;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.Gamemodes.Colorwars;
+using Lotus.Gamemodes.Debug;
+using Lotus.Gamemodes.Standard;
+using Lotus.API;
+using Lotus.Gamemodes.CaptureTheFlag;
 using VentLib.Options;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -15,7 +15,7 @@ using VentLib.Options.Game.Events;
 using VentLib.Options.Game.Tabs;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes;
+namespace Lotus.Gamemodes;
 
 // As we move to the future we're going to try to use instances for managers rather than making everything static
 public class GamemodeManager

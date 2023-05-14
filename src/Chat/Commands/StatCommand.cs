@@ -1,7 +1,7 @@
 using System.Linq;
-using TOHTOR.API.Stats;
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.API.Stats;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
@@ -9,7 +9,7 @@ using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Localized("Commands.Stats")]
 [Command(CommandFlag.LobbyOnly, "stats", "stat")]

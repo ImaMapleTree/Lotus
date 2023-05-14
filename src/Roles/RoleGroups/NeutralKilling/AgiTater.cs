@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
@@ -22,10 +22,10 @@ using VentLib.Options.IO;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Roles.Internals.InteractionResult;
-using static TOHTOR.Roles.RoleGroups.NeutralKilling.AgiTater.AgitaterTranslations;
+using static Lotus.Roles.Internals.InteractionResult;
+using static Lotus.Roles.RoleGroups.NeutralKilling.AgiTater.AgitaterTranslations;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 [Localized("Roles")]
 public class AgiTater: NeutralKillingBase
@@ -91,26 +91,26 @@ public class AgiTater: NeutralKillingBase
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        AddKillCooldownOptions(base.RegisterOptions(optionStream), AgiOptions.PlaceBombCooldown, "Place Bomb Cooldown")
-            .SubOption(sub => sub.KeyName("Explode On Meeting", AgiOptions.ExplodeOnMeetings)
+        AddKillCooldownOptions(base.RegisterOptions(optionStream), AgitaterTranslations.AgiOptions.PlaceBombCooldown, "Place Bomb Cooldown")
+            .SubOption(sub => sub.KeyName("Explode On Meeting", AgitaterTranslations.AgiOptions.ExplodeOnMeetings)
                 .AddOnOffValues()
                 .BindBool(FlagSetter(ExplodeCondition.Meetings))
                 .ShowSubOptionPredicate(o => (bool)o)
                 .Build())
-            .SubOption(sub => sub.KeyName("Explode After Duration", AgiOptions.ExplodeAfterDuration)
+            .SubOption(sub => sub.KeyName("Explode After Duration", AgitaterTranslations.AgiOptions.ExplodeAfterDuration)
                 .AddOnOffValues(false)
                 .BindBool(FlagSetter(ExplodeCondition.Duration))
                 .ShowSubOptionPredicate(b => (bool)b)
-                .SubOption(sub2 => sub2.KeyName("Bomb Duration", AgiOptions.BombDuration)
+                .SubOption(sub2 => sub2.KeyName("Bomb Duration", AgitaterTranslations.AgiOptions.BombDuration)
                     .AddFloatRange(2.5f, 120f, 2.5f, 7, "s")
                     .BindFloat(bombDuration.SetDuration)
                     .Build())
                 .Build())
-            .SubOption(sub => sub.KeyName("Explode When Bombed Twice", AgiOptions.ExplodeDoubleBombed)
+            .SubOption(sub => sub.KeyName("Explode When Bombed Twice", AgitaterTranslations.AgiOptions.ExplodeDoubleBombed)
                 .AddOnOffValues(false)
                 .BindBool(FlagSetter(ExplodeCondition.DoubleBomb))
                 .Build())
-            .SubOption(sub2 => sub2.KeyName("Bombs per Round", AgiOptions.BombsPerRound)
+            .SubOption(sub2 => sub2.KeyName("Bombs per Round", AgitaterTranslations.AgiOptions.BombsPerRound)
                 .Value(v => v.Text(ModConstants.Infinity).Color(ModConstants.Palette.InfinityColor).Value(-1).Build())
                 .AddIntRange(1, 15, 1, 3)
                 .IOSettings(io => io.UnknownValueAction = ADEAnswer.UseDefault)

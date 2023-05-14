@@ -1,10 +1,10 @@
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
+using Lotus.Roles;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.GUI.Hud;
+namespace Lotus.GUI.Hud;
 
 public class HighlightPatches
 {

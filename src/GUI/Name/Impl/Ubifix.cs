@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using TOHTOR.GUI.Name.Interfaces;
+using Lotus.GUI.Name.Interfaces;
 using UnityEngine;
 
-namespace TOHTOR.GUI.Name.Impl;
+namespace Lotus.GUI.Name.Impl;
 
 public class Ubifix
 {

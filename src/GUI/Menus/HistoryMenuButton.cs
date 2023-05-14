@@ -1,5 +1,5 @@
 using System;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 using UnityEngine.UI;
 using VentLib.Logging;
@@ -7,7 +7,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.GUI.Menus;
+namespace Lotus.GUI.Menus;
 
 public class HistoryMenuButton
 {
@@ -19,7 +19,7 @@ public class HistoryMenuButton
         VentLogger.Fatal("Creating button");
         optionalButton = UnityOptional<ReportButton>.Of(Object.Instantiate(reportButton, instance.transform));
         ReportButton button = optionalButton.Get();
-        button.graphic.sprite = Utils.LoadSprite("TOHTOR.assets.History.png", 125);
+        button.graphic.sprite = Utils.LoadSprite("Lotus.assets.History.png", 125);
         button.transform.localPosition += new Vector3(-3.8f, -2.45f);
         button.SetActive(true);
 

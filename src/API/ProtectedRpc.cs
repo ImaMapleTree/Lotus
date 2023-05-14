@@ -1,9 +1,9 @@
-using TOHTOR.Extensions;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
-namespace TOHTOR.API;
+namespace Lotus.API;
 
 public class ProtectedRpc
 {

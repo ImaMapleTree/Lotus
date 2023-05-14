@@ -1,14 +1,14 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Player;
-using TOHTOR.Roles;
+using Lotus.Managers.History.Events;
+using Lotus.Player;
+using Lotus.API.Odyssey;
+using Lotus.Roles;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Managers.History;
+namespace Lotus.Managers.History;
 
 public class GameHistory
 {

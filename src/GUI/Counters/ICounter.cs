@@ -1,4 +1,4 @@
-namespace TOHTOR.GUI.Counters;
+namespace Lotus.GUI.Counters;
 
 public interface ICounter
 {

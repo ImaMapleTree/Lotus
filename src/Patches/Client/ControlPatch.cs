@@ -1,10 +1,10 @@
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.RoleGroups.Crew;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
+using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Extensions;
 
-namespace TOHTOR.Patches.Client;
+namespace Lotus.Patches.Client;
 
 [HarmonyPatch(typeof(ConsoleJoystick), nameof(ConsoleJoystick.HandleHUD))]
 class ConsoleJoystickHandleHUDPatch

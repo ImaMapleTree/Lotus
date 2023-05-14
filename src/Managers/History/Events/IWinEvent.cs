@@ -1,7 +1,7 @@
 using System.Collections.Generic;
-using TOHTOR.Victory.Conditions;
+using Lotus.Victory.Conditions;
 
-namespace TOHTOR.Managers.History.Events;
+namespace Lotus.Managers.History.Events;
 
 public interface IWinEvent : IHistoryEvent
 {

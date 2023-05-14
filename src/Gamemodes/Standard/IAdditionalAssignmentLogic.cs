@@ -1,8 +1,9 @@
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
+using Lotus.API;
+using Lotus.Roles;
+using Lotus.API.Odyssey;
 
-namespace TOHTOR.Gamemodes.Standard;
+namespace Lotus.Gamemodes.Standard;
 
 public interface IAdditionalAssignmentLogic
 {
@@ -11,7 +12,7 @@ public interface IAdditionalAssignmentLogic
     /// <br/>
     /// <b>Important</b>
     /// <br/>
-    /// You should have a rough understanding of how role assignment works and roles should <b>ALWAYS</b> call <see cref="TOHTOR.Roles.CustomRole.Instantiate"/>
+    /// You should have a rough understanding of how role assignment works and roles should <b>ALWAYS</b> call <see cref="CustomRole.Instantiate"/>
     /// Additionally, the standard-algorithm uses <see cref="Api.Roles.AssignRole"/> for actually applying the role to players. You should replicate
     /// this behaviour but DO NOT set sendToClient=true
     /// </summary>

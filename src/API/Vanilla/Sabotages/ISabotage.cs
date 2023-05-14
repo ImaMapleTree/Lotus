@@ -1,7 +1,7 @@
 using System;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.API.Vanilla.Sabotages;
+namespace Lotus.API.Vanilla.Sabotages;
 
 public interface ISabotage
 {

@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name.Interfaces;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.GUI.Name.Interfaces;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Processes;
+namespace Lotus.API.Processes;
 
 [LoadStatic]
 public class NameUpdateProcess

@@ -1,9 +1,9 @@
-using TOHTOR.Extensions;
-using TOHTOR.Managers.History;
-using TOHTOR.Managers.History.Events;
+using Lotus.Managers.History;
+using Lotus.Managers.History.Events;
+using Lotus.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.Events;
+namespace Lotus.Roles.Events;
 
 public abstract class TargetedAbilityEvent : ITargetedEvent, IRoleEvent
 {

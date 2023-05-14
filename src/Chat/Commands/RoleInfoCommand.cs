@@ -1,9 +1,9 @@
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
-using TOHTOR.Utilities;
+using Lotus.Roles;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -12,7 +12,7 @@ using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 public class RoleInfoCommand
 {

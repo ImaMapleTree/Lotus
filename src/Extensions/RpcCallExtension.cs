@@ -1,4 +1,4 @@
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class RpcCallExtension
 {

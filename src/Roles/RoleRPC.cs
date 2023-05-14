@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 public enum RoleRPC: uint
 {

@@ -1,7 +1,7 @@
 using HarmonyLib;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.Chat.Patches;
+namespace Lotus.Chat.Patches;
 
 [HarmonyPatch(typeof(TextBoxTMP), nameof(TextBoxTMP.IsCharAllowed))]
 public class TextBoxPatch

@@ -4,18 +4,18 @@ using System.Net;
 using System.Reflection;
 using System.Threading.Tasks;
 using HarmonyLib;
-using TOHTOR.Patches;
+using Lotus.Patches;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
 
 
-namespace TOHTOR;
+namespace Lotus;
 
 [HarmonyPatch]
 public class ModUpdater
 {
-    private static readonly string URL = "https://api.github.com/repos/music-discussion/TOHTOR-TheOtherRoles--TOH-TOR";
+    private static readonly string URL = "https://api.github.com/repos/music-discussion/Lotus-TheOtherRoles--TOH-TOR";
     public static bool hasUpdate = false;
     public static bool isBroken = false;
     public static bool isChecked = true;
@@ -72,7 +72,7 @@ public class ModUpdater
             string result;
             using (HttpClient client = new())
             {
-                client.DefaultRequestHeaders.Add("User-Agent", "TOHTOR Updater");
+                client.DefaultRequestHeaders.Add("User-Agent", "Lotus Updater");
                 using var response = await client.GetAsync(new Uri(url), HttpCompletionOption.ResponseContentRead);
                 if (!response.IsSuccessStatusCode || response.Content == null)
                 {
@@ -105,7 +105,7 @@ public class ModUpdater
                         downloadUrl = assets[i]["browser_download_url"].ToString();
                         break;
                     }
-                    if (assets[i]["name"].ToString() == "TOHTOR.dll")
+                    if (assets[i]["name"].ToString() == "Lotus.dll")
                         downloadUrl = assets[i]["browser_download_url"].ToString();
                 }
                 /*hasUpdate = latestVersion.CompareTo(TOHPlugin) > 0;#2#
@@ -181,7 +181,7 @@ public class ModUpdater
         {
             using WebClient client = new();
             client.DownloadProgressChanged += new DownloadProgressChangedEventHandler(DownloadCallBack);
-            client.DownloadFileAsync(new Uri(url), "BepInEx/plugins/TOHTOR.dll");
+            client.DownloadFileAsync(new Uri(url), "BepInEx/plugins/Lotus.dll");
             while (client.IsBusy) await System.Threading.Tasks.Task.Delay(1);
             ShowPopup(Localizer.Translate("ModUpater.UpdateRestart"), true);
         }

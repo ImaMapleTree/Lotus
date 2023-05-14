@@ -1,30 +1,31 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Roles.RoleGroups.Crew.Escort;
+using static Lotus.Roles.RoleGroups.Crew.Escort;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Consort : Impostor
 {
     private float roleblockDuration;
     private bool blocking;
 
-    [NewOnSetup] private Dictionary<byte, BlockDelegate> blockedPlayers;
+    [NewOnSetup] private Dictionary<byte, Escort.BlockDelegate> blockedPlayers;
 
     [UIComponent(UI.Cooldown)] private Cooldown roleblockCooldown;
 
@@ -43,7 +44,7 @@ public class Consort : Impostor
         roleblockCooldown.Start();
         blocking = false;
 
-        blockedPlayers[target.PlayerId] = BlockDelegate.Block(target, MyPlayer, roleblockDuration);
+        blockedPlayers[target.PlayerId] = Escort.BlockDelegate.Block(target, MyPlayer, roleblockDuration);
         MyPlayer.RpcGuardAndKill(target);
         Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target,
             $"{RoleColor.Colorize(MyPlayer.name)} role blocked {target.GetRoleColor().Colorize(target.name)}."));
@@ -78,7 +79,7 @@ public class Consort : Impostor
     [RoleAction(RoleActionType.AnyEnterVent)]
     private void Block(PlayerControl source, ActionHandle handle)
     {
-        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(source.PlayerId);
+        Escort.BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(source.PlayerId);
         if (blockDelegate == null) return;
 
         handle.Cancel();
@@ -88,7 +89,7 @@ public class Consort : Impostor
     [RoleAction(RoleActionType.SabotageStarted)]
     private void BlockSabotage(PlayerControl caller, ActionHandle handle)
     {
-        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(caller.PlayerId);
+        Escort.BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(caller.PlayerId);
         if (blockDelegate == null) return;
 
         handle.Cancel();
@@ -98,7 +99,7 @@ public class Consort : Impostor
     [RoleAction(RoleActionType.AnyReportedBody)]
     private void BlockReport(PlayerControl reporter, ActionHandle handle)
     {
-        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(reporter.PlayerId);
+        Escort.BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(reporter.PlayerId);
         if (blockDelegate == null) return;
 
         handle.Cancel();

@@ -2,16 +2,16 @@ using System;
 using HarmonyLib;
 using Hazel;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Utilities;
+using Lotus.API;
+using Lotus.Roles;
+using Lotus.Roles.Interfaces;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using VentLib.Networking.RPC;
 using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches.Systems;
+namespace Lotus.Patches.Systems;
 
 [HarmonyPatch(typeof(GameData), nameof(GameData.RpcSetTasks))]
 class RpcSetTasksPatch

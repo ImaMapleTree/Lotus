@@ -1,27 +1,27 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
+using Lotus.API;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Utilities;
+using Lotus.Victory;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using VentLib.Options;
-using TOHTOR.Roles;
-using TOHTOR.Utilities;
-using TOHTOR.Victory;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Options.Game.Tabs;
 using VentLib.Utilities;
 
-namespace TOHTOR.Gamemodes.Debug;
+namespace Lotus.Gamemodes.Debug;
 
 public class DebugGamemode: Gamemode
 {
     private List<Option> specificOptions = new();
     private readonly Dictionary<byte, string> _roleAssignments = new();
 
-    internal static GameOptionTab DebugTab = new("Debug Tab", () => Utils.LoadSprite("TOHTOR.assets.Tabs.Debug_Tab.png"));
+    internal static GameOptionTab DebugTab = new("Debug Tab", () => Utils.LoadSprite("Lotus.assets.Tabs.Debug_Tab.png"));
 
     public override string GetName() => "Debug";
     public override IEnumerable<GameOptionTab> EnabledTabs() => new[] { DebugTab };

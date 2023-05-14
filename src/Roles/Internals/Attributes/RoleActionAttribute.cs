@@ -2,11 +2,14 @@ extern alias JBAnnotations;
 using System;
 using System.Collections.Generic;
 using JBAnnotations::JetBrains.Annotations;
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Patches.Meetings;
+using VentLib.Utilities.Optionals;
 
 // ReSharper disable InvalidXmlDocComment
 
-namespace TOHTOR.Roles.Internals.Attributes;
+namespace Lotus.Roles.Internals.Attributes;
 
 [MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)] // Inherited = false because inheritance is managed through Subclassing, DO NOT WORRY!
@@ -101,7 +104,7 @@ public enum RoleActionType
     /// Triggered when my player dies. This action <b>CANNOT</b> be canceled. <br/>
     /// </summary>
     /// <param name="killer"><see cref="PlayerControl"/> the killer</param>
-    /// <param name="realKiller"><see cref="VentLib.Utilities.Optionals.Optional"/> the OPTIONAl real killer (exists if killed indirectly)</param>
+    /// <param name="realKiller"><see cref="Optional{T}"/> the OPTIONAl real killer (exists if killed indirectly)</param>
     MyDeath,
     SelfExiled,
     /// <summary>
@@ -177,9 +180,9 @@ public enum RoleActionType
     /// <b>IMPORTANT</b><br/>
     /// You CAN modify the meeting delegate at this time to change the results of the meeting. HOWEVER,
     /// modifying the votes will only change what is displayed during the meeting. You MUST also update the exiled player to change
-    /// the exiled player, as the votes WILL NOT be recalculated automatically at this point. <see cref="TOHTOR.Patches.Meetings.CheckForEndVotingPatch.CalculateExiledPlayer"/>
+    /// the exiled player, as the votes WILL NOT be recalculated automatically at this point. <see cref="CheckForEndVotingPatch.CalculateExiledPlayer"/>
     /// </summary>
-    /// <param name="meetingDelegate"><see cref="TOHTOR.API.Vanilla.Meetings.MeetingDelegate"/> the meeting delegate for the current meeting</param>
+    /// <param name="meetingDelegate"><see cref="MeetingDelegate"/> the meeting delegate for the current meeting</param>
     VotingComplete,
     /// <summary>
     /// Triggers when a meeting is called

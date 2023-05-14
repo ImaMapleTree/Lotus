@@ -1,21 +1,21 @@
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Legacy;
-using TOHTOR.Roles.RoleGroups.Impostors;
-using TOHTOR.Utilities;
+using Lotus.API;
+using Lotus.Factions;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Impostors;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
+using Lotus.Roles.Legacy;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Amnesiac : CustomRole, ISabotagerRole
 {
@@ -30,8 +30,8 @@ public class Amnesiac : CustomRole, ISabotagerRole
         CustomRole newRole = reported.GetCustomRole();
         if (!stealExactRole)
         {
-            if (newRole.SpecialType == SpecialType.NeutralKilling) { }
-            else if (newRole.SpecialType == SpecialType.Neutral)
+            if (newRole.SpecialType == Internals.SpecialType.NeutralKilling) { }
+            else if (newRole.SpecialType == Internals.SpecialType.Neutral)
                 newRole = CustomRoleManager.Static.Opportunist;
             else if (newRole.IsCrewmate())
                 newRole = CustomRoleManager.Static.Sheriff;

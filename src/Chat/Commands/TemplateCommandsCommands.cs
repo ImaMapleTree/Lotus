@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using TOHTOR.Managers;
-using TOHTOR.Managers.Templates;
+using Lotus.Managers;
+using Lotus.Managers.Templates;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Chat.Commands.TemplateCommandsCommands.TemplateCommandTranslations;
+using static Lotus.Chat.Commands.TemplateCommandsCommands.TemplateCommandTranslations;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Command(CommandFlag.HostOnly, "commands", "cmd")]
 public class TemplateCommandsCommands: CommandTranslations

@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Reactive;
+using Lotus.API.Reactive;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Stats;
+namespace Lotus.API.Stats;
 
 internal class BoundStatistic<T> : Statistic<T>, IPersistentStatistic
 {

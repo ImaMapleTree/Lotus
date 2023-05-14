@@ -1,6 +1,6 @@
-using TOHTOR.API.Vanilla.Sabotages;
+using Lotus.API.Vanilla.Sabotages;
 
-namespace TOHTOR.API.Reactive.HookEvents;
+namespace Lotus.API.Reactive.HookEvents;
 
 public class SabotageHookEvent: IHookEvent
 {

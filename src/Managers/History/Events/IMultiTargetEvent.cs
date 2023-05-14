@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TOHTOR.Managers.History.Events;
+namespace Lotus.Managers.History.Events;
 
 public interface IMultiTargetEvent : IHistoryEvent
 {

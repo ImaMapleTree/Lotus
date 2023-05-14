@@ -1,12 +1,12 @@
 using System.Collections.Generic;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
+using Lotus.Extensions;
+using Lotus.Roles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
 
-namespace TOHTOR.Options.General;
+namespace Lotus.Options.General;
 
 [Localized("Options")]
 public class MiscellaneousOptions

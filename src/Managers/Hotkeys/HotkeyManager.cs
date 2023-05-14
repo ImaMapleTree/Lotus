@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.Managers.Hotkeys;
+namespace Lotus.Managers.Hotkeys;
 
 public class HotkeyManager
 {

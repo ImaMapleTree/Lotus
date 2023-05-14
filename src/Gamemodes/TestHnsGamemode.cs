@@ -1,16 +1,16 @@
 using System.Collections.Generic;
-using TOHTOR.Options;
-using TOHTOR.Utilities;
-using TOHTOR.Victory;
+using Lotus.Options;
+using Lotus.Utilities;
+using Lotus.Victory;
 using VentLib.Options.Game.Tabs;
 
-namespace TOHTOR.Gamemodes;
+namespace Lotus.Gamemodes;
 
 public class TestHnsGamemode: Gamemode
 {
     public override string GetName() => "Hide and Seek";
 
-    public static GameOptionTab HnsTab = new("Hide & Seek Options", () => Utils.LoadSprite("TOHTOR.assets.Tabs.TabIcon_HideAndSeek.png"));
+    public static GameOptionTab HnsTab = new("Hide & Seek Options", () => Utils.LoadSprite("Lotus.assets.Tabs.TabIcon_HideAndSeek.png"));
 
     public override void Setup()
     {

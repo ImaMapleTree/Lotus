@@ -2,31 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using TOHTOR.Options;
-using TOHTOR.Options.Roles;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Debugger;
-using TOHTOR.Roles.Extra;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.RoleGroups.Coven;
-using TOHTOR.Roles.RoleGroups.Crew;
-using TOHTOR.Roles.RoleGroups.Impostors;
-using TOHTOR.Roles.RoleGroups.Madmates.Roles;
-using TOHTOR.Roles.RoleGroups.Neutral;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Roles.RoleGroups.Undead.Roles;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Roles.Subroles;
+using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Roles.Debugger;
+using Lotus.Roles.Extra;
+using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.Coven;
+using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Roles.RoleGroups.Impostors;
+using Lotus.Roles.RoleGroups.Madmates.Roles;
+using Lotus.Roles.RoleGroups.Neutral;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Roles.RoleGroups.Undead.Roles;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Subroles;
+using Lotus.Options.Roles;
 using VentLib.Options;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Roles.AbstractBaseRole;
-using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
-using Medium = TOHTOR.Roles.RoleGroups.Crew.Medium;
-using Necromancer = TOHTOR.Roles.RoleGroups.Undead.Roles.Necromancer;
-using SerialKiller = TOHTOR.Roles.RoleGroups.Impostors.SerialKiller;
+using static Lotus.Roles.AbstractBaseRole;
+using Impostor = Lotus.Roles.RoleGroups.Vanilla.Impostor;
+using Medium = Lotus.Roles.RoleGroups.Crew.Medium;
+using Necromancer = Lotus.Roles.RoleGroups.Undead.Roles.Necromancer;
+using SerialKiller = Lotus.Roles.RoleGroups.Impostors.SerialKiller;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 [LoadStatic]
 public static class CustomRoleManager
@@ -87,7 +87,7 @@ public static class CustomRoleManager
     
     internal static void LinkEditor(Type editorType)
     {
-        if (!editorType.IsAssignableTo(typeof(RoleEditor)))
+        if (!editorType.IsAssignableTo(typeof(AbstractBaseRole.RoleEditor)))
             throw new ArgumentException("Editor Type MUST be a subclass of AbstractBaseRole.RoleEditor");
         Type roleType = editorType.BaseType!.DeclaringType!;
         bool isStatic = typeof(StaticRoles).GetFields().Any(f => f.FieldType == roleType);
@@ -95,7 +95,7 @@ public static class CustomRoleManager
 
         CustomRole role = GetRoleFromType(roleType);
         ConstructorInfo editorCtor = editorType.GetConstructor(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic, new Type[] { roleType })!;
-        RoleEditor editor = (RoleEditor)editorCtor.Invoke(new object?[] {role});
+        AbstractBaseRole.RoleEditor editor = (AbstractBaseRole.RoleEditor)editorCtor.Invoke(new object?[] {role});
         CustomRole modified = (CustomRole)editor.StartLink();
 
         if (isStatic) {
@@ -113,14 +113,14 @@ public static class CustomRoleManager
 
     internal static void RemoveEditor(Type editorType)
     {
-        if (!editorType.IsAssignableTo(typeof(RoleEditor)))
+        if (!editorType.IsAssignableTo(typeof(AbstractBaseRole.RoleEditor)))
             throw new ArgumentException("Editor Type MUST be a subclass of AbstractBaseRole.RoleEditor");
         Type roleType = editorType.BaseType!.DeclaringType!;
         bool isStatic = typeof(StaticRoles).GetFields().Any(f => f.FieldType == roleType);
         bool isExtra = typeof(ExtraRoles).GetFields().Any(f => f.FieldType == roleType);
 
         CustomRole role = GetRoleFromType(roleType);
-        RoleEditor editor = role.Editor;
+        AbstractBaseRole.RoleEditor editor = role.Editor;
 
         if (isStatic) {
             typeof(StaticRoles).GetField(roleType.Name)?.SetValue(Static, editor.FrozenRole);
@@ -151,7 +151,7 @@ public static class CustomRoleManager
         public Freezer Freezer = new Freezer();
         public Grenadier Grenadier = new Grenadier();
         public IdentityThief IdentityThief = new IdentityThief();
-        public Impostor Impostor = new Impostor();
+        public Roles.RoleGroups.Vanilla.Impostor Impostor = new Roles.RoleGroups.Vanilla.Impostor();
         public Janitor Janitor = new Janitor();
 
         public Mafia Mafia = new Mafia();
@@ -164,7 +164,7 @@ public static class CustomRoleManager
         public Puppeteer Puppeteer = new Puppeteer();
         //sidekick madmate
         //silencer
-        public SerialKiller SerialKiller = new SerialKiller();
+        public Roles.RoleGroups.Impostors.SerialKiller SerialKiller = new Roles.RoleGroups.Impostors.SerialKiller();
         public Sniper Sniper = new Sniper();
         public Swooper Swooper = new Swooper();
         public TimeThief TimeThief = new TimeThief();
@@ -197,7 +197,7 @@ public static class CustomRoleManager
         public Mayor Mayor = new Mayor();
         public Mechanic Mechanic = new Mechanic();
         public Medic Medic = new Medic();
-        public Medium Medium = new Medium();
+        public Roles.RoleGroups.Crew.Medium Medium = new Roles.RoleGroups.Crew.Medium();
         public Mystic Mystic = new Mystic();
         public Observer Observer = new Observer();
         public Oracle Oracle = new Oracle();
@@ -234,7 +234,7 @@ public static class CustomRoleManager
         public Jester Jester = new Jester();
         public Juggernaut Juggernaut = new Juggernaut();
         public Marksman Marksman = new Marksman();
-        public Necromancer Necromancer = new Necromancer();
+        public Roles.RoleGroups.Undead.Roles.Necromancer Necromancer = new Roles.RoleGroups.Undead.Roles.Necromancer();
         //neutral witch
         public Opportunist Opportunist = new Opportunist();
         public Phantom Phantom = new Phantom();

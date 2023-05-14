@@ -1,4 +1,4 @@
-namespace TOHTOR.Managers.History.Events;
+namespace Lotus.Managers.History.Events;
 
 public interface IDeathEvent : IRecipientEvent
 {

@@ -1,10 +1,10 @@
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using TOHTOR.API;
-using TOHTOR.Options;
+using Lotus.API;
+using Lotus.Options;
 using UnityEngine;
 
-namespace TOHTOR.GUI.Hud;
+namespace Lotus.GUI.Hud;
 
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
 class HudManagerPatch

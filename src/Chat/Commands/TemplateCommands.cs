@@ -1,15 +1,15 @@
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers;
-using TOHTOR.Managers.Templates;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Managers;
+using Lotus.Managers.Templates;
+using Lotus.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Command(CommandFlag.HostOnly, "template", "t", "templates")]
 public class TemplateCommands: CommandTranslations

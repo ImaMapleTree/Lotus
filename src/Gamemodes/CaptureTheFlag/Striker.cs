@@ -1,17 +1,17 @@
 /*using System.Linq;
 using AmongUs.GameOptions;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Extensions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Roles;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
-using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
+using Impostor = Lotus.Roles.RoleGroups.Vanilla.Impostor;
 
-namespace TOHTOR.Gamemodes.CaptureTheFlag;
+namespace Lotus.Gamemodes.CaptureTheFlag;
 
 public class Striker: Impostor
 {

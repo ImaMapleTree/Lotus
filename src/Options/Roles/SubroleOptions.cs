@@ -1,10 +1,10 @@
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Options.Roles;
+namespace Lotus.Options.Roles;
 
 [Localized("Options")]
 public class SubroleOptions

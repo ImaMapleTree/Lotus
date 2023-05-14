@@ -1,20 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Interfaces;
-using TOHTOR.Logging;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Interfaces;
+using Lotus.Extensions;
+using Lotus.Logging;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.GUI.Name.Impl;
+namespace Lotus.GUI.Name.Impl;
 
 public class SimpleNameModel : INameModel
 {

@@ -1,10 +1,10 @@
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Reactive.HookEvents;
+using Lotus.API.Reactive.HookEvents;
 using VentLib.Networking.RPC;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Reactive;
+namespace Lotus.API.Reactive;
 
 public class Hooks
 {

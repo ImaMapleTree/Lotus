@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.Managers;
-using TOHTOR.Managers.Friends;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Factions.Neutrals;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Roles.Internals;
+using Lotus.Utilities;
+using Lotus.Extensions;
+using Lotus.Managers.Friends;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -19,7 +19,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Localized("Commands")]
 public class BasicCommands: CommandTranslations

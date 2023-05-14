@@ -1,13 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
 using Hazel;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Vanilla;
+namespace Lotus.API.Vanilla;
 
 public class VentApi
 {

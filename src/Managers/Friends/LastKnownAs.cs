@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text.Json;
 
-namespace TOHTOR.Managers.Friends;
+namespace Lotus.Managers.Friends;
 
 public class LastKnownAs
 {

@@ -1,16 +1,16 @@
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.Managers;
-using TOHTOR.Managers.Templates;
-using TOHTOR.Roles;
-using TOHTOR.Utilities;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Utilities;
+using Lotus.Managers.Templates;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
 using VentLib.Localization;
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Localized("Commands.Help")]
 [Command("h", "help")]

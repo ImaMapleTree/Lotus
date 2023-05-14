@@ -1,6 +1,6 @@
 using System;
 
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 [Flags]
 public enum RoleFlag

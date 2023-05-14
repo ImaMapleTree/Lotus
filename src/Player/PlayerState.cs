@@ -1,4 +1,4 @@
-namespace TOHTOR.Player;
+namespace Lotus.Player;
 
 public struct PlayerState
 {

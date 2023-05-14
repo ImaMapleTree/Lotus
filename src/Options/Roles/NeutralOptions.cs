@@ -1,12 +1,12 @@
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
-using static TOHTOR.ModConstants.Palette;
+using static Lotus.ModConstants.Palette;
 
-namespace TOHTOR.Options.Roles;
+namespace Lotus.Options.Roles;
 
 [Localized("Options")]
 public class NeutralOptions

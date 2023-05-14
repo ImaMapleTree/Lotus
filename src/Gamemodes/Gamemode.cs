@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Reflection;
 using HarmonyLib;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Victory;
+using Lotus.Victory;
+using Lotus.Roles.Internals;
 using VentLib.Options;
 using VentLib.Options.Game.Tabs;
 
-namespace TOHTOR.Gamemodes;
+namespace Lotus.Gamemodes;
 
 public abstract class Gamemode: IGamemode
 {

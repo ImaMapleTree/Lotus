@@ -1,29 +1,26 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
-using VentLib.Networking.RPC;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 [Localized("Roles.Blackmailer")]
 public class Blackmailer: Shapeshifter
@@ -111,21 +108,4 @@ public class Blackmailer: Shapeshifter
                 .AddOnOffValues()
                 .BindBool(b => showBlackmailedToAll = b)
                 .Build());
-
-    private class PersonalFatalIntent : IFatalIntent
-    {
-        public void Action(PlayerControl actor, PlayerControl target)
-        {
-            RpcV3.Immediate(actor.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
-            target.RpcExileV2();
-        }
-
-        public void Halted(PlayerControl actor, PlayerControl target)
-        {
-        }
-
-        public Optional<IDeathEvent> CauseOfDeath() => Optional<IDeathEvent>.Null();
-
-        public bool IsRanged() => false;
-    }
 }

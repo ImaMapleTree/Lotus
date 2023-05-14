@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TOHTOR.API.Stats;
+namespace Lotus.API.Stats;
 
 // ReSharper disable once InconsistentNaming
 public interface Statistic<T> : Statistic

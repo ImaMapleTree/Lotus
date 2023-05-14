@@ -1,11 +1,11 @@
 using System;
 using System.IO;
-using TOHTOR.Managers.Friends;
-using TOHTOR.Managers.Templates;
+using Lotus.Managers.Friends;
+using Lotus.Managers.Templates;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 // TODO: Create copy of local storage in cache folder and have file checking if cached, if file DNE then copy files from cache into main game
 [LoadStatic]
