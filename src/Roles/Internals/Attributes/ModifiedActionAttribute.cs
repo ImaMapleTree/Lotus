@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.Internals.Attributes;
+namespace Lotus.Roles.Internals.Attributes;
 
 public class ModifiedActionAttribute: RoleActionAttribute
 {

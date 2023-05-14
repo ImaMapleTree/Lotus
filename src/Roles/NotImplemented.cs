@@ -1,8 +1,8 @@
-using TOHTOR.Options;
+using Lotus.Options;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 public class NotImplemented: CustomRole
 {

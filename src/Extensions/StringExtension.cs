@@ -1,8 +1,8 @@
 using System.Text.RegularExpressions;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class StringExtension
 {

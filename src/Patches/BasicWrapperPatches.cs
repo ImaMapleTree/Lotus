@@ -1,7 +1,7 @@
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 public class BasicWrapperPatches
 {

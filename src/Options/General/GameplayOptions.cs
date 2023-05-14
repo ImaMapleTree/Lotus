@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using TOHTOR.Extensions;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Options.General;
+namespace Lotus.Options.General;
 
 [Localized("Options")]
 public class GameplayOptions

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class EnumerableExtensions
 {

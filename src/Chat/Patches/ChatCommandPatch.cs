@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -12,7 +12,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.Chat.Patches;
+namespace Lotus.Chat.Patches;
 
 [HarmonyPatch(typeof(ChatController), nameof(ChatController.Update))]
 public class ChatUpdatePatch

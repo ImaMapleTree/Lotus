@@ -4,7 +4,7 @@ using VentLib.Options.Game;
 using VentLib.Options.IO;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Options.Client;
+namespace Lotus.Options.Client;
 
 [Localized("Options")]
 public class VideoOptions

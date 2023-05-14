@@ -1,15 +1,15 @@
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
-using TOHTOR.Patches.Systems;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Patches.Systems;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Mystic : Crewmate
 {

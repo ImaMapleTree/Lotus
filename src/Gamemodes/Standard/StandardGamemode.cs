@@ -1,26 +1,26 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.Gamemodes.Standard.WinCons;
-using TOHTOR.Options;
-using TOHTOR.Options.Roles;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.RoleGroups.Undead;
-using TOHTOR.Victory;
-using TOHTOR.Victory.Conditions;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Factions;
+using Lotus.Factions.Neutrals;
+using Lotus.Gamemodes.Standard.WinCons;
+using Lotus.Options;
+using Lotus.Options.Roles;
+using Lotus.Roles.RoleGroups.Undead;
+using Lotus.Victory;
+using Lotus.Victory.Conditions;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Factions.Interfaces;
+using Lotus.Roles.Internals;
 using VentLib.Logging;
 using VentLib.Options.Game.Tabs;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes.Standard;
+namespace Lotus.Gamemodes.Standard;
 
 public class StandardGamemode: Gamemode
 {

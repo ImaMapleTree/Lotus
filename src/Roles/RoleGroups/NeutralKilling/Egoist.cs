@@ -1,14 +1,14 @@
 using AmongUs.GameOptions;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.Factions;
+using Lotus.Factions.Impostors;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 public class Egoist: Shapeshifter
 {

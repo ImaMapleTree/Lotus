@@ -1,8 +1,8 @@
 using AmongUs.GameOptions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Overrides;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.Internals;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public class Engineer: Crewmate
 {

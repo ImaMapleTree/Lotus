@@ -1,6 +1,6 @@
 using VentLib.Networking.RPC;
 
-namespace TOHTOR.API.Reactive.HookEvents;
+namespace Lotus.API.Reactive.HookEvents;
 
 public struct RpcHookEvent : IHookEvent
 {

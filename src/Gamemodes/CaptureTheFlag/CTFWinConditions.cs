@@ -1,10 +1,10 @@
 /*using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.Victory.Conditions;
+using Lotus.API;
+using Lotus.Victory.Conditions;
 
-namespace TOHTOR.Gamemodes.CaptureTheFlag;
+namespace Lotus.Gamemodes.CaptureTheFlag;
 
 public class CTFMostPointWinCondition: IWinCondition
 {

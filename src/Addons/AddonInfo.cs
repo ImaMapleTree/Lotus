@@ -2,7 +2,7 @@ using System;
 using Hazel;
 using VentLib.Networking.Interfaces;
 
-namespace TOHTOR.Addons;
+namespace Lotus.Addons;
 
 public class AddonInfo: IRpcSendable<AddonInfo>
 {

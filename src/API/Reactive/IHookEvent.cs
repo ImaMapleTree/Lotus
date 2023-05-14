@@ -1,4 +1,4 @@
-namespace TOHTOR.API.Reactive;
+namespace Lotus.API.Reactive;
 
 public interface IHookEvent
 {

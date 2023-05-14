@@ -1,13 +1,13 @@
 using System.Collections.Generic;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name.Interfaces;
-using TOHTOR.Roles;
-using TOHTOR.Utilities;
+using Lotus.Roles;
+using Lotus.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
+using Lotus.GUI.Name.Interfaces;
 using VentLib.Utilities.Extensions;
 using static GameData;
 
-namespace TOHTOR.Player;
+namespace Lotus.Player;
 
 public class FrozenPlayer
 {

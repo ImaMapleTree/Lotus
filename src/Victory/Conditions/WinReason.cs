@@ -1,4 +1,4 @@
-namespace TOHTOR.Victory.Conditions;
+namespace Lotus.Victory.Conditions;
 
 public enum WinReason
 {

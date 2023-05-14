@@ -1,11 +1,11 @@
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public partial class Alchemist
 {

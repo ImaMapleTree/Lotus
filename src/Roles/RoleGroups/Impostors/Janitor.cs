@@ -1,17 +1,17 @@
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -21,7 +21,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Janitor: Vanilla.Impostor
 {

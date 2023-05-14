@@ -1,17 +1,17 @@
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.Gamemodes;
-using TOHTOR.Patches.Meetings;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Gamemodes;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Patches.Meetings;
+using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches.Actions;
+namespace Lotus.Patches.Actions;
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
 public class ReportDeadBodyPatch

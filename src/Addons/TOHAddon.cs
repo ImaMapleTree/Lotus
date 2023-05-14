@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
 using System.Reflection;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Roles;
+using Lotus.Factions.Interfaces;
+using Lotus.Roles;
+using Lotus.Extensions;
 
-namespace TOHTOR.Addons;
+namespace Lotus.Addons;
 
 public abstract class TOHAddon
 {

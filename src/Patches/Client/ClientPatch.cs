@@ -1,7 +1,7 @@
 using HarmonyLib;
 using InnerNet;
-using TOHTOR.Managers;
-using TOHTOR.Utilities;
+using Lotus.Managers;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
@@ -11,7 +11,7 @@ using VentLib.Utilities;
 // ReSharper disable InconsistentNaming
 
 
-namespace TOHTOR.Patches.Client;
+namespace Lotus.Patches.Client;
 
 /*[Localized(Group = "ModUpdater")]
 [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.MakePublic))]

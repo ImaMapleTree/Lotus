@@ -1,9 +1,9 @@
 using System;
 using System.Globalization;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
+using Lotus.API;
 
-namespace TOHTOR.Managers.History;
+namespace Lotus.Managers.History;
 
 /// <summary>
 /// Simple class that stores its creation time

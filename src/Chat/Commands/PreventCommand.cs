@@ -2,16 +2,16 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using HarmonyLib;
-using TOHTOR.Gamemodes.Standard;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
-using TOHTOR.Utilities;
+using Lotus.Gamemodes.Standard;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Command(CommandFlag.HostOnly, "combos", "combo")]
 public class PreventCommand

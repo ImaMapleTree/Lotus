@@ -1,6 +1,6 @@
 using VentLib.Networking.RPC;
 
-namespace TOHTOR.API;
+namespace Lotus.API;
 
 public partial class Api
 {

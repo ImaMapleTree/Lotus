@@ -1,8 +1,8 @@
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
+using Lotus.Roles;
+using Lotus.Extensions;
 
-namespace TOHTOR.Patches.Client;
+namespace Lotus.Patches.Client;
 
 [HarmonyPatch(typeof(Vent), nameof(Vent.CanUse))]
 class UseVentPatch

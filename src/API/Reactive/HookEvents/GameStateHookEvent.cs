@@ -1,6 +1,6 @@
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
 
-namespace TOHTOR.API.Reactive.HookEvents;
+namespace Lotus.API.Reactive.HookEvents;
 
 public class GameStateHookEvent : IHookEvent
 {

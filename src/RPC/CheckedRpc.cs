@@ -1,12 +1,12 @@
 using AmongUs.GameOptions;
 using Hazel;
-using TOHTOR.Extensions;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.RPC;
+namespace Lotus.RPC;
 
 public static class CheckedRpc
 {

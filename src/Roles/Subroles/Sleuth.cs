@@ -1,16 +1,16 @@
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Utilities;
+using Lotus.Managers;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 [Localized("Roles.Subroles.Sleuth")]
 public class Sleuth: Subrole

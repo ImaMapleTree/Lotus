@@ -1,16 +1,16 @@
 using AmongUs.Data;
 using HarmonyLib;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 static class ExileControllerWrapUpPatch
 {

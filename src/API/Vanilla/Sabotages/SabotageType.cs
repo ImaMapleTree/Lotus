@@ -1,6 +1,6 @@
 using System;
 
-namespace TOHTOR.API.Vanilla.Sabotages;
+namespace Lotus.API.Vanilla.Sabotages;
 
 [Flags]
 public enum SabotageType

@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
 
 public interface IAlchemyIngredient
 {

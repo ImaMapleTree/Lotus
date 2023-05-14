@@ -1,9 +1,9 @@
 using HarmonyLib;
-using TOHTOR.Extensions;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CheckProtect))]
 class CheckProtectPatch

@@ -1,22 +1,22 @@
 using System.Collections.Generic;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities.Collections;
-using static TOHTOR.Roles.RoleGroups.Crew.Bastion.BastionTranslations.BastionOptionTranslations;
+using static Lotus.Roles.RoleGroups.Crew.Bastion.BastionTranslations.BastionOptionTranslations;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Bastion: Engineer
 {

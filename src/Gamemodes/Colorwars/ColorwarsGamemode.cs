@@ -1,12 +1,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Utilities;
+using Lotus.Victory;
+using Lotus.API;
+using Lotus.Extensions;
 using VentLib.Options;
-using TOHTOR.Victory;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -15,13 +15,13 @@ using VentLib.Ranges;
 using VentLib.Utilities;
 using OptionValue = VentLib.Options.OptionValue;
 
-namespace TOHTOR.Gamemodes.Colorwars;
+namespace Lotus.Gamemodes.Colorwars;
 
 // TODO add option to convert killed to same color, last color standing = win AND/OR traditional mode
 [Localized("Gamemodes.Colorwars")]
 public class ColorwarsGamemode: Gamemode
 {
-    public static GameOptionTab ColorwarsTab = new("Colorwars", () => Utils.LoadSprite("TOHTOR.assets.Tabs.TabIcon_ColorWars.png"));
+    public static GameOptionTab ColorwarsTab = new("Colorwars", () => Utils.LoadSprite("Lotus.assets.Tabs.TabIcon_ColorWars.png"));
     public static int TeamSize = 2;
     public static bool ConvertColorMode;
     public static bool ManualTeams;

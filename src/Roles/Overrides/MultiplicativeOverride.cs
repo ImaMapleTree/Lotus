@@ -1,8 +1,8 @@
 using System;
 using AmongUs.GameOptions;
-using TOHTOR.Logging;
+using Lotus.Logging;
 
-namespace TOHTOR.Roles.Overrides;
+namespace Lotus.Roles.Overrides;
 
 public class MultiplicativeOverride: GameOptionOverride
 {

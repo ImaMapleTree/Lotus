@@ -7,7 +7,7 @@ using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR;
+namespace Lotus;
 
 public class Test : IRpcSendable<Test>
 {

@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using static GameData;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 public static class AntiBlackoutLogic
 {

@@ -1,17 +1,17 @@
 
 using System;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class PickPocket : Impostor
 {

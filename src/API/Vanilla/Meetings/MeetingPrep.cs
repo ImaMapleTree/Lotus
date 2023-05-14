@@ -1,15 +1,15 @@
 using System;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Processes;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Extensions;
-using TOHTOR.Victory;
+using Lotus.API.Odyssey;
+using Lotus.API.Processes;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Victory;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Vanilla.Meetings;
+namespace Lotus.API.Vanilla.Meetings;
 
 internal class MeetingPrep
 {

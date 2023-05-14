@@ -3,23 +3,23 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.Patches.Systems;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.GUI;
+using Lotus.Patches.Systems;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 public static class RoleUtils
 {

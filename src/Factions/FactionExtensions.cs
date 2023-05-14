@@ -1,8 +1,8 @@
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Roles;
+using Lotus.Factions.Interfaces;
+using Lotus.Roles;
+using Lotus.Extensions;
 
-namespace TOHTOR.Factions;
+namespace Lotus.Factions;
 
 public static class FactionExtensions
 {

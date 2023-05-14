@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Reactive;
+using Lotus.API.Reactive;
 using VentLib.Logging;
 using VentLib.Options.Processors;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Stats;
+namespace Lotus.API.Stats;
 
 internal class AccumulatingStatistic<T> : BoundStatistic<T>, IAccumulativeStatistic<T>, IJsonStats
 {

@@ -1,7 +1,7 @@
 using HarmonyLib;
 using Hazel;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 [HarmonyPatch(typeof(GameManager), nameof(GameManager.Serialize))]
 class GameManagerSerializeFix

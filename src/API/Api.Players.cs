@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using Hazel;
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Name.Interfaces;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name.Interfaces;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API;
+namespace Lotus.API;
 
 public partial class Api
 {

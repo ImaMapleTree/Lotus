@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.Interfaces;
+namespace Lotus.Roles.Interfaces;
 
 /// <summary>
 /// Despite the naming of this interface a "Phantom" role is any role that should be treated as "not really existing" in the game.

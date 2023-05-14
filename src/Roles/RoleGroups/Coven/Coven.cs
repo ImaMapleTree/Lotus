@@ -1,11 +1,11 @@
 
-using TOHTOR.Roles.Internals;
+using Lotus.Roles.Internals;
 
-namespace TOHTOR.Roles.RoleGroups.Coven;
+namespace Lotus.Roles.RoleGroups.Coven;
 
 public class Coven: NotImplemented
 {
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier
-            .SpecialType(SpecialType.Coven);
+            .SpecialType(Internals.SpecialType.Coven);
 }

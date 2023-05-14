@@ -1,22 +1,22 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Options;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Managers.History.Events;
+using Lotus.Options;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 public class Pestilence: NeutralKillingBase
 {

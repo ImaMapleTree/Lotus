@@ -3,7 +3,7 @@ using HarmonyLib;
 using VentLib.Logging;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.Chat.Patches;
+namespace Lotus.Chat.Patches;
 
 
 class ChatBubblePatch

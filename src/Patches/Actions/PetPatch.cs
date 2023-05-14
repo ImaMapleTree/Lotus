@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using Hazel;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.Patches.Actions;
+namespace Lotus.Patches.Actions;
 
 public class PetPatch
 {

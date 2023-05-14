@@ -1,16 +1,16 @@
 using System;
 using System.Linq;
 using AmongUs.Data;
+using Lotus.GUI.Menus.OptionsMenu.Components;
 using TMPro;
-using TOHTOR.GUI.Menus.OptionsMenu.Components;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Submenus;
+namespace Lotus.GUI.Menus.OptionsMenu.Submenus;
 
 [RegisterInIl2Cpp]
 public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent

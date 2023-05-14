@@ -1,7 +1,7 @@
 using System;
 using HarmonyLib;
 
-namespace TOHTOR.GUI.Patches;
+namespace Lotus.GUI.Patches;
 
 [HarmonyPatch(typeof(KillOverlay), nameof(KillOverlay.ShowKillAnimation))]
 public class KillOverlayPatch

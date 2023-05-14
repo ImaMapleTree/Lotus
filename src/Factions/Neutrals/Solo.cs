@@ -1,8 +1,8 @@
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Options;
+using Lotus.Factions.Interfaces;
+using Lotus.Options;
 using UnityEngine;
 
-namespace TOHTOR.Factions.Neutrals;
+namespace Lotus.Factions.Neutrals;
 
 public class Solo : Faction<Solo>
 {

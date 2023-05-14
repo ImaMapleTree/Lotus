@@ -1,11 +1,11 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
-    <Description>Town Of Host: The Other Roles</Description>
+    <Description>Project Lotus</Description>
     <Authors>Discussions, Tealeaf</Authors>
     <langVersion>latest</langVersion>
     <AmongUs>E:\SteamLibrary\steamapps\common\Among Us</AmongUs>
-    <RootNamespace>TOHTOR</RootNamespace>
+    <RootNamespace>Lotus</RootNamespace>
     <Nullable>enable</Nullable>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
@@ -16,7 +16,6 @@
   <PropertyGroup>
     <debug>true</debug>
   </PropertyGroup>
-  
   
   
   <ItemGroup>
@@ -59,6 +58,7 @@
     <Content Remove="./SourceGenerators/**/*" />
     <Compile Remove="./SourceGenerators/**/*" />
   </ItemGroup>
+  
   
   <Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" Condition="'$(Configuration)' == 'Debug'" />

@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.GUI.Name;
+namespace Lotus.GUI.Name;
 
 public class LiveString
 {

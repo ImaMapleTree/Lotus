@@ -1,19 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using Hazel;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
@@ -22,7 +22,7 @@ using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.Roles.RoleGroups.Undead.Roles;
+namespace Lotus.Roles.RoleGroups.Undead.Roles;
 
 public class Retributionist : NeutralKillingBase
 {

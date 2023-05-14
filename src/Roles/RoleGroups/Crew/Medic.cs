@@ -1,20 +1,20 @@
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 [Localized($"Roles.{nameof(Medic)}")]
 public class Medic: Crewmate

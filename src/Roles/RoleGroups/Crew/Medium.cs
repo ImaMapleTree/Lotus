@@ -1,15 +1,15 @@
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.API;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 [Localized("Roles.Medium")]
 public partial class Medium: Crewmate, IModdable

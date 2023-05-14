@@ -2,11 +2,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using TOHTOR.Chat;
+using Lotus.Chat;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers.Templates;
+namespace Lotus.Managers.Templates;
 
 public class TemplateCommandManager
 {

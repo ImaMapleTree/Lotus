@@ -1,4 +1,4 @@
-namespace TOHTOR.GUI.Name.Impl;
+namespace Lotus.GUI.Name;
 
 public enum ViewMode
 {

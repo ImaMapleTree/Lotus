@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR;
+namespace Lotus;
 
 public class RandomSpawn
 {

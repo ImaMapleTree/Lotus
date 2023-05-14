@@ -1,13 +1,13 @@
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Doctor : Scientist
 {

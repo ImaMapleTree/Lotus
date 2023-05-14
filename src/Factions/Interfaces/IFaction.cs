@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TOHTOR.Factions.Interfaces;
+namespace Lotus.Factions.Interfaces;
 
 public interface IFaction
 {

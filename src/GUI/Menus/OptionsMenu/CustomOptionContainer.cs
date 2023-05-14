@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Lotus.GUI.Menus.OptionsMenu.Components;
+using Lotus.GUI.Menus.OptionsMenu.Submenus;
 using TMPro;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Menus.OptionsMenu.Components;
-using TOHTOR.GUI.Menus.OptionsMenu.Submenus;
-using TOHTOR.Logging;
-using TOHTOR.Utilities;
+using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -18,7 +18,7 @@ using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 // ReSharper disable InconsistentNaming
 
-namespace TOHTOR.GUI.Menus.OptionsMenu;
+namespace Lotus.GUI.Menus.OptionsMenu;
 
 [Localized("GUI")]
 [RegisterInIl2Cpp]
@@ -60,10 +60,9 @@ public class CustomOptionContainer: MonoBehaviour
 
     public CustomOptionContainer(IntPtr intPtr): base(intPtr)
     {
-        VentLogger.Fatal("Ctor");
         transform.localPosition += new Vector3(1f, 0f);
         background = gameObject.AddComponent<SpriteRenderer>();
-        background.sprite = OptionMenuResources.BackgroundSprite;
+        background.sprite = OptionMenuResources.OptionsBackgroundSprite;
 
 
         generalMenu = gameObject.AddComponent<GeneralMenu>();

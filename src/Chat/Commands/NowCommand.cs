@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Utilities;
+using Lotus.Factions;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Impostors;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Roles.Internals;
+using Lotus.Utilities;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Neutrals;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
@@ -20,7 +20,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Command("n", "now")]
 public class NowCommand: ICommandReceiver

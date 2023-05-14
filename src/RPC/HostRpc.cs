@@ -1,7 +1,7 @@
 using System.Linq;
-using TOHTOR.Extensions;
-using TOHTOR.Options;
-using TOHTOR.Utilities;
+using Lotus.Options;
+using Lotus.Extensions;
+using Lotus.Utilities;
 using VentLib;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
@@ -9,7 +9,7 @@ using VentLib.Networking.RPC.Attributes;
 using VentLib.Options;
 using VentLib.Utilities.Collections;
 
-namespace TOHTOR.RPC;
+namespace Lotus.RPC;
 
 public static class HostRpc
 {

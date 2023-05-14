@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace TOHTOR.GUI.Patches;
+namespace Lotus.GUI.Patches;
 
 [HarmonyPatch(typeof(ChatController), nameof(ChatController.Toggle))]
 class CancelBanMenuStuckPatch

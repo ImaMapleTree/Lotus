@@ -1,11 +1,11 @@
-using TOHTOR.Factions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.Factions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Madmates.Roles;
+namespace Lotus.Roles.RoleGroups.Madmates.Roles;
 
 public class Parasite : Shapeshifter
 {

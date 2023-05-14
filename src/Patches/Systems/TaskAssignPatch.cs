@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using HarmonyLib;
-using TOHTOR.Options;
-using TOHTOR.Options.General;
+using Lotus.Options;
+using Lotus.Options.General;
 using VentLib.Logging;
 
-namespace TOHTOR.Patches.Systems;
+namespace Lotus.Patches.Systems;
 
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.AddTasksFromList))]
 class AddTasksFromListPatch

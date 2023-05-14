@@ -1,10 +1,10 @@
 /*using System.Collections.Generic;
 using System.Linq;
 using Hazel;
-using TOHTOR.Extensions;
+using Lotus.Extensions;
 using UnityEngine;
 
-namespace TOHTOR
+namespace Lotus
 {
     public static class SabotageMasterOLD
     {

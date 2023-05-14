@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Subroles;
-using TOHTOR.RPC;
+using Lotus.API.Odyssey;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.RPC;
+using Lotus.Extensions;
+using Lotus.Roles.Subroles;
 using VentLib.Networking.RPC.Attributes;
 
-namespace TOHTOR.API;
+namespace Lotus.API;
 
 public partial class Api
 {

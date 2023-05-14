@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Options.General;
+namespace Lotus.Options.General;
 
 [Localized("Options")]
 public class SabotageOptions

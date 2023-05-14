@@ -1,30 +1,30 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Undead;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Managers;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Victory;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Undead;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Victory;
+using Lotus.Extensions;
+using Lotus.Managers;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Undead.Roles;
+namespace Lotus.Roles.RoleGroups.Undead.Roles;
 
 public class Necromancer : UndeadRole
 {

@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Extensions;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Stats;
+namespace Lotus.API.Stats;
 
 [Localized("Statistics")]
 public class VanillaStatistics

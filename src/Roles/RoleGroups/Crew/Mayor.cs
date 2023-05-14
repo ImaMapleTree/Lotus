@@ -1,23 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Patches.Systems;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Holders;
+using Lotus.Patches.Systems;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 [Localized("Roles.Mayor")]
 public class Mayor: Crewmate

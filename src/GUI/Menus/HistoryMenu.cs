@@ -2,11 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Lotus.Managers.History.Events;
+using Lotus.Utilities;
 using TMPro;
-using TOHTOR.Extensions;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Events;
-using TOHTOR.Utilities;
+using Lotus.Extensions;
+using Lotus.Roles.Events;
 using UnityEngine;
 using UnityEngine.UI;
 using VentLib.Logging;
@@ -15,7 +15,7 @@ using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.GUI.Menus;
+namespace Lotus.GUI.Menus;
 
 public class HistoryMenu
 {
@@ -54,12 +54,12 @@ public class HistoryMenu
         PassiveButton historyTabButton = Object.Instantiate(parentButton, parentButton.transform.parent);
         PassiveButton winnersTabButton = Object.Instantiate(parentButton, parentButton.transform.parent);
 
-        historyTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("TOHTOR.assets.HistoryTab.png"));
+        historyTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("Lotus.assets.HistoryTab.png"));
         historyTabButton.transform.localPosition += new Vector3(-6f, 4.1f);
         historyTab = UnityOptional<PassiveButton>.Of(historyTabButton);
 
 
-        winnersTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("TOHTOR.assets.Winners.png"));
+        winnersTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("Lotus.assets.Winners.png"));
         winnersTabButton.transform.localPosition += new Vector3(-5.15f, 4.1f);
         winnersTab = UnityOptional<PassiveButton>.Of(winnersTabButton);
 

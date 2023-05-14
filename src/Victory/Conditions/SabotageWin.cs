@@ -1,17 +1,17 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Patches.Systems;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Factions;
+using Lotus.Factions.Impostors;
+using Lotus.Patches.Systems;
+using Lotus.API;
+using Lotus.Extensions;
 using VentLib.Utilities.Extensions;
-using Impostor = TOHTOR.Roles.RoleGroups.Vanilla.Impostor;
+using Impostor = Lotus.Roles.RoleGroups.Vanilla.Impostor;
 
-namespace TOHTOR.Victory.Conditions;
+namespace Lotus.Victory.Conditions;
 
 public class SabotageWin: IWinCondition
 {
@@ -22,7 +22,7 @@ public class SabotageWin: IWinCondition
         ISabotage sabotage = SabotagePatch.CurrentSabotage;
         if (sabotage.SabotageType() is SabotageType.Lights or SabotageType.Communications or SabotageType.Door) return false;
 
-        List<PlayerControl> eligiblePlayers = Game.GetAllPlayers().Where(p => p.GetCustomRole() is Impostor i && i.CanSabotage()).ToList();
+        List<PlayerControl> eligiblePlayers = Game.GetAllPlayers().Where(p => p.GetCustomRole() is Roles.RoleGroups.Vanilla.Impostor i && i.CanSabotage()).ToList();
         List<PlayerControl> impostors = eligiblePlayers.Where(p => p.GetCustomRole().Faction is ImpostorFaction).ToList();
         List<PlayerControl> others = eligiblePlayers.Except(impostors).ToList();
 

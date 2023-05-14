@@ -1,25 +1,25 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Victory.Conditions;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Impostors;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Neutrals;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Executioner : CustomRole
 {

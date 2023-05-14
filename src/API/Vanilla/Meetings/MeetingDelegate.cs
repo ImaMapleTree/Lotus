@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
+using Lotus.Managers;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using static MeetingHud;
 
-namespace TOHTOR.API.Vanilla.Meetings;
+namespace Lotus.API.Vanilla.Meetings;
 
 public class MeetingDelegate
 {

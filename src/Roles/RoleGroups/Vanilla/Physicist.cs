@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public class Physicist : Scientist
 {

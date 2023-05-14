@@ -1,4 +1,4 @@
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
@@ -7,7 +7,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Localized("Commands.Admin")]
 [Command(CommandFlag.HostOnly, "kick", "ban")]

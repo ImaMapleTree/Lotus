@@ -1,7 +1,7 @@
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
+using Lotus.Roles.Internals;
+using Lotus.Extensions;
 
-namespace TOHTOR.API.Reactive.HookEvents;
+namespace Lotus.API.Reactive.HookEvents;
 
 public class PlayerActionHookEvent: IHookEvent
 {

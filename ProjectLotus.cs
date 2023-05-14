@@ -5,39 +5,47 @@ using HarmonyLib;
 using UnityEngine;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP;
-using TOHTOR.Addons;
-using TOHTOR.API;
-using TOHTOR.Gamemodes;
-using TOHTOR.Managers;
-using TOHTOR.Managers.Reporting;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.RPC;
-using TOHTOR.Utilities;
+using Lotus;
+using Lotus.Addons;
+using Lotus.API;
+using Lotus.Gamemodes;
+using Lotus.GUI.Menus;
+using Lotus.GUI.Patches;
+using Lotus.Managers;
+using Lotus.Managers.Reporting;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.RPC;
+using Lotus.Utilities;
 using VentLib;
 using VentLib.Logging;
 using VentLib.Networking.Handshake;
 using VentLib.Networking.RPC;
 using VentLib.Options;
 using VentLib.Options.Game;
-using VentLib.Options.Game.Tabs;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Version;
 using VentLib.Version.Git;
 using VentLib.Version.Updater;
-using VentLib.Version.Updater.Bridge.Lib2Sharp;
+using VentLib.Version.Updater.Github;
 using Version = VentLib.Version.Version;
 
-[assembly: AssemblyVersion("1.0.*")]
-namespace TOHTOR;
+[assembly: AssemblyVersion(ProjectLotus.CompileVersion)]
+namespace Lotus;
 
-[BepInPlugin(PluginGuid, "TOHTOR", PluginVersion)]
+[BepInPlugin(PluginGuid, "Lotus", $"{MajorVersion}.{MinorVersion}.0")]
 [BepInProcess("Among Us.exe")]
-public class TOHPlugin : BasePlugin, IGitVersionEmitter
+public class ProjectLotus : BasePlugin, IGitVersionEmitter
 {
-    public const string PluginGuid = "com.discussions.tohtor";
-    public const string PluginVersion = "1.0.0";
+    public const string PluginGuid = "com.tealeaf.Lotus";
+    public const string CompileVersion = $"{MajorVersion}.{MinorVersion}.*";
+
+    public const string MajorVersion = "1";
+    public const string MinorVersion = "0"; // Update with each release
+
+    public static string PluginVersion = typeof(ProjectLotus).Assembly.GetName().Version!.ToString();
+
     public readonly GitVersion CurrentVersion = new();
 
     public static readonly string ModName = "Project: Lotus";
@@ -55,8 +63,11 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
     public static RProfiler Profiler = new RProfiler("General");
     public static bool Initialized;
 
+    public static ModUpdater ModUpdater = null!;
+    
 
-    public TOHPlugin()
+
+    public ProjectLotus()
     {
         Instance = this;
         Vents.Initialize();
@@ -64,9 +75,19 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
         versionControl.AddVersionReceiver(ReceiveVersion);
         PluginDataManager.TemplateManager.RegisterTag("lobby-join", "Tag for the template shown to players joining the lobby.");
         
-        ModUpdater updater = ModUpdater.Default();
-        updater.EstablishConnection();
-        
+        ModUpdater = ModUpdater.Default();
+        ModUpdater.EstablishConnection("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");
+        ModUpdater.RegisterReleaseCallback(BeginUpdate, true);
+    }
+
+    private void BeginUpdate(Release release)
+    {
+        SplashPatch.UpdateButton.IfPresent(b => b.gameObject.SetActive(true));
+        ModUpdateMenu.AddUpdateItem("Lotus", null, ex => ModUpdater.Update(errorCallback: ex)!);
+        Assembly ventAssembly = typeof(Vents).Assembly;
+
+        if (release.ContainsDLL($"{ventAssembly.GetName().Name!}.dll"))
+            ModUpdateMenu.AddUpdateItem("VentFramework", null, ex => ModUpdater.Update(ventAssembly, ex)!);
     }
 
 
@@ -75,18 +96,9 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
 
     public static float RefixCooldownDelay = 0f;
     public static List<byte> ResetCamPlayerList = null!;
-    public static Dictionary<byte, float> AllPlayerKillCooldown = new();
-
-    /// <summary>
-    /// Key: ターゲットのPlayerId, Value: パペッティアのPlayerId
-    /// </summary>
-    public static int SKMadmateNowCount;
-    public static bool VisibleTasksCount;
 
     public static GamemodeManager GamemodeManager;
-    public static TOHPlugin Instance = null!;
-
-    public static GameOptionTab TestTab = new("Test Tab", () => Utils.LoadSprite("TOHTOR.assets.Tabs.TabIcon_MiscRoles.png"));
+    public static ProjectLotus Instance = null!;
 
     public override void Load()
     {
@@ -95,8 +107,6 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
         uint id = Profiler.Sampler.Start();
         GameOptionController.Enable();
         GamemodeManager = new GamemodeManager();
-
-        VisibleTasksCount = false;
 
         BanManager.Init();
 
@@ -115,7 +125,6 @@ public class TOHPlugin : BasePlugin, IGitVersionEmitter
         //OptionManager.AllHolders.AddRange(OptionManager.Options().SelectMany(opt => opt.GetHoldersRecursive()));
         Initialized = true;
         Profiler.Sampler.Stop(id);
-        ReportManager.GenerateReport();
 
     }
 

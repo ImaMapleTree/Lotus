@@ -1,15 +1,15 @@
 using System;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.RPC;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.RPC;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Camouflager: Shapeshifter
 {

@@ -1,11 +1,11 @@
 using System;
+using Lotus.Patches.Network;
 using TMPro;
-using TOHTOR.Extensions;
-using TOHTOR.Patches.Network;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.Managers.Date;
+namespace Lotus.Managers.Date;
 
 [LoadStatic]
 public class SpecialDate: ISpecialDate
@@ -17,7 +17,7 @@ public class SpecialDate: ISpecialDate
     {
         ((ISpecialDate)Christmas).Create();
         Christmas.text = "Merry Christmas!";
-        Christmas.color = TOHPlugin.ModColor.ToColor();
+        Christmas.color = ProjectLotus.ModColor.ToColor();
 
         ((ISpecialDate)ShiftyBirthday).Create();
         ShiftyBirthday.text = "Happy Birthday\nShifty!";

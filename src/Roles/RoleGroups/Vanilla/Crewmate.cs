@@ -1,21 +1,21 @@
 using System;
 using AmongUs.GameOptions;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Impl;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public class Crewmate : CustomRole, IOverridenTaskHolderRole
 {

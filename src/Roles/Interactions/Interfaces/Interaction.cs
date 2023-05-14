@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.Interactions.Interfaces;
+namespace Lotus.Roles.Interactions.Interfaces;
 
 // ReSharper disable once InconsistentNaming
 public interface Interaction

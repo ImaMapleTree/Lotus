@@ -1,23 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Undead;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.GUI.Name.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.RoleGroups.Undead.Events;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Undead;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.GUI.Name.Interfaces;
+using Lotus.Roles.RoleGroups.Undead.Events;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Undead.Roles;
+namespace Lotus.Roles.RoleGroups.Undead.Roles;
 
 public class UndeadRole : Impostor
 {
@@ -40,7 +40,7 @@ public class UndeadRole : Impostor
 
         CustomRole role = target.GetCustomRole();
         role.Faction = new TheUndead.Unconverted(role.Faction, nameComponent);
-        role.SpecialType = SpecialType.Undead;
+        role.SpecialType = Internals.SpecialType.Undead;
         Game.MatchData.GameHistory.AddEvent(new ConvertEvent(MyPlayer, target));
     }
 
@@ -95,6 +95,6 @@ public class UndeadRole : Impostor
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .SpecialType(SpecialType.Undead)
+            .SpecialType(Internals.SpecialType.Undead)
             .Faction(FactionInstances.TheUndead);
 }

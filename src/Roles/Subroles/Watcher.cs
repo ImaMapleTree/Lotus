@@ -1,7 +1,7 @@
-using TOHTOR.Roles.Overrides;
+using Lotus.Roles.Overrides;
 using UnityEngine;
 
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 public class Watcher: Subrole
 {

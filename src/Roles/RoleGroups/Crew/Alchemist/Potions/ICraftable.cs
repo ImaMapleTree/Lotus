@@ -1,8 +1,8 @@
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
 using UnityEngine;
 using VentLib.Utilities.Collections;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Potions;
 
 public interface ICraftable
 {

@@ -1,8 +1,8 @@
 /*using System.Collections.Generic;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
+using Lotus.Extensions;
+using Lotus.Roles;
 
-namespace TOHTOR
+namespace Lotus
 {
     public static class NinjaOld
     {

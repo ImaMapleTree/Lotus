@@ -1,26 +1,26 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Impostors;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.NeutralKilling;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Roles.RoleGroups.Crew.Snitch.SnitchTranslations.SnitchOptionTranslations;
-using static TOHTOR.Utilities.TranslationUtil;
+using static Lotus.Roles.RoleGroups.Crew.Snitch.SnitchTranslations.SnitchOptionTranslations;
+using static Lotus.Utilities.TranslationUtil;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Snitch : Crewmate
 {

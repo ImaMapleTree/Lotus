@@ -1,10 +1,10 @@
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Potions;
 
 [Localized("Roles.Alchemist.Potions")]
 public abstract class Potion : ICraftable

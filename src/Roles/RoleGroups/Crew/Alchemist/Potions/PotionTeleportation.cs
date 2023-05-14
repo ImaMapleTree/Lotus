@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Utilities;
+using Lotus.API;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Potions;
 
 public class PotionTeleportation: Potion
 {

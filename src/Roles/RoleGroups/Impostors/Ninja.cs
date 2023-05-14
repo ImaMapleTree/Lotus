@@ -1,18 +1,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Utilities;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Ninja : Vanilla.Impostor
 {

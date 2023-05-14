@@ -2,21 +2,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Gamemodes;
-using TOHTOR.GUI.Menus;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Gamemodes;
+using Lotus.GUI.Menus;
+using Lotus.Managers;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Patches
+namespace Lotus.Patches
 {
     [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoStartGame))]
     class ChangeRoleSettings
@@ -32,9 +32,8 @@ namespace TOHTOR.Patches
         {
             HistoryMenuIntermediate.HistoryMenuButton.IfPresent(button => button.SetActive(false));
 
-            TOHPlugin.ResetCamPlayerList = new List<byte>();
+            ProjectLotus.ResetCamPlayerList = new List<byte>();
             /*StaticOptions.UsedButtonCount = 0;*/
-            TOHPlugin.VisibleTasksCount = true;
             FallFromLadder.Reset();
 
             Game.State = GameState.InIntro;
@@ -66,7 +65,7 @@ namespace TOHTOR.Patches
             VentLogger.Debug($"Role Assignments\n{textTable}", "RoleManager::SelectRoles~Postfix");
             
 
-            TOHPlugin.ResetCamPlayerList.AddRange(Game.GetAllPlayers().Where(p => p.GetCustomRole() is Arsonist).Select(p => p.PlayerId));
+            ProjectLotus.ResetCamPlayerList.AddRange(Game.GetAllPlayers().Where(p => p.GetCustomRole() is Arsonist).Select(p => p.PlayerId));
             Game.RenderAllForAll(state: GameState.InIntro);
             Game.CurrentGamemode.Trigger(GameAction.GameStart);
         }

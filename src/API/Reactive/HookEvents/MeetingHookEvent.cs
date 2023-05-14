@@ -1,6 +1,6 @@
-using TOHTOR.API.Vanilla.Meetings;
+using Lotus.API.Vanilla.Meetings;
 
-namespace TOHTOR.API.Reactive.HookEvents;
+namespace Lotus.API.Reactive.HookEvents;
 
 public class MeetingHookEvent : IHookEvent
 {

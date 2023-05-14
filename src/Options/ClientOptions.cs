@@ -1,7 +1,7 @@
-using TOHTOR.Options.Client;
+using Lotus.Options.Client;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 [LoadStatic]
 public class ClientOptions

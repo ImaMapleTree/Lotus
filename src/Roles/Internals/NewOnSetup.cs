@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace TOHTOR.Roles.Internals;
+namespace Lotus.Roles.Internals;
 
 public struct NewOnSetup
 {

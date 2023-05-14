@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace TOHTOR.GUI.Menus;
+namespace Lotus.GUI.Menus;
 
 [HarmonyPatch(typeof(LobbyBehaviour), nameof(LobbyBehaviour.Start))]
 public class TestPatch

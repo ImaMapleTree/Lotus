@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.RoleGroups.Coven;
+namespace Lotus.Roles.RoleGroups.Coven;
 
 public class HexMaster: NotImplemented
 {

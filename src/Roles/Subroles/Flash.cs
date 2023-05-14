@@ -1,10 +1,10 @@
-using TOHTOR.API.Odyssey;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
 using UnityEngine;
 using VentLib.Utilities.Collections;
 
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 public class Flash: Subrole
 {

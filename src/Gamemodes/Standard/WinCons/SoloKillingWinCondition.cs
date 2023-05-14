@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.Logging;
-using TOHTOR.Roles;
-using TOHTOR.Victory.Conditions;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Neutrals;
+using Lotus.Logging;
+using Lotus.Roles;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes.Standard.WinCons;
+namespace Lotus.Gamemodes.Standard.WinCons;
 
 public class SoloKillingWinCondition : IWinCondition
 {

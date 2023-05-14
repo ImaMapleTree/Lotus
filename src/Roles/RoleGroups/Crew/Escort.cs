@@ -1,27 +1,27 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Logging;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.Logging;
+using Lotus.Roles.Events;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Escort: Crewmate
 {

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public partial class Alchemist
 {

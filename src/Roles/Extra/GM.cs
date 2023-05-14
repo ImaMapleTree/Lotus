@@ -1,11 +1,11 @@
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Factions;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.Extra;
+namespace Lotus.Roles.Extra;
 
 public class GM : CustomRole
 {

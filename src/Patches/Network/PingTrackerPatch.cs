@@ -1,16 +1,16 @@
 using HarmonyLib;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Options;
+using Lotus.Utilities;
 using TMPro;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Options;
-using TOHTOR.Patches.Client;
-using TOHTOR.Utilities;
+using Lotus.Patches.Client;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
 
 
-namespace TOHTOR.Patches.Network;
+namespace Lotus.Patches.Network;
 
 [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
 class PingTrackerPatch
@@ -34,7 +34,7 @@ class PingTrackerPatch
         __instance.text.sortingOrder = -1;
 
         
-        __instance.text.text += TOHPlugin.CredentialsText;
+        __instance.text.text += ProjectLotus.CredentialsText;
         if (GeneralOptions.DebugOptions.NoGameEnd) __instance.text.text += $"\r\n" + Utils.ColorString(Color.red, Localizer.Translate("StaticOptions.NoGameEnd"));
         __instance.text.text += $"\r\n" + Game.CurrentGamemode.GetName();
 

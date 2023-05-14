@@ -1,11 +1,11 @@
 #nullable enable
 using System;
 using AmongUs.GameOptions;
-using TOHTOR.API;
+using Lotus.API;
 using UnityEngine;
 using VentLib.Logging;
 
-namespace TOHTOR.Roles.Overrides;
+namespace Lotus.Roles.Overrides;
 
 public class GameOptionOverride
 {

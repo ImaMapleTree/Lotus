@@ -1,21 +1,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
-using TOHTOR.Roles.RoleGroups.Crew.Potions;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Impl;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Roles.RoleGroups.Crew.Potions;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public partial class Alchemist
 {

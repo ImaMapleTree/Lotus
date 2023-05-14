@@ -3,13 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Il2CppSystem.ComponentModel;
-using TOHTOR.Logging;
+using Lotus.Logging;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using Component = UnityEngine.Component;
 
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class DebugExtensions
 {

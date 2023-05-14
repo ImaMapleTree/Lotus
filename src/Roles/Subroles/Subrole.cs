@@ -1,15 +1,15 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Logging;
+using Lotus.Factions;
+using Lotus.Factions.Interfaces;
+using Lotus.Logging;
+using Lotus.Extensions;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 public abstract class Subrole: CustomRole
 {

@@ -2,7 +2,7 @@ using System.Linq;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
 
 public class IngredientPurity: Ingredient, IWorldIngredient
 {

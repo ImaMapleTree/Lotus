@@ -1,12 +1,12 @@
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 public class Bewilder: Subrole
 {

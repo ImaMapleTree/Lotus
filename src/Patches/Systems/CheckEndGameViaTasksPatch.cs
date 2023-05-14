@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace TOHTOR.Patches.Systems;
+namespace Lotus.Patches.Systems;
 
 [HarmonyPatch(typeof(GameManager), nameof(GameManager.CheckEndGameViaTasks))]
 public class CheckEndGameViaTasksPatch

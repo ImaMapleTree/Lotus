@@ -1,7 +1,7 @@
 using System;
-using TOHTOR.Managers.History.Events;
+using Lotus.Managers.History.Events;
 
-namespace TOHTOR.Roles.Interactions;
+namespace Lotus.Roles.Interactions;
 
 // Eventually fatal IE AgiTater bomb
 public class EfIntent : FatalIntent

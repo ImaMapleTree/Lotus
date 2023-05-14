@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.Utilities;
+namespace Lotus.Utilities;
 
 public class TranslationUtil
 {

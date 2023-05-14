@@ -1,6 +1,6 @@
 using AmongUs.GameOptions;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public class Scientist: Crewmate
 {

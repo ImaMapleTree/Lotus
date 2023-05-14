@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Undead;
-using TOHTOR.Roles.RoleGroups.Undead.Roles;
-using TOHTOR.Victory.Conditions;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Undead;
+using Lotus.Roles.RoleGroups.Undead.Roles;
+using Lotus.Victory.Conditions;
+using Lotus.API;
+using Lotus.Extensions;
 using VentLib.Logging;
 
-namespace TOHTOR.Roles.RoleGroups.Undead;
+namespace Lotus.Roles.RoleGroups.Undead;
 
 public class UndeadWinCondition : IFactionWinCondition
 {

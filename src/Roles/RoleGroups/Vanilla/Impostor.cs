@@ -1,17 +1,17 @@
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Factions;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public partial class Impostor : CustomRole, IModdable, ISabotagerRole
 {

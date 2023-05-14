@@ -1,19 +1,19 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using Hazel;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Gamemodes;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.Gamemodes;
+using Lotus.Roles;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches.Actions;
+namespace Lotus.Patches.Actions;
 
 [HarmonyPatch(typeof(Vent), nameof(Vent.EnterVent))]
 class EnterVentPatch

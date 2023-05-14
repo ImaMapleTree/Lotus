@@ -2,9 +2,9 @@ using System;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using TOHTOR.Managers;
+using Lotus.Managers;
 
-namespace TOHTOR.Roles.Internals.Attributes;
+namespace Lotus.Roles.Internals.Attributes;
 
 /// <summary>
 /// Marks any role editor class for automatically linking at the start of the runtime.

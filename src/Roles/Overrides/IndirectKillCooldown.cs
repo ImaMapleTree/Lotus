@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.Logging;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.Logging;
 
-namespace TOHTOR.Roles.Overrides;
+namespace Lotus.Roles.Overrides;
 
 public class IndirectKillCooldown: GameOptionOverride
 {

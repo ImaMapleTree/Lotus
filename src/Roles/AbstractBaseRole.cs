@@ -6,27 +6,27 @@ using System.Linq;
 using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Undead;
-using TOHTOR.GUI;
-using TOHTOR.Logging;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Extra;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Roles.Subroles;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Factions;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Impostors;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Undead;
+using Lotus.GUI;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles.Extra;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Subroles;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
@@ -38,7 +38,7 @@ using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 // Some people hate using "Base" and "Abstract" in class names but I used both so now I'm a war-criminal :)
 public abstract class AbstractBaseRole
@@ -189,7 +189,7 @@ public abstract class AbstractBaseRole
         this.roleActions[action.ActionType] = currentActions;
     }
 
-    public void Trigger(RoleActionType actionType, ref ActionHandle handle, params object[] parameters)
+    public void  Trigger(RoleActionType actionType, ref ActionHandle handle, params object[] parameters)
     {
         if (!AmongUsClient.Instance.AmHost || Game.State is GameState.InLobby) return;
 
@@ -215,16 +215,24 @@ public abstract class AbstractBaseRole
         {
             if (handle.IsCanceled) continue;
             if (MyPlayer == null || !MyPlayer.IsAlive() && !action.TriggerWhenDead) continue;
-            
-            if (actionType.IsPlayerAction())
+
+            try
             {
-                Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(MyPlayer, action, parameters));
-                Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer, action, parameters);
+                if (actionType.IsPlayerAction())
+                {
+                    Hooks.PlayerHooks.PlayerActionHook.Propagate(
+                        new PlayerActionHookEvent(MyPlayer, action, parameters));
+                    Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer, action, parameters);
+                }
+
+                if (handle.IsCanceled) continue;
+
+                action.Execute(this, parameters);
             }
-
-            if (handle.IsCanceled) continue;
-
-            action.Execute(this, parameters);
+            catch (Exception e)
+            {
+                VentLogger.Exception(e, $"Failed to execute RoleAction {action}.");
+            }
         }
         Profilers.Global.Sampler.Stop(id);
     }

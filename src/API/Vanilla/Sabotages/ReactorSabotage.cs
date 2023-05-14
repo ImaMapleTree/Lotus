@@ -1,15 +1,15 @@
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Extensions;
-using TOHTOR.Patches.Systems;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Patches.Systems;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.API.Vanilla.Sabotages;
+namespace Lotus.API.Vanilla.Sabotages;
 
 public class ReactorSabotage : ISabotage
 {

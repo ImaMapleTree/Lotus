@@ -1,6 +1,6 @@
 using System.Linq;
-using TOHTOR.Managers;
-using TOHTOR.Utilities;
+using Lotus.Managers;
+using Lotus.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
@@ -8,7 +8,7 @@ using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Command(CommandFlag.HostOnly, "friends", "friend", "f")]
 public class FriendCommands: CommandTranslations, ICommandReceiver

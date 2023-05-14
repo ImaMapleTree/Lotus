@@ -2,19 +2,19 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
 using VentLib.Utilities.Optionals;
 using static MeetingHud;
 
-namespace TOHTOR.Patches.Meetings;
+namespace Lotus.Patches.Meetings;
 
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CheckForEndVoting))]
 public class CheckForEndVotingPatch

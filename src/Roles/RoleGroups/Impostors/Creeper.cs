@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.API;
+using Lotus.GUI;
+using Lotus.GUI.Name;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Creeper : Vanilla.Impostor // hidden role. 5% chance to replace Bomber. so no options for this role.
 {

@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers;
+using Lotus.API;
+using Lotus.Managers;
+using Lotus.API.Odyssey;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
-namespace TOHTOR.Gamemodes.Colorwars;
+namespace Lotus.Gamemodes.Colorwars;
 
 // ReSharper disable once InconsistentNaming
 public static class FFAAssignRoles

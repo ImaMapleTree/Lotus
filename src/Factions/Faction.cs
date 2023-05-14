@@ -1,8 +1,8 @@
-using TOHTOR.Factions.Interfaces;
+using Lotus.Factions.Interfaces;
 using UnityEngine;
 using VentLib.Logging;
 
-namespace TOHTOR.Factions;
+namespace Lotus.Factions;
 
 public abstract class Faction<T> : IFaction<T> where T: IFaction<T>
 {

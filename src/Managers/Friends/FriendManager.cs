@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace TOHTOR.Managers.Friends;
+namespace Lotus.Managers.Friends;
 
 public class FriendManager
 {

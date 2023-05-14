@@ -1,7 +1,7 @@
 extern alias JBAnnotations;
 using System;
 
-namespace TOHTOR.Roles.Internals.Attributes;
+namespace Lotus.Roles.Internals.Attributes;
 
 /// <summary>
 /// Automatically calls the constructor OR clone method (if allowed) on the marked field when instancing a role (assigning it to a player).

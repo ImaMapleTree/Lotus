@@ -1,11 +1,11 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using TOHTOR.Managers;
+using Lotus.Managers;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
 {

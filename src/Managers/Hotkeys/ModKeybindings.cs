@@ -1,10 +1,10 @@
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Chat.Commands;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Interactions;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Chat.Commands;
+using Lotus.Roles.Interactions;
+using Lotus.Extensions;
+using Lotus.Roles;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
@@ -12,9 +12,9 @@ using VentLib.Options;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Managers.Hotkeys.HotkeyManager;
+using static Lotus.Managers.Hotkeys.HotkeyManager;
 
-namespace TOHTOR.Managers.Hotkeys;
+namespace Lotus.Managers.Hotkeys;
 
 [LoadStatic]
 public class ModKeybindings

@@ -2,21 +2,21 @@ extern alias JBAnnotations;
 using System.Collections.Generic;
 using System.Linq;
 using JBAnnotations::JetBrains.Annotations;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Gamemodes.Standard.Lotteries;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Roles.Subroles;
-using TOHTOR.Utilities;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Gamemodes.Standard.Lotteries;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Subroles;
+using Lotus.Extensions;
+using Lotus.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes.Standard;
+namespace Lotus.Gamemodes.Standard;
 
 public class StandardRoleAssignmentLogic
 {

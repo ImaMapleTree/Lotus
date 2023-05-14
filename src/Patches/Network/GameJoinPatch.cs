@@ -1,14 +1,14 @@
 using System.Linq;
 using AmongUs.Data;
 using HarmonyLib;
-using TOHTOR.Addons;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Patches;
+using Lotus.Addons;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Patches;
 using VentLib.Logging;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches.Network;
+namespace Lotus.Patches.Network;
 
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnGameJoined))]
 class GameJoinPatch

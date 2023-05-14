@@ -1,10 +1,10 @@
-using TOHTOR.Extensions;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Potions;
 
 public class PotionProtection: Potion
 {

@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 [HarmonyPatch(typeof(LogicGameFlowNormal), nameof(LogicGameFlowNormal.IsGameOverDueToDeath))]
 class DontBlackoutPatch

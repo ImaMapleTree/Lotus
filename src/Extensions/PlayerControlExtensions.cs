@@ -4,23 +4,23 @@ using System.Collections.Generic;
 using AmongUs.GameOptions;
 using Hazel;
 using InnerNet;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Logging;
-using TOHTOR.Managers;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.Subroles;
+using Lotus.Logging;
 using UnityEngine;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.Subroles;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
-using GameStates = TOHTOR.API.GameStates;
+using GameStates = Lotus.API.GameStates;
 
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class PlayerControlExtensions
 {
@@ -201,14 +201,14 @@ public static class PlayerControlExtensions
         if (ReferenceEquals(target, null)) target = pc;
 
         var systemtypes = SystemTypes.Reactor;
-        if (TOHPlugin.NormalOptions.MapId == 2) systemtypes = SystemTypes.Laboratory;
+        if (ProjectLotus.NormalOptions.MapId == 2) systemtypes = SystemTypes.Laboratory;
 
         Async.Schedule(() => pc.RpcDesyncRepairSystem(systemtypes, 128), 0f + delay);
         Async.Schedule(() => pc.RpcSpecificMurderPlayer(target), 0.2f + delay);
 
         Async.Schedule(() => {
             pc.RpcDesyncRepairSystem(systemtypes, 16);
-            if (TOHPlugin.NormalOptions.MapId == 4) //Airship用
+            if (ProjectLotus.NormalOptions.MapId == 4) //Airship用
                 pc.RpcDesyncRepairSystem(systemtypes, 17);
         }, 0.4f + delay);
     }

@@ -2,7 +2,7 @@ using UnityEngine;
 using VentLib.Localization.Attributes;
 using Random = UnityEngine.Random;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
 
 public class IngredientChaos: Ingredient
 {

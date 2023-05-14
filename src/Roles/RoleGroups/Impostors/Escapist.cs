@@ -1,17 +1,17 @@
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Escapist: Impostor
 {

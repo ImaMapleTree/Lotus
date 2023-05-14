@@ -2,13 +2,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using TOHTOR.API.Reactive;
-using TOHTOR.Managers;
+using Lotus.API.Reactive;
+using Lotus.Managers;
 using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Stats;
+namespace Lotus.API.Stats;
 
 sealed class DefaultStatisticManager : Statistics
 {

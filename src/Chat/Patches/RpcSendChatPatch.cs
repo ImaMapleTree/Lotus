@@ -2,7 +2,7 @@ using HarmonyLib;
 using Hazel;
 using VentLib.Networking.RPC;
 
-namespace TOHTOR.Chat.Patches;
+namespace Lotus.Chat.Patches;
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSendChat))]
 internal class RpcSendChatPatch

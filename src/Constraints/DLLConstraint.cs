@@ -4,13 +4,13 @@ using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Reflection;
-using TOHTOR.Logging;
-using TOHTOR.Managers;
+using Lotus.Managers;
+using Lotus.Logging;
 using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Constraints;
+namespace Lotus.Constraints;
 
 [LoadStatic]
 public class DLLConstraint
@@ -20,7 +20,7 @@ public class DLLConstraint
 
     private static readonly FileInfo LocalFile;
 
-    private const bool Enabled = true;
+    private const bool Enabled = false;
     
     static DLLConstraint()
     {

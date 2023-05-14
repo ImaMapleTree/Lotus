@@ -1,23 +1,23 @@
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Managers;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Options;
 using VentLib.Localization;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Patches.Meetings;
+namespace Lotus.Patches.Meetings;
 
 [LoadStatic]
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]

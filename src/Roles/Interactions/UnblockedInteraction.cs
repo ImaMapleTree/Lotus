@@ -1,6 +1,6 @@
-using TOHTOR.Roles.Interactions.Interfaces;
+using Lotus.Roles.Interactions.Interfaces;
 
-namespace TOHTOR.Roles.Interactions;
+namespace Lotus.Roles.Interactions;
 
 public class UnblockedInteraction : DirectInteraction, IUnblockedInteraction
 {

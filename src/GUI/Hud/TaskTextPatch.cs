@@ -1,13 +1,13 @@
 using System;
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Legacy;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Victory;
+using Lotus.Roles;
+using Lotus.Victory;
+using Lotus.Extensions;
+using Lotus.Roles.Legacy;
+using Lotus.Roles.RoleGroups.Vanilla;
 using VentLib.Utilities;
 
-namespace TOHTOR.GUI.Hud;
+namespace Lotus.GUI.Hud;
 
 [HarmonyPatch(typeof(TaskPanelBehaviour), nameof(TaskPanelBehaviour.SetTaskText))]
 class TaskTextPatch

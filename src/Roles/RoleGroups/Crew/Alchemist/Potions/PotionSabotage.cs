@@ -1,9 +1,9 @@
-using TOHTOR.Extensions;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Potions;
 
 public class PotionSabotage: Potion
 {

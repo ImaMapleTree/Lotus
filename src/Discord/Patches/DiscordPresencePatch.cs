@@ -1,7 +1,7 @@
 using Discord;
 using HarmonyLib;
 
-namespace TOHTOR.Discord.Patches;
+namespace Lotus.Discord.Patches;
 
 [HarmonyPatch(typeof(ActivityManager), nameof(ActivityManager.UpdateActivity))]
 public class DiscordPresencePatch

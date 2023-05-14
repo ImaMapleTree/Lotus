@@ -1,13 +1,13 @@
 using System.Linq;
 using HarmonyLib;
 using InnerNet;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using VentLib.Options.Interfaces;
 using VentLib.Options.IO;
 using VentLib.Options.Processors;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.API;
+namespace Lotus.API;
 
 [LoadStatic]
 public class UniquePlayerId

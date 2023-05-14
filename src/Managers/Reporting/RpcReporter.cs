@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using VentLib.Networking.RPC;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.Managers.Reporting;
+namespace Lotus.Managers.Reporting;
 
 [LoadStatic]
 class RpcReporter: IReportProducer

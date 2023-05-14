@@ -1,15 +1,15 @@
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class TimeThief : Vanilla.Impostor
 {

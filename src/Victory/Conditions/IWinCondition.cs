@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TOHTOR.Victory.Conditions;
+namespace Lotus.Victory.Conditions;
 
 public interface IWinCondition: IComparable<IWinCondition>
 {

@@ -1,32 +1,32 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Options;
-using TOHTOR.Options.Roles;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Utilities;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Utilities;
+using Lotus.Extensions;
+using Lotus.Factions.Neutrals;
+using Lotus.Options;
+using Lotus.Options.Roles;
 using UnityEngine;
 using VentLib.Options;
 using VentLib.Options.Events;
 using VentLib.Options.Game;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Optionals;
-using static TOHTOR.Managers.CustomRoleManager;
+using static Lotus.Managers.CustomRoleManager;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 public class PlagueBearer: NeutralKillingBase
 {

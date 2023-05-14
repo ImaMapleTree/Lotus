@@ -5,7 +5,7 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using InnerNet;
 using VentLib.Logging;
 
-namespace TOHTOR.RPC;
+namespace Lotus.RPC;
 
 public class CustomRpcSender
 {

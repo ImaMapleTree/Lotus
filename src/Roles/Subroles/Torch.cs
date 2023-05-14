@@ -1,14 +1,14 @@
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Patches.Systems;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Factions;
+using Lotus.Factions.Interfaces;
+using Lotus.Patches.Systems;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
 using UnityEngine;
 
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 public class Torch: Subrole
 {

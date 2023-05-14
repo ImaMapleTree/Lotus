@@ -1,8 +1,8 @@
 using System;
-using TOHTOR.Roles.Internals;
+using Lotus.Roles.Internals;
 using VentLib.Utilities.Debug.Profiling;
 
-namespace TOHTOR.Utilities;
+namespace Lotus.Utilities;
 
 public class FixedUpdateLock: ICloneOnSetup<FixedUpdateLock>
 {

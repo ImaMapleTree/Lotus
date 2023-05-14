@@ -1,10 +1,10 @@
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.GUI.Name.Interfaces;
-using TOHTOR.Roles;
+using Lotus.GUI.Name.Impl;
+using Lotus.GUI.Name.Interfaces;
+using Lotus.Roles;
+using Lotus.Extensions;
+using Lotus.GUI;
 
-namespace TOHTOR.Player;
+namespace Lotus.Player;
 
 public class PlayerPlus
 {

@@ -1,19 +1,19 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Options;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Managers.History.Events;
+using Lotus.Options;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 public class CrewPostor : Crewmate
 {

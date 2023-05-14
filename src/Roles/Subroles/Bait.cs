@@ -1,9 +1,9 @@
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 public class Bait: Subrole
 {

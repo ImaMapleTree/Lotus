@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.RPC;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.RPC;
 using VentLib.Logging;
 using VentLib.Utilities;
 using Priority = HarmonyLib.Priority;
 
-namespace TOHTOR.Patches.Actions;
+namespace Lotus.Patches.Actions;
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Shapeshift))]
 public static class ShapeshiftPatch

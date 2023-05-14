@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 // This patch allows host to have bigger range when setting options
 [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.Start))]

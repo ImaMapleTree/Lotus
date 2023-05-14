@@ -1,24 +1,24 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Factions.Impostors;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 // TODO: Make into morphling
 public class BountyHunter: Vanilla.Impostor

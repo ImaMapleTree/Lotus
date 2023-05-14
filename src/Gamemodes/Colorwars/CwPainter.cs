@@ -1,18 +1,18 @@
 using System;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.Roles;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.API;
+using Lotus.Extensions;
 using VentLib.Options.Game;
-using static TOHTOR.Roles.RoleGroups.Impostors.SerialKiller;
-using SerialKiller = TOHTOR.Roles.RoleGroups.Impostors.SerialKiller;
+using static Lotus.Roles.RoleGroups.Impostors.SerialKiller;
+using SerialKiller = Lotus.Roles.RoleGroups.Impostors.SerialKiller;
 
-namespace TOHTOR.Gamemodes.Colorwars;
+namespace Lotus.Gamemodes.Colorwars;
 
-public class CwPainter: SerialKillerModifier
+public class CwPainter: Roles.RoleGroups.Impostors.SerialKiller.SerialKillerModifier
 {
-    internal CwPainter(SerialKiller role) : base(role) { }
+    internal CwPainter(Roles.RoleGroups.Impostors.SerialKiller role) : base(role) { }
     public override void OnLink() { }
 
     [ModifiedAction(RoleActionType.FixedUpdate)]

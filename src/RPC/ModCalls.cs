@@ -1,4 +1,4 @@
-namespace TOHTOR.RPC;
+namespace Lotus.RPC;
 
 public enum ModCalls: uint
 {

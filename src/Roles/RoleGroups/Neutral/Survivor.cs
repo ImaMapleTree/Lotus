@@ -1,18 +1,18 @@
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Options;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Victory;
-using TOHTOR.Victory.Conditions;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Options;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Victory;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Survivor : CustomRole
 {

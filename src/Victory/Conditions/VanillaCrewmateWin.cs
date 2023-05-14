@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Interfaces;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Interfaces;
+using Lotus.Roles;
+using Lotus.Roles.Interfaces;
+using Lotus.Extensions;
 using VentLib.Logging;
 
-namespace TOHTOR.Victory.Conditions;
+namespace Lotus.Victory.Conditions;
 
 public class VanillaCrewmateWin: IFactionWinCondition
 {

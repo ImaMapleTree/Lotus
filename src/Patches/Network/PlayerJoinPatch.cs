@@ -1,18 +1,18 @@
 using HarmonyLib;
 using InnerNet;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Gamemodes;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Gamemodes;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
 using static Platforms;
 
 
-namespace TOHTOR.Patches.Network;
+namespace Lotus.Patches.Network;
 
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerJoined))]
 internal class PlayerJoinPatch

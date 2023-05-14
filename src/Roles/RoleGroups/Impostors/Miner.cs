@@ -1,13 +1,13 @@
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Miner : Impostor
 {

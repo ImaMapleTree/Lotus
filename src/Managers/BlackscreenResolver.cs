@@ -1,18 +1,18 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.RPC;
-using TOHTOR.Utilities;
-using TOHTOR.Victory;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.RPC;
+using Lotus.Utilities;
+using Lotus.Victory;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 internal class BlackscreenResolver
 {

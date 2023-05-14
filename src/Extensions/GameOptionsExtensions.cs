@@ -2,7 +2,7 @@
 using System;
 using AmongUs.GameOptions;
 
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class GameOptionsExtensions
 {

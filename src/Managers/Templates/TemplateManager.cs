@@ -4,7 +4,7 @@ using System.Linq;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers.Templates;
+namespace Lotus.Managers.Templates;
 
 public class TemplateManager
 {

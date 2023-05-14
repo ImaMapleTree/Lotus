@@ -1,7 +1,7 @@
-using TOHTOR.Options.Roles;
+using Lotus.Options.Roles;
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 [Localized("Options")]
 public class RoleOptions

@@ -1,4 +1,4 @@
-namespace TOHTOR.API.Reactive.HookEvents;
+namespace Lotus.API.Reactive.HookEvents;
 
 public class PlayerMessageHookEvent : IHookEvent
 {

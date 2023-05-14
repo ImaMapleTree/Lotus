@@ -1,7 +1,7 @@
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Attributes;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public class Morphling : Shapeshifter
 {

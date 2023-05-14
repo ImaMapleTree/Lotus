@@ -1,17 +1,17 @@
 using System.Linq;
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Options;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Options;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -19,7 +19,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using Convert = System.Convert;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 // TODO: Redo Sniper
 public class Sniper: Shapeshifter

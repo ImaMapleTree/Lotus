@@ -5,13 +5,13 @@ using System.Text.RegularExpressions;
 using AmongUs.Data;
 using HarmonyLib;
 using InnerNet;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Chat;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
+using Lotus.API.Odyssey;
+using Lotus.Chat;
+using Lotus.Roles;
+using Lotus.Extensions;
 using VentLib.Options;
 
-namespace TOHTOR.Managers.Templates;
+namespace Lotus.Managers.Templates;
 
 public class Template
 {
@@ -51,7 +51,7 @@ public class Template
         { "$RoomCode", _ => GameCode.IntToGameName(AmongUsClient.Instance.GameId) },
         { "$Host", _ => DataManager.Player.Customization.name },
         { "$AUVersion", _ => UnityEngine.Application.version },
-        { "$ModVersion", _ => TOHPlugin.PluginVersion + (TOHPlugin.DevVersion ? " " + TOHPlugin.DevVersionStr : "") },
+        { "$ModVersion", _ => ProjectLotus.PluginVersion + (ProjectLotus.DevVersion ? " " + ProjectLotus.DevVersionStr : "") },
         { "$Map", _ => Constants.MapNames[GameOptionsManager.Instance.CurrentGameOptions.MapId] },
         { "$Gamemode", _ => Game.CurrentGamemode.GetName() },
         { "$Date", _ => DateTime.Now.ToShortDateString() },

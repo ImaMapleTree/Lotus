@@ -1,11 +1,11 @@
 
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class IdentityThief : Impostor
 {

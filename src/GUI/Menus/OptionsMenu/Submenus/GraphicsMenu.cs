@@ -1,18 +1,18 @@
 using System;
 using AmongUs.Data;
+using Lotus.GUI.Menus.OptionsMenu.Components;
+using Lotus.Options;
+using Lotus.Options.Client;
+using Lotus.Utilities;
 using TMPro;
-using TOHTOR.GUI.Menus.OptionsMenu.Components;
-using TOHTOR.Options;
-using TOHTOR.Options.Client;
-using TOHTOR.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Utilities.GameObjectUtils;
+using static Lotus.Utilities.GameObjectUtils;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Submenus;
+namespace Lotus.GUI.Menus.OptionsMenu.Submenus;
 
 [RegisterInIl2Cpp]
 public class GraphicsMenu: MonoBehaviour, IBaseOptionMenuComponent

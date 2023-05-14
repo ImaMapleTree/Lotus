@@ -1,11 +1,11 @@
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.GUI;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Freezer : Vanilla.Shapeshifter
 {

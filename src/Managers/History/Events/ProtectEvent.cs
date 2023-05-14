@@ -1,10 +1,10 @@
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
+using Lotus.API.Odyssey;
+using Lotus.Roles;
+using Lotus.API;
+using Lotus.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Managers.History.Events;
+namespace Lotus.Managers.History.Events;
 
 public class ProtectEvent : ITargetedEvent, IRoleEvent
 {
