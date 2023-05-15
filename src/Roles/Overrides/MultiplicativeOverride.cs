@@ -18,8 +18,7 @@ public class MultiplicativeOverride: GameOptionOverride
     {
         if (!Condition?.Invoke() ?? false) return;
         object value = Option.GetValue(options);
-        DevLogger.Log($"OLD VALUE: {value}");
-        DevLogger.Log($"NEW VALUE: {Option.SetValue(options, Multiply(value))})");
+        Option.SetValue(options, Multiply(value));
     }
     
     private object? Multiply(dynamic? originalValue)

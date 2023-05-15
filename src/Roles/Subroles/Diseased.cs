@@ -16,7 +16,6 @@ public class Diseased: Subrole
     private void DiseasedDies(PlayerControl killer)
     {
         Game.MatchData.Roles.AddOverride(killer.PlayerId, new MultiplicativeOverride(Override.KillCooldown, 2));
-        DevLogger.Log($"Affecting: {killer.name} | {killer}");
         killer.GetCustomRole().SyncOptions();
     }
 

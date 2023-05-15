@@ -48,7 +48,6 @@ public abstract class Subrole: CustomRole
         if (RegulatedFactions() != null)
         {
             bool anyMatchFactions = RegulatedFactions()!.Any(f => factionType.IsAssignableTo(f.GetType()));
-            DevLogger.Log($"Faction: {role.Faction} matches: {RegulatedFactions().Select(f => f.Name()).Fuse()} | {anyMatchFactions}");
             if (anyMatchFactions && FactionCompatabilityMode is CompatabilityMode.Blacklisted) return false;
             if (!anyMatchFactions && FactionCompatabilityMode is CompatabilityMode.Whitelisted) return false;
         }

@@ -32,12 +32,7 @@ public class IndirectKillCooldown: GameOptionOverride
     {
         hookKey = $"{nameof(IndirectKillCooldown)}~{Game.NextMatchID()}";
         cooldownSupplier = expectedCooldown;
-        DevLogger.Log($"Binding: {hookKey}");
-        Hooks.GameStateHooks.RoundStartHook.Bind(hookKey, _ =>
-        {
-            DevLogger.Log($"DOUBLED {hookKey}");
-            doubled = true;
-        }, true);
+        Hooks.GameStateHooks.RoundStartHook.Bind(hookKey, _ => doubled = true, true);
         Hooks.GameStateHooks.RoundEndHook.Bind(hookKey, _ => doubled = false, true);
     }
 

@@ -34,7 +34,6 @@ public class SoloKillingWinCondition : IWinCondition
         {
             foreach (CustomRole killer2 in aliveKillers.Where(k => k.MyPlayer.PlayerId != killer.MyPlayer.PlayerId))
             {
-                DevLogger.Log($"Relationship of {killer.MyPlayer.name} to {killer2.MyPlayer.name} => {killer.Relationship(killer2)}");
                 if (killer.Relationship(killer2) is Relation.None) return false;
             }
         }

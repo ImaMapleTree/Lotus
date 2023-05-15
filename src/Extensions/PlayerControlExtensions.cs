@@ -34,9 +34,7 @@ public static class PlayerControlExtensions
         CustomRole role = player.GetCustomRole();
         List<CustomRole> subroles = player.GetSubroles();
         role.Trigger(action, ref handle, parameters);
-        if (action is not RoleActionType.FixedUpdate) DevLogger.Log($"Triggering Action: {action}");
         if (handle is { IsCanceled: true }) return;
-        if (action is not RoleActionType.FixedUpdate) DevLogger.Log($"I'm dying: {player.name} || {action} || {player.GetSubroles().Select(r => r.RoleName).Fuse()}");
         foreach (CustomRole subrole in subroles)
         {
             subrole.Trigger(action, ref handle, parameters);

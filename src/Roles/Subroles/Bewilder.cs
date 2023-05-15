@@ -17,7 +17,6 @@ public class Bewilder: Subrole
     [RoleAction(RoleActionType.MyDeath)]
     private void BewilderDies(PlayerControl killer, Optional<PlayerControl> realKiller)
     {
-        DevLogger.Log("Bewilder dies");
         if (realKiller.Exists()) killer = realKiller.Get();
 
         GameOptionOverride optionOverride = killer.GetVanillaRole().IsImpostor()

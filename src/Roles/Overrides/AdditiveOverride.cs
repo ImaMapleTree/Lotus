@@ -18,8 +18,7 @@ public class AdditiveOverride: GameOptionOverride
     {
         if (!Condition?.Invoke() ?? false) return;
         object value = Option.GetValue(options);
-        DevLogger.Log($"OLD VALUE: {value}");
-        DevLogger.Log($"NEW VALUE: {Option.SetValue(options, Add(value))})");
+        Option.SetValue(options, Add(value));
     }
     
     private object? Add(dynamic? originalValue)
