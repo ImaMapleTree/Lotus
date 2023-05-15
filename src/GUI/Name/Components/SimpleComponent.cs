@@ -6,6 +6,7 @@ using Lotus.API.Odyssey;
 using Lotus.GUI.Name.Impl;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.API;
+using Lotus.Options;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.GUI.Name.Components;
@@ -17,7 +18,7 @@ public class SimpleComponent : INameModelComponent
 
     private LiveString mainText;
     private Func<List<PlayerControl>> viewers;
-    private readonly List<PlayerControl> additionalViewers = new();
+    private readonly List<PlayerControl> additionalViewers = GeneralOptions.GameplayOptions.GhostsSeeInfo ? Game.GetDeadPlayers().ToList() : new List<PlayerControl>();
     private ViewMode viewMode;
     private GameState[] gameStates;
 

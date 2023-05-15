@@ -1,7 +1,9 @@
 using System;
 using System.Linq;
 using AmongUs.Data;
+using Lotus.Extensions;
 using Lotus.GUI.Menus.OptionsMenu.Components;
+using Lotus.Logging;
 using TMPro;
 using Lotus.Utilities;
 using UnityEngine;
@@ -18,7 +20,6 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
     private TextMeshPro title;
     private TextMeshPro controlsText;
 
-
     private MonoToggleButton censorChatButton;
     private MonoToggleButton friendInviteButton;
     private MonoToggleButton colorblindTextButton;
@@ -26,10 +27,13 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
 
     private MonoToggleButton mouseMovementButton;
     private MonoToggleButton changeKeyBindingButton;
+    private MonoToggleButton languageButton;
 
     private TiledToggleButton controlScheme;
-
+    private LanguageSetter languageSetter;
+    
     private GameObject anchorObject;
+    private bool languageSetterExists;
 
     public GeneralMenu(IntPtr intPtr) : base(intPtr)
     {
@@ -37,18 +41,9 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         anchorObject.transform.SetParent(transform);
         anchorObject.transform.localPosition += new Vector3(2f, 2f);
         anchorObject.transform.localScale = new Vector3(1f, 1f, 1);
-
-        title = Instantiate(FindObjectOfType<TextMeshPro>(), anchorObject.transform);
-        title.font = CustomOptionContainer.GetGeneralFont();
-
-        title.transform.localPosition += new Vector3(-3.3f, 0.2f);
     }
-
-    private void Awake()
-    {
-        title.text = "General";
-    }
-
+    
+    
     private void Start()
     {
         title.text = "General";
@@ -56,8 +51,21 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         controlsText.text = "Controls";
     }
 
+    private void Update()
+    {
+        if (!languageSetterExists) return;
+        if (languageButton != null) languageButton.SetOffText(DataManager.Settings.language.language);
+    }
+
     public void PassMenu(OptionsMenuBehaviour optionsMenuBehaviour)
     {
+        GameObject textGameObject = gameObject.CreateChild("Title", new Vector3(8.6f, -1.8f));
+        title = textGameObject.AddComponent<TextMeshPro>();
+        title.font = CustomOptionContainer.GetGeneralFont();
+        title.fontSize = 5.35f;
+        title.transform.localPosition += new Vector3(-3.3f, 0.2f);
+        
+        languageSetterExists = false;
         GameObject censorGameObject = new("Censor Button");
         censorGameObject.transform.SetParent(anchorObject.transform);
         censorGameObject.transform.localScale = new Vector3(1f, 1f, 1f);
@@ -68,8 +76,6 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         censorChatButton.SetToggleOffAction(() => DataManager.Settings.Multiplayer.CensorChat = false);
         censorChatButton.SetState(DataManager.Settings.Multiplayer.CensorChat);
         censorGameObject.transform.localPosition += new Vector3(0.5f, 0.25f);
-
-        optionsMenuBehaviour.CensorChatButton.gameObject.SetActive(false);
 
         GameObject fIGameObject = new("Friend & Invite Button");
         fIGameObject.transform.SetParent(anchorObject.transform);
@@ -111,7 +117,7 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         optionsMenuBehaviour.StreamerModeButton.gameObject.SetActive(false);
 
 
-        GameObject controlGameObject = new GameObject("Control Scheme Button");
+        GameObject controlGameObject = new("Control Scheme Button");
         controlsText = Instantiate(title, controlGameObject.transform);
         controlsText.transform.localPosition += new Vector3(-1.3f, -0.2f);
 
@@ -164,7 +170,30 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         keybindingObject.transform.localPosition += new Vector3(3.5f, 1.5f);
         optionsMenuBehaviour.KeyboardOptions.SetActive(false);
         optionsMenuBehaviour.MouseAndKeyboardOptions.GetComponentsInChildren<Component>().ForEach(c => c.gameObject.SetActive(false));
+
+        
+        
+
+        // =======================================
+        //          Language Button
+        // =========================================
+        LanguageSetter languageSetterPrefab = FindObjectOfType<LanguageSetter>(true);
+        if (languageSetterPrefab == null) return;
+        
+        languageSetter = Instantiate(languageSetterPrefab, anchorObject.transform);
+        languageSetter.transform.localPosition -= new Vector3(2.5f, 1.88f);
+
+        GameObject languageButtonObject = anchorObject.CreateChild("Language Button", new Vector3(1f, -1.75f));
+        languageButton = languageButtonObject.AddComponent<MonoToggleButton>();
+        languageButton.SetOffText(DataManager.Settings.language.language);
+        languageButton.SetToggleOnAction(() =>
+        {
+            languageButton.SetState(false);
+            languageSetter.Open();
+        });
+        languageSetterExists = true;
     }
+    
 
 
     public void Open()

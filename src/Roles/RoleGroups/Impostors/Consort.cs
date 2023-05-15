@@ -10,13 +10,11 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.API;
 using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
-using static Lotus.Roles.RoleGroups.Crew.Escort;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
@@ -27,7 +25,8 @@ public class Consort : Impostor
 
     [NewOnSetup] private Dictionary<byte, Escort.BlockDelegate> blockedPlayers;
 
-    [UIComponent(UI.Cooldown)] private Cooldown roleblockCooldown;
+    [UIComponent(UI.Cooldown)] 
+    private Cooldown roleblockCooldown;
 
     [UIComponent(UI.Text)]
     private string BlockingText() => !blocking ? "" : Color.red.Colorize("Blocking");

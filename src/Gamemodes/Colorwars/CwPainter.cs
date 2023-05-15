@@ -2,7 +2,6 @@ using System;
 using Lotus.API.Odyssey;
 using Lotus.Roles;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.API;
 using Lotus.Extensions;
 using VentLib.Options.Game;
 using static Lotus.Roles.RoleGroups.Impostors.SerialKiller;
@@ -10,9 +9,9 @@ using SerialKiller = Lotus.Roles.RoleGroups.Impostors.SerialKiller;
 
 namespace Lotus.Gamemodes.Colorwars;
 
-public class CwPainter: Roles.RoleGroups.Impostors.SerialKiller.SerialKillerModifier
+public class CwPainter: SerialKillerModifier
 {
-    internal CwPainter(Roles.RoleGroups.Impostors.SerialKiller role) : base(role) { }
+    internal CwPainter(SerialKiller role) : base(role) { }
     public override void OnLink() { }
 
     [ModifiedAction(RoleActionType.FixedUpdate)]

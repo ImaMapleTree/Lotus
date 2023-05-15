@@ -259,18 +259,18 @@ public static class Utils
         })));
     }
 
-    public static Sprite LoadSprite(string path, float pixelsPerUnit = 100f)
+    public static Sprite LoadSprite(string path, float pixelsPerUnit = 100f, bool linear = false, int mipMapLevel = 0)
     {
         Sprite sprite = null;
         try
         {
             var stream = Assembly.GetCallingAssembly().GetManifestResourceStream(path);
-            var texture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+            var texture = new Texture2D(1, 1, TextureFormat.ARGB32, true, linear);
             using MemoryStream ms = new();
             stream.CopyTo(ms);
             ImageConversion.LoadImage(texture, ms.ToArray());
-            sprite = Sprite.Create(texture, new(0, 0, texture.width, texture.height), new(0.5f, 0.5f),
-                pixelsPerUnit);
+            sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit);
+            sprite.texture.requestedMipmapLevel = mipMapLevel;
         }
         catch (Exception e)
         {

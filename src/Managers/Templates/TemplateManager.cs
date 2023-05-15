@@ -67,10 +67,10 @@ public class TemplateManager
         return true;
     }
 
-    public bool TryFormat(object obj, string tag, out string formatted)
+    public bool TryFormat(object obj, string tag, out string formatted, bool ignoreWarning = false)
     {
         formatted = "";
-        if (!registeredTags.ContainsKey(tag)) VentLogger.Warn($"Tag \"{tag}\" is not registered. Please ensure all template tags have been registered through TemplateManager.RegisterTag().", "TemplateManager");
+        if (!ignoreWarning && !registeredTags.ContainsKey(tag)) VentLogger.Warn($"Tag \"{tag}\" is not registered. Please ensure all template tags have been registered through TemplateManager.RegisterTag().", "TemplateManager");
         if (!taggedTemplates.ContainsKey(tag)) return false;
         formatted = taggedTemplates[tag].Format(obj).Replace("\\n", "\n");
         return true;

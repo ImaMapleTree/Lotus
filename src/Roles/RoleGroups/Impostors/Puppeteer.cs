@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -14,6 +13,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -22,13 +22,10 @@ namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Puppeteer: Vanilla.Impostor
 {
-    private DateTime lastCheck = DateTime.Now;
-    private List<PlayerControl> cursedPlayers;
+    [NewOnSetup] private List<PlayerControl> cursedPlayers;
+    [NewOnSetup] private Dictionary<byte, Remote<IndicatorComponent>> playerRemotes = null!;
 
-    private Dictionary<byte, Remote<IndicatorComponent>> playerRemotes = null!;
-
-    protected override void Setup(PlayerControl player) => cursedPlayers = new List<PlayerControl>();
-    protected override void PostSetup() => playerRemotes = new Dictionary<byte, Remote<IndicatorComponent>>();
+    private FixedUpdateLock fixedUpdateLock = new();
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
@@ -49,9 +46,7 @@ public class Puppeteer: Vanilla.Impostor
     [RoleAction(RoleActionType.FixedUpdate)]
     private void PuppeteerKillCheck()
     {
-        double elapsed = (DateTime.Now - lastCheck).TotalSeconds;
-        if (elapsed < ModConstants.RoleFixedUpdateCooldown) return;
-        lastCheck = DateTime.Now;
+        if (fixedUpdateLock.AcquireLock()) return;
         foreach (PlayerControl player in new List<PlayerControl>(cursedPlayers))
         {
             if (player.Data.IsDead) {
@@ -72,6 +67,15 @@ public class Puppeteer: Vanilla.Impostor
         cursedPlayers.Where(p => p.Data.IsDead).ToArray().Do(RemovePuppet);
     }
 
+    [RoleAction(RoleActionType.SelfExiled)]
+    [RoleAction(RoleActionType.MyDeath)]
+    [RoleAction(RoleActionType.RoundStart, triggerAfterDeath: true)]
+    private void ClearPuppets()
+    {
+        cursedPlayers.ForEach(RemovePuppet);
+        cursedPlayers.Clear();
+    }
+    
     private void RemovePuppet(PlayerControl puppet)
     {
         playerRemotes!.GetValueOrDefault(puppet.PlayerId, null)?.Delete();

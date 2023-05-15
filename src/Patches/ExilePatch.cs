@@ -57,7 +57,6 @@ static class ExileControllerWrapUpPatch
 
         Hooks.PlayerHooks.PlayerExiledHook.Propagate(new PlayerHookEvent(exiled.Object!));
         Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerHookEvent(exiled.Object!));
-
     }
 
     static void WrapUpFinalizer()

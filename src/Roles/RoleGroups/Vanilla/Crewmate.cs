@@ -4,7 +4,6 @@ using Lotus.API.Odyssey;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
-using Lotus.GUI.Name.Impl;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals.Attributes;
@@ -14,6 +13,7 @@ using VentLib.Options.Game;
 using VentLib.Options.IO;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.RoleGroups.Vanilla;
 
@@ -44,11 +44,11 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
     }
 
     [RoleAction(RoleActionType.TaskComplete, triggerAfterDeath: true, blockable: false)]
-    protected void InternalTaskComplete(PlayerControl player)
+    protected void InternalTaskComplete(PlayerControl player, Optional<NormalPlayerTask> task)
     {
         if (player.PlayerId != MyPlayer.PlayerId) return;
         TasksComplete++;
-        if (player.IsAlive()) this.OnTaskComplete();
+        if (player.IsAlive()) this.OnTaskComplete(task);
         Game.MatchData.GameHistory.AddEvent(new TaskCompleteEvent(player));
     }
 
@@ -73,7 +73,7 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
     /// <summary>
     /// Called automatically when this player completes a task
     /// </summary>
-    protected virtual void OnTaskComplete() { }
+    protected virtual void OnTaskComplete(Optional<NormalPlayerTask> playerTask) { }
 
     protected GameOptionBuilder AddTaskOverrideOptions(GameOptionBuilder builder)
     {

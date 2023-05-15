@@ -21,6 +21,7 @@ public class ReportDeadBodyPatch
         VentLogger.Old($"{__instance.GetNameWithRole()} => {target?.Object?.GetNameWithRole() ?? "null"}", "ReportDeadBody");
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.ReportBody) && target != null) return false;
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.CallMeeting) && target == null) return false;
+        
         if (!AmongUsClient.Instance.AmHost) return true;
         
         ActionHandle handle = ActionHandle.NoInit();

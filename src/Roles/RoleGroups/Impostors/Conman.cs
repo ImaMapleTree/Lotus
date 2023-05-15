@@ -6,14 +6,14 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
-using Lotus.Roles.Internals;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
-using VentLib.Options.IO;
 using VentLib.Utilities.Extensions;
+using static Lotus.Roles.RoleGroups.Impostors.Conman.ConmanTranslations.ConmanOptionTranslations;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
-public class Manipulator : Impostor
+public class Conman : Impostor
 {
     private int discussionTimeDecrease;
     private int votingTimeDecrease;
@@ -48,16 +48,33 @@ public class Manipulator : Impostor
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddKillCooldownOptions(base.RegisterOptions(optionStream))
-            .SubOption(sub => sub.Name("Discussion Time Decrease")
+            .SubOption(sub => sub.KeyName("Discussion Time Decrease", DiscussionTimeDecrease)
                 .AddIntRange(0, 120, 5, 6, "s")
                 .BindInt(f => discussionTimeDecrease = f)
                 .Build())
-            .SubOption(sub => sub.Name("Voting Time Decrease")
+            .SubOption(sub => sub.KeyName("Voting Time Decrease", VotingTimeDecrease)
                 .AddIntRange(0, 120, 5, 3, "s")
                 .BindInt(f => votingTimeDecrease = f)
                 .Build())
-            .SubOption(sub => sub.Name("Affect Anonymous Voting")
+            .SubOption(sub => sub.KeyName("Affect Anonymous Voting", AffectAnonymousVoting)
                 .AddOnOffValues()
                 .BindBool(b => affectAnonymousMeeting = b)
                 .Build());
+
+    [Localized(nameof(Conman))]
+    internal static class ConmanTranslations
+    {
+        [Localized("Options")]
+        internal static class ConmanOptionTranslations
+        {
+            [Localized(nameof(DiscussionTimeDecrease))]
+            public static string DiscussionTimeDecrease = "Discussion Time Decrease";
+
+            [Localized(nameof(VotingTimeDecrease))]
+            public static string VotingTimeDecrease = "Voting Time Decrease";
+
+            [Localized(nameof(AffectAnonymousVoting))]
+            public static string AffectAnonymousVoting = "Affect Anonymous Voting";
+        }
+    }
 }

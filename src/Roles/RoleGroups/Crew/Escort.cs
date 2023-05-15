@@ -63,7 +63,6 @@ public class Escort: Crewmate
     [RoleAction(RoleActionType.AnyPlayerAction)]
     private void BlockAction(PlayerControl source, ActionHandle handle, RoleAction action)
     {
-        DevLogger.Log($"Action: {action}");
         if (action.Blockable) Block(source, handle);
     }
 

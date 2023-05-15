@@ -69,7 +69,7 @@ public class Swapper : Crewmate
                 currentSwaps--;
                 target2 = player.PlayerId;
                 Utils.SendMessage(SwapperSelectMessage2.Formatted(Utils.GetPlayerById(target2)?.name, Utils.GetPlayerById(target1)?.name), MyPlayer.PlayerId, RoleColor.Colorize(SwapperAbility));
-            }, () => meetingDelegate.AddVote(MyPlayer, Utils.PlayerById(target1)));
+            }, () => meetingDelegate.CastVote(MyPlayer, Utils.PlayerById(target1)));
         }
         // Target 1 is not selected yet so this is either a complete skip or 
         else
@@ -113,13 +113,13 @@ public class Swapper : Crewmate
         votesForPlayer1.ForEach(player =>
         {
             meetingDelegate.RemoveVote(player, player1Optional);
-            meetingDelegate.AddVote(player, player2Optional);
+            meetingDelegate.CastVote(player, player2Optional);
         });
         
         votesForPlayer2.ForEach(player =>
         {
             meetingDelegate.RemoveVote(player, player2Optional);
-            meetingDelegate.AddVote(player, player1Optional);
+            meetingDelegate.CastVote(player, player1Optional);
         });
         
         (byte exiledPlayer, bool isTie) = CheckForEndVotingPatch.CalculateExiledPlayer(meetingDelegate);

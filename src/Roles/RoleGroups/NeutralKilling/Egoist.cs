@@ -5,6 +5,7 @@ using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Options.Game;
 
@@ -34,5 +35,6 @@ public class Egoist: Shapeshifter
         base.Modify(roleModifier)
             .VanillaRole(egoistIsShapeshifter ? RoleTypes.Shapeshifter : RoleTypes.Impostor)
             .Faction(FactionInstances.Solo)
+            .SpecialType(SpecialType.NeutralKilling)
             .RoleColor(new Color(0.34f, 0f, 1f));
 }

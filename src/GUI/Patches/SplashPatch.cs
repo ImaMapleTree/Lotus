@@ -22,9 +22,8 @@ class SplashPatch
 {
     public static GameObject AmongUsLogo = null!;
     private static UnityOptional<GameObject> _customSplash = UnityOptional<GameObject>.Null();
-    internal static bool FriendListButtonHasBeenMoved;
     internal static ModUpdateMenu ModUpdateMenu;
-    internal static UnityOptional<GameObject> UpdateButton;
+    internal static UnityOptional<GameObject> UpdateButton = UnityOptional<GameObject>.Null();
 
     private static GameObject howToPlayButton;
 
@@ -58,8 +57,6 @@ class SplashPatch
         AccountTabPatch.ModifyAccountTabLocation(accountTab);
 
         AdjustBottomButtons(GameObject.Find("BottomButtons"));
-
-        FriendListButtonHasBeenMoved = true;
 
         var tohLogo = new GameObject("titleLogo_TOH");
         tohLogo.transform.position = new Vector3(4.55f, -1.5f);

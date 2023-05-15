@@ -1,9 +1,11 @@
 using System;
 using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
 using VentLib.Utilities.Debug.Profiling;
 
 namespace Lotus.Utilities;
 
+[NewOnSetup]
 public class FixedUpdateLock: ICloneOnSetup<FixedUpdateLock>
 {
     public double LockDuration;

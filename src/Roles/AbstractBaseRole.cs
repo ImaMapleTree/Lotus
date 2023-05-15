@@ -220,8 +220,7 @@ public abstract class AbstractBaseRole
             {
                 if (actionType.IsPlayerAction())
                 {
-                    Hooks.PlayerHooks.PlayerActionHook.Propagate(
-                        new PlayerActionHookEvent(MyPlayer, action, parameters));
+                    Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(MyPlayer, action, parameters));
                     Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer, action, parameters);
                 }
 
@@ -250,7 +249,8 @@ public abstract class AbstractBaseRole
             .Where(f => f.FieldType == typeof(Cooldown) || (f.FieldType.IsGenericType && typeof(Optional<>).IsAssignableFrom(f.FieldType.GetGenericTypeDefinition())))
             .Do(f =>
             {
-                if (f.FieldType == typeof(Cooldown)) CreateCooldown(f);
+                if (f.FieldType.GetCustomAttribute<NewOnSetupAttribute>() != null) CreateAnnotatedFields(new NewOnSetup(f, f.FieldType.GetCustomAttribute<NewOnSetupAttribute>()!.UseCloneIfPresent));
+                else if (f.FieldType == typeof(Cooldown)) CreateCooldown(f);
                 else CreateOptional(f);
             });
     }

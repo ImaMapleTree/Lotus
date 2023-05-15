@@ -65,7 +65,7 @@ public class Phantom : Crewmate, IPhantomRole
     
     public bool IsCountedAsPlayer() => false;
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         if (!MyPlayer.IsAlive()) return;
         if (TotalTasks == TasksComplete) ManualWin.Activate(MyPlayer, WinReason.SoloWinner, 999);
@@ -75,7 +75,7 @@ public class Phantom : Crewmate, IPhantomRole
 
     private void PhantomReveal()
     {
-        MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("★", RoleColor), GameStates.IgnStates));
+        MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), GameStates.IgnStates));
 
         Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).ForEach(p =>
         {

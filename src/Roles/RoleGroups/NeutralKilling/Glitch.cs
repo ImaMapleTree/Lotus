@@ -76,7 +76,7 @@ public class Glitch: NeutralKillingBase
     [RoleAction(RoleActionType.AnyEnterVent)]
     private void Block(PlayerControl source, ActionHandle handle)
     {
-        Escort.BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(source.PlayerId);
+        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(source.PlayerId);
         if (blockDelegate == null) return;
 
         handle.Cancel();
@@ -86,17 +86,7 @@ public class Glitch: NeutralKillingBase
     [RoleAction(RoleActionType.SabotageStarted)]
     private void BlockSabotage(PlayerControl caller, ActionHandle handle)
     {
-        Escort.BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(caller.PlayerId);
-        if (blockDelegate == null) return;
-
-        handle.Cancel();
-        blockDelegate.UpdateDelegate();
-    }
-
-    [RoleAction(RoleActionType.AnyReportedBody)]
-    private void BlockReport(PlayerControl reporter, ActionHandle handle)
-    {
-        Escort.BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(reporter.PlayerId);
+        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(caller.PlayerId);
         if (blockDelegate == null) return;
 
         handle.Cancel();

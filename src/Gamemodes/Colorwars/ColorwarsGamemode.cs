@@ -21,7 +21,7 @@ namespace Lotus.Gamemodes.Colorwars;
 [Localized("Gamemodes.Colorwars")]
 public class ColorwarsGamemode: Gamemode
 {
-    public static GameOptionTab ColorwarsTab = new("Colorwars", () => Utils.LoadSprite("Lotus.assets.Tabs.TabIcon_ColorWars.png"));
+    public static GameOptionTab ColorwarsTab = new("Colorwars", () => Utils.LoadSprite("Lotus.assets.TabIcons.ColorWarsIcon.png", 675));
     public static int TeamSize = 2;
     public static bool ConvertColorMode;
     public static bool ManualTeams;

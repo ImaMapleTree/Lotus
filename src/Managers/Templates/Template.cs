@@ -10,6 +10,8 @@ using Lotus.Chat;
 using Lotus.Roles;
 using Lotus.Extensions;
 using VentLib.Options;
+using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Managers.Templates;
 
@@ -65,6 +67,9 @@ public class Template
         { "@Description", player => ((PlayerControl) player).GetCustomRole().Description },
         { "@Options", player => OptionUtils.OptionText(((PlayerControl) player).GetCustomRole().Options) },
         { "@Faction", player => ((PlayerControl) player).GetCustomRole().Faction.Name() },
+        { "@Subroles", player => ((PlayerControl) player).GetSubroles().Select(r => r.RoleColor.Colorize(r.RoleName)).Fuse() },
+        { "@Modifiers", player => ((PlayerControl) player).GetSubroles().Select(r => r.RoleColor.Colorize(r.RoleName)).Fuse() },
+        { "@Mods", player => ((PlayerControl) player).GetSubroles().Select(r => r.RoleColor.Colorize(r.RoleName)).Fuse() },
         { "^Role_Name", role => ((CustomRole) role).RoleName },
         { "^Role_Description", role => ((CustomRole) role).Description },
         { "^Role_Blurb", role => ((CustomRole) role).Blurb },
@@ -85,19 +90,15 @@ public class Template
         { "$Time", "The current time (based on the host)." },
         { "$Players", "A list of all player names separated by a comma." },
         { "$PlayerCount", "A count of all players currently in the lobby." },
-        { "@Name", "The previewer's name." },
-        { "@Color", "The previewer's color." },
-        { "@Role", "The previewer's role." },
-        { "@Blurb", "The previewer's role blurb." },
-        { "@Description", "The previewer's role description." },
-        { "@Options", "The previewer's role options." },
-        { "@Faction", "The previewer's faction." },
-        { "^Role_Name", "The name of the role." },
-        { "^Role_Description", "The description of the role." },
-        { "^Role_Blurb", "The blurb for the role." },
-        { "^Role_Options", "The current options for the role." },
-        { "^Role_Faction", "The faction of the role." },
-        { "^Role_Basis", "The role's (vanilla) basis." }
+        { "@Name", "The players's name." },
+        { "@Color", "The players's color." },
+        { "@Role", "The players's role." },
+        { "@Blurb", "The players's role blurb." },
+        { "@Description", "The players's role description." },
+        { "@Options", "The players's role options." },
+        { "@Faction", "The players's faction." },
+        { "@Subroles", "The players's subroles (modifiers)" },
+        { "@Modifiers", "Identical to @Subroles, shows the player's subroles (modifiers)" }
     };
 
     private static readonly Dictionary<string, Func<object, string, string>> VariableValues = new()

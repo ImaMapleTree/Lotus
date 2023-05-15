@@ -2,11 +2,11 @@ using Lotus.API.Odyssey;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Managers.History.Events;
-using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Roles.Interfaces;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
@@ -19,7 +19,6 @@ public partial class SerialKiller : Impostor, IModdable
 {
     private bool paused = true;
     public Cooldown DeathTimer = null!;
-    private float killCooldown;
     private bool beginsAfterFirstKill;
 
     private bool hasKilled;
@@ -81,7 +80,7 @@ public partial class SerialKiller : Impostor, IModdable
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier).OptionOverride(Override.KillCooldown, () => killCooldown);
+        base.Modify(roleModifier).OptionOverride(Override.KillCooldown, () => KillCooldown);
 
 
     [Localized(nameof(SerialKiller))]

@@ -1,120 +1,163 @@
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using Lotus.API.Odyssey;
+using Lotus.Chat;
+using Lotus.Extensions;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Utilities;
-using Lotus.API;
-using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
+using static Lotus.API.Api.Players;
+using static Lotus.Options.GeneralOptionTranslations;
+using static Lotus.Roles.RoleGroups.Crew.Medic.MedicTranslations;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
-[Localized($"Roles.{nameof(Medic)}")]
+[Localized("Roles")]
 public class Medic: Crewmate
 {
-    private Optional<byte> guardedPlayer = Optional<byte>.Null();
+    private static Color crossColor = new(0.2f, 0.49f, 0f);
     private GuardMode mode;
-    private bool castVote;
-    private bool guardedOnce;
+    private byte guardedPlayer = byte.MaxValue;
 
-    [Localized("ProtectingMessage")]
-    private static string protectingMessage = "You are currently protecting:";
-    [Localized("VotePlayerInfo")]
-    private static string votePlayerMessage = "Vote to select a player to guard.";
+    private bool targetLockedIn;
+    private bool confirmedVote;
 
-    [RoleAction(RoleActionType.RoundStart)]
-    private void SwapGuard()
-    {
-        guardedOnce = guardedOnce || guardedPlayer.Exists();
-        guardedPlayer.IfPresent(player =>
-        {
-            Game.MatchData.GameHistory.AddEvent(new ProtectEvent(MyPlayer, Utils.GetPlayerById(player)!));
-        });
-    }
+    private Remote<IndicatorComponent>? protectedIndicator;
 
     [RoleAction(RoleActionType.RoundEnd)]
-    private void SendAndCheckGuarded()
+    private void RoundEndMessage()
     {
-        castVote = false;
-        guardedPlayer.IfPresent(b =>
-        {
-            if (Game.GetAlivePlayers().All(p => p.PlayerId != b)) guardedPlayer = Optional<byte>.Null();
-        });
-
-        Utils.SendMessage($"{protectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}\n{votePlayerMessage}", MyPlayer.PlayerId);
-    }
-
-    [RoleAction(RoleActionType.MyVote)]
-    protected void SelectTarget(Optional<PlayerControl> votedPlayer, ActionHandle handle)
-    {
-        // ReSharper disable once ConvertIfStatementToSwitchStatement
-        if (guardedOnce && mode is GuardMode.Never) return;
-        if (guardedOnce && mode is GuardMode.OnDeath)
-        {
-            
-        }
-        
-        
-        if (guardedOnce && guardedPlayer.Exists() && mode is GuardMode.OnDeath) return;
-        if (this.castVote) return;
-        this.castVote = true;
-        handle.Cancel();
-
-        if (!votedPlayer.Exists()) return;
-        byte voted = votedPlayer.Get().PlayerId;
-
-        if (MyPlayer.PlayerId == voted) { }
-        else if (!guardedPlayer.Exists()) guardedPlayer = votedPlayer.Map(p => p.PlayerId);
-        else guardedPlayer = guardedPlayer.Exists() ? new Optional<byte>() : new Optional<byte>(guardedPlayer.Get());
-
-        Utils.SendMessage($"{protectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}", MyPlayer.PlayerId);
+        confirmedVote = false;
+        string title = new ChatHandler.TitleBuilder().PrefixSuffix("<b>+</b>").Text(RoleName).Color(crossColor).Build();
+        ChatHandler handler = ChatHandler.Of(title).Player(MyPlayer).LeftAlign();
+        if (guardedPlayer == byte.MaxValue) handler.Message(MedicHelpMessage).Send();
+        else if (mode is GuardMode.AnyMeeting) 
+            handler.Message(ProtectingMessage.Formatted(FindPlayerById(guardedPlayer)?.name)).Send();
     }
 
     [RoleAction(RoleActionType.AnyInteraction)]
     protected void ProtectTarget(PlayerControl killer, PlayerControl target, Interaction interaction, ActionHandle handle)
     {
         if (Game.State is not GameState.Roaming) return;
-        if (!guardedPlayer.Exists()) return;
-        if (target.PlayerId != guardedPlayer.Get()) return;
+        if (guardedPlayer != target.PlayerId) return;
+        
         if (interaction.Intent() is not (IHostileIntent or IFatalIntent)) return;
-
         handle.Cancel();
         Game.MatchData.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, killer));
     }
 
-    [RoleAction(RoleActionType.Disconnect)]
-    private void HandleDisconnect(PlayerControl player)
+    [SuppressMessage("ReSharper", "AssignmentInConditionalExpression")]
+    [RoleAction(RoleActionType.MyVote)]
+    private void HandleMedicVote(Optional<PlayerControl> votedPlayer, ActionHandle handle)
     {
-        if (!guardedPlayer.Exists() || guardedPlayer.Get() != player.PlayerId) return;
-        guardedPlayer = Optional<byte>.Null();
-        guardedOnce = false;
+        string title = new ChatHandler.TitleBuilder().PrefixSuffix("<b>+</b>").Text(RoleName).Color(crossColor).Build();
+        ChatHandler handler = ChatHandler.Of(title: title).Player(MyPlayer).LeftAlign();
+        if (confirmedVote) return;
+        // If guarded player is selected, and mode is any meeting then skip
+        if (targetLockedIn && guardedPlayer != byte.MaxValue && mode is not GuardMode.AnyMeeting) return;
+        
+        handle.Cancel();
+        
+        if (confirmedVote = !votedPlayer.Exists())
+        {
+            handler.Message(ReturnToNormalVoting.Formatted(NoOneText)).Send();
+            return;
+        }
+
+        PlayerControl voted = votedPlayer.Get();
+        byte player = voted.PlayerId;
+
+        if (player == MyPlayer.PlayerId) return;
+
+        if (confirmedVote = guardedPlayer == player)
+        {
+            targetLockedIn = true;
+            handler.Message(ReturnToNormalVoting.Formatted(FindPlayerById(guardedPlayer)?.name)).Send();
+            return;
+        }
+
+        protectedIndicator?.Delete();
+        guardedPlayer = player;
+        protectedIndicator = voted.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent("<b>+</b>", crossColor, Game.IgnStates, MyPlayer));
+        Game.GetDeadPlayers().ForEach(p => protectedIndicator?.Get().AddViewer(p));
+        
+        handler.Message(SelectedPlayerMessage.Formatted(FindPlayerById(guardedPlayer)?.name)).Send();
     }
 
-    private static Optional<string> GetPlayerName(byte b) => Game.GetAlivePlayers().FirstOrOptional(p => p.PlayerId == b).Map(p => p.name);
+    [RoleAction(RoleActionType.AnyExiled)]
+    [RoleAction(RoleActionType.Disconnect)]
+    [RoleAction(RoleActionType.AnyDeath)]
+    private void CheckForDisconnectAndDeath(PlayerControl player, ActionHandle handle)
+    {
+        if (player.PlayerId != guardedPlayer) return;
+        bool resetGuard = handle.ActionType is RoleActionType.Disconnect;
+        resetGuard = resetGuard || handle.ActionType is RoleActionType.AnyDeath && mode is GuardMode.OnDeath;
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0f, 0.4f, 0f));
+        protectedIndicator?.Delete();
+        if (!resetGuard) return;
+    
+        targetLockedIn = false;
+        guardedPlayer = byte.MaxValue;
+    }
+    
+
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.91f, 0.48f, 0.45f));
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub
-                .Name("Change Guarded Player")
-                .Value(v => v.Text("Their Death").Value(0).Build())
-                .Value(v => v.Text("Any Meeting").Value(1).Build())
-                .Value(v => v.Text("Never").Value(2).Build())
+                .KeyName("Change Guarded Player", MedicOptionTranslations.ChangeGuardedPlayer)
+                .Value(v => v.Text(MedicOptionTranslations.OnDeathValue).Value(2).Build())
+                .Value(v => v.Text(MedicOptionTranslations.MeetingsValue).Value(1).Build())
+                .Value(v => v.Text(MedicOptionTranslations.NeverValue).Value(0).Build())
                 .BindInt(o => mode = (GuardMode)o)
                 .Build());
 
     protected enum GuardMode
     {
-        OnDeath,
-        PerRound,
-        Never
+        Never,
+        AnyMeeting,
+        OnDeath
+    }
+
+    [Localized(nameof(Medic))]
+    internal static class MedicTranslations
+    {
+        [Localized(nameof(ProtectingMessage))]
+        public static string ProtectingMessage = "You are currently protecting: {0}";
+        
+        [Localized(nameof(MedicHelpMessage))]
+        public static string MedicHelpMessage = "You are a medic! Your duty: to save innocent lives! Vote a player to protect next round! Alternatively, you can skip here to return to normal voting.";
+        
+        [Localized(nameof(SelectedPlayerMessage))]
+        public static string SelectedPlayerMessage = "You have decided to protect {0}. Vote them again to confirm your choice, or Skip to return to normal voting.";
+
+        [Localized(nameof(ReturnToNormalVoting))]
+        public static string ReturnToNormalVoting = "You are now protecting {0}. Your next vote works as normal.";
+
+        [Localized("Options")]
+        public static class MedicOptionTranslations
+        {
+            [Localized(nameof(ChangeGuardedPlayer))]
+            public static string ChangeGuardedPlayer = "Change Guarded Player";
+
+            [Localized(nameof(OnDeathValue))]
+            public static string OnDeathValue = "After Death";
+
+            [Localized(nameof(MeetingsValue))]
+            public static string MeetingsValue = "Meetings";
+
+            [Localized(nameof(NeverValue))]
+            public static string NeverValue = "Never";
+        }
     }
 }

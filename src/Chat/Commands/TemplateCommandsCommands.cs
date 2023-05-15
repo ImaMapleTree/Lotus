@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using Lotus.Logging;
 using Lotus.Managers;
 using Lotus.Managers.Templates;
 using UnityEngine;
@@ -15,12 +16,12 @@ namespace Lotus.Chat.Commands;
 [Command(CommandFlag.HostOnly, "commands", "cmd")]
 public class TemplateCommandsCommands: CommandTranslations
 {
-    private static Regex _commaRegex = new("( *, *)");
+    private static Regex _commaRegex = new("(\\s*,\\s*)");
 
     [Command("create", "c")]
     public static void CreateCommand(PlayerControl source, string tag, string aliases)
     {
-        List<string> aliasList = _commaRegex.Split(aliases).Where(r => r is not ("" or " ")).ToList();
+        List<string> aliasList = _commaRegex.Split(aliases).Where(r => r is not ("" or " ") && !r.Contains(',')).ToList();
         var result = CommandManager.Create(tag, aliasList);
         
         // ReSharper disable once SwitchStatementMissingSomeEnumCasesNoDefault

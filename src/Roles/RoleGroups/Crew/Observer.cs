@@ -7,6 +7,7 @@ using Lotus.Options;
 using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Options.Game;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
@@ -29,7 +30,7 @@ public class Observer: Crewmate
         currentVisionMod = overrideStartingVision ? startingVision : AUSettings.CrewLightMod();
     }
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         if (slowlyGainsVision)
             currentVisionMod = Mathf.Clamp(currentVisionMod + visionGain, 0, totalVisionMod);

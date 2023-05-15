@@ -29,7 +29,7 @@ public partial class Alchemist
     private void IncreasedVoting(Optional<PlayerControl> votedFor, MeetingDelegate meetingDelegate)
     {
         if (!votedFor.Exists()) return;
-        for (int i = 0; i < ExtraVotes; i++) meetingDelegate.AddVote(MyPlayer, votedFor);
+        for (int i = 0; i < ExtraVotes; i++) meetingDelegate.CastVote(MyPlayer, votedFor);
     }
 
     [RoleAction(RoleActionType.SabotagePartialFix)]

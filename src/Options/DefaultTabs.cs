@@ -9,17 +9,17 @@ namespace Lotus.Options;
 [LoadStatic]
 public class DefaultTabs
 {
-    public static GameOptionTab GeneralTab = new("General Settings", () => Utils.LoadSprite("Lotus.assets.Tabs.TabIcon_MainSettings.png"));
+    public static GameOptionTab GeneralTab = new("General Settings", () => Utils.LoadSprite("Lotus.assets.TabIcons.GeneralIcon.png", 650, true));
 
-    public static GameOptionTab ImpostorsTab = new("Impostor Settings", () => Utils.LoadSprite("Lotus.assets.Tabs.TabIcon_ImpostorRoles.png"));
+    public static GameOptionTab ImpostorsTab = new("Impostor Settings", () => Utils.LoadSprite("Lotus.assets.TabIcons.ImpostorsIcon.png", 650, true));
 
-    public static GameOptionTab CrewmateTab = new("Crewmate Settings", () => Utils.LoadSprite("Lotus.assets.Tabs.TabIcon_CrewmateRoles.png"));
+    public static GameOptionTab CrewmateTab = new("Crewmate Settings", () => Utils.LoadSprite("Lotus.assets.TabIcons.CrewmatesIcon.png", 650, true));
 
-    public static GameOptionTab NeutralTab = new("Neutral Settings", () => Utils.LoadSprite("Lotus.assets.Tabs.TabIcon_NeutralRoles.png"));
+    public static GameOptionTab NeutralTab = new("Neutral Settings", () => Utils.LoadSprite("Lotus.assets.TabIcons.NeutralsIcon.png", 650, true));
 
     //public static GameOptionTab SubrolesTab = new("Subrole Settings", "Lotus.assets.TabIcon_Addons.png");
 
-    public static GameOptionTab MiscTab = new("Misc Settings", () => Utils.LoadSprite("Lotus.assets.Tabs.TabIcon_MiscRoles.png"));
+    public static GameOptionTab MiscTab = new("Misc Settings", () => Utils.LoadSprite("Lotus.assets.TabIcons.MiscIcon.png", 650, true));
 
     public static GameOptionTab HiddenTab = new("Hidden", () => Utils.LoadSprite("Lotus.assets.TabIcon_Addons.png"));
 

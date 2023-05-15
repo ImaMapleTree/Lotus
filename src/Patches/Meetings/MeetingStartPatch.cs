@@ -1,19 +1,16 @@
+using System;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Meetings;
+using Lotus.Chat;
 using Lotus.Managers;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
-using Lotus.API;
-using Lotus.Extensions;
-using Lotus.Options;
-using VentLib.Localization;
 using VentLib.Logging;
-using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
@@ -37,15 +34,18 @@ public class MeetingStartPatch
         MeetingDelegate meetingDelegate = MeetingPrep.PrepMeeting();
         PlayerControl reporter = Utils.GetPlayerById(__instance.reporterId)!;
 
-        Game.GetAlivePlayers().Do(p =>
+        try
         {
-            if (Game.MatchData.MeetingsCalled == 0 && PluginDataManager.TemplateManager.TryFormat(p, "meeting-first", out string msg))
-                Utils.SendMessage(msg, p.PlayerId);
+            Game.GetAlivePlayers().Do(p =>
+            {
+                if (Game.MatchData.MeetingsCalled == 0 &&
+                    PluginDataManager.TemplateManager.TryFormat(p, "meeting-first", out string msg))
+                    ChatHandler.Of(msg).LeftAlign().Send(p);
 
-            if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-start", out string message))
-                Utils.SendMessage(message, p.PlayerId);
-        });
-
+                if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-start", out string message))
+                    ChatHandler.Of(message).LeftAlign().Send(p);
+            });
+        } catch (Exception ex) { VentLogger.Exception(ex, "Error Sending Template Information!"); }
 
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.RoundEnd, ref handle, meetingDelegate, false);

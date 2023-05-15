@@ -1,4 +1,5 @@
 using Lotus.Options;
+using VentLib.Options;
 using VentLib.Options.Game;
 
 namespace Lotus.Extensions;

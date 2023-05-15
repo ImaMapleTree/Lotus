@@ -74,6 +74,7 @@ public class Blackmailer: Shapeshifter
         });
     }
 
+    [RoleAction(RoleActionType.SelfExiled)]
     [RoleAction(RoleActionType.MyDeath)]
     private void BlackmailerDies()
     {

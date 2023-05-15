@@ -28,13 +28,13 @@ public class MeetingDelegate
         BlackscreenResolver = new BlackscreenResolver(this);
     }
 
-    public void AddVote(PlayerControl player, Optional<PlayerControl> target)
+    public void CastVote(PlayerControl player, Optional<PlayerControl> target)
     {
         VentLogger.Trace($"{player.GetNameWithRole()} casted vote for {target.Map(p => p.GetNameWithRole()).OrElse("No One")}");
-        AddVote(player.PlayerId, target.Map(p => p.PlayerId));
+        CastVote(player.PlayerId, target.Map(p => p.PlayerId));
     }
 
-    public void AddVote(byte playerId, Optional<byte> target)
+    public void CastVote(byte playerId, Optional<byte> target)
     {
         currentVotes.GetOrCompute(playerId, () => new List<Optional<byte>>()).Add(target);
     }

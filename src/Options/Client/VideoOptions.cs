@@ -1,7 +1,10 @@
 using System;
+using Lotus.Logging;
+using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Options.Client;
@@ -34,7 +37,11 @@ public class VideoOptions
             .Description("Maximum Framerate for the Application")
             .IOSettings(s => s.UnknownValueAction = ADEAnswer.Allow)
             .Values(2, FpsLimits)
-            .BindInt(i => _targetFps = i)
+            .BindInt(i =>
+            {
+                Application.targetFrameRate = _targetFps = i;
+                Async.Schedule(() => Application.targetFrameRate = _targetFps, 1f);
+            })
             .BuildAndRegister();
     }
 

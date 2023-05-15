@@ -145,6 +145,7 @@ public static class CustomRoleManager
         public BountyHunter BountyHunter = new BountyHunter();
         public Camouflager Camouflager = new Camouflager();
         public Consort Consort = new Consort();
+        public Creeper Creeper = new Creeper();
         public Disperser Disperser = new Disperser();
         public Escapist Escapist = new Escapist();
         public FireWorker FireWorker = new FireWorker();
@@ -153,9 +154,9 @@ public static class CustomRoleManager
         public IdentityThief IdentityThief = new IdentityThief();
         public Roles.RoleGroups.Vanilla.Impostor Impostor = new Roles.RoleGroups.Vanilla.Impostor();
         public Janitor Janitor = new Janitor();
-
-        public Mafia Mafia = new Mafia();
-        public Manipulator Manipulator = new Manipulator();
+        public Mafioso Mafioso = new Mafioso();
+        public Mastermind Mastermind = new Mastermind();
+        public Conman Conman = new Conman();
         public Mare Mare = new Mare();
         public Miner Miner = new Miner();
         public Morphling Morphling = new Morphling();
@@ -172,7 +173,7 @@ public static class CustomRoleManager
         public Vampire Vampire = new Vampire();
         public Warlock Warlock = new Warlock();
         public Witch Witch = new Witch();
-        public YingYanger YingYanger = new YingYanger();
+        public YinYanger YinYanger = new YinYanger();
 
         public CrewPostor CrewPostor = new CrewPostor();
         public Madmate Madmate = new Madmate();
@@ -197,7 +198,7 @@ public static class CustomRoleManager
         public Mayor Mayor = new Mayor();
         public Mechanic Mechanic = new Mechanic();
         public Medic Medic = new Medic();
-        public Roles.RoleGroups.Crew.Medium Medium = new Roles.RoleGroups.Crew.Medium();
+        public Medium Medium = new Roles.RoleGroups.Crew.Medium();
         public Mystic Mystic = new Mystic();
         public Observer Observer = new Observer();
         public Oracle Oracle = new Oracle();
@@ -207,6 +208,7 @@ public static class CustomRoleManager
         public Sheriff Sheriff = new Sheriff();
         public Snitch Snitch = new Snitch();
         public Speedrunner Speedrunner = new Speedrunner();
+        public Swapper Swapper = new Swapper();
         public Transporter Transporter = new Transporter();
         public Trapper Trapper = new Trapper();
         public Vigilante Vigilante = new Vigilante();
@@ -244,7 +246,6 @@ public static class CustomRoleManager
         public Retributionist Retributionist = new Retributionist();
         public Sidekick Sidekick = new Sidekick();
         public Survivor Survivor = new Survivor();
-        public Swapper Swapper = new Swapper();
         public Terrorist Terrorist = new Terrorist();
         public Vulture Vulture = new Vulture();
         public Werewolf Werewolf = new Werewolf();

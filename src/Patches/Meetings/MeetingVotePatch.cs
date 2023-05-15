@@ -29,7 +29,7 @@ public class MeetingVotePatch
 
         if (!handle.IsCanceled)
         {
-            MeetingDelegate.Instance.AddVote(voter, voted);
+            MeetingDelegate.Instance.CastVote(voter, voted);
             return;
         }
 

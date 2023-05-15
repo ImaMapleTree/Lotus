@@ -74,7 +74,7 @@ public class TemplateCommands: CommandTranslations
         {
             string text = "";
             if (int.TryParse(ctx.Args[0], out int result)) success = Templates.TryFormat(p, result - 1, out text);
-            else success = Templates.TryFormat(p, ctx.Join(), out text);
+            else success = Templates.TryFormat(p, ctx.Join(), out text, true);
             if (!success)
             {
                 Utils.SendMessage(TemplateCommandTranslations.ErrorShowingTemplateText.Formatted(p.name), source.PlayerId, CommandError, true);

@@ -72,7 +72,7 @@ public class Mayor: Crewmate
             return;
         }
         if (!voted.Exists()) return;
-        for (int i = 0; i < additionalVotes; i++) meetingDelegate.AddVote(MyPlayer, voted);
+        for (int i = 0; i < additionalVotes; i++) meetingDelegate.CastVote(MyPlayer, voted);
     }
 
     [RoleAction(RoleActionType.RoundEnd)]

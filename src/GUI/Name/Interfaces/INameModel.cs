@@ -19,4 +19,7 @@ public interface INameModel
     public List<IComponentHolder> ComponentHolders();
 
     public T GetComponentHolder<T>() where T : IComponentHolder;
+
+    // ReSharper disable once InconsistentNaming
+    public T GCH<T>() where T : IComponentHolder;
 }

@@ -96,4 +96,6 @@ public class SimpleNameModel : INameModel
     {
         return (T)componentHolders.First(f => f is T);
     }
+
+    public T GCH<T>() where T : IComponentHolder => GetComponentHolder<T>();
 }

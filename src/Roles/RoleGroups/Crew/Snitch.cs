@@ -17,6 +17,7 @@ using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 using static Lotus.Roles.RoleGroups.Crew.Snitch.SnitchTranslations.SnitchOptionTranslations;
 using static Lotus.Utilities.TranslationUtil;
 
@@ -37,12 +38,12 @@ public class Snitch : Crewmate
     [RoleAction(RoleActionType.MyDeath)]
     private void ClearComponents() => indicatorComponents.ForEach(c => c.Delete());
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         int remainingTasks = TotalTasks - TasksComplete;
         if (remainingTasks == SnitchWarningTasks)
         {
-            MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("★", RoleColor), GameStates.IgnStates));
+            MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), GameStates.IgnStates));
             if (EvilHaveArrow)
                 Game.GetAlivePlayers().Where(IsTrackable).ForEach(p =>
                 {

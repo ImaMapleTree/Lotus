@@ -6,6 +6,7 @@ using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
@@ -29,7 +30,7 @@ public class Speedrunner : Crewmate
         currentSpeedBoost = AUSettings.PlayerSpeedMod();
     }
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         if (slowlyAcquireSpeedBoost)
             currentSpeedBoost = Mathf.Clamp(currentSpeedBoost + speedBoostGain, 0, totalSpeedBoost);

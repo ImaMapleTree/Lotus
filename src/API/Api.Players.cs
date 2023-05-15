@@ -2,8 +2,10 @@ using System.Collections.Generic;
 using Hazel;
 using Lotus.API.Odyssey;
 using Lotus.GUI.Name.Interfaces;
+using Lotus.Utilities;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.API;
 
@@ -44,6 +46,10 @@ public partial class Api
                 messageWriter.Recycle();
             });
         }
+
+        public static PlayerControl? FindPlayerById(byte playerId) => Utils.GetPlayerById(playerId);
+
+        public static Optional<PlayerControl> PlayerById(byte playerId) => Utils.PlayerById(playerId);
 
     }
 

@@ -69,14 +69,14 @@ public class AgiTater: NeutralKillingBase
     [RoleAction(RoleActionType.RoundStart)]
     private void AgitaterBombReset() => currentBombs = bombsPerRound;
 
-    [RoleAction(RoleActionType.FixedUpdate)]
+    [RoleAction(RoleActionType.FixedUpdate, triggerAfterDeath: true)]
     private void AgitaterFixedUpdate()
     {
         if (!fixedUpdateLock.AcquireLock()) return;
         bombs.ToArray().ForEach(b => b.DoUpdate());
     }
 
-    [RoleAction(RoleActionType.MeetingCalled)]
+    [RoleAction(RoleActionType.MeetingCalled, triggerAfterDeath: true)]
     private void KillPlayersBeforeMeeting()
     {
         if (Condition.HasFlag(ExplodeCondition.Meetings))

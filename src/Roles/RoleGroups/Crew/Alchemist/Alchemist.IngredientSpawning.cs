@@ -8,6 +8,7 @@ using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
@@ -15,7 +16,7 @@ public partial class Alchemist
 {
     private bool helpedFixLights;
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         LocalIngredients.Add(new IngredientCatalyst());
     }

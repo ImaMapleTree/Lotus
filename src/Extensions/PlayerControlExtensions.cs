@@ -1,6 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
 using InnerNet;
@@ -13,6 +14,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.Subroles;
 using Lotus.Logging;
+using Lotus.Patches.Actions;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
@@ -32,7 +34,9 @@ public static class PlayerControlExtensions
         CustomRole role = player.GetCustomRole();
         List<CustomRole> subroles = player.GetSubroles();
         role.Trigger(action, ref handle, parameters);
+        if (action is not RoleActionType.FixedUpdate) DevLogger.Log($"Triggering Action: {action}");
         if (handle is { IsCanceled: true }) return;
+        if (action is not RoleActionType.FixedUpdate) DevLogger.Log($"I'm dying: {player.name} || {action} || {player.GetSubroles().Select(r => r.RoleName).Fuse()}");
         foreach (CustomRole subrole in subroles)
         {
             subrole.Trigger(action, ref handle, parameters);
@@ -256,5 +260,8 @@ public static class PlayerControlExtensions
 
     public static VanillaRoleTracker.TeamInfo GetTeamInfo(this PlayerControl player) => Game.MatchData.VanillaRoleTracker.GetInfo(player.PlayerId);
 
-    public static bool IsAlive(this PlayerControl target) => target != null && !target.Data.IsDead && !target.Data.Disconnected;
+    public static bool IsAlive(this PlayerControl target)
+    {
+        return target != null && !target.Data.IsDead && !target.Data.Disconnected && !MurderPatches.DeferredDeaths.Contains(target.PlayerId);
+    }
 }

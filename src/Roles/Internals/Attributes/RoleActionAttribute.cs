@@ -127,7 +127,8 @@ public enum RoleActionType
     /// Triggers when any player completes a task. This cannot be canceled (Currently)
     /// </summary>
     /// <param name="player"><see cref="PlayerControl"/> the player completing the task</param>
-    /// <param name="taskId"><see cref="uint"/> the id of the completed task</param>
+    /// <param name="task"><see cref="Optional"/> an optional of <see cref="PlayerTask"/>, containing the task that was done</param>
+    /// <param name="taskLength"><see cref="Lotus.Patches.Actions.TaskLength"/> the length of the completed task</param>
     TaskComplete,
     FixedUpdate,
     /// <summary>
@@ -227,6 +228,14 @@ public static class RoleActionTypeMethods
             RoleActionType.AnyVote => false,
             RoleActionType.Interaction => false,
             RoleActionType.AnyInteraction => false,
+            RoleActionType.OnHoldPet => false,
+            RoleActionType.OnPetRelease => false,
+            RoleActionType.AnyShapeshift => false,
+            RoleActionType.AnyUnshapeshift => false,
+            RoleActionType.Chat => false,
+            RoleActionType.Disconnect => false,
+            RoleActionType.VotingComplete => false,
+            RoleActionType.MeetingCalled => true,
             _ => PlayerActions.Contains(actionType)
         };
     }

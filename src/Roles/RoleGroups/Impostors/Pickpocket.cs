@@ -33,7 +33,7 @@ public class PickPocket : Impostor
     [RoleAction(RoleActionType.MyVote)]
     private void EnhancedVote(Optional<PlayerControl> target, MeetingDelegate meetingDelegate)
     {
-        for (int i = 0; i < currentVotes; i++) meetingDelegate.AddVote(MyPlayer, target);
+        for (int i = 0; i < currentVotes; i++) meetingDelegate.CastVote(MyPlayer, target);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

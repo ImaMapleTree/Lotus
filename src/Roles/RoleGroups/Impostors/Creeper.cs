@@ -1,35 +1,68 @@
-using System.Collections.Generic;
-using System.Linq;
-using HarmonyLib;
+using Lotus.Extensions;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.API;
-using Lotus.GUI;
-using Lotus.GUI.Name;
-using UnityEngine;
+using Lotus.Roles.RoleGroups.Vanilla;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
+using static Lotus.Roles.RoleGroups.Impostors.Creeper.BomberTranslations.BomberOptionTranslations;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
-public class Creeper : Vanilla.Impostor // hidden role. 5% chance to replace Bomber. so no options for this role.
+public class Creeper : Shapeshifter
 {
-    private bool exploded;
+    private bool bomberProtectedByShields;
+    private float explosionRadius;
+
     [RoleAction(RoleActionType.OnPet)]
-    private void Explode()
+    [RoleAction(RoleActionType.Shapeshift)]
+    private void CreeperExplode()
     {
-        if (exploded || MyPlayer.Data.IsDead) return;
-        exploded = true;
-        List<PlayerControl> allPlayersInDistance = RoleUtils.GetPlayersWithinDistance(MyPlayer.GetTruePosition(), 3f).Distinct().ToList();
-        // we can add an explode time if you want. . .
-        allPlayersInDistance.Add(MyPlayer); // they will explode along with everyone else.
-        allPlayersInDistance.Distinct().Do(explodedPlayer => {
-            explodedPlayer.RpcMurderPlayer(explodedPlayer);
+        RoleUtils.GetPlayersWithinDistance(MyPlayer, explosionRadius).ForEach(p =>
+        {
+            FatalIntent intent = new(true, () => new BombedEvent(p, MyPlayer));
+            MyPlayer.InteractWith(p, new DirectInteraction(intent, this));
         });
+        
+        FatalIntent suicideIntent = new(false, () => new BombedEvent(MyPlayer, MyPlayer));
+        MyPlayer.InteractWith(MyPlayer, bomberProtectedByShields 
+            ? new DirectInteraction(suicideIntent, this) 
+            : new UnblockedInteraction(suicideIntent, this)
+        );
     }
-    protected override RoleModifier Modify(RoleModifier roleModifier)
+    
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => 
+        base.RegisterOptions(optionStream)
+            .SubOption(sub => sub.KeyName("Bomber Protected By Shielding", BomberProtection)
+                .AddOnOffValues()
+                .BindBool(b => bomberProtectedByShields = b)
+                .Build())
+            .SubOption(sub => sub.KeyName("Explosion Radius", ExplosionRadius)
+                .Value(v => v.Value(1.2f).Text(SmallDistance).Build())
+                .Value(v => v.Value(1.8f).Text(MediumDistance).Build())
+                .Value(v => v.Value(2.4f).Text(LargeDistance).Build())
+                .BindFloat(f => explosionRadius = f)
+                .Build());
+
+    [Localized(nameof(Creeper))]
+    internal static class BomberTranslations
     {
-        base.Modify(roleModifier);
-        //VentLogger.Warn($"{this.RoleName} Not Implemented Yet", "RoleImplementation");
-        return roleModifier;
+        [Localized("Options")]
+        internal static class BomberOptionTranslations
+        {
+            public static string SmallDistance = "Small";
+
+            public static string MediumDistance = "Medium";
+
+            public static string LargeDistance = "Large";
+            
+            [Localized(nameof(BomberProtection))]
+            public static string BomberProtection = "Bomber Protected by Shielding";
+
+            [Localized(nameof(ExplosionRadius))]
+            public static string ExplosionRadius = "Explosion Radius";
+
+        }
     }
 }

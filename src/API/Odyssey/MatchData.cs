@@ -40,8 +40,7 @@ public class MatchData
 
         public IEnumerable<GameOptionOverride> GetOverrides(byte playerId)
         {
-            RemoteList<GameOptionOverride> remoteList = rolePersistentOverrides.GetOrCompute(playerId, () => new RemoteList<GameOptionOverride>());
-            return remoteList;
+            return rolePersistentOverrides.GetOrCompute(playerId, () => new RemoteList<GameOptionOverride>());
         }
 
         public void AddMainRole(byte playerId, CustomRole role) => MainRoles[playerId] = role;

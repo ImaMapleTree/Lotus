@@ -12,6 +12,7 @@ using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
@@ -20,7 +21,7 @@ public class CrewPostor : Crewmate
     private bool warpToTarget;
     private bool canKillAllied;
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         if (MyPlayer.Data.IsDead) return;
         List<PlayerControl> inRangePlayers = RoleUtils.GetPlayersWithinDistance(MyPlayer, 999, true).Where(p => canKillAllied || p.Relationship(MyPlayer) is not Relation.FullAllies).ToList();

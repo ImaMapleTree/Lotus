@@ -21,6 +21,7 @@ using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 using Object = UnityEngine.Object;
 
 namespace Lotus.Roles.RoleGroups.Neutral;
@@ -44,7 +45,7 @@ public class Postman: Crewmate
 
     public override bool TasksApplyToTotal() => false;
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         if (completedDelivery) AssignNewTarget();
         else MyPlayer.InteractWith(MyPlayer, new UnblockedInteraction(new FatalIntent(), this));

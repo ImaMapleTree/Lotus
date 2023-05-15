@@ -18,11 +18,16 @@ namespace Lotus.Patches.Actions;
 
 public static class MurderPatches
 {
-    private static readonly HashSet<byte> DeferredDeaths = new();
+    internal static readonly HashSet<byte> DeferredDeaths = new();
+    internal static readonly HashSet<byte> TriggeredDeathAbility = new();
 
     static MurderPatches()
     {
-        Hooks.GameStateHooks.GameStartHook.Bind(nameof(MurderPatches), _ => DeferredDeaths.Clear());
+        Hooks.GameStateHooks.GameStartHook.Bind(nameof(MurderPatches), _ =>
+        {
+            DeferredDeaths.Clear();
+            TriggeredDeathAbility.Clear();
+        });
     }
 
     [QuickPrefix(typeof(PlayerControl), nameof(PlayerControl.CheckMurder))]
@@ -63,8 +68,10 @@ public static class MurderPatches
     public static void MurderPlayer(PlayerControl __instance, PlayerControl target)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+        if (TriggeredDeathAbility.Contains(target.PlayerId)) return;
         // Needed because this patch does not guarantee a player is dead
         if (!target.Data.IsDead && !DeferredDeaths.Contains(target.PlayerId)) return;
+        TriggeredDeathAbility.Add(target.PlayerId);
         VentLogger.Trace($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}{(target.protectedByGuardian ? "(Protected)" : "")}", "MurderPlayer");
 
         IDeathEvent deathEvent = Game.MatchData.GameHistory.GetCauseOfDeath(target.PlayerId)
