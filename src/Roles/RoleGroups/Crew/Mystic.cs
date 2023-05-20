@@ -4,7 +4,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -17,9 +17,12 @@ public class Mystic : Crewmate
     private bool sendAudioAlert;
 
     [RoleAction(RoleActionType.AnyDeath)]
-    private void MysticAnyDeath()
+    private void MysticAnyDeath(PlayerControl deadPlayer)
     {
         if (MyPlayer.Data.IsDead) return;
+        if (deadPlayer.GetSubrole<Bait>() != null) return;
+        
+        
         GameOptionOverride[] overrides = { new(Override.CrewLightMod, 0f) };
         SyncOptions(overrides);
 

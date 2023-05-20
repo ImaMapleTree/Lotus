@@ -73,9 +73,9 @@ public static class PlayerControlExtensions
         return role[0] as Subrole;
     }
 
-    public static T GetSubrole<T>(this PlayerControl player) where T: CustomRole
+    public static T? GetSubrole<T>(this PlayerControl player) where T: CustomRole
     {
-        return (T?)player.GetSubrole()!;
+        return player.GetSubrole() as T;
     }
 
     public static List<CustomRole> GetSubroles(this PlayerControl player)

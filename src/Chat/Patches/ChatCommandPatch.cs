@@ -64,7 +64,7 @@ public class ChatUpdatePatch
                 .Send(p.GetClientId());
         });
         
-        if (Game.State is GameState.InLobby) player.RpcSetName(player.name);
+        if (!AmongUsClient.Instance.IsGameStarted) Async.Schedule(() => player.RpcSetName(name), 0.01f);
 
         __instance.TimeSinceLastMessage = 0f;
     }

@@ -62,7 +62,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
     public Harmony Harmony { get; } = new(PluginGuid);
     public static string CredentialsText;
 
-    public static RProfiler Profiler = new RProfiler("General");
+    public static RProfiler Profiler = new("General");
     public static bool Initialized;
 
     public static ModUpdater ModUpdater = null!;
@@ -84,6 +84,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
     private void BeginUpdate(Release release)
     {
+        if (Constraints.DLLConstraint.Enabled) return;
         SplashPatch.UpdateButton.IfPresent(b => b.gameObject.SetActive(true));
         ModUpdateMenu.AddUpdateItem("Lotus", null, ex => ModUpdater.Update(errorCallback: ex)!);
         Assembly ventAssembly = typeof(Vents).Assembly;

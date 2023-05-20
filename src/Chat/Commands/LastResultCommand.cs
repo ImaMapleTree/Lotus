@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
-using Lotus.Extensions;
 using Lotus.Managers.History;
 using Lotus.Options;
 using UnityEngine;
@@ -27,8 +26,8 @@ public class LastResultCommand: CommandTranslations
             if (!GeneralOptions.MiscellaneousOptions.AutoDisplayResults) return;
             if (versionEvent.Player == null) return;
             if (PlayerHistories == null) return;
-            if (AmongUsClient.Instance.NetworkMode is not NetworkModes.LocalGame && PlayerHistories.All(p => p.UniquePlayerId != versionEvent.Player.UniquePlayerId())) return;
-            GeneralResults(versionEvent.Player);
+            if (AmongUsClient.Instance.NetworkMode is not NetworkModes.LocalGame && PlayerHistories.All(p => p.UniquePlayerId.ToFriendcode() != versionEvent.Player.FriendCode)) return;
+            Async.Schedule(() => GeneralResults(versionEvent.Player), 0.5f);
         });
         Hooks.NetworkHooks.GameJoinHook.Bind(nameof(LastResultCommand), gameJoinEvent =>
         {
@@ -38,7 +37,7 @@ public class LastResultCommand: CommandTranslations
         });
     }
     
-    [Command("last", "l")]
+    [Command(CommandFlag.LobbyOnly, "last", "l")]
     public static void LastGame(PlayerControl source, CommandContext context)
     {
         if (PlayerHistories == null) ErrorHandler(source).Message(Translations.NoPreviousGameText).Send();

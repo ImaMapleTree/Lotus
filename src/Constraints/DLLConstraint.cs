@@ -20,7 +20,7 @@ public class DLLConstraint
 
     private static readonly FileInfo LocalFile;
 
-    private const bool Enabled = false;
+    public const bool Enabled = false;
     
     static DLLConstraint()
     {

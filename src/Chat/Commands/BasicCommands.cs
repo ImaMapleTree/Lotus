@@ -70,7 +70,8 @@ public class BasicCommands: CommandTranslations
     [Command(CommandFlag.HostOnly, "dump")]
     public static void Dump(PlayerControl source)
     {
-        Utils.SendMessage(DumpSuccess.Formatted(new FileInfo(VentLogger.Dump()!).Directory!.GetFile("dump.log").FullName), source.PlayerId);
+        ChatHandler.Of("Successfully dumped logs.").Send(source);
+        /*Utils.SendMessage(DumpSuccess.Formatted(new FileInfo(VentLogger.Dump()!).Directory!.GetFile("dump.log").FullName), source.PlayerId);*/
     }
 
     [Command(CommandFlag.LobbyOnly, "name")]

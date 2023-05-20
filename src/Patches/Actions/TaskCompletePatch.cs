@@ -15,6 +15,7 @@ class TaskCompletePatch
 {
     public static void Prefix(PlayerControl __instance, uint idx)
     {
+        if (__instance == null) return;
         GameData.TaskInfo taskInfo = __instance.Data.FindTaskById(idx);
         NormalPlayerTask? npt = ShipStatus.Instance.GetTaskById(taskInfo!.TypeId);
         VentLogger.Info($"Task Complete => {__instance.GetNameWithRole()} ({npt?.Length})", "CompleteTask");
