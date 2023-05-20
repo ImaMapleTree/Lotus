@@ -8,7 +8,7 @@ using static Lotus.ModConstants.Palette;
 
 namespace Lotus.Options.Roles;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class NeutralOptions
 {
     public int MinimumNeutralPassiveRoles;

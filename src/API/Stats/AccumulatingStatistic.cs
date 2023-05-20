@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using VentLib.Logging;
 using VentLib.Options.Processors;
@@ -13,7 +14,7 @@ internal class AccumulatingStatistic<T> : BoundStatistic<T>, IAccumulativeStatis
     private Dictionary<string, T?> accumulatedData = new();
     private Func<T?, T?, T?> accumulator;
 
-    public AccumulatingStatistic(string identifier, string name, T? defaultValue) : base(identifier, name, defaultValue)
+    public AccumulatingStatistic(string identifier, Func<string> name, T? defaultValue) : base(identifier, name, defaultValue)
     {
 
         Hooks.GameStateHooks.GameEndHook.Bind(HookKey, _ => MergeStatistics(), true);

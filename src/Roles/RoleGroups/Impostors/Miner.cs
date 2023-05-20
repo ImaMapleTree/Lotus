@@ -9,6 +9,7 @@ using VentLib.Options.Game;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
+// TOOD: Miner
 public class Miner : Impostor
 {
     [UIComponent(UI.Cooldown)]

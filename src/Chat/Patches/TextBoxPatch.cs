@@ -1,4 +1,6 @@
 using HarmonyLib;
+using Lotus.Logging;
+using VentLib.Utilities;
 using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Chat.Patches;
@@ -8,7 +10,8 @@ public class TextBoxPatch
 {
     public static void Postfix(TextBoxTMP __instance, char i, ref bool __result)
     {
-        if (i is '@' or '$' or '_') __result = true;
+        /*Async.Schedule(() => DevLogger.Log($"{__instance.text} | {__instance.text.Length} | {(int)__instance.text[0]}"), 0.01f);*/
+        __result = i != 8 && i is not ('\r' or '\n');
     }
 
     [QuickPrefix(typeof(TextBoxTMP), nameof(TextBoxTMP.SetText))]

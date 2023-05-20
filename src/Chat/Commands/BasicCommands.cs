@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Factions.Neutrals;
@@ -69,7 +70,7 @@ public class BasicCommands: CommandTranslations
     [Command(CommandFlag.HostOnly, "dump")]
     public static void Dump(PlayerControl source)
     {
-        Utils.SendMessage(DumpSuccess.Formatted(VentLogger.Dump()), source.PlayerId);
+        Utils.SendMessage(DumpSuccess.Formatted(new FileInfo(VentLogger.Dump()!).Directory!.GetFile("dump.log").FullName), source.PlayerId);
     }
 
     [Command(CommandFlag.LobbyOnly, "name")]
@@ -153,4 +154,11 @@ public class BasicCommands: CommandTranslations
 
     [Command("view", "v")]
     public static void View(PlayerControl source, int id) => TemplateCommands.Preview(source, id);
+
+    [Command(CommandFlag.HostOnly, "title reload", "tload")]
+    public static void ReloadTitles(PlayerControl source)
+    {
+        PluginDataManager.TitleManager.Reload();
+        ChatHandler.Of("Successfully reloaded titles.").Send(source);
+    }
 }

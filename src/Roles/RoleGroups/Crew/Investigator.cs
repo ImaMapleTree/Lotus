@@ -2,94 +2,62 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API;
-using Lotus.Factions.Impostors;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.GUI.Name.Impl;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.Roles.RoleGroups.Coven;
-using Lotus.Roles.RoleGroups.Madmates.Roles;
-using Lotus.Roles.RoleGroups.Neutral;
-using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Utilities;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
-using Lotus.GUI.Name.Interfaces;
-using Lotus.Roles.RoleGroups.Impostors;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Utilities;
 using UnityEngine;
-using VentLib.Logging;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
+using static Lotus.Roles.RoleGroups.Crew.Investigator.Translations.Options;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
-// This is going to be the longest option list :(
 public class Investigator : Crewmate
 {
-    protected static readonly List<Tuple<Type, Color, InvestOptCategory>> InvestCategoryList = new()
+    public static List<(Func<CustomRole, bool> predicate, GameOptionBuilder builder, bool allColored)> RoleTypeBuilders = new()
     {
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Amnesiac), new Color(0.51f, 0.87f, 0.99f), InvestOptCategory.NeutralPassive),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Executioner), new Color(0.55f, 0.17f, 0.33f), InvestOptCategory.NeutralPassive),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Jester), new Color(0.93f, 0.38f, 0.65f), InvestOptCategory.NeutralPassive),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Opportunist), Color.green, InvestOptCategory.NeutralPassive),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Phantom), new Color(0.51f, 0.87f, 0.99f), InvestOptCategory.NeutralPassive),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Survivor), new Color(1f, 0.9f, 0.3f), InvestOptCategory.NeutralPassive),
-
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Arsonist), new Color(1f, 0.4f, 0.2f), InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(BloodKnight), Utils.ConvertHexToColor("#630000"), InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(CrewPostor), Utils.ConvertHexToColor("#DC6601"), InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Egoist), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Glitch), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Hacker), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Jackal), new Color(0f, 0.71f, 0.92f), InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Juggernaut), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Marksman), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(NeutWitch), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Pestilence), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Pirate), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(PlagueBearer), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Poisoner), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Swapper), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Vulture), Color.green, InvestOptCategory.NeutralKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Werewolf), Color.green, InvestOptCategory.NeutralKilling),
-
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Sheriff), new Color(0.97f, 0.8f, 0.27f), InvestOptCategory.CrewmateKilling),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Veteran), new Color(0.6f, 0.5f, 0.25f), InvestOptCategory.CrewmateKilling),
-
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Conjuror), Color.red, InvestOptCategory.Coven),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Coven.Coven), Color.red, InvestOptCategory.Coven),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(CovenWitch), Color.red, InvestOptCategory.Coven),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(HexMaster), Color.red, InvestOptCategory.Coven),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Medusa), Color.red, InvestOptCategory.Coven),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Mimic), Color.red, InvestOptCategory.Coven),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(PotionMaster), Color.red, InvestOptCategory.Coven),
-
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Madmate), Color.red, InvestOptCategory.Madmate),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(MadGuardian), Color.red, InvestOptCategory.Madmate),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(MadSnitch), Color.red, InvestOptCategory.Madmate),
-        new Tuple<Type, Color, InvestOptCategory>(typeof(Parasite), Color.red, InvestOptCategory.Madmate),
+        (r => r.SpecialType is SpecialType.NeutralKilling, new GameOptionBuilder()
+            .KeyName("Neutral Killing Are Red", TranslationUtil.Colorize(NeutralKillingRed, Color.red, ModConstants.Palette.NeutralColor, ModConstants.Palette.KillingColor))
+            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
+            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(1).Color(Color.green).Build())
+            .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
+            .ShowSubOptionPredicate(i => (int)i == 2), false),
+        (r => r.SpecialType is SpecialType.Neutral, new GameOptionBuilder()
+            .KeyName("Neutral Passive Are Red", TranslationUtil.Colorize(NeutralPassiveRed, Color.red, ModConstants.Palette.NeutralColor, ModConstants.Palette.PassiveColor))
+            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
+            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(1).Color(Color.green).Build())
+            .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
+            .ShowSubOptionPredicate(i => (int)i == 2), false),
+        (r => r.Faction is Factions.Impostors.Madmates, new GameOptionBuilder()
+            .KeyName("Madmates Are Red", TranslationUtil.Colorize(MadmateRed, Color.red, ModConstants.Palette.MadmateColor))
+            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
+            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(1).Color(Color.green).Build())
+            .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
+            .ShowSubOptionPredicate(i => (int)i == 2), false)
     };
-
+        
+    // 2 = Color red, 1 = Color green
+    public static Dictionary<Type, int> RoleColoringDictionary = new();
+    [NewOnSetup] private List<byte> investigated = null!;
+    
     [UIComponent(UI.Cooldown)]
-    private Cooldown abilityCooldown;
-    private NIOpt neutralPassiveRed;
-    private NIOpt neutralKillingRed;
-    private NIOpt crewmateKillingRed;
-    private NIOpt covenPurple;
-    private NIOpt madmateRed;
+    private Cooldown abilityCooldown = null!;
 
-    private List<int> redRoles = new();
-    private List<byte> investigated;
-
-    protected override void Setup(PlayerControl player)
+    public Investigator()
     {
-        investigated = new List<byte>();
-        base.Setup(player);
+        CustomRoleManager.AddOnFinishCall(PopulateInvestigatorOptions);
     }
 
     [RoleAction(RoleActionType.OnPet)]
@@ -105,124 +73,70 @@ public class Investigator : Crewmate
 
         investigated.Add(player.PlayerId);
         CustomRole role = player.GetCustomRole();
+        
+        int setting = RoleTypeBuilders.FirstOrOptional(rtb => rtb.predicate(role)).Map(rtb => rtb.allColored ? 2 : 1).OrElse(0);
+        if (setting == 0) setting = RoleColoringDictionary.GetValueOrDefault(role.GetType(), 1);
 
-        int categoryIndex = InvestCategoryList.FindIndex(tuple => tuple.Item1 == role.GetType());
-        InvestOptCategory category = categoryIndex != -1 ? InvestCategoryList[categoryIndex].Item3 : InvestOptCategory.None;
-
-        Color good = new(0.35f, 0.71f, 0.33f);
-        Color bad = new(0.72f, 0.04f, 0f);
-        Color purple = new(0.45f, 0.31f, 0.72f);
-
-        bool roleIsInRoles = redRoles.Contains(categoryIndex);
-        Color color = (category) switch
-        {
-            InvestOptCategory.None => role.Faction is ImpostorFaction ? bad : good,
-            InvestOptCategory.NeutralPassive => neutralPassiveRed is NIOpt.All ? bad : neutralPassiveRed is NIOpt.None ? good : roleIsInRoles ? bad : good,
-            InvestOptCategory.NeutralKilling => neutralKillingRed is NIOpt.All ? bad : neutralKillingRed is NIOpt.None ? good : roleIsInRoles ? bad : good,
-            InvestOptCategory.CrewmateKilling => crewmateKillingRed is NIOpt.All ? bad : crewmateKillingRed is NIOpt.None ? good : roleIsInRoles ? bad : good,
-            InvestOptCategory.Coven => covenPurple is NIOpt.All ? purple : covenPurple is NIOpt.None ? good : roleIsInRoles ? purple : good,
-            InvestOptCategory.Madmate => madmateRed is NIOpt.All ? bad : madmateRed is NIOpt.None ? good : roleIsInRoles ? bad : good,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-        VentLogger.Old($"{player.GetNameWithRole()} is type {role.GetType()} and falls under category \"{category}\". Player is in redRoles list? {roleIsInRoles}. Player's name should be color: {color.ToTextColor()}", "InvestigateInfo");
-
+        Color color = setting == 2 ? Color.green : Color.red;
+        
         NameComponent nameComponent = new(new LiveString(player.name, color), GameStates.IgnStates, ViewMode.Replace, MyPlayer);
         player.NameModel().GetComponentHolder<NameHolder>().Add(nameComponent);
     }
 
     // This is the most complicated options because of all the individual settings
-    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream)
-    {
-        GameOptionBuilder neutPassiveBuilder = new GameOptionBuilder()
-            .Name("Neutral Passive are Red")
-            .BindInt(v => neutralPassiveRed = (NIOpt)v)
-            .ShowSubOptionPredicate(v => (int)v >= 2)
-            .Value(v => v.Text("None").Value(1).Color(Color.red).Build())
-            .Value(v => v.Text("All").Value(0).Color(Color.cyan).Build())
-            .Value(v => v.Text("Individual").Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build());
-        GameOptionBuilder neutKillBuilder = new GameOptionBuilder()
-            .Name("Neutral Killing are Red")
-            .BindInt(v => neutralKillingRed = (NIOpt)v)
-            .ShowSubOptionPredicate(v => (int)v >= 2)
-            .Value(v => v.Text("None").Value(1).Color(Color.red).Build())
-            .Value(v => v.Text("All").Value(0).Color(Color.cyan).Build())
-            .Value(v => v.Text("Individual").Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build());
-        GameOptionBuilder crewmateKillBuilder = new GameOptionBuilder()
-            .Name("Crewmate Killing are Red")
-            .BindInt(v => crewmateKillingRed = (NIOpt)v)
-            .ShowSubOptionPredicate(v => (int)v >= 2)
-            .Value(v => v.Text("None").Value(1).Color(Color.red).Build())
-            .Value(v => v.Text("All").Value(0).Color(Color.cyan).Build())
-            .Value(v => v.Text("Individual").Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build());
-        GameOptionBuilder covenBuilder = new GameOptionBuilder()
-            .Name("Coven are Purple")
-            .BindInt(v => covenPurple = (NIOpt)v)
-            .ShowSubOptionPredicate(v => (int)v >= 2)
-            .Value(v => v.Text("None").Value(1).Color(Color.red).Build())
-            .Value(v => v.Text("All").Value(0).Color(Color.cyan).Build())
-            .Value(v => v.Text("Individual").Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build());
-        GameOptionBuilder madmateBuilder = new GameOptionBuilder()
-            .Name("Madmate are Red")
-            .BindInt(v => madmateRed = (NIOpt)v)
-            .ShowSubOptionPredicate(v => (int)v >= 2)
-            .Value(v => v.Text("None").Value(1).Color(Color.red).Build())
-            .Value(v => v.Text("All").Value(0).Color(Color.cyan).Build())
-            .Value(v => v.Text("Individual").Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build());
-
-        GameOptionBuilder[] builders = { neutPassiveBuilder, neutKillBuilder, crewmateKillBuilder, covenBuilder, madmateBuilder };
-
-        for (int i = 0; i < InvestCategoryList.Count; i++)
-        {
-            Tuple<Type, Color, InvestOptCategory> item = InvestCategoryList[i];
-            GameOptionBuilder builder = builders[(int)item.Item3 - 1];
-
-            var i1 = i;
-            builder.SubOption(sub => sub
-                .Name(item.Item1.Name)
-                .Color(item.Item2)
-                .Bind(v =>
-                {
-                    if ((bool)v)
-                        redRoles.Add(i1);
-                    else
-                        redRoles.Remove(i1);
-                })
-                .AddOnOffValues(false)
-                .Build());
-        }
-
-
-        return base.RegisterOptions(optionStream)
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
+        base.RegisterOptions(optionStream)
             .SubOption(sub => sub
-                .Name("Investigate Cooldown")
-                .BindFloat(v => abilityCooldown.Duration = v)
+                .KeyName("Investigate Cooldown", InvestigateCooldown)
+                .BindFloat(abilityCooldown.SetDuration)
                 .AddFloatRange(2.5f, 120, 2.5f, 10, "s")
-                .Build())
-            .SubOption(_ => builders[0].Build())
-            .SubOption(_ => builders[1].Build())
-            .SubOption(_ => builders[2].Build())
-            .SubOption(_ => builders[3].Build())
-            .SubOption(_ => builders[4].Build());
-    }
+                .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(1f, 0.79f, 0.51f));
 
-
-    protected enum NIOpt
+    private void PopulateInvestigatorOptions()
     {
-        All,
-        None,
-        Individual
+        CustomRoleManager.AllRoles.ForEach(r =>
+        {
+            RoleTypeBuilders.FirstOrOptional(b => b.predicate(r)).Map(i => i.builder)
+                .IfPresent(builder =>
+                {
+                    builder.SubOption(sub => sub.KeyName(r.EnglishRoleName, r.RoleColor.Colorize(r.RoleName))
+                        .AddEnableDisabledValues()
+                        .BindBool(b =>
+                        {
+                            if (b) RoleColoringDictionary[r.GetType()] = 2;
+                            else RoleColoringDictionary[r.GetType()] = 1;
+                        })
+                        .Build());
+                });
+        });
+        RoleTypeBuilders.ForEach(rtb =>
+        {
+            rtb.builder.BindInt(i => rtb.allColored = i == 1);
+            RoleOptions.Children.Add(rtb.builder.Build());
+        });
     }
 
-    protected enum InvestOptCategory
+    [Localized(nameof(Investigator))]
+    internal static class Translations
     {
-        None,
-        NeutralPassive,
-        NeutralKilling,
-        CrewmateKilling,
-        Coven,
-        Madmate
+        [Localized(ModConstants.Options)]
+        internal static class Options
+        {
+            [Localized(nameof(InvestigateCooldown))]
+            public static string InvestigateCooldown = "Investigate Cooldown";
+            
+            [Localized(nameof(NeutralKillingRed))]
+            public static string NeutralKillingRed = "Neutral::1 Killing::2 Are Red::0";
+
+            [Localized(nameof(NeutralPassiveRed))]
+            public static string NeutralPassiveRed = "Neutral::1 Passive::2 Are Red::0";
+
+            [Localized(nameof(MadmateRed))]
+            public static string MadmateRed = "Madmates::1 Are Red::0";
+        }
     }
+    
 }

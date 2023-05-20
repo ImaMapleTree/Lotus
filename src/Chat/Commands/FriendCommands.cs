@@ -79,8 +79,9 @@ public class FriendCommands: CommandTranslations, ICommandReceiver
         public static string LastKnownAsText = "Known As: {0}";
     }
 
-    public void Receive(PlayerControl source, CommandContext context)
+    public bool Receive(PlayerControl source, CommandContext context)
     {
         if (context.Args.Length == 0) BasicCommands.PlayerIds(source, context);
+        return true;
     }
 }

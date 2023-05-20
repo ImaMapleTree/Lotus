@@ -76,16 +76,16 @@ public class Archangel : CustomRole
         switch (roleChangeWhenTargetDies)
         {
             case GARoleChange.Jester:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
                 break;
             case GARoleChange.Opportunist:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
             case GARoleChange.SchrodingerCat:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
                 break;
             case GARoleChange.Crewmate:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
                 break;
             case GARoleChange.None:
             default:

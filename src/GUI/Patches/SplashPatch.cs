@@ -62,7 +62,7 @@ class SplashPatch
         tohLogo.transform.position = new Vector3(4.55f, -1.5f);
         tohLogo.transform.localScale = new Vector3(1f, 1f, 1f);
         var renderer = tohLogo.AddComponent<SpriteRenderer>();
-        renderer.sprite = Utils.LoadSprite("Lotus.assets.LotusBanner.png", 1000f);
+        renderer.sprite = Utils.LoadSprite("Lotus.assets.LotusBanner1.png", 850f);
 
         _customSplash.OrElseSet(InitializeSplash);
         PlayerParticles particles = Object.FindObjectOfType<PlayerParticles>();

@@ -3,6 +3,8 @@ using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
@@ -45,7 +47,14 @@ public class CheckForEndVotingPatch
         
         // Generate voter states to reflect voting
         List<VoterState> votingStates = GenerateVoterStates(meetingDelegate);
-        
+
+        List<byte> playerVotes = meetingDelegate.CurrentVotes()
+            // Kinda weird logic here, we take the existing List<Optional<>> and filter it to only existing votes
+            // Then we filter all votes to only the votes of the exiled player
+            // Finally we transform the exiled player votes into the player's playerID
+            .SelectMany(kv => kv.Value.Filter().Where(i => i == exiledPlayer).Select(i => kv.Key)).ToList();
+
+        if (meetingDelegate.ExiledPlayer != null) Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(meetingDelegate.ExiledPlayer, playerVotes));
         __instance.RpcVotingComplete(votingStates.ToArray(), meetingDelegate.ExiledPlayer, meetingDelegate.IsTie);
         return false;
     }

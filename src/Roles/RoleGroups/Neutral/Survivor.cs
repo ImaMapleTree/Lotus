@@ -9,6 +9,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
+using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
@@ -81,5 +82,5 @@ public class Survivor : CustomRole
         roleModifier
             .Faction(FactionInstances.Solo)
             .SpecialType(SpecialType.Neutral)
-            .RoleColor("#FFE64D");
+            .RoleColor(new Color(1f, 0.9f, 0.3f));
 }

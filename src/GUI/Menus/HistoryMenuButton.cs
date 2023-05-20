@@ -19,9 +19,9 @@ public class HistoryMenuButton
         VentLogger.Fatal("Creating button");
         optionalButton = UnityOptional<ReportButton>.Of(Object.Instantiate(reportButton, instance.transform));
         ReportButton button = optionalButton.Get();
-        button.graphic.sprite = Utils.LoadSprite("Lotus.assets.History.png", 125);
-        button.transform.localPosition += new Vector3(-3.8f, -2.45f);
-        button.SetActive(true);
+        button.graphic.sprite = Utils.LoadSprite("Lotus.assets.History.png", 800);
+        button.transform.localPosition += new Vector3(-3.8f, 4f);
+        button.SetActive(false);
 
         PassiveButton passiveButton = button.GetComponentInChildren<PassiveButton>();
         passiveButton.OnClick = new Button.ButtonClickedEvent();

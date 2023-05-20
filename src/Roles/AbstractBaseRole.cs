@@ -24,6 +24,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
 using Lotus.API;
+using Lotus.API.Stats;
 using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Utilities;
@@ -79,14 +80,16 @@ public abstract class AbstractBaseRole
     public int Chance { get; private set;  }
     public int Count { get; private set; }
     public int AdditionalChance { get; private set; }
-    public bool BaseCanVent;
+    public bool BaseCanVent = true;
 
+    public RoleAbilityFlag RoleAbilityFlags;
     public RoleFlag RoleFlags;
     public readonly List<CustomRole> LinkedRoles = new();
 
-    internal GameOption Options;
+    internal GameOption RoleOptions;
     internal Assembly DeclaringAssembly = Assembly.GetCallingAssembly();
 
+    public virtual List<Statistic> Statistics() => new();
     public string EnglishRoleName { get; private set; }
     private readonly Dictionary<RoleActionType, List<RoleAction>> roleActions = new();
 
@@ -115,17 +118,17 @@ public abstract class AbstractBaseRole
             CustomRoleManager.AddRole(r);
         });
 
-        Options = optionBuilder.Build();
+        RoleOptions = optionBuilder.Build();
 
-        if (!RoleFlags.HasFlag(RoleFlag.DontRegisterOptions) && Options.GetValueText() != "N/A")
+        if (!RoleFlags.HasFlag(RoleFlag.DontRegisterOptions) && RoleOptions.GetValueText() != "N/A")
         {
-            if (!RoleFlags.HasFlag(RoleFlag.Hidden) && Options.Tab == null)
+            if (!RoleFlags.HasFlag(RoleFlag.Hidden) && RoleOptions.Tab == null)
             {
-                if (GetType() == typeof(Impostor)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(Engineer)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(Scientist)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(Crewmate)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(GuardianAngel)) Options.Tab = DefaultTabs.HiddenTab;
+                if (GetType() == typeof(Impostor)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(Engineer)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(Scientist)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(Crewmate)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(GuardianAngel)) RoleOptions.Tab = DefaultTabs.HiddenTab;
                 else
                 {
 
@@ -135,20 +138,20 @@ public abstract class AbstractBaseRole
                     }
 
                     else if (this is Subrole)
-                        Options.Tab = DefaultTabs.MiscTab;
+                        RoleOptions.Tab = DefaultTabs.MiscTab;
                     else if (this.Faction is ImpostorFaction)
-                        Options.Tab = DefaultTabs.ImpostorsTab;
+                        RoleOptions.Tab = DefaultTabs.ImpostorsTab;
                     else if (this.Faction is Crewmates)
-                        Options.Tab = DefaultTabs.CrewmateTab;
+                        RoleOptions.Tab = DefaultTabs.CrewmateTab;
                     else if (this.Faction is TheUndead)
-                        Options.Tab = DefaultTabs.NeutralTab;
+                        RoleOptions.Tab = DefaultTabs.NeutralTab;
                     else if (this.SpecialType is SpecialType.NeutralKilling or SpecialType.Neutral)
-                        Options.Tab = DefaultTabs.NeutralTab;
+                        RoleOptions.Tab = DefaultTabs.NeutralTab;
                     else
-                        Options.Tab = DefaultTabs.MiscTab;
+                        RoleOptions.Tab = DefaultTabs.MiscTab;
                 }
             }
-            Options.Register(CustomRoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
+            RoleOptions.Register(CustomRoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
         }
 
         SetupRoleActions();
@@ -500,6 +503,12 @@ public abstract class AbstractBaseRole
         public RoleModifier RoleFlags(RoleFlag roleFlags)
         {
             myRole.RoleFlags = roleFlags;
+            return this;
+        }
+
+        public RoleModifier RoleAbilityFlags(RoleAbilityFlag roleAbilityFlags)
+        {
+            myRole.RoleAbilityFlags = roleAbilityFlags;
             return this;
         }
     }

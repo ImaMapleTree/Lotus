@@ -1,10 +1,10 @@
 using HarmonyLib;
-using Lotus.Roles;
 using Lotus.Extensions;
+using Lotus.Roles;
 using UnityEngine;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace Lotus.GUI.Hud;
+namespace Lotus.Patches.Hud;
 
 public class HighlightPatches
 {

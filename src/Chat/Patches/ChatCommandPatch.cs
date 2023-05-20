@@ -2,11 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Lotus.API.Odyssey;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Utilities;
-using Lotus.Extensions;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -64,6 +63,8 @@ public class ChatUpdatePatch
                     .End()
                 .Send(p.GetClientId());
         });
+        
+        if (Game.State is GameState.InLobby) player.RpcSetName(player.name);
 
         __instance.TimeSinceLastMessage = 0f;
     }

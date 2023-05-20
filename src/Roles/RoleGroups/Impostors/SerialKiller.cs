@@ -86,7 +86,7 @@ public partial class SerialKiller : Impostor, IModdable
     [Localized(nameof(SerialKiller))]
     private static class SerialKillerTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         public static class SerialKillerOptionTranslations
         {
             [Localized(nameof(TimeUntilSuicide))]

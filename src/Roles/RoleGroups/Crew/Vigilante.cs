@@ -59,7 +59,7 @@ public class Vigilante: CustomRole
             lastPlayer = 255;
             return;
         }
-        List<CustomRole> enabledRoles = Api.Roles.GetEnabledRoles().Sorted(r => r.RoleName).ToList();
+        List<CustomRole> enabledRoles = MatchData.GetEnabledRoles().Sorted(r => r.RoleName).ToList();
         roles = new List<CustomRole>[PlayerControl.AllPlayerControls.Count];
 
         int evenD = Mathf.FloorToInt((float)enabledRoles.Count / roles.Length);

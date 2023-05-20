@@ -5,7 +5,6 @@ using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.GUI.Name.Impl;
 using Lotus.GUI.Name.Interfaces;
-using Lotus.API;
 using Lotus.Options;
 using VentLib.Utilities.Optionals;
 

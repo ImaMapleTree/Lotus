@@ -4,6 +4,8 @@ using Lotus.API.Odyssey;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
 using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Logging;
@@ -18,6 +20,9 @@ public class TimeThief : Vanilla.Impostor
     private int minimumVotingTime;
     private bool returnTimeAfterDeath;
 
+    [UIComponent(UI.Counter)]
+    public string TimeStolenCounter() => RoleUtils.Counter(kills * meetingTimeSubtractor + "s", color: RoleColor);
+    
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {

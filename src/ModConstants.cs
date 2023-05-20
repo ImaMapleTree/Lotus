@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 
 namespace Lotus;
 
@@ -24,6 +25,8 @@ public static class ModConstants
 
     public const float MaxPlayerSpeed = 3f;
 
+    public const string Options = "Options";
+
     public static string[] ColorNames = new[]
     {
         "Red", "Blue", "Green", "Pink", "Orange", "Yellow", "Black", "White", "Purple", "Brown", "Cyan", "Lime",
@@ -39,6 +42,7 @@ public static class ModConstants
         public static Color NeutralColor = new(1f, 0.67f, 0.11f);
         public static Color PassiveColor = new(1f, 0.87f, 0.91f);
         public static Color KillingColor = new(1f, 0.27f, 0.18f);
+        public static Color MadmateColor = new(0.73f, 0.18f, 0.02f);
 
         public static Color GeneralColor1 = new(0.15f, 0.27f, 0.33f);
         public static Color GeneralColor2 = new(0.16f, 0.62f, 0.56f);
@@ -48,23 +52,32 @@ public static class ModConstants
 
 
         public static Color InvalidUsage = new(1f, 0.67f, 0.11f);
+        public static Color WinnerColor = new(1f, 0.83f, 0.24f);
     }
 
+    [Localized("DeathNames")]
     public static class DeathNames
     {
-        public const string Killed = "Killed";
+        [Localized(nameof(Killed))]
+        public static string Killed = "Killed";
 
-        public const string Suicide = "Suicide";
+        [Localized(nameof(Suicide))]
+        public static string Suicide = "Suicide";
 
-        public const string Exiled = "Exiled";
+        [Localized(nameof(Exiled))]
+        public static string Exiled = "Exiled";
 
-        public const string Bombed = "Bombed";
+        [Localized(nameof(Bombed))]
+        public static string Bombed = "Bombed";
 
-        public const string Bitten = "Bitten";
+        [Localized(nameof(Bitten))]
+        public static string Bitten = "Bitten";
 
-        public const string Cursed = "Cursed";
+        [Localized(nameof(Cursed))]
+        public static string Cursed = "Cursed";
 
-        public const string Incinerated = "Incinerated";
+        [Localized(nameof(Incinerated))]
+        public static string Incinerated = "Incinerated";
     }
 
     public static Dictionary<string, string> Pets = new()

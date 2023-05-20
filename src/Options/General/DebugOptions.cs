@@ -6,7 +6,7 @@ using VentLib.Options.Game;
 
 namespace Lotus.Options.General;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class DebugOptions
 {
     private static Color _optionColor = new(1f, 0.59f, 0.38f);

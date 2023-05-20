@@ -248,7 +248,7 @@ public class Mafioso: Engineer
                 .BindBool(b => hasGun = b)
                 .Build())
             .SubOption(sub => sub.KeyName("Gun Cooldown", GunCooldown)
-                .Value(v =>  v.Text(GeneralOptionTranslations.CommonText).Color(new Color(1f, 0.61f, 0.33f)).Value(-1f).Build())
+                .Value(v =>  v.Text(GeneralOptionTranslations.GlobalText).Color(new Color(1f, 0.61f, 0.33f)).Value(-1f).Build())
                 .AddFloatRange(0, 120, 2.5f, 0, "s")
                 .BindFloat(gunCooldown.SetDuration)
                 .Build())
@@ -291,7 +291,7 @@ public class Mafioso: Engineer
         [Localized(nameof(PurchaseItemMessage))]
         public static string PurchaseItemMessage = "You have purchased: {0}. You now have {1} cash leftover.";
 
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         internal static class MafiaOptionTranslations
         {
             [Localized(nameof(StartsGameWithGun))]

@@ -8,7 +8,7 @@ using VentLib.Options.IO;
 
 namespace Lotus.Options.General;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class MiscellaneousOptions
 {
     private static Color _optionColor = new(1f, 0.75f, 0.81f);

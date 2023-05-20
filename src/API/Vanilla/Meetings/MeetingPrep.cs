@@ -1,10 +1,15 @@
 using System;
+using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.API.Processes;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Victory;
 using Lotus.Extensions;
+using Lotus.Patches.Actions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.RPC;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -32,10 +37,14 @@ internal class MeetingPrep
     /// </summary>
     /// <param name="reporter">Optional player, if provided, uses rpc to call meeting</param>
     /// <returns>the current meeting delegate</returns>
-    public static MeetingDelegate PrepMeeting(PlayerControl? reporter = null)
+    public static MeetingDelegate? PrepMeeting(PlayerControl? reporter = null)
     {
         if (!_prepped) _meetingDelegate = new MeetingDelegate();
         if (_prepped || !AmongUsClient.Instance.AmHost) return _meetingDelegate;
+        ActionHandle handle = ActionHandle.NoInit();
+        if (reporter != null) Game.TriggerForAll(RoleActionType.MeetingCalled, ref handle, reporter);
+        if (handle.IsCanceled) return null;
+        
         Game.State = GameState.InMeeting;
 
         NameUpdateProcess.Paused = true;
@@ -49,7 +58,6 @@ internal class MeetingPrep
         if (reporter != null) Async.Schedule(() => QuickStartMeeting(reporter), NetUtils.DeriveDelay(0.2f));
 
         CheckEndGamePatch.Deferred = true;
-        Hooks.GameStateHooks.RoundEndHook.Propagate(new GameStateHookEvent(Game.MatchData));
         Game.SyncAll();
         return _meetingDelegate;
     }
@@ -57,6 +65,9 @@ internal class MeetingPrep
     private static void QuickStartMeeting(PlayerControl reporter)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+        
+        Game.GetAllPlayers().Where(p => p.IsShapeshifted()).ForEach(p => p.CRpcRevertShapeshift(false));
+        
         MeetingRoomManager.Instance.AssignSelf(reporter, Reported);
         DestroyableSingleton<HudManager>.Instance.OpenMeetingRoom(reporter);
         reporter.RpcStartMeeting(Reported);

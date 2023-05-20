@@ -6,7 +6,7 @@ using VentLib.Utilities.Attributes;
 
 namespace Lotus.Options;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 [LoadStatic]
 public class GeneralOptions
 {

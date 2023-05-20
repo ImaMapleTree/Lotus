@@ -35,9 +35,9 @@ public static class Utils
         return GetPlayerById(player.PlayerId)?.GetNameWithRole() ?? "";
     }
 
-    public static Color ConvertHexToColor(string hex)
+    public static Color? ConvertHexToColor(string hex)
     {
-        ColorUtility.TryParseHtmlString(hex, out Color c);
+        if (!ColorUtility.TryParseHtmlString(hex, out Color c)) return null;
         return c;
     }
 

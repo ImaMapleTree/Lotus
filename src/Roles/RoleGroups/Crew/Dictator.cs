@@ -52,6 +52,7 @@ public class Dictator: Crewmate
                 .AddIntRange(1, 15)
                 .BindInt(i => totalDictates = i)
                 .Build());
+    
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(0.87f, 0.61f, 0f));
@@ -72,9 +73,9 @@ public class Dictator: Crewmate
         public static string LynchEventMessage = "{0}::0 lynched {1}::1.";
         
         [Localized(nameof(DictateMessage))]
-        public static string DictateMessage = "{0} was voted out by the {1}::1";
+        public static string DictateMessage = "{0} was voted out by the {1}::0";
 
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         public static class DictatorOptionTranslations
         {
             [Localized(nameof(NumberOfDictates))]

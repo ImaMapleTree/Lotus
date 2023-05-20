@@ -12,6 +12,7 @@ using Lotus.API;
 using Lotus.Extensions;
 using Lotus.Factions.Impostors;
 using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
@@ -21,7 +22,7 @@ using VentLib.Utilities.Extensions;
 namespace Lotus.Roles.RoleGroups.Impostors;
 
 // TODO: Make into morphling
-public class BountyHunter: Vanilla.Impostor
+public class BountyHunter: Impostor
 {
     private PlayerControl? bhTarget;
     private Cooldown acquireNewTarget;

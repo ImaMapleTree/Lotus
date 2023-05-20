@@ -12,10 +12,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
-using Lotus.GUI;
-using Lotus.GUI.Name;
 using UnityEngine;
-using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
@@ -40,7 +37,7 @@ public class NeutWitch : NeutralKillingBase
         remotes.GetValueOrDefault(target.PlayerId)?.Delete();
         IndicatorComponent component = new SimpleIndicatorComponent("◆", new Color(0.36f, 0f, 0.58f), GameStates.IgnStates, MyPlayer);
         remotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         return true;
     }
 
@@ -62,6 +59,7 @@ public class NeutWitch : NeutralKillingBase
             player.RpcMurderPlayer(inRangePlayers.GetRandom());
             RemovePuppet(player);
         }
+        
 
         cursedPlayers.Where(p => p.Data.IsDead).ToArray().Do(RemovePuppet);
     }

@@ -96,9 +96,8 @@ public class WinnersMenu
         {
             PlayerHistory playerHistory = allPlayers[index];
             CustomRole role = playerHistory.Role;
-            PoolablePlayer newPlayer = Object.Instantiate(prefabPlayer, prefabPlayer.transform.parent);
+            PoolablePlayer newPlayer = prefabPlayer;//Object.Instantiate(prefabPlayer, prefabPlayer.transform.parent);
             newPlayer.gameObject.SetActive(true);
-            newPlayer.cosmetics.initialized = false;
             newPlayer.UpdateFromPlayerOutfit(playerHistory.Outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
 
             int row = Mathf.FloorToInt(index / 5f);
@@ -131,7 +130,7 @@ public class WinnersMenu
 
     private Color StatusColor(PlayerStatus status)
     {
-        return (status) switch
+        return status switch
         {
             PlayerStatus.Alive => Color.green,
             PlayerStatus.Exiled => new Color(0.73f, 0.54f, 0.45f),

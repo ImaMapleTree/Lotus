@@ -22,8 +22,9 @@ public class MeetingStartPatch
 {
     static MeetingStartPatch()
     {
-        PluginDataManager.TemplateManager.RegisterTag("meeting-first", "Tag for the template to be shown during the first meeting.");
-        PluginDataManager.TemplateManager.RegisterTag("meeting-start", "Tag for the template to be shown during each meeting.");
+        PluginDataManager.TemplateManager.RegisterTag("meeting-first", "The template to show during the first meeting.");
+        PluginDataManager.TemplateManager.RegisterTag("meeting-subsequent", "The template to show during all meetings after the first.");
+        PluginDataManager.TemplateManager.RegisterTag("meeting-start", "The template to show during each meeting.");
     }
 
     public static void Prefix(MeetingHud __instance)
@@ -31,16 +32,20 @@ public class MeetingStartPatch
         if (!AmongUsClient.Instance.AmHost) return;
         VentLogger.Info("------------Meeting Start------------", "Phase");
 
-        MeetingDelegate meetingDelegate = MeetingPrep.PrepMeeting();
+        MeetingDelegate meetingDelegate = MeetingPrep.PrepMeeting()!;
         PlayerControl reporter = Utils.GetPlayerById(__instance.reporterId)!;
 
         try
         {
             Game.GetAlivePlayers().Do(p =>
             {
-                if (Game.MatchData.MeetingsCalled == 0 &&
-                    PluginDataManager.TemplateManager.TryFormat(p, "meeting-first", out string msg))
-                    ChatHandler.Of(msg).LeftAlign().Send(p);
+                if (Game.MatchData.MeetingsCalled == 0)
+                {
+                    if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-first", out string firstMeetingMessage))
+                        ChatHandler.Of(firstMeetingMessage).LeftAlign().Send(p);
+                }
+                else if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-subsequent", out string subsequentMeeting)) 
+                    ChatHandler.Of(subsequentMeeting).LeftAlign().Send(p);
 
                 if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-start", out string message))
                     ChatHandler.Of(message).LeftAlign().Send(p);
@@ -49,9 +54,10 @@ public class MeetingStartPatch
 
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.RoundEnd, ref handle, meetingDelegate, false);
-        Game.RenderAllForAll(force: true);
+        Game.RenderAllForAll(GameState.InMeeting, force: true);
 
         Hooks.MeetingHooks.MeetingCalledHook.Propagate(new MeetingHookEvent(reporter, MeetingPrep.Reported, meetingDelegate));
+        Hooks.GameStateHooks.RoundEndHook.Propagate(new GameStateHookEvent(Game.MatchData));
         Game.MatchData.MeetingsCalled++;
     }
 

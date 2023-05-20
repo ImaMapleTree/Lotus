@@ -30,7 +30,7 @@ public class Crusader: Crewmate, ISabotagerRole
     {
         if (MyPlayer.InteractWith(target, DirectInteraction.HelpfulInteraction.Create(this)) == InteractionResult.Halt) return;
         protectedPlayer = Optional<byte>.NonNull(target.PlayerId);
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         Game.MatchData.GameHistory.AddEvent(new ProtectEvent(MyPlayer, target));
     }
 
@@ -81,7 +81,7 @@ public class Crusader: Crewmate, ISabotagerRole
     [Localized(nameof(Crusader))]
     internal static class CrusaderTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         public static class CrusaderOptions
         {
             [Localized(nameof(BeneficialInteractionProtection))]

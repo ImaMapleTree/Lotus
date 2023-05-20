@@ -7,7 +7,7 @@ using VentLib.Options.Game;
 
 namespace Lotus.Options.General;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class AdminOptions
 {
     private static Color _optionColor = CustomRoleManager.Special.GM.RoleColor;

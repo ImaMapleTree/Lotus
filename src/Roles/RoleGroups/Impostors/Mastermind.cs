@@ -4,6 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Extensions;
 using Lotus.Factions;
 using Lotus.GUI;
@@ -17,6 +18,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
+using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -51,8 +53,12 @@ public class Mastermind : Impostor
 
         Remote<TextComponent>?[] textComponents = { target.NameModel().GCH<TextHolder>().Add(alliedText), null };
         ClearManipulated(target);
+        
         remotes[target.PlayerId] = textComponents;
+        manipulatedPlayers.Add(target.PlayerId);
+        
         Async.Schedule(() => BeginSuicideCountdown(target), 5f);
+        RefreshKillCooldown(target);
         return false;
     }
 
@@ -68,19 +74,22 @@ public class Mastermind : Impostor
         handle.Cancel();
         
         CustomRole emitterRole = emitter.GetCustomRole();
-        Remote<GameOptionOverride> killCooldown =  emitterRole.AddOverride(new GameOptionOverride(Override.KillCooldown, 0));
-        emitter.InteractWith(target, new ManipulatedInteraction(new FatalIntent(), emitter.GetCustomRole(), MyPlayer));
-        killCooldown.Delete();
+        Remote<GameOptionOverride> killCooldown =  Game.MatchData.Roles.AddOverride(emitter.PlayerId, new GameOptionOverride(Override.KillCooldown, 0f));
         emitterRole.SyncOptions();
+        Async.Schedule(() =>
+        {
+            emitter.InteractWith(target, new ManipulatedInteraction(new FatalIntent(), emitter.GetCustomRole(), MyPlayer));
+            killCooldown.Delete();
+            emitterRole.SyncOptions();
+        }, NetUtils.DeriveDelay(0.05f));
         ClearManipulated(emitter);
     }
 
     private void BeginSuicideCountdown(PlayerControl target)
     {
         if (target == null) return;
-        manipulatedPlayers.Add(target.PlayerId);
         Cooldown playerCooldown = expirationTimers[target.PlayerId] = timeToKill.Clone();
-        LiveString killIndicator = new(ManipulatedText.Formatted(playerCooldown), RoleColor); 
+        LiveString killIndicator = new(() => ManipulatedText + " " + Color.white.Colorize(playerCooldown + "s"), RoleColor); 
         TextComponent textComponent = new(killIndicator, GameState.Roaming, viewers: target);
         remotes.GetOrCompute(target.PlayerId, () => new []{ (Remote<TextComponent>?)null, null})[1] = target.NameModel().GCH<TextHolder>().Add(textComponent);
         playerCooldown.StartThenRun(() => ExecuteSuicide(target));
@@ -89,7 +98,7 @@ public class Mastermind : Impostor
     private void ExecuteSuicide(PlayerControl target)
     {
         if (!manipulatedPlayers.Contains(target.PlayerId)) return;
-        target.InteractWith(target, new UnblockedInteraction(new FatalIntent(false, () => new ManipulatedPlayerDeathEvent(target, target))));
+        target.InteractWith(target, new UnblockedInteraction(new FatalIntent(false, () => new ManipulatedPlayerDeathEvent(target, target)), this));
         ClearManipulated(target);
     }
     
@@ -98,7 +107,7 @@ public class Mastermind : Impostor
     [RoleAction(RoleActionType.MeetingCalled)]
     public override void HandleDisconnect()
     {
-        manipulatedPlayers.ToArray().Filter(Api.Players.PlayerById).ForEach(p =>
+        manipulatedPlayers.ToArray().Filter(Players.PlayerById).ForEach(p =>
         {
             FatalIntent fatalIntent = new(false, () => new ManipulatedPlayerDeathEvent(p, p));
             p.InteractWith(p, new ManipulatedInteraction(fatalIntent, p.GetCustomRole(), MyPlayer));
@@ -114,7 +123,7 @@ public class Mastermind : Impostor
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => 
-        base.RegisterOptions(optionStream)
+        AddKillCooldownOptions(base.RegisterOptions(optionStream), ManipulationCooldown, "Manipulation Cooldown")
             .SubOption(sub => sub.KeyName("Manipulated Player Limit", ManipulatedPlayerLimit)
                 .Value(v => v.Text(ModConstants.Infinity).Color(ModConstants.Palette.InfinityColor).Value(-1).Build())
                 .AddIntRange(1, 5, 1, 0)
@@ -130,18 +139,27 @@ public class Mastermind : Impostor
                 .BindFloat(timeToKill.SetDuration)
                 .Build());
 
+    protected override RoleModifier Modify(RoleModifier roleModifier) => 
+        base.Modify(roleModifier)
+            .OptionOverride(new IndirectKillCooldown(KillCooldown, () => CanManipulate))
+            .OptionOverride(Override.KillCooldown, () => AUSettings.KillCooldown(), () => !CanManipulate);
+
     [Localized(nameof(Mastermind))]
     internal static class MastermindTranslations
     {
         [Localized(nameof(ManipulatedText))]
-        public static string ManipulatedText = "Manipulated";
+        public static string ManipulatedText = "Manipulated!";
 
         [Localized(nameof(KillImploredText))]
         public static string KillImploredText = "You <b>MUST</b> Kill Someone In {0}s";
 
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         internal static class MastermindOptionTranslations
         {
+
+            [Localized(nameof(ManipulationCooldown))]
+            public static string ManipulationCooldown = "Manipulation Cooldown";
+            
             [Localized(nameof(ManipulatedPlayerLimit))]
             public static string ManipulatedPlayerLimit = "Manipulated Player Limit";
 

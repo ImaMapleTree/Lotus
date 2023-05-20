@@ -1,13 +1,11 @@
 using System;
 using HarmonyLib;
+using Lotus.Extensions;
 using Lotus.Roles;
 using Lotus.Victory;
-using Lotus.Extensions;
-using Lotus.Roles.Legacy;
-using Lotus.Roles.RoleGroups.Vanilla;
 using VentLib.Utilities;
 
-namespace Lotus.GUI.Hud;
+namespace Lotus.Patches.Hud;
 
 [HarmonyPatch(typeof(TaskPanelBehaviour), nameof(TaskPanelBehaviour.SetTaskText))]
 class TaskTextPatch

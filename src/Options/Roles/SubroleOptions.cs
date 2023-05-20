@@ -6,7 +6,7 @@ using VentLib.Options.Game;
 
 namespace Lotus.Options.Roles;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class SubroleOptions
 {
     public static Color ModifierColor = new(0.43f, 0.89f, 0.61f);

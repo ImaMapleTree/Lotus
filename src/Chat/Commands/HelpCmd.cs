@@ -61,16 +61,16 @@ public class HelpCmd: ICommandReceiver
                 : language.Translate($"Roles.{matchingRole.EnglishRoleName}.Description");
             
             if (!PluginDataManager.TemplateManager.TryFormat(matchingRole, "help-role", out string formatted))
-                formatted = $"{matchingRole.RoleName} ({matchingRole.Faction.Name()})\n{matchingRole.Blurb}\n{matchingRole.Description}\n\nOptions:\n{OptionUtils.OptionText(matchingRole.Options)}";
+                formatted = $"{matchingRole.RoleName} ({matchingRole.Faction.Name()})\n{matchingRole.Blurb}\n{matchingRole.Description}\n\nOptions:\n{OptionUtils.OptionText(matchingRole.RoleOptions)}";
             
             ChatHandler.Of(formatted).LeftAlign().Send(source);
         }
     }
 
     // This is triggered when just using /help
-    public void Receive(PlayerControl source, CommandContext context)
+    public bool Receive(PlayerControl source, CommandContext context)
     {
-        if (context.Args.Length > 0) return;
+        if (context.Args.Length > 0) return true;
         string help = Localizer.Translate("Commands.Help.Alias");
         Utils.SendMessage(
                 Localizer.Translate("Commands.Help.CommandList")
@@ -79,5 +79,6 @@ public class HelpCmd: ICommandReceiver
                 + $"\n/{help} {Localizer.Translate("Commands.Help.Gamemodes.Alias")} - {Localizer.Translate("Commands.Help.Gamemodes.Info")}",
                 source.PlayerId
             );
+        return true;
     }
 }

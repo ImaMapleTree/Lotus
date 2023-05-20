@@ -1,19 +1,17 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AmongUs.GameOptions;
 using Hazel;
 using InnerNet;
-using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Managers;
 using Lotus.Roles;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.Subroles;
-using Lotus.Logging;
 using Lotus.Patches.Actions;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
@@ -26,7 +24,7 @@ namespace Lotus.Extensions;
 
 public static class PlayerControlExtensions
 {
-    public static UniquePlayerId UniquePlayerId(this PlayerControl player) => API.UniquePlayerId.From(player);
+    public static UniquePlayerId UniquePlayerId(this PlayerControl player) => API.Player.UniquePlayerId.From(player);
 
     public static void Trigger(this PlayerControl player, RoleActionType action, ref ActionHandle handle, params object[] parameters)
     {
@@ -97,7 +95,7 @@ public static class PlayerControlExtensions
         RpcV3.Immediate(player.NetId, RpcCalls.SetRole).Write((ushort)role).Send(clientId);
     }
 
-    public static void RpcGuardAndKill(this PlayerControl killer, PlayerControl? target = null, int colorId = 0)
+    public static void RpcMark(this PlayerControl killer, PlayerControl? target = null, int colorId = 0)
     {
         if (target == null) target = killer;
 
@@ -123,7 +121,7 @@ public static class PlayerControlExtensions
         else
         {
             player.GetCustomRole().SyncOptions(new List<GameOptionOverride> { new(Override.KillCooldown, time * 2)} );
-            player.RpcGuardAndKill();
+            player.RpcMark();
             player.GetCustomRole().SyncOptions();
         }
     }

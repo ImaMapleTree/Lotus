@@ -48,7 +48,7 @@ public class SimpleNameModel : INameModel
     {
         this.player = player;
         SetHolders();
-        this.unalteredName = player.Data.PlayerName;
+        this.unalteredName = player.name;
         NameHolder.Add(new NameComponent(new LiveString(unalteredName, Color.white), new[] { GameState.Roaming, GameState.InMeeting}, ViewMode.Replace));
     }
 

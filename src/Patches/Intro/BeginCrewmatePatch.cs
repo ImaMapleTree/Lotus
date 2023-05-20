@@ -74,7 +74,7 @@ class BeginCrewmatePatch
                 PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Shapeshifter);
                 break;
 
-            case SabotageMaster:
+            case Repairman:
                 PlayerControl.LocalPlayer.Data.Role.IntroSound = ShipStatus.Instance.SabotageSound;
                 break;
 
@@ -109,7 +109,7 @@ class BeginCrewmatePatch
             __instance.ImpostorText.gameObject.SetActive(true);
             __instance.ImpostorText.text = "https://github.com/music-discussion/Lotus-TheOtherRoles--TOH-TOR" +
                                            "\r\nv0.9.4 - Out Now on Github";
-            __instance.TeamTitle.color = Utils.ConvertHexToColor("#73fa73");
+            __instance.TeamTitle.color = new Color(0.45f, 0.98f, 0.45f);
             StartFadeIntro(__instance, Color.cyan, Color.yellow);
         }
         if (Input.GetKey(KeyCode.LeftShift))
@@ -118,7 +118,7 @@ class BeginCrewmatePatch
             __instance.ImpostorText.gameObject.SetActive(true);
             __instance.ImpostorText.text = "https://github.com/music-discussion/Lotus-TheOtherRoles--TOH-TOR" +
                                            "\r\nv0.9.4 - Coming Soon on Github";
-            __instance.TeamTitle.color = Utils.ConvertHexToColor("#73fa73");
+            __instance.TeamTitle.color = new Color(0.45f, 0.98f, 0.45f);
             StartFadeIntro(__instance, Color.cyan, Color.yellow);
         }
         if (Input.GetKey(KeyCode.RightControl))
@@ -126,8 +126,8 @@ class BeginCrewmatePatch
             __instance.TeamTitle.text = "Discord Server";
             __instance.ImpostorText.gameObject.SetActive(true);
             __instance.ImpostorText.text = "https://discord.gg/tohtor";
-            __instance.TeamTitle.color = Utils.ConvertHexToColor("#73fa73");
-            StartFadeIntro(__instance, Utils.ConvertHexToColor("#73fa73"), Utils.ConvertHexToColor("#73fa73"));
+            __instance.TeamTitle.color = new Color(0.45f, 0.98f, 0.45f);
+            StartFadeIntro(__instance, new Color(0.45f, 0.98f, 0.45f), new Color(0.45f, 0.98f, 0.45f));
         }
     }
     private static AudioClip? GetIntroSound(RoleTypes roleType)

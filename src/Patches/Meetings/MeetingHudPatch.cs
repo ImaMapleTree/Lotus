@@ -38,13 +38,11 @@ class MeetingHudOnDestroyPatch
 
     private static void PostMeetingSetups()
     {
-        bool noVenting = GeneralOptions.GameplayOptions.ForceNoVenting;
         bool randomSpawn = GeneralOptions.MayhemOptions.RandomSpawn;
 
         Game.GetAllPlayers().ForEach(p =>
         {
             if (randomSpawn) Game.RandomSpawn.Spawn(p);
-            if (noVenting && !p.GetCustomRole().BaseCanVent) Async.Schedule(() => VentApi.ForceNoVenting(p), 0.1f);
         });
     }
 }

@@ -34,7 +34,7 @@ public class Vampiress : Impostor
         InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this));
         if (result is InteractionResult.Halt) return false;
 
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         bitten.Add(target.PlayerId);
         Async.Schedule(() =>
         {

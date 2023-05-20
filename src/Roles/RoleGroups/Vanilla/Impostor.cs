@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using AmongUs.GameOptions;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Stats;
 using Lotus.Factions;
 using Lotus.Managers.History.Events;
 using Lotus.Options;
@@ -18,10 +20,9 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
 {
     private const float DefaultFloatValue = -1;
 
-    public virtual bool CanSabotage() => canSabotage;
-    public virtual bool CanKill() => canKill;
+    public virtual bool CanSabotage() => canSabotage && !RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotSabotage);
     protected bool canSabotage = true;
-    protected bool canKill = true;
+    
     public float KillCooldown
     {
         set => killCooldown = value;
@@ -57,7 +58,7 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
     {
         return optionBuilder.SubOption(sub => sub.Name(name)
             .Key(key)
-            .Value(v => v.Text(GeneralOptionTranslations.CommonText).Color(new Color(1f, 0.61f, 0.33f)).Value(DefaultFloatValue).Build())
+            .Value(v => v.Text(GeneralOptionTranslations.GlobalText).Color(new Color(1f, 0.61f, 0.33f)).Value(DefaultFloatValue).Build())
             .AddFloatRange(0, 120, 2.5f, defaultIndex, "s")
             .BindFloat(f => KillCooldown = f)
             .Build());
@@ -71,4 +72,5 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
             .OptionOverride(Override.KillCooldown, () => KillCooldown)
             .RoleColor(Color.red);
 
+    public override List<Statistic> Statistics() => new() { VanillaStatistics.Kills };
 }

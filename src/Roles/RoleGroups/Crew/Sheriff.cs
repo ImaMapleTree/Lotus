@@ -68,17 +68,17 @@ public class Sheriff : Crewmate
         shotsRemaining--;
         shootCooldown.Start();
 
-        if (target.Relationship(MyPlayer) is Relation.FullAllies) Suicide(target);
+        if (Relationship(target) is Relation.FullAllies) return Suicide(target);
         return MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
     }
 
-    private void Suicide(PlayerControl target)
+    private bool Suicide(PlayerControl target)
     {
         MyPlayer.RpcMurderPlayer(MyPlayer);
-
-        if (!canKillCrewmates) return;
+        if (!canKillCrewmates) return false;
         bool killed = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, killed));
+        return true;
     }
     // OPTIONS
 
@@ -118,6 +118,7 @@ public class Sheriff : Crewmate
             .VanillaRole(RoleTypes.Crewmate)
             .DesyncRole(!isSheriffDesync ? null : RoleTypes.Impostor)
             .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod(), () => isSheriffDesync)
-            .CanVent(false)
+            .OptionOverride(Override.KillCooldown, () => shootCooldown.Duration)
+            .RoleAbilityFlags(RoleAbilityFlag.CannotVent)
             .RoleColor(new Color(0.97f, 0.8f, 0.27f));
 }

@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using AmongUs.GameOptions;
 using Lotus.API;
+using Lotus.API.Stats;
 using Lotus.Factions;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
@@ -41,12 +43,13 @@ public class Jester : CustomRole
         return roleModifier
             .Faction(FactionInstances.Solo)
             .VanillaRole(canUseVents ? RoleTypes.Engineer : RoleTypes.Crewmate)
-            .SpecialType(Internals.SpecialType.Neutral)
-            .CanVent(canUseVents)
+            .SpecialType(SpecialType.Neutral)
             .RoleFlags(RoleFlag.CannotWinAlone)
             .RoleColor(new Color(0.93f, 0.38f, 0.65f))
             .OptionOverride(Override.CrewLightMod, () => AUSettings.ImpostorLightMod(), () => impostorVision)
             .OptionOverride(Override.EngVentDuration, 100f)
             .OptionOverride(Override.EngVentCooldown, 0.1f);
     }
+
+    public override List<Statistic> Statistics() => new() {VanillaStatistics.TimesVented };
 }

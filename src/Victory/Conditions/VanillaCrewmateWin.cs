@@ -7,7 +7,6 @@ using Lotus.Factions.Interfaces;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
 using Lotus.Extensions;
-using VentLib.Logging;
 
 namespace Lotus.Victory.Conditions;
 
@@ -20,7 +19,7 @@ public class VanillaCrewmateWin: IFactionWinCondition
     {
         factions = CrewmateFaction;
 
-        if (Game.State is not GameState.Roaming) return false;
+        if (Game.State is not (GameState.Roaming or GameState.InMeeting)) return false;
 
         winReason = WinReason.TasksComplete;
 

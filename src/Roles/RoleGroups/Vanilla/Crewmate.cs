@@ -1,6 +1,8 @@
 using System;
+using System.Collections.Generic;
 using AmongUs.GameOptions;
 using Lotus.API.Odyssey;
+using Lotus.API.Stats;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
@@ -104,10 +106,12 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.VanillaRole(RoleTypes.Crewmate).Faction(FactionInstances.Crewmates).RoleColor("#b6f0ff");
 
+    public override List<Statistic> Statistics() => new() { VanillaStatistics.TasksComplete };
+
     [Localized(nameof(Crewmate))]
     private static class CrewmateTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         internal static class CrewmateOptionTranslations
         {
             [Localized(nameof(OverrideRoleTasks))]

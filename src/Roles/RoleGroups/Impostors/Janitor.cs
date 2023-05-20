@@ -38,7 +38,7 @@ public class Janitor: Vanilla.Impostor
         if (!cleanOnKill) return base.TryKill(target);
 
         if (MyPlayer.InteractWith(target, new DirectInteraction(new FakeFatalIntent(), this)) is InteractionResult.Halt) return false;
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         RpcV3.Standard(MyPlayer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
         target.RpcExileV2();
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
@@ -60,7 +60,7 @@ public class Janitor: Vanilla.Impostor
                 if (ModVersion.AllClientsModded()) CleanBody(playerId);
                 else Game.MatchData.UnreportableBodies.Add(playerId);
 
-        MyPlayer.RpcGuardAndKill(MyPlayer);
+        MyPlayer.RpcMark(MyPlayer);
     }
 
     [ModRPC(RoleRPC.RemoveBody, invocation: MethodInvocation.ExecuteAfter)]

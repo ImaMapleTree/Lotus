@@ -6,7 +6,6 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Gamemodes;
 using Lotus.Managers;
 using Lotus.Options;
-using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
 using static Platforms;
@@ -26,6 +25,7 @@ internal class PlayerJoinPatch
             VentLogger.Old($"ブロック済みのプレイヤー{client?.PlayerName}({client.FriendCode})をBANしました。", "BAN");
         }
         
+        Hooks.NetworkHooks.ClientConnectHook.Propagate(new ClientConnectHookEvent(client));
         Async.WaitUntil(() => client.Character, c => c != null, c => EnforceAdminSettings(client, c), maxRetries: 50);
     }
 
@@ -43,14 +43,16 @@ internal class PlayerJoinPatch
 
         BanManager.CheckBanPlayer(client);
         BanManager.CheckDenyNamePlayer(client);
-        
+
         Hooks.PlayerHooks.PlayerJoinHook.Propagate(new PlayerHookEvent(player));
         player.name = client.PlayerName;
         PluginDataManager.LastKnownAs.SetName(client.FriendCode, client.PlayerName);
         Game.CurrentGamemode.Trigger(GameAction.GameJoin, client);
 
+        PluginDataManager.TitleManager.HandlePlayerJoin();
+        
         if (!GeneralOptions.AdminOptions.AutoStartEnabled || GameStartManager.Instance.LastPlayerCount < GeneralOptions.AdminOptions.AutoStart) return;
         GameStartManager.Instance.BeginGame();
-        GameStartManager.Instance.countDownTimer = 0.5f;
+        GameStartManager.Instance.countDownTimer = 10f;
     }
 }

@@ -47,6 +47,6 @@ public class FatalIntent : IFatalIntent
 
     public void Halted(PlayerControl actor, PlayerControl target)
     {
-        actor.RpcGuardAndKill(target);
+        actor.RpcMark(target);
     }
 }

@@ -120,7 +120,7 @@ public static class RoleUtils
             return InteractionResult.Halt;
         }
         ActionHandle handle = ActionHandle.NoInit();
-        PlayerControl.AllPlayerControls.ToArray().Where(p => p.PlayerId != interaction.Emitter().MyPlayer.PlayerId).Trigger(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
+        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null && p.PlayerId != interaction.Emitter().MyPlayer.PlayerId).Trigger(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
         if (player.PlayerId != target.PlayerId) target.Trigger(RoleActionType.Interaction, ref handle, player, interaction);
         if (!handle.IsCanceled || interaction is IUnblockedInteraction) interaction.Intent().Action(player, target);
         if (handle.IsCanceled) interaction.Intent().Halted(player, target);

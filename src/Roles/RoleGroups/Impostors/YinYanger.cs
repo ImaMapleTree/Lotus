@@ -52,7 +52,7 @@ public class YinYanger : Vanilla.Impostor
         else yangPlayer = target;
         
         SyncOptions();
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         return true;
     }
     

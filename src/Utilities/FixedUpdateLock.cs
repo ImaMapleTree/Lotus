@@ -33,6 +33,11 @@ public class FixedUpdateLock: ICloneOnSetup<FixedUpdateLock>
         return acquirable;
     }
 
+    public void Unlock()
+    {
+        lastAcquire = DateTime.MinValue;
+    }
+
     public FixedUpdateLock Clone()
     {
         return (FixedUpdateLock)this.MemberwiseClone();

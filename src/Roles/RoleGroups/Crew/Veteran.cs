@@ -14,6 +14,7 @@ using Lotus.API;
 using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
+using VentLib.Utilities;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
@@ -39,7 +40,7 @@ public class Veteran : Crewmate
     private string VeteranAlertCounter() => RoleUtils.Counter(remainingAlerts, totalAlerts);
 
     [UIComponent(UI.Indicator)]
-    private string GetAlertedString() => veteranDuration.IsReady() ? "" : Utils.ColorString(Color.red, "♣");
+    private string GetAlertedString() => veteranDuration.IsReady() ? "" : RoleColor.Colorize("♣");
 
     [RoleAction(RoleActionType.OnPet)]
     public void AssumeAlert()

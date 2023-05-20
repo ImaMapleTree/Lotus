@@ -56,7 +56,7 @@ static class ExileControllerWrapUpPatch
         Game.TriggerForAll(RoleActionType.AnyExiled, ref otherExiledHandle, exiled);
 
         Hooks.PlayerHooks.PlayerExiledHook.Propagate(new PlayerHookEvent(exiled.Object!));
-        Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerHookEvent(exiled.Object!));
+        Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerDeathHookEvent(exiled.Object!, ModConstants.DeathNames.Exiled));
     }
 
     static void WrapUpFinalizer()

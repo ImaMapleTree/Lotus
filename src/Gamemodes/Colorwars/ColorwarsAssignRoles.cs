@@ -42,7 +42,7 @@ public static class ColorwarsAssignRoles
                 if (player.PlayerId == localPlayer.PlayerId) player.SetRole(RoleTypes.Impostor);
                 RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).SendInclusive(teamClientIds);
                 RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).SendExcluding(teamClientIds);
-                Api.Roles.AssignRole(player, CustomRoleManager.Static.SerialKiller);
+                MatchData.AssignRole(player, CustomRoleManager.Static.SerialKiller);
             }
         }
 

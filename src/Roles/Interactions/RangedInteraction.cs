@@ -6,7 +6,7 @@ public class RangedInteraction : DirectInteraction, IRangedInteraction
 {
     private readonly float distance;
 
-    public RangedInteraction(Intent intent, float distance, CustomRole? customRole = null) : base(intent, customRole)
+    public RangedInteraction(Intent intent, float distance, CustomRole customRole) : base(intent, customRole)
     {
         this.distance = distance;
     }

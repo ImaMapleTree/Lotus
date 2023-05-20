@@ -55,7 +55,7 @@ public class Witch: Vanilla.Impostor
         IndicatorComponent component = new(liveString, GameState.InMeeting);
         remotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
         target.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: MyPlayer));
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         return true;
     }
 

@@ -11,6 +11,6 @@ public class HostileIntent : IHostileIntent
 
     public void Halted(PlayerControl actor, PlayerControl target)
     {
-        actor.RpcGuardAndKill(actor);
+        actor.RpcMark(actor);
     }
 }

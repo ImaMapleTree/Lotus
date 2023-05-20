@@ -17,7 +17,7 @@ public class SpecialDate: ISpecialDate
     {
         ((ISpecialDate)Christmas).Create();
         Christmas.text = "Merry Christmas!";
-        Christmas.color = ProjectLotus.ModColor.ToColor();
+        Christmas.color = ProjectLotus.ModColor.ToColor()!.Value;
 
         ((ISpecialDate)ShiftyBirthday).Create();
         ShiftyBirthday.text = "Happy Birthday\nShifty!";

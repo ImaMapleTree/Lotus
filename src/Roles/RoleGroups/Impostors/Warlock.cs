@@ -38,7 +38,7 @@ public class Warlock : Shapeshifter
         if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         cursedPlayers.Add(target.PlayerId);
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         return true;
     }
 

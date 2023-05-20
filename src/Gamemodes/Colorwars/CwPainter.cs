@@ -43,7 +43,7 @@ public class CwPainter: SerialKillerModifier
         if (killerColor == target.cosmetics.bodyMatProperties.ColorId) return;
 
         target.RpcSetColor((byte)killerColor);
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         this.DeathTimer.Start();
     }
 

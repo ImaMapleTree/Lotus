@@ -64,7 +64,7 @@ public class Conman : Impostor
     [Localized(nameof(Conman))]
     internal static class ConmanTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         internal static class ConmanOptionTranslations
         {
             [Localized(nameof(DiscussionTimeDecrease))]

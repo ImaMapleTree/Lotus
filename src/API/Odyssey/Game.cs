@@ -14,13 +14,23 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Victory;
 using Lotus.Extensions;
 using Lotus.Managers;
-using Lotus.Player;
+using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.API.Odyssey;
 
 public static class Game
 {
+    static Game()
+    {
+        Hooks.NetworkHooks.GameJoinHook.Bind("GameHook", ev =>
+        {
+            if (!ev.IsNewLobby) return;
+            VentLogger.Trace("Joined new lobby. Cleaning up old game states.", "GameCleanupCheck");
+            Cleanup(true);
+        });
+    }
+    
     private static readonly Dictionary<byte, ulong> GameIDs = new();
     private static ulong _gameID;
     

@@ -90,13 +90,14 @@ public class NowCommand: ICommandReceiver
 
     private void ListRoleGroup(PlayerControl source, string title, IEnumerable<CustomRole> roles)
     {
-        string text = roles.Where(r => r.IsEnabled()).Select(r => OptionUtils.OptionText(r.Options)).Fuse("\n");
+        string text = roles.Where(r => r.IsEnabled()).Select(r => OptionUtils.OptionText(r.RoleOptions)).Fuse("\n");
         ChatHandler.Of(text, title).LeftAlign().Send(source);
     }
 
 
-    public void Receive(PlayerControl source, CommandContext context)
+    public bool Receive(PlayerControl source, CommandContext context)
     {
         if (context.Args.Length == 0) ListNormalOptions(source);
+        return true;
     }
 }

@@ -33,6 +33,8 @@
     <PackageReference Condition="$(Debug) == 'false'" Include="VentFramework" Version="1.2.0.143" />
 
     <PackageReference Include="GitInfo" Version="3.0.4" />
+
+    <PackageReference Include="YamlDotNet" Version="13.1.0" />
     
     <Reference Condition="$(Debug) == 'true'" Include="../VentFramework/bin/Debug/net6.0/VentFramework.dll">
       <IncludeAssets>runtime; compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -42,11 +44,7 @@
   
 
   <ItemGroup>
-    <EmbeddedResource Include=".\assets\*.png" />
-    <EmbeddedResource Include=".\assets\*.jpg" />
-    <EmbeddedResource Include=".\assets\*\*.png" />
-    <EmbeddedResource Include=".\assets\*\*.jpg" />
-    <EmbeddedResource Include=".\assets\string.csv" />
+    <EmbeddedResource Include=".\assets\**\*" />
   </ItemGroup>
   
   <ItemGroup>

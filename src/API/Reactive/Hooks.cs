@@ -20,7 +20,10 @@ public class Hooks
 
     public static class NetworkHooks
     {
+        public static readonly Hook<GameJoinHookEvent> GameJoinHook = new SimpleHook<GameJoinHookEvent>();
         public static readonly Hook<RpcHookEvent> RpcHook = new SimpleHook<RpcHookEvent>();
+        public static readonly Hook<ClientConnectHookEvent> ClientConnectHook = new SimpleHook<ClientConnectHookEvent>();
+        public static readonly Hook<ReceiveVersionHookEvent> ReceiveVersionHook = new SimpleHook<ReceiveVersionHookEvent>();
 
         static NetworkHooks()
         {
@@ -31,19 +34,22 @@ public class Hooks
     public static class PlayerHooks
     {
         public static readonly Hook<PlayerHookEvent> PlayerJoinHook = new SimpleHook<PlayerHookEvent>();
-        public static readonly Hook<PlayerHookEvent> PlayerLeaveHook = new SimpleHook<PlayerHookEvent>();
+        public static readonly Hook<PlayerHookEvent> PlayerDisconnectHook = new SimpleHook<PlayerHookEvent>();
 
         public static readonly Hook<PlayerMessageHookEvent> PlayerMessageHook = new SimpleHook<PlayerMessageHookEvent>();
         public static readonly Hook<PlayerActionHookEvent> PlayerActionHook = new SimpleHook<PlayerActionHookEvent>();
-
+        public static readonly Hook<PlayerTaskHookEvent> PlayerTaskCompleteHook = new SimpleHook<PlayerTaskHookEvent>();
+        
         public static readonly Hook<PlayerMurderHookEvent> PlayerMurderHook = new SimpleHook<PlayerMurderHookEvent>();
-        public static readonly Hook<PlayerHookEvent> PlayerDeathHook = new SimpleHook<PlayerHookEvent>();
+        public static readonly Hook<PlayerDeathHookEvent> PlayerDeathHook = new SimpleHook<PlayerDeathHookEvent>();
         public static readonly Hook<PlayerHookEvent> PlayerExiledHook = new SimpleHook<PlayerHookEvent>();
     }
 
     public static class MeetingHooks
     {
         public static readonly Hook<MeetingHookEvent> MeetingCalledHook = new SimpleHook<MeetingHookEvent>();
+        public static readonly Hook<CastVoteHookEvent> CastVoteHook = new SimpleHook<CastVoteHookEvent>();
+        public static readonly Hook<ExiledHookEvent> ExiledHook = new SimpleHook<ExiledHookEvent>();
     }
 
     public static class SabotageHooks

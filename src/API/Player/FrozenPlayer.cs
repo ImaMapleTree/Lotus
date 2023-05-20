@@ -1,13 +1,13 @@
 using System.Collections.Generic;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.Extensions;
 using Lotus.Roles;
 using Lotus.Utilities;
-using Lotus.API.Odyssey;
-using Lotus.Extensions;
-using Lotus.GUI.Name.Interfaces;
 using VentLib.Utilities.Extensions;
 using static GameData;
 
-namespace Lotus.Player;
+namespace Lotus.API.Player;
 
 public class FrozenPlayer
 {
@@ -19,8 +19,9 @@ public class FrozenPlayer
     public uint Level;
     public PlayerOutfit Outfit;
     public ulong GameID;
+    public string? CauseOfDeath;
 
-    public PlayerControl MyPlayer => NullablePlayer == null ? (NullablePlayer ??= GetPlayer()) : NullablePlayer;
+    public PlayerControl MyPlayer => NullablePlayer == null ? NullablePlayer ??= GetPlayer() : NullablePlayer;
 
     public PlayerControl NullablePlayer;
 
@@ -35,7 +36,7 @@ public class FrozenPlayer
         Subroles = player.GetSubroles();
         GameID = player.GetGameID();
         
-
+        Hooks.PlayerHooks.PlayerDeathHook.Bind($"{nameof(FrozenPlayer)}-{PlayerId}", pd => CauseOfDeath = pd.CauseOfDeath, true);
         this.NullablePlayer = player;
     }
 

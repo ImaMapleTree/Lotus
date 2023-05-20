@@ -1,10 +1,12 @@
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Logging;
 using Lotus.Options;
 using UnityEngine;
 
-namespace Lotus.GUI.Hud;
+namespace Lotus.Patches.Hud;
 
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
 class HudManagerPatch
@@ -22,9 +24,7 @@ class HudManagerPatch
     {
         var player = PlayerControl.LocalPlayer;
         if (player == null) return;
-        var taskTextPrefix = "";
-        DestroyableSingleton<TranslationController>.Instance.GetString(StringNames.FakeTasks, new Il2CppReferenceArray<Il2CppSystem.Object>(0));
-        //壁抜け
+        
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             if ((!AmongUsClient.Instance.IsGameStarted || !GameStates.IsOnlineGame)
@@ -41,24 +41,15 @@ class HudManagerPatch
                 player.Collider.offset = new Vector2(0f, -0.3636f);
             }
         }
+        
+        if (!AmongUsClient.Instance.IsGameStarted) __instance.ReportButton.Hide();
+        else __instance.ReportButton.Show();;
 
 
         __instance.GameSettings.text = OptionShower.GetOptionShower().GetPage();
         //ゲーム中でなければ以下は実行されない
         if (!AmongUsClient.Instance.IsGameStarted) return;
-
-        if (!Input.GetKeyDown(KeyCode.Y) || AmongUsClient.Instance.NetworkMode != NetworkModes.FreePlay) return;
-
-        __instance.ToggleMapVisible(new MapOptions()
-        {
-            Mode = MapOptions.Modes.Sabotage,
-            AllowMovementWhileMapOpen = true
-        });
-
-        if (!player.AmOwner) return;
-
-        player.MyPhysics.inputHandler.enabled = true;
-        ConsoleJoystick.SetMode_Task();
+        
     }
 }
 

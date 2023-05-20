@@ -25,6 +25,7 @@ namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Snitch : Crewmate
 {
+    
     public bool SnitchCanTrackNk;
 
     public bool EvilHaveArrow;
@@ -45,7 +46,7 @@ public class Snitch : Crewmate
         {
             MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), GameStates.IgnStates));
             if (EvilHaveArrow)
-                Game.GetAlivePlayers().Where(IsTrackable).ForEach(p =>
+                Game.GetAllPlayers().Where(IsTrackable).ForEach(p =>
                 {
                     LiveString liveString = new(() => RoleUtils.CalculateArrow(p, MyPlayer, RoleColor));
                     var remote = p.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: p));
@@ -54,7 +55,7 @@ public class Snitch : Crewmate
         }
 
         if (remainingTasks != 0) return;
-        Game.GetAlivePlayers().Where(IsTrackable).ForEach(p =>
+        Game.GetAllPlayers().Where(IsTrackable).ForEach(p =>
         {
             p.NameModel().GetComponentHolder<RoleHolder>().Components().ForEach(rc => rc.AddViewer(MyPlayer));
 
@@ -105,7 +106,7 @@ public class Snitch : Crewmate
     [Localized(nameof(Snitch))]
     internal static class SnitchTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         internal static class SnitchOptionTranslations
         {
             [Localized(nameof(RemainingTaskWarning))]

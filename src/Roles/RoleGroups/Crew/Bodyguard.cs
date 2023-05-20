@@ -154,7 +154,7 @@ public class Bodyguard: Crewmate
         [Localized("VotePlayerInfo")]
         public static string VotePlayerMessage = "Vote to select a player to guard.";
         
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         public static class BodyguardOptions
         {
             [Localized(nameof(BeneficialInteractionProtection))]

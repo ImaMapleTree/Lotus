@@ -49,7 +49,7 @@ public class Swooper: Impostor
     {
         if (!remainInvisibleOnKill || swoopingDuration.IsReady()) return base.TryKill(target);
         InteractionResult result = MyPlayer.InteractWith(target, new DirectInteraction(new FatalIntent(true), this));
-        MyPlayer.RpcGuardAndKill(MyPlayer);
+        MyPlayer.RpcMark(MyPlayer);
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }

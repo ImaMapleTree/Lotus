@@ -21,6 +21,6 @@ public class Madmate : Impostor
         base.Modify(roleModifier)
             .VanillaRole(canSabotage ? RoleTypes.Impostor : RoleTypes.Engineer)
             .SpecialType(SpecialType.Madmate)
-            .RoleColor(new Color(0.73f, 0.18f, 0.02f))
+            .RoleColor(ModConstants.Palette.MadmateColor)
             .Faction(FactionInstances.Madmates);
 }

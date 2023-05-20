@@ -11,6 +11,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Logging;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;

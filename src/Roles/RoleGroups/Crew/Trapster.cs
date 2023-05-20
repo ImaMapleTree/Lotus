@@ -6,13 +6,15 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Roles.Internals;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
+using static Lotus.Roles.RoleGroups.Crew.Trapster.TrapsterTranslations.TrapsterOptionTranslations;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
-public class Trapper : Crewmate
+public class Trapster : Crewmate
 {
     private float trappedDuration;
     private bool trapOnIndirectKill;
@@ -35,15 +37,29 @@ public class Trapper : Crewmate
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub
-                .Name("Traps on Indirect Kills")
+                .KeyName("Traps on Indirect Kills", TrapsOnIndirectKills)
                 .BindBool(b => trapOnIndirectKill = b)
                 .AddOnOffValues()
                 .Build())
             .SubOption(sub => sub
-                .Name("Trapped Duration")
+                .KeyName("Trapped Duration", TrappedDuration)
                 .Bind(v => trappedDuration = (float)v)
                 .AddFloatRange(1, 10, 0.5f, 8, "s")
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.35f, 0.56f, 0.82f));
+
+    [Localized(nameof(Trapster))]
+    internal static class TrapsterTranslations
+    {
+        [Localized(ModConstants.Options)]
+        internal static class TrapsterOptionTranslations
+        {
+            [Localized(nameof(TrapsOnIndirectKills))]
+            public static string TrapsOnIndirectKills = "Traps on Indirect Kills";
+
+            [Localized(nameof(TrappedDuration))]
+            public static string TrappedDuration = "Trapped Duration";
+        }
+    }
 }

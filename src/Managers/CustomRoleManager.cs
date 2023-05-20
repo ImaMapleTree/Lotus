@@ -7,7 +7,6 @@ using Lotus.Roles;
 using Lotus.Roles.Debugger;
 using Lotus.Roles.Extra;
 using Lotus.Roles.Internals;
-using Lotus.Roles.RoleGroups.Coven;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Impostors;
 using Lotus.Roles.RoleGroups.Madmates.Roles;
@@ -16,15 +15,10 @@ using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Roles.RoleGroups.Undead.Roles;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
-using Lotus.Options.Roles;
 using VentLib.Options;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
-using static Lotus.Roles.AbstractBaseRole;
-using Impostor = Lotus.Roles.RoleGroups.Vanilla.Impostor;
 using Medium = Lotus.Roles.RoleGroups.Crew.Medium;
-using Necromancer = Lotus.Roles.RoleGroups.Undead.Roles.Necromancer;
-using SerialKiller = Lotus.Roles.RoleGroups.Impostors.SerialKiller;
 
 namespace Lotus.Managers;
 
@@ -32,8 +26,7 @@ namespace Lotus.Managers;
 public static class CustomRoleManager
 {
     public static OptionManager RoleOptionManager = OptionManager.GetManager(file: "role_options.txt");
-    /*public static Dictionary<byte, CustomRole> PlayerRoles = new();
-    public static Dictionary<byte, List<CustomRole>> PlayerSubroles = new();*/
+    private static readonly List<Action> FinishedCallbacks = new();
 
     public static StaticRoles Static = new();
     public static Modifiers Mods = new();
@@ -58,6 +51,14 @@ public static class CustomRoleManager
         .ToList();
 
     public static readonly List<CustomRole> AllRoles = MainRoles.Concat(SpecialRoles).Concat(ModifierRoles).Concat(_lazyInitializeList!).ToList();
+
+    private static bool _initailized = FinishedCallbacks.All(fc =>
+    {
+        fc();
+        return true;
+    });
+
+    public static void AddOnFinishCall(Action action) => FinishedCallbacks.Add(action);
 
     public static void AddRole(CustomRole staticRole)
     {
@@ -144,6 +145,7 @@ public static class CustomRoleManager
         public Blackmailer Blackmailer = new Blackmailer();
         public BountyHunter BountyHunter = new BountyHunter();
         public Camouflager Camouflager = new Camouflager();
+        public Conman Conman = new Conman();
         public Consort Consort = new Consort();
         public Creeper Creeper = new Creeper();
         public Disperser Disperser = new Disperser();
@@ -152,12 +154,11 @@ public static class CustomRoleManager
         public Freezer Freezer = new Freezer();
         public Grenadier Grenadier = new Grenadier();
         public IdentityThief IdentityThief = new IdentityThief();
-        public Roles.RoleGroups.Vanilla.Impostor Impostor = new Roles.RoleGroups.Vanilla.Impostor();
+        public Impostor Impostor = new Impostor();
         public Janitor Janitor = new Janitor();
         public Mafioso Mafioso = new Mafioso();
-        public Mastermind Mastermind = new Mastermind();
-        public Conman Conman = new Conman();
         public Mare Mare = new Mare();
+        public Mastermind Mastermind = new Mastermind();
         public Miner Miner = new Miner();
         public Morphling Morphling = new Morphling();
         public Ninja Ninja = new Ninja();
@@ -165,7 +166,7 @@ public static class CustomRoleManager
         public Puppeteer Puppeteer = new Puppeteer();
         //sidekick madmate
         //silencer
-        public Roles.RoleGroups.Impostors.SerialKiller SerialKiller = new Roles.RoleGroups.Impostors.SerialKiller();
+        public SerialKiller SerialKiller = new SerialKiller();
         public Sniper Sniper = new Sniper();
         public Swooper Swooper = new Swooper();
         public TimeThief TimeThief = new TimeThief();
@@ -204,13 +205,13 @@ public static class CustomRoleManager
         public Oracle Oracle = new Oracle();
         public Physicist Physicist = new Physicist();
         public Psychic Psychic = new Psychic();
-        public SabotageMaster SabotageMaster = new SabotageMaster();
+        public Repairman Repairman = new Repairman();
         public Sheriff Sheriff = new Sheriff();
         public Snitch Snitch = new Snitch();
         public Speedrunner Speedrunner = new Speedrunner();
         public Swapper Swapper = new Swapper();
         public Transporter Transporter = new Transporter();
-        public Trapper Trapper = new Trapper();
+        public Trapster Trapster = new Trapster();
         public Vigilante Vigilante = new Vigilante();
         public Veteran Veteran = new Veteran();
 
@@ -228,7 +229,6 @@ public static class CustomRoleManager
         public Copycat Copycat = new Copycat();
         public Egoist Egoist = new Egoist();
         public Executioner Executioner = new Executioner();
-        public Glitch Glitch = new Glitch();
         public GuardianAngel GuardianAngel = new GuardianAngel();
         public Hacker Hacker = new Hacker();
         public Hitman Hitman = new Hitman();
@@ -236,17 +236,18 @@ public static class CustomRoleManager
         public Jester Jester = new Jester();
         public Juggernaut Juggernaut = new Juggernaut();
         public Marksman Marksman = new Marksman();
-        public Roles.RoleGroups.Undead.Roles.Necromancer Necromancer = new Roles.RoleGroups.Undead.Roles.Necromancer();
+
+        public Necromancer Necromancer = new Necromancer();
+
         //neutral witch
         public Opportunist Opportunist = new Opportunist();
         public Phantom Phantom = new Phantom();
         public PlagueBearer PlagueBearer = new PlagueBearer();
-        public Pestilence Pestilence = new Pestilence();
         public Postman Postman = new Postman();
         public Retributionist Retributionist = new Retributionist();
-        public Sidekick Sidekick = new Sidekick();
         public Survivor Survivor = new Survivor();
         public Terrorist Terrorist = new Terrorist();
+        public Glitch Glitch = new Glitch();
         public Vulture Vulture = new Vulture();
         public Werewolf Werewolf = new Werewolf();
 
@@ -270,7 +271,6 @@ public static class CustomRoleManager
         public IllegalRole IllegalRole = new IllegalRole();
 
         public GM GM = new GM();
-        public Coven Coven = new Coven();
         public Debugger Debugger = new Debugger();
         
         //double shot

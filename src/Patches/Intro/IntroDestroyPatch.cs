@@ -5,11 +5,11 @@ using HarmonyLib;
 using Hazel;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla;
 using Lotus.Options;
-using Lotus.Player;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
@@ -41,7 +41,7 @@ class IntroDestroyPatch
             if (GeneralOptions.GameplayOptions.FixFirstKillCooldown) FixFirstKillCooldown();
         }
 
-        DisperseAndPreventVenting();
+        if (GeneralOptions.MayhemOptions.RandomSpawn) Game.GetAllPlayers().Do(p => Game.RandomSpawn.Spawn(p));
 
         Async.Schedule(SetShapeshifters, NetUtils.DeriveDelay(0.15f));
         Async.Schedule(ForceApplyPets, 0.3f);
@@ -92,24 +92,5 @@ class IntroDestroyPatch
         });
         GeneralRPC.SendGameData();
         Game.GetAllPlayers().ForEach(p => p.CRpcShapeshift(p, false));
-    }
-
-    private static void DisperseAndPreventVenting()
-    {
-        if (GeneralOptions.MayhemOptions.RandomSpawn) Game.GetAllPlayers().Do(p => Game.RandomSpawn.Spawn(p));
-        if (GeneralOptions.GameplayOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
-
-        bool isRandomSpawn = GeneralOptions.MayhemOptions.RandomSpawn;
-        bool isForceVenting = GeneralOptions.GameplayOptions.ForceNoVenting;
-
-        if (!isRandomSpawn && !isForceVenting) return;
-
-        Game.GetAllPlayers().ForEach(p =>
-        {
-            
-            if (isRandomSpawn) Game.RandomSpawn.Spawn(p);
-            if (!isForceVenting || p.GetCustomRole().BaseCanVent) return;
-            Async.Schedule(() => VentApi.ForceNoVenting(p), NetUtils.DeriveDelay(0.1f));
-        });
     }
 }

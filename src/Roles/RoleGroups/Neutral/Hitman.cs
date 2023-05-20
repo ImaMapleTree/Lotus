@@ -1,11 +1,13 @@
 using System.Collections.Generic;
-using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
+using Lotus.Factions;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Neutrals;
 using UnityEngine;
 using VentLib.Options.Game;
 
@@ -13,6 +15,7 @@ namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Hitman: NeutralKillingBase
 {
+    private static HitmanFaction _hitmanFaction = new HitmanFaction();
     public List<string> AdditionalWinRoles = new();
 
     protected override void Setup(PlayerControl player)
@@ -27,8 +30,8 @@ public class Hitman: NeutralKillingBase
     private void GameEnd(WinDelegate winDelegate)
     {
         if (!MyPlayer.IsAlive()) return;
-        if (winDelegate.GetWinReason() is WinReason.SoloWinner && !AdditionalWinRoles.Contains(winDelegate.GetWinners()[0].GetCustomRole().EnglishRoleName)) return;
-        if (winDelegate.GetWinners().All(p => p.PlayerId != MyPlayer.PlayerId)) winDelegate.GetWinners().Add(MyPlayer);
+        if (winDelegate.GetWinReason() is WinReason.SoloWinner && !AdditionalWinRoles.Contains(winDelegate.GetWinners()[0].GetCustomRole().EnglishRoleName)) return; 
+        winDelegate.GetWinners().Add(MyPlayer);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -58,4 +61,20 @@ public class Hitman: NeutralKillingBase
                     .BindBool(RoleUtils.BindOnOffListSetting(AdditionalWinRoles, "Lovers"))
                     .Build())
                 .Build());
+
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).Faction(_hitmanFaction);
+
+
+    private class HitmanFaction : Solo
+    {
+        public override Relation Relationship(Solo sameFaction)
+        {
+            return Relation.SharedWinners;
+        }
+
+        public override Relation RelationshipOther(IFaction other)
+        {
+            return Relation.SharedWinners;
+        }
+    }
 }

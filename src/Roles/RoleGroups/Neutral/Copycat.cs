@@ -8,11 +8,9 @@ using Lotus.Factions;
 using Lotus.Factions.Interfaces;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.GUI.Name.Impl;
 using Lotus.Managers;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Interactions.Interfaces;
-using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
@@ -27,7 +25,7 @@ using VentLib.Utilities.Extensions;
 
 namespace Lotus.Roles.RoleGroups.Neutral;
 
-public class Copycat: CustomRole, ISabotagerRole
+public class Copycat: CustomRole
 {
     /// <summary>
     /// A dict of role types and roles for the cat to fallback upon if the role cannot be copied properly (ex: Crewpostor bc Copycat cannot gain tasks)
@@ -39,7 +37,7 @@ public class Copycat: CustomRole, ISabotagerRole
     private bool copyKillersRole;
     private bool turned;
 
-    public bool CanSabotage() => false;
+    public override bool CanVent() => false;
 
     [RoleAction(RoleActionType.Interaction)]
     private void CopycatAttacked(PlayerControl actor, Interaction interaction, ActionHandle handle)
@@ -59,14 +57,18 @@ public class Copycat: CustomRole, ISabotagerRole
         CustomRole attackerRole = attacker.GetCustomRole();
         FallbackTypes.GetOptional(attackerRole.GetType()).IfPresent(r => attackerRole = r());
         CustomRole role = copyRoleProgress ? attackerRole : CustomRoleManager.GetCleanRole(attackerRole);
-        Api.Roles.AssignRole(MyPlayer, role);
+        MatchData.AssignRole(MyPlayer, role);
+        
+        role = MyPlayer.GetCustomRole();
+        role.RoleColor = RoleColor;
+
         Game.MatchData.GameHistory.AddEvent(new RoleChangeEvent(MyPlayer, role, this));
 
         float killCooldown = role.GetOverride(Override.KillCooldown)?.GetValue() as float? ?? AUSettings.KillCooldown();
         role.SyncOptions(new[] { new GameOptionOverride(Override.KillCooldown, killCooldown * 2) });
         Async.Schedule(() =>
         {
-            MyPlayer.RpcGuardAndKill(MyPlayer);
+            MyPlayer.RpcMark(MyPlayer);
             role.SyncOptions();
         }, NetUtils.DeriveDelay(0.05f));
         
@@ -107,5 +109,6 @@ public class Copycat: CustomRole, ISabotagerRole
         roleModifier.RoleColor(new Color(1f, 0.7f, 0.67f))
             .VanillaRole(copyKillersRole ? RoleTypes.Shapeshifter : RoleTypes.Crewmate)
             .Faction(FactionInstances.Solo)
-            .SpecialType(Internals.SpecialType.Neutral);
+            .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage)
+            .SpecialType(SpecialType.Neutral);
 }

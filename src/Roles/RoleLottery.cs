@@ -53,6 +53,11 @@ public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
     public bool MoveNext()
     {
         current = Next();
+        return HasNext();
+    }
+
+    public bool HasNext()
+    {
         return tickets.Count > 0 || priorityTickets.Count > 0;
     }
 

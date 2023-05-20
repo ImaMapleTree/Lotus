@@ -13,10 +13,10 @@ public class DirectInteraction : Interaction
     private CustomRole role;
     private Intent intent;
 
-    public DirectInteraction(Intent intent, CustomRole? customRole = null)
+    public DirectInteraction(Intent intent, CustomRole customRole)
     {
         this.intent = intent;
-        this.role = customRole!;
+        this.role = customRole;
     }
 
     public CustomRole Emitter() => role;

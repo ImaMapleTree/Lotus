@@ -35,7 +35,7 @@ public class Mare: Vanilla.Impostor
     }
 
     [RoleAction(RoleActionType.Attack)]
-    public new bool TryKill(PlayerControl target) => CanKill() && base.TryKill(target);
+    public new bool TryKill(PlayerControl target) => (canKillWithoutSabotage || abilityEnabled) && base.TryKill(target);
 
     [RoleAction(RoleActionType.SabotageStarted, priority: Priority.Last)]
     private void MareSabotageCheck(ISabotage sabotage, ActionHandle handle)
@@ -54,8 +54,6 @@ public class Mare: Vanilla.Impostor
         if (redNameDuringSabotage) MyPlayer.NameModel().GetComponentHolder<NameHolder>().Remove(coloredName);
         SyncOptions();
     }
-
-    public override bool CanKill() => canKillWithoutSabotage || abilityEnabled;
 
     // lol this was fun because of the bitwise operators
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

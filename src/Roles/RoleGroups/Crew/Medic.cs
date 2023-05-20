@@ -1,5 +1,7 @@
 using System.Diagnostics.CodeAnalysis;
+using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Chat;
 using Lotus.Extensions;
 using Lotus.GUI.Name.Components;
@@ -15,7 +17,6 @@ using VentLib.Options.Game;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
-using static Lotus.API.Api.Players;
 using static Lotus.Options.GeneralOptionTranslations;
 using static Lotus.Roles.RoleGroups.Crew.Medic.MedicTranslations;
 
@@ -41,7 +42,7 @@ public class Medic: Crewmate
         ChatHandler handler = ChatHandler.Of(title).Player(MyPlayer).LeftAlign();
         if (guardedPlayer == byte.MaxValue) handler.Message(MedicHelpMessage).Send();
         else if (mode is GuardMode.AnyMeeting) 
-            handler.Message(ProtectingMessage.Formatted(FindPlayerById(guardedPlayer)?.name)).Send();
+            handler.Message(ProtectingMessage.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send();
     }
 
     [RoleAction(RoleActionType.AnyInteraction)]
@@ -81,7 +82,7 @@ public class Medic: Crewmate
         if (confirmedVote = guardedPlayer == player)
         {
             targetLockedIn = true;
-            handler.Message(ReturnToNormalVoting.Formatted(FindPlayerById(guardedPlayer)?.name)).Send();
+            handler.Message(ReturnToNormalVoting.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send();
             return;
         }
 
@@ -90,7 +91,7 @@ public class Medic: Crewmate
         protectedIndicator = voted.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent("<b>+</b>", crossColor, Game.IgnStates, MyPlayer));
         Game.GetDeadPlayers().ForEach(p => protectedIndicator?.Get().AddViewer(p));
         
-        handler.Message(SelectedPlayerMessage.Formatted(FindPlayerById(guardedPlayer)?.name)).Send();
+        handler.Message(SelectedPlayerMessage.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send();
     }
 
     [RoleAction(RoleActionType.AnyExiled)]
@@ -110,7 +111,7 @@ public class Medic: Crewmate
     }
     
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.91f, 0.48f, 0.45f));
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0f, 0.4f, 0f));
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
@@ -144,7 +145,7 @@ public class Medic: Crewmate
         [Localized(nameof(ReturnToNormalVoting))]
         public static string ReturnToNormalVoting = "You are now protecting {0}. Your next vote works as normal.";
 
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         public static class MedicOptionTranslations
         {
             [Localized(nameof(ChangeGuardedPlayer))]

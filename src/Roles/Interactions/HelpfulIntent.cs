@@ -11,6 +11,6 @@ public class HelpfulIntent : IHelpfulIntent
 
     public void Halted(PlayerControl actor, PlayerControl target)
     {
-        actor.RpcGuardAndKill(actor);
+        actor.RpcMark(actor);
     }
 }

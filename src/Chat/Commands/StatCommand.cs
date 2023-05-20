@@ -18,10 +18,11 @@ public class StatCommand: ICommandReceiver
     [Localized("PlayerNotFound")]
     private static string _playerNotFoundMessage = "Player \"{0}\" not found";
 
-    public void Receive(PlayerControl source, CommandContext context)
+    public bool Receive(PlayerControl source, CommandContext context)
     {
         if (context.Args.Length == 0) GetPlayerStats(source, source);
         else GetPlayerStats(source, context.Join());
+        return true;
     }
 
     private void GetPlayerStats(PlayerControl requester, string name)

@@ -12,7 +12,7 @@ using VentLib.Options.Game;
 namespace Lotus.Roles.RoleGroups.Neutral;
 
 // Inherits from crewmate because crewmate has task setup
-public class Terrorist : Crewmate
+public class Terrorist : Engineer
 {
     private bool canWinBySuicide;
     private bool canWinByExiled;
@@ -47,7 +47,7 @@ public class Terrorist : Crewmate
                 .AddOnOffValues(false)
                 .Build()))
             .SubOption(sub => sub
-                .KeyName("Can Win By Exiled", TerroristTranslations.TerroristOptionTranslations.CanWinByExiled)
+                .KeyName("Can Win By Being Exiled", TerroristTranslations.TerroristOptionTranslations.CanWinByExiled)
                 .BindBool(v => canWinByExiled = v)
                 .AddOnOffValues()
                 .Build());
@@ -61,14 +61,14 @@ public class Terrorist : Crewmate
     [Localized(nameof(Terrorist))]
     internal static class TerroristTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         internal static class TerroristOptionTranslations
         {
             [Localized(nameof(CanWinBySuicide))]
             public static string CanWinBySuicide = "Can Win By Suicide";
 
             [Localized(nameof(CanWinByExiled))]
-            public static string CanWinByExiled = "Can Win BY Exiled";
+            public static string CanWinByExiled = "Can Win By Being Exiled";
         }
     }
 }

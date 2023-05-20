@@ -1,17 +1,18 @@
 using System;
 using System.Collections.Generic;
+using Lotus.API.Player;
 
 namespace Lotus.API.Stats;
 
 // ReSharper disable once InconsistentNaming
 public interface Statistic<T> : Statistic
 {
-    public static Statistic<T> Create(string identifier, string name, T? defaultValue = default, bool accumulative = false)
+    public static Statistic<T> Create(string identifier, Func<string> name, T? defaultValue = default, bool accumulative = false)
     {
         return accumulative ? new AccumulatingStatistic<T>(identifier, name, defaultValue) : new BoundStatistic<T>(identifier, name, defaultValue);
     }
 
-    public static IAccumulativeStatistic<T> CreateAccumulative(string identifier, string name, T? defaultValue = default)
+    public static IAccumulativeStatistic<T> CreateAccumulative(string identifier, Func<string> name, T? defaultValue = default)
     {
         return new AccumulatingStatistic<T>(identifier, name, defaultValue);
     }

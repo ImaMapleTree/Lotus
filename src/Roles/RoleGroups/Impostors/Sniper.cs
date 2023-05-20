@@ -69,7 +69,7 @@ public class Sniper: Shapeshifter
         loadBulletCooldown.Start();
         GameOptionOverride[] killCooldown = { new(Override.KillCooldown, loadBulletCooldown.Duration * 2) };
         DesyncOptions.SendModifiedOptions(killCooldown, MyPlayer);
-        MyPlayer.RpcGuardAndKill();
+        MyPlayer.RpcMark();
     }
 
     [RoleAction(RoleActionType.FixedUpdate)]
@@ -108,7 +108,7 @@ public class Sniper: Shapeshifter
             float distance = Vector2.Distance(MyPlayer.transform.position, target.transform.position);
             InteractionResult result = MyPlayer.InteractWith(target, new RangedInteraction(new FatalIntent(true), distance, this));
             if (result == InteractionResult.Halt) continue;
-            MyPlayer.RpcGuardAndKill();
+            MyPlayer.RpcMark();
             killed = true;
         }
 

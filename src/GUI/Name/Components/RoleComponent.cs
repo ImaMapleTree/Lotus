@@ -6,6 +6,7 @@ using Lotus.GUI.Name.Impl;
 using Lotus.Roles;
 using Lotus.API;
 using Lotus.Logging;
+using VentLib.Utilities;
 
 namespace Lotus.GUI.Name.Components;
 
@@ -16,7 +17,7 @@ public class RoleComponent : SimpleComponent
     public RoleComponent(CustomRole role, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive, Func<List<PlayerControl>>? viewers = null) : base(LiveString.Empty, gameStates, viewMode, viewers)
     {
         this.role = role;
-        this.SetMainText(new LiveString(role.RoleName, role.RoleColor));
+        this.SetMainText(new LiveString(() => role.RoleColor.Colorize(role.RoleName)));
     }
 
     public RoleComponent(CustomRole role, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive, params PlayerControl[] viewers) : this(role, gameStates, viewMode, viewers.ToList)

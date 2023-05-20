@@ -43,7 +43,7 @@ public class Escort: Crewmate
         PlayerControl target = candidates[0];
 
         blockedPlayers[target.PlayerId] = BlockDelegate.Block(target, MyPlayer, roleblockDuration);
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{RoleColor.Colorize(MyPlayer.name)} role blocked {target.GetRoleColor().Colorize(target.name)}."));
 
         if (roleblockDuration > 0) Async.Schedule(() => blockedPlayers.Remove(target.PlayerId), roleblockDuration);

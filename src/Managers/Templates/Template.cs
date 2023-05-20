@@ -65,7 +65,7 @@ public class Template
         { "@Role", player => ((PlayerControl) player).GetCustomRole().RoleName },
         { "@Blurb", player => ((PlayerControl) player).GetCustomRole().Blurb },
         { "@Description", player => ((PlayerControl) player).GetCustomRole().Description },
-        { "@Options", player => OptionUtils.OptionText(((PlayerControl) player).GetCustomRole().Options) },
+        { "@Options", player => OptionUtils.OptionText(((PlayerControl) player).GetCustomRole().RoleOptions) },
         { "@Faction", player => ((PlayerControl) player).GetCustomRole().Faction.Name() },
         { "@Subroles", player => ((PlayerControl) player).GetSubroles().Select(r => r.RoleColor.Colorize(r.RoleName)).Fuse() },
         { "@Modifiers", player => ((PlayerControl) player).GetSubroles().Select(r => r.RoleColor.Colorize(r.RoleName)).Fuse() },
@@ -73,7 +73,7 @@ public class Template
         { "^Role_Name", role => ((CustomRole) role).RoleName },
         { "^Role_Description", role => ((CustomRole) role).Description },
         { "^Role_Blurb", role => ((CustomRole) role).Blurb },
-        { "^Role_Options", role => OptionUtils.OptionText(((CustomRole) role).Options) },
+        { "^Role_Options", role => OptionUtils.OptionText(((CustomRole) role).RoleOptions) },
         { "^Role_Faction", role => ((CustomRole) role).Faction.Name() },
         { "^Role_Basis", role => ((CustomRole) role).RealRole.ToString() }
     };

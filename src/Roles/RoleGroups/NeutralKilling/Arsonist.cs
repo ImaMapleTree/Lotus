@@ -54,7 +54,7 @@ public class Arsonist : NeutralKillingBase
         if (progress < requiredAttacks) return false;
 
         dousedPlayers.Add(target.PlayerId);
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         Game.MatchData.GameHistory.AddEvent(new PlayerDousedEvent(MyPlayer, target));
 
         MyPlayer.NameModel().Render();

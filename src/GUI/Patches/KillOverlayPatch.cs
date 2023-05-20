@@ -1,5 +1,6 @@
 using System;
 using HarmonyLib;
+using Lotus.Logging;
 
 namespace Lotus.GUI.Patches;
 
@@ -10,7 +11,8 @@ public class KillOverlayPatch
 
     public static bool Prefix(KillOverlay __instance)
     {
-        bool show = ((DateTime.Now - _lastOverlay).TotalSeconds > 0.5f);
+        DevLogger.Log("Showing Kill Animation");
+        bool show = (DateTime.Now - _lastOverlay).TotalSeconds > 0.5f;
         _lastOverlay = DateTime.Now;
         return show;
     }

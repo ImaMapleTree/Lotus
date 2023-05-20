@@ -8,7 +8,7 @@ using VentLib.Options.Game;
 
 namespace Lotus.Options.General;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class SabotageOptions
 {
     private static Color _optionColor = new(1f, 0.94f, 0.63f);

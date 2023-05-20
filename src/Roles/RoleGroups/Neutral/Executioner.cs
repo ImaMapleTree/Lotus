@@ -14,6 +14,7 @@ using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -62,16 +63,16 @@ public class Executioner : CustomRole
         switch ((ExeRoleChange)roleChangeWhenTargetDies)
         {
             case ExeRoleChange.Jester:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
                 break;
             case ExeRoleChange.Opportunist:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
             case ExeRoleChange.SchrodingerCat:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
                 break;
             case ExeRoleChange.Crewmate:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
                 break;
             case ExeRoleChange.None:
             default:
@@ -103,7 +104,7 @@ public class Executioner : CustomRole
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor(new Color(0.55f, 0.17f, 0.33f)).Faction(FactionInstances.Solo).RoleFlags(RoleFlag.CannotWinAlone);
+        roleModifier.RoleColor(new Color(0.55f, 0.17f, 0.33f)).Faction(FactionInstances.Solo).RoleFlags(RoleFlag.CannotWinAlone).SpecialType(SpecialType.Neutral);
 
     private enum ExeRoleChange
     {

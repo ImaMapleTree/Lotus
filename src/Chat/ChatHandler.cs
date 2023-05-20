@@ -3,6 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Chat.Patches;
+using Lotus.Logging;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -86,18 +87,20 @@ public class ChatHandler
 
     public static void Send(PlayerControl? player, string message, string? title = null, bool leftAligned = false)
     {
+        PlayerControl? sender;
         Async.Schedule(() =>
         {
-            PlayerControl? sender = Game.GetAlivePlayers().FirstOrDefault();
+            sender = Game.GetAlivePlayers().FirstOrDefault();
             if (sender == null) return;
-        
+
+            string name = sender.name;
+
             title ??= _defaultTitle;
         
             if (player == null) MassSend(sender, message, title, leftAligned);
             else if (player.IsHost()) SendToHost(sender, message, title, leftAligned);
             else
             {
-                string name = sender.name;
                 RpcV3.Mass()
                     .Start(sender.NetId, RpcCalls.SetName)
                     .Write(title)
@@ -110,6 +113,7 @@ public class ChatHandler
                     .End()
                     .Send(player.GetClientId());
             }
+            sender.RpcSetName(name);
         }, 0.125f);
     }
 
@@ -121,6 +125,7 @@ public class ChatHandler
         OnChatPatch.UtilsSentList.Add(sender.PlayerId);
         DestroyableSingleton<HudManager>.Instance.Chat.AddChat(sender, message);
         sender.SetName(name);
+        // TODO:  look at this tomorrow
     }
 
     private static void MassSend(PlayerControl sender, string message, string title, bool leftAligned)

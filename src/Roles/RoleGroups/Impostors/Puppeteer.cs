@@ -13,6 +13,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
+using Lotus.Logging;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Utilities.Collections;
@@ -39,16 +40,21 @@ public class Puppeteer: Vanilla.Impostor
         IndicatorComponent component = new(new LiveString("◆", new Color(0.36f, 0f, 0.58f)), GameStates.IgnStates, viewers: MyPlayer);
         playerRemotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
 
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         return true;
     }
 
     [RoleAction(RoleActionType.FixedUpdate)]
     private void PuppeteerKillCheck()
     {
-        if (fixedUpdateLock.AcquireLock()) return;
+        if (!fixedUpdateLock.AcquireLock()) return;
         foreach (PlayerControl player in new List<PlayerControl>(cursedPlayers))
         {
+            if (player == null)
+            {
+                cursedPlayers.Remove(player!);
+                continue;
+            }
             if (player.Data.IsDead) {
                 RemovePuppet(player);
                 continue;
@@ -76,10 +82,13 @@ public class Puppeteer: Vanilla.Impostor
         cursedPlayers.Clear();
     }
     
+    [RoleAction(RoleActionType.AnyDeath)]
+    [RoleAction(RoleActionType.Disconnect)]
     private void RemovePuppet(PlayerControl puppet)
     {
+        if (cursedPlayers.All(p => p.PlayerId != puppet.PlayerId)) return;
         playerRemotes!.GetValueOrDefault(puppet.PlayerId, null)?.Delete();
-        cursedPlayers.Remove(puppet);
+        cursedPlayers.RemoveAll(p => p.PlayerId == puppet.PlayerId);
     }
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

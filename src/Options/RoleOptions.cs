@@ -3,7 +3,7 @@ using VentLib.Localization.Attributes;
 
 namespace Lotus.Options;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class RoleOptions
 {
     public static MadmateOptions MadmateOptions = null!;

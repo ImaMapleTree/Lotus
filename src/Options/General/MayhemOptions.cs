@@ -7,7 +7,7 @@ using VentLib.Options.Game;
 
 namespace Lotus.Options.General;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class MayhemOptions
 {
     private static Color _optionColor = new(0.84f, 0.8f, 1f);

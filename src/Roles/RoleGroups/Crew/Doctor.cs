@@ -12,12 +12,9 @@ namespace Lotus.Roles.RoleGroups.Crew;
 public class Doctor : Scientist
 {
     [RoleAction(RoleActionType.AnyDeath)]
-    private void DoctorAnyDeath(PlayerControl dead)
+    private void DoctorAnyDeath(PlayerControl dead, string causeOfDeath)
     {
-        string causeOfDeath = Game.MatchData.GameHistory.GetCauseOfDeath(dead.PlayerId).Map(de => de.SimpleName()).OrElse("Unknown");
-
-        string coloredString = Color.white.Colorize($"({RoleColor.Colorize(causeOfDeath)})");
-        
+        string coloredString = "<size=1>" + Color.white.Colorize($"({RoleColor.Colorize(causeOfDeath)})") + "</size>";
         dead.NameModel().GetComponentHolder<TextHolder>().Add(new TextComponent(new LiveString(coloredString), new[] { GameState.InMeeting }, viewers: MyPlayer));
     }
 

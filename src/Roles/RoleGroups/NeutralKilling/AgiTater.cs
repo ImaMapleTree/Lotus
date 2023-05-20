@@ -40,8 +40,6 @@ public class AgiTater: NeutralKillingBase
 
     private int currentBombs;
 
-    public override bool CanSabotage() => false;
-
     [UIComponent(UI.Counter, ViewMode.Additive, GameState.Roaming)]
     private string BombCounter() => bombsPerRound == -1 ? "" : RoleUtils.Counter(currentBombs, bombsPerRound, RoleColor);
     
@@ -62,7 +60,7 @@ public class AgiTater: NeutralKillingBase
 
         AgiBomb agiBomb = new(target.PlayerId, this, Condition.HasFlag(ExplodeCondition.Duration) ? bombDuration.Clone() : null);
         agiBomb.SetRemote(bombs.Add(agiBomb));
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         return false;
     }
 
@@ -129,6 +127,7 @@ public class AgiTater: NeutralKillingBase
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
+            .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.CannotVent)
             .RoleColor(new Color(0.96f, 0.64f, 0.38f))
             .OptionOverride(new IndirectKillCooldown(() => KillCooldown));
 
@@ -247,7 +246,7 @@ public class AgiTater: NeutralKillingBase
         [Localized(nameof(HoldingBombLevel3))]
         public static string HoldingBombLevel3 = "Holding Bomb!!!!!";
 
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         public static class AgiOptions
         {
             [Localized(nameof(PlaceBombCooldown))]

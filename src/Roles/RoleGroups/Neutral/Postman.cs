@@ -15,6 +15,7 @@ using Lotus.Victory.Conditions;
 using Lotus.API;
 using Lotus.Extensions;
 using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -133,5 +134,8 @@ public class Postman: Crewmate
                 .BindInt(i => targetDiesMode = i)
                 .Build()));
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.6f, 0.6f, 0.6f)).Faction(FactionInstances.Solo);
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier)
+        .RoleColor(new Color(0.6f, 0.6f, 0.6f))
+        .SpecialType(SpecialType.Neutral)
+        .Faction(FactionInstances.Solo);
 }

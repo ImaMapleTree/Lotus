@@ -8,6 +8,8 @@ using BepInEx.Unity.IL2CPP;
 using Lotus;
 using Lotus.Addons;
 using Lotus.API;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.Gamemodes;
 using Lotus.GUI.Menus;
 using Lotus.GUI.Patches;
@@ -48,7 +50,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
     public readonly GitVersion CurrentVersion = new();
 
-    public static readonly string ModName = "Project: Lotus";
+    public static readonly string ModName = "Project Lotus";
     public static readonly string ModColor = "#4FF918";
 
     public static readonly bool ShowDiscordButton = true;
@@ -148,5 +150,6 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         }
 
         if (PluginDataManager.TemplateManager.TryFormat(player, "lobby-join", out string message)) Utils.SendMessage(message, player.PlayerId);
+        Hooks.NetworkHooks.ReceiveVersionHook.Propagate(new ReceiveVersionHookEvent(player, version));
     }
 }

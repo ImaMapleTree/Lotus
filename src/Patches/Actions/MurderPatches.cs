@@ -79,17 +79,18 @@ public static class MurderPatches
                 ? new SuicideEvent(__instance)
                 : new DeathEvent(target, __instance)
             );
-
+        
         Game.MatchData.GameHistory.AddEvent(deathEvent);
         Game.MatchData.GameHistory.SetCauseOfDeath(target.PlayerId, deathEvent);
 
 
         ActionHandle ignored = ActionHandle.NoInit();
-        target.Trigger(RoleActionType.MyDeath, ref ignored, __instance, deathEvent.Instigator());
-        Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, __instance, deathEvent.Instigator());
+        target.Trigger(RoleActionType.MyDeath, ref ignored, __instance, deathEvent.Instigator(), deathEvent.SimpleName());
+        Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, __instance, deathEvent.Instigator(), deathEvent.SimpleName());
 
-        Hooks.PlayerHooks.PlayerMurderHook.Propagate(new PlayerMurderHookEvent(__instance, target));
-        Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerHookEvent(target));
+        PlayerMurderHookEvent playerMurderHookEvent = new(__instance, target, deathEvent.SimpleName());
+        Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);
+        Hooks.PlayerHooks.PlayerDeathHook.Propagate(playerMurderHookEvent);
     }
 
     [QuickPostfix(typeof(PlayerControl), nameof(PlayerControl.Die))]

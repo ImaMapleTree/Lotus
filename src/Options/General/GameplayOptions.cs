@@ -7,7 +7,7 @@ using VentLib.Options.Game;
 
 namespace Lotus.Options.General;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class GameplayOptions
 {
     private static Color _optionColor = new(0.81f, 1f, 0.75f);
@@ -22,7 +22,6 @@ public class GameplayOptions
     public bool GhostsSeeRoles;
     public bool GhostsSeeInfo;
     public bool GhostsIgnoreTasks;
-    public bool ForceNoVenting;
     public int SyncMeetingCount;
 
     public bool SyncMeetings => SyncMeetingCount != -1;
@@ -122,12 +121,6 @@ public class GameplayOptions
             .Value(v => v.Text(GameplayOptionTranslations.SyncMeetingNever).Value(-1).Color(Color.red).Build())
             .AddIntRange(1, 15, 1)
             .BindInt(i => SyncMeetingCount = i)
-            .BuildAndRegister());
-
-        AllOptions.Add(Builder("Force No Venting")
-            .Name(GameplayOptionTranslations.ForceNoVentingText)
-            .AddOnOffValues()
-            .BindBool(b => ForceNoVenting = b)
             .BuildAndRegister());
 
         additionalOptions.ForEach(o =>

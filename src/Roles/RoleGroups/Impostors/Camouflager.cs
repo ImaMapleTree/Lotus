@@ -6,6 +6,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Roles.Internals;
 using Lotus.RPC;
 using VentLib.Options.Game;
 
@@ -31,11 +32,12 @@ public class Camouflager: Shapeshifter
 
     [RoleAction(RoleActionType.MeetingCalled)]
     [RoleAction(RoleActionType.Unshapeshift)]
-    private void CamouflagerUnshapeshift()
+    private void CamouflagerUnshapeshift(ActionHandle handle)
     {
         if (!camouflaged) return;
         camouflaged = false;
-        Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
+        if (handle.ActionType is not RoleActionType.MeetingCalled)
+            Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

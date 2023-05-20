@@ -9,7 +9,7 @@ using VentLib.Utilities.Extensions;
 
 namespace Lotus.Options.Client;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class VideoOptions
 {
     public static object[] FpsLimits = { 24, 30, 60, 120, 144, 240, 265, Int32.MaxValue };

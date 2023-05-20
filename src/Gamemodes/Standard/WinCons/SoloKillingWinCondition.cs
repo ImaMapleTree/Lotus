@@ -28,7 +28,7 @@ public class SoloKillingWinCondition : IWinCondition
            aliveKillers.Add(r);
         });
 
-        if (alivePlayers - aliveKillers.Count > 1 || aliveKillers.Count == 0) return false;
+        if (alivePlayers - aliveKillers.Count >= 1 || aliveKillers.Count == 0) return false;
         
         foreach (CustomRole killer in aliveKillers)
         {

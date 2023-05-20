@@ -44,6 +44,9 @@ public static class GeneralOptionTranslations
     [Localized(nameof(AllText))]
     public static string AllText = "All";
 
-    [Localized(nameof(CommonText))]
-    public static string CommonText = "Common";
+    [Localized(nameof(GlobalText))]
+    public static string GlobalText = "Global";
+
+    [Localized(nameof(CustomText))]
+    public static string CustomText = "Custom";
 }

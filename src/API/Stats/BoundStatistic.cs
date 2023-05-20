@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
@@ -11,7 +12,7 @@ namespace Lotus.API.Stats;
 internal class BoundStatistic<T> : Statistic<T>, IPersistentStatistic
 {
     private readonly string identifier;
-    private string name;
+    private Func<string> name;
     private List<Action<UniquePlayerId, Statistic<T>>> eventConsumers = new();
 
     protected readonly T? DefaultValue;
@@ -19,7 +20,7 @@ internal class BoundStatistic<T> : Statistic<T>, IPersistentStatistic
     protected readonly string HookKey;
 
 
-    public BoundStatistic(string identifier, string name, T? defaultValue)
+    public BoundStatistic(string identifier, Func<string> name, T? defaultValue)
     {
         this.identifier = identifier;
         this.name = name;
@@ -37,7 +38,7 @@ internal class BoundStatistic<T> : Statistic<T>, IPersistentStatistic
 
     public T? GetValue(byte playerId) => GetValue(UniquePlayerId.From(playerId));
 
-    public string Name() => name;
+    public string Name() => name();
 
     public T? this[UniquePlayerId playerId]
     {

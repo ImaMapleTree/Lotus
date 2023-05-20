@@ -12,9 +12,10 @@ namespace Lotus.Chat.Commands;
 [Command("history")]
 public class HistoryCommands : ICommandReceiver
 {
-    public void Receive(PlayerControl source, CommandContext context)
+    public bool Receive(PlayerControl source, CommandContext context)
     {
-        if (Game.MatchData.GameHistory == null!) return;
+        if (Game.MatchData.GameHistory == null!) return true;
         Utils.SendMessage(Game.MatchData.GameHistory.Events.Where(e => e.IsCompletion()).Select(e => e.GenerateMessage()).Join(delimiter: "\n"), source.PlayerId);
+        return true;
     }
 }

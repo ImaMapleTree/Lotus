@@ -44,7 +44,7 @@ public class Consort : Impostor
         blocking = false;
 
         blockedPlayers[target.PlayerId] = Escort.BlockDelegate.Block(target, MyPlayer, roleblockDuration);
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target,
             $"{RoleColor.Colorize(MyPlayer.name)} role blocked {target.GetRoleColor().Colorize(target.name)}."));
 

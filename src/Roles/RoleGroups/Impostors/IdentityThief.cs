@@ -19,7 +19,7 @@ public class IdentityThief : Impostor
         if (shiftsUntilNextKill) Async.Schedule(() => MyPlayer.RpcRevertShapeshift(true), KillCooldown);
         return killed;
     }
-
+    
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Shifts Until Next Kill")

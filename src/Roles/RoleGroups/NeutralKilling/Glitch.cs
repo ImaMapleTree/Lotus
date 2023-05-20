@@ -8,7 +8,6 @@ using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Crew;
-using Lotus.API;
 using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -49,7 +48,7 @@ public class Glitch: NeutralKillingBase
         if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         blockedPlayers[target.PlayerId] = Escort.BlockDelegate.Block(target, MyPlayer, roleblockDuration);
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{RoleColor.Colorize(MyPlayer.name)} hacked {target.GetRoleColor().Colorize(target.name)}."));
 
         if (roleblockDuration > 0) Async.Schedule(() => blockedPlayers.Remove(target.PlayerId), roleblockDuration);

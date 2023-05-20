@@ -13,7 +13,6 @@ using Lotus.GUI.Counters;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.GUI.Name.Impl;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Managers;
 using Lotus.Options;
@@ -21,7 +20,6 @@ using Lotus.Options.Roles;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.Subroles;
 using Lotus.Extensions;
-using Lotus.Logging;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Networking;
@@ -44,7 +42,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     }
 
 
-    public virtual bool CanVent() => BaseCanVent || GeneralOptions.MayhemOptions.AllRolesCanVent;
+    public virtual bool CanVent() => (BaseCanVent && !RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotVent)) || GeneralOptions.MayhemOptions.AllRolesCanVent;
     
     public virtual void HandleDisconnect() {}
     
@@ -54,7 +52,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     {
         if (this.Faction is Solo && role.Faction is Solo)
         {
-            return RoleOptions.NeutralOptions.NeutralTeamingMode switch
+            return Options.RoleOptions.NeutralOptions.NeutralTeamingMode switch
             {
                 NeutralTeaming.All => Relation.FullAllies,
                 NeutralTeaming.KillersNeutrals => RealRole.IsImpostor() && role.RealRole.IsImpostor() ? Relation.FullAllies : Relation.None,
@@ -200,6 +198,12 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
         SyncOptions(new GameOptionOverride[] { new(Override.KillCooldown, 0.1f)} , true);
         HudManager.Instance.SetHudActive(true);
+    }
+
+    public void RefreshKillCooldown(PlayerControl target, bool syncOptions = true)
+    {
+        if (syncOptions) SyncOptions();
+        MyPlayer.RpcMark(target);
     }
 
     private void ShowRoleToTeammates(IEnumerable<PlayerControl> allies)

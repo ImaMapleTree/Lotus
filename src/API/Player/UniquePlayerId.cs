@@ -7,7 +7,7 @@ using VentLib.Options.IO;
 using VentLib.Options.Processors;
 using VentLib.Utilities.Attributes;
 
-namespace Lotus.API;
+namespace Lotus.API.Player;
 
 [LoadStatic]
 public class UniquePlayerId
@@ -56,6 +56,20 @@ public class UniquePlayerId
         return ID.GetHashCode();
     }
 
+    public static bool operator ==(UniquePlayerId playerId, UniquePlayerId other)
+    {
+        if (ReferenceEquals(playerId, null)) return ReferenceEquals(other, null);
+        if (ReferenceEquals(other, null)) return false;
+        return playerId.Equals(other);
+    }
+    
+    public static bool operator !=(UniquePlayerId playerId, UniquePlayerId other)
+    {
+        if (ReferenceEquals(playerId, null)) return !ReferenceEquals(other, null);
+        if (ReferenceEquals(other, null)) return true;
+        return !playerId.Equals(other);
+    }
+    
     public override string ToString() => ID;
 
 

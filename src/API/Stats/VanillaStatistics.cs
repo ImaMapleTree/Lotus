@@ -4,6 +4,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Vanilla.Sabotages;
 using Lotus.Extensions;
@@ -19,6 +20,7 @@ public class VanillaStatistics
     private static bool _firstMurder;
     private const string StatisticsHookKey = nameof(StatisticsHookKey);
 
+    [Localized("Statistics")] internal static string StatisticsText = "Statistics";
     [Localized("Games")] private static string _games = "Games";
     [Localized("Wins")] private static string _wins = "Wins";
     [Localized("Losses")] private static string _losses = "Losses";
@@ -27,7 +29,7 @@ public class VanillaStatistics
     [Localized("FirstKills")] private static string _firstKills = "First Kills";
     [Localized("FirstDeaths")] private static string _firstDeaths = "First Deaths";
     [Localized("Shapeshifts")] private static string _shapeshifts = "Shapeshifts";
-    [Localized("TimesVented")] private static string _timesVented = "Times Venting";
+    [Localized("TimesVented")] private static string _timesVented = "Times Vented";
     [Localized("TotalTasksComplete")] private static string _totalTasksComplete = "Tasks Completed";
     [Localized("ShortTasksComplete")] private static string _shortTasksComplete = "Short Tasks Completed";
     [Localized("LongTasksComplete")] private static string _longTasksComplte = "Long Tasks Completed";
@@ -51,41 +53,41 @@ public class VanillaStatistics
     [Localized("TimeDead")] private static string _timeDead = "Time Spent Dead";
     [Localized("TotalTime")] private static string _totalTime = "Total Play Time";
 
-    public static IAccumulativeStatistic<int> Games = Statistic<int>.CreateAccumulative(Identifiers.Games, _games);
-    public static IAccumulativeStatistic<int> Wins = Statistic<int>.CreateAccumulative(Identifiers.Wins, _wins);
-    public static IAccumulativeStatistic<int> Losses = Statistic<int>.CreateAccumulative(Identifiers.Losses, _losses);
-    public static IAccumulativeStatistic<int> Kills = Statistic<int>.CreateAccumulative(Identifiers.Kills, _playerKills);
-    public static IAccumulativeStatistic<int> Deaths = Statistic<int>.CreateAccumulative(Identifiers.Deaths, _deaths);
-    public static IAccumulativeStatistic<int> FirstKills = Statistic<int>.CreateAccumulative(Identifiers.FirstKills, _firstKills);
-    public static IAccumulativeStatistic<int> FirstDeaths = Statistic<int>.CreateAccumulative(Identifiers.FirstDeaths, _firstDeaths);
-    public static IAccumulativeStatistic<int> Shapeshifts = Statistic<int>.CreateAccumulative(Identifiers.Shapeshifts, _shapeshifts);
-    public static IAccumulativeStatistic<int> TimesVented = Statistic<int>.CreateAccumulative(Identifiers.TimesVented, _timesVented);
+    public static IAccumulativeStatistic<int> Games = Statistic<int>.CreateAccumulative(Identifiers.Games, () => _games);
+    public static IAccumulativeStatistic<int> Wins = Statistic<int>.CreateAccumulative(Identifiers.Wins, () => _wins);
+    public static IAccumulativeStatistic<int> Losses = Statistic<int>.CreateAccumulative(Identifiers.Losses, () => _losses);
+    public static IAccumulativeStatistic<int> Kills = Statistic<int>.CreateAccumulative(Identifiers.Kills, () => _playerKills);
+    public static IAccumulativeStatistic<int> Deaths = Statistic<int>.CreateAccumulative(Identifiers.Deaths, () => _deaths);
+    public static IAccumulativeStatistic<int> FirstKills = Statistic<int>.CreateAccumulative(Identifiers.FirstKills, () => _firstKills);
+    public static IAccumulativeStatistic<int> FirstDeaths = Statistic<int>.CreateAccumulative(Identifiers.FirstDeaths, () => _firstDeaths);
+    public static IAccumulativeStatistic<int> Shapeshifts = Statistic<int>.CreateAccumulative(Identifiers.Shapeshifts, () => _shapeshifts);
+    public static IAccumulativeStatistic<int> TimesVented = Statistic<int>.CreateAccumulative(Identifiers.TimesVented, () => _timesVented);
 
-    public static IAccumulativeStatistic<int> TasksComplete = Statistic<int>.CreateAccumulative(Identifiers.TasksComplete, _totalTasksComplete);
-    public static IAccumulativeStatistic<int> ShortTasksComplete = Statistic<int>.CreateAccumulative(Identifiers.ShortTasksComplete, _shortTasksComplete);
-    public static IAccumulativeStatistic<int> LongTasksComplete = Statistic<int>.CreateAccumulative(Identifiers.LongTasksComplete, _longTasksComplte);
-    public static IAccumulativeStatistic<int> CommonTasksComplete = Statistic<int>.CreateAccumulative(Identifiers.CommonTasksComplete, _commonTasksComplete);
+    public static IAccumulativeStatistic<int> TasksComplete = Statistic<int>.CreateAccumulative(Identifiers.TasksComplete, () => _totalTasksComplete);
+    public static IAccumulativeStatistic<int> ShortTasksComplete = Statistic<int>.CreateAccumulative(Identifiers.ShortTasksComplete, () => _shortTasksComplete);
+    public static IAccumulativeStatistic<int> LongTasksComplete = Statistic<int>.CreateAccumulative(Identifiers.LongTasksComplete, () => _longTasksComplte);
+    public static IAccumulativeStatistic<int> CommonTasksComplete = Statistic<int>.CreateAccumulative(Identifiers.CommonTasksComplete, () => _commonTasksComplete);
 
-    public static IAccumulativeStatistic<int> LightsSabotaged = Statistic<int>.CreateAccumulative(Identifiers.LightsSabotaged, _lightsSabotaged);
-    public static IAccumulativeStatistic<int> ReactorSabotaged = Statistic<int>.CreateAccumulative(Identifiers.ReactorSabotaged, _reactorSabotaged);
-    public static IAccumulativeStatistic<int> OxygenSabotaged = Statistic<int>.CreateAccumulative(Identifiers.OxygenSabotaged, _oxygenSabotaged);
-    public static IAccumulativeStatistic<int> CommsSabotaged = Statistic<int>.CreateAccumulative(Identifiers.CommsSabotaged, _commsSabotaged);
-    public static IAccumulativeStatistic<int> DoorsSabotaged = Statistic<int>.CreateAccumulative(Identifiers.DoorsSabotaged, _doorsSabotaged);
-    public static IAccumulativeStatistic<int> SabotagesCalled = Statistic<int>.CreateAccumulative(Identifiers.SabotagesCalled, _sabotagesCalled);
-    public static IAccumulativeStatistic<int> SabotagesFixed = Statistic<int>.CreateAccumulative(Identifiers.SabotagesFixed, _sabotagesFixed);
+    public static IAccumulativeStatistic<int> LightsSabotaged = Statistic<int>.CreateAccumulative(Identifiers.LightsSabotaged, () => _lightsSabotaged);
+    public static IAccumulativeStatistic<int> ReactorSabotaged = Statistic<int>.CreateAccumulative(Identifiers.ReactorSabotaged, () => _reactorSabotaged);
+    public static IAccumulativeStatistic<int> OxygenSabotaged = Statistic<int>.CreateAccumulative(Identifiers.OxygenSabotaged, () => _oxygenSabotaged);
+    public static IAccumulativeStatistic<int> CommsSabotaged = Statistic<int>.CreateAccumulative(Identifiers.CommsSabotaged, () => _commsSabotaged);
+    public static IAccumulativeStatistic<int> DoorsSabotaged = Statistic<int>.CreateAccumulative(Identifiers.DoorsSabotaged, () => _doorsSabotaged);
+    public static IAccumulativeStatistic<int> SabotagesCalled = Statistic<int>.CreateAccumulative(Identifiers.SabotagesCalled, () => _sabotagesCalled);
+    public static IAccumulativeStatistic<int> SabotagesFixed = Statistic<int>.CreateAccumulative(Identifiers.SabotagesFixed, () => _sabotagesFixed);
 
-    public static IAccumulativeStatistic<int> MeetingsCalled = Statistic<int>.CreateAccumulative(Identifiers.MeetingsCalled, _meetingsCalled);
-    public static IAccumulativeStatistic<int> BodiesReported = Statistic<int>.CreateAccumulative(Identifiers.BodiesReported, _bodiesReported);
-    public static IAccumulativeStatistic<int> MessagesSent = Statistic<int>.CreateAccumulative(Identifiers.MessagesSent, _messagesSent);
-    public static IAccumulativeStatistic<int> PlayersExiled = Statistic<int>.CreateAccumulative(Identifiers.PlayersExiled, _playersExiled);
-    public static IAccumulativeStatistic<int> TimesExiled = Statistic<int>.CreateAccumulative(Identifiers.TimesExiled, _timesExiled);
-    public static IAccumulativeStatistic<int> TimesVoteSkipped = Statistic<int>.CreateAccumulative(Identifiers.TimesVoteSkipped, _timesVoteSkipped);
-    public static IAccumulativeStatistic<int> TimesVoted = Statistic<int>.CreateAccumulative(Identifiers.TimesVoted, _timesVoted);
-    public static IAccumulativeStatistic<int> TotalVotesFor = Statistic<int>.CreateAccumulative(Identifiers.TotalVotesFor, _timesVotedFor);
+    public static IAccumulativeStatistic<int> MeetingsCalled = Statistic<int>.CreateAccumulative(Identifiers.MeetingsCalled, () => _meetingsCalled);
+    public static IAccumulativeStatistic<int> BodiesReported = Statistic<int>.CreateAccumulative(Identifiers.BodiesReported, () => _bodiesReported);
+    public static IAccumulativeStatistic<int> MessagesSent = Statistic<int>.CreateAccumulative(Identifiers.MessagesSent, () => _messagesSent);
+    public static IAccumulativeStatistic<int> PlayersExiled = Statistic<int>.CreateAccumulative(Identifiers.PlayersExiled, () => _playersExiled);
+    public static IAccumulativeStatistic<int> TimesExiled = Statistic<int>.CreateAccumulative(Identifiers.TimesExiled, () => _timesExiled);
+    public static IAccumulativeStatistic<int> TimesVoteSkipped = Statistic<int>.CreateAccumulative(Identifiers.TimesVoteSkipped, () => _timesVoteSkipped);
+    public static IAccumulativeStatistic<int> TimesVoted = Statistic<int>.CreateAccumulative(Identifiers.TimesVoted, () => _timesVoted);
+    public static IAccumulativeStatistic<int> TotalVotesFor = Statistic<int>.CreateAccumulative(Identifiers.TotalVotesFor, () => _timesVotedFor);
 
-    public static IAccumulativeStatistic<double> TimeAlive = Statistic<double>.CreateAccumulative(Identifiers.TimeAlive, _timesAlive);
-    public static IAccumulativeStatistic<double> TimeDead = Statistic<double>.CreateAccumulative(Identifiers.TimeDead, _timeDead);
-    public static IAccumulativeStatistic<double> TotalTime = Statistic<double>.CreateAccumulative(Identifiers.TotalTime, _totalTime);
+    public static IAccumulativeStatistic<double> TimeAlive = Statistic<double>.CreateAccumulative(Identifiers.TimeAlive, () => _timesAlive);
+    public static IAccumulativeStatistic<double> TimeDead = Statistic<double>.CreateAccumulative(Identifiers.TimeDead, () => _timeDead);
+    public static IAccumulativeStatistic<double> TotalTime = Statistic<double>.CreateAccumulative(Identifiers.TotalTime, () => _totalTime);
 
     [SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass")]
     public static class Identifiers
@@ -157,13 +159,29 @@ public class VanillaStatistics
             FirstDeaths.Update(murderEvent.Victim.UniquePlayerId(), i => i + 1);
             _firstMurder = false;
         });
-        Hooks.MeetingHooks.MeetingCalledHook.Bind(StatisticsHookKey, meetingEvent =>
-        {
-            GameData.PlayerInfo? reported = meetingEvent.Reported;
-            if (reported == null) MeetingsCalled.Update(meetingEvent.Caller.UniquePlayerId(), i => i + 1);
-            else BodiesReported.Update(meetingEvent.Caller.UniquePlayerId(), i => i + 1);
-        });
         Hooks.PlayerHooks.PlayerMessageHook.Bind(StatisticsHookKey, messageEvent => MessagesSent.Update(messageEvent.Player.UniquePlayerId(), i => i + 1));
+        Hooks.PlayerHooks.PlayerTaskCompleteHook.Bind(StatisticsHookKey, taskEvent =>
+        {
+            UniquePlayerId uniqueId = taskEvent.Player.UniquePlayerId();
+            switch (taskEvent.PlayerTask.Length)
+            {
+                case NormalPlayerTask.TaskLength.Common:
+                    CommonTasksComplete.Update(uniqueId, i => i + 1);
+                    break;
+                case NormalPlayerTask.TaskLength.Short:
+                    ShortTasksComplete.Update(uniqueId, i => i + 1);
+                    break;
+                case NormalPlayerTask.TaskLength.Long:
+                    LongTasksComplete.Update(uniqueId, i => i + 1);
+                    break;
+                case NormalPlayerTask.TaskLength.None:
+                    break;
+                default:
+                    throw new ArgumentOutOfRangeException();
+            }
+            TasksComplete.Update(uniqueId, i => i + 1);
+        });
+        // Sabotage Stuff
         Hooks.SabotageHooks.SabotageCalledHook.Bind(StatisticsHookKey, sabotageEvent =>
         {
             SabotageType type = sabotageEvent.Sabotage.SabotageType();
@@ -198,6 +216,35 @@ public class VanillaStatistics
         {
             sabotageFixEvent.Fixer.IfPresent(fixer => SabotagesFixed.Update(fixer.UniquePlayerId(), i => i + 1));
         });
+        
+        // =================
+        // Meetings (Voting)
+        // =================
+        Hooks.MeetingHooks.MeetingCalledHook.Bind(StatisticsHookKey, meetingEvent =>
+        {
+            GameData.PlayerInfo? reported = meetingEvent.Reported;
+            if (reported == null) MeetingsCalled.Update(meetingEvent.Caller.UniquePlayerId(), i => i + 1);
+            else BodiesReported.Update(meetingEvent.Caller.UniquePlayerId(), i => i + 1);
+        });
+        Hooks.MeetingHooks.CastVoteHook.Bind(StatisticsHookKey, @event =>
+        {
+            PlayerControl player = @event.Voter;
+            @event.Vote.Handle(voted =>
+            {
+                TimesVoted.Update(player.UniquePlayerId(), i => i + 1);
+                if (voted != null) TotalVotesFor.Update(voted.UniquePlayerId(), i => i + 1);
+            }, () => TimesVoteSkipped.Update(player.UniquePlayerId(), i => i + 1));
+        });
+        Hooks.MeetingHooks.ExiledHook.Bind(StatisticsHookKey, exileHook =>
+        {
+            if (exileHook.ExiledPlayer.Object != null)
+                TimesExiled.Update(exileHook.ExiledPlayer.Object.UniquePlayerId(), i => i + 1);
+            exileHook.Voters.Distinct().Filter(Players.PlayerById).ForEach(p =>
+            {
+                PlayersExiled.Update(p.UniquePlayerId(), i => i + 1);
+            });
+        });
+        
     }
 
     private static void SetupStatisticTracking()

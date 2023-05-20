@@ -128,5 +128,7 @@ public class Retributionist : NeutralKillingBase
                 .Build());
 
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.73f, 0.66f, 0.69f));
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
+        base.Modify(roleModifier)
+            .RoleColor(new Color(0.73f, 0.66f, 0.69f));
 }

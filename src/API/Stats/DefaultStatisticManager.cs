@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.Managers;
 using VentLib.Logging;

@@ -87,14 +87,14 @@ public class Bastion: Engineer
     [Localized(nameof(Bastion))]
     internal static class BastionTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         public static class BastionOptionTranslations
         {
             [Localized(nameof(PlantBombCooldown))]
             public static string PlantBombCooldown = "Plant Bomb Cooldown";
 
             [Localized(nameof(BombsPerRound))]
-            public static string BombsPerRound = "Bombs rer Rounds";
+            public static string BombsPerRound = "Bombs per Rounds";
         }
     }
 }

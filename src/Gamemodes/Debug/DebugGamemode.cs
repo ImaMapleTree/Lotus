@@ -36,7 +36,7 @@ public class DebugGamemode: Gamemode
         {
             VentLogger.Debug($"Assigning {p.name} => {_roleAssignments.GetValueOrDefault(p.PlayerId)}");
             CustomRole? role = CustomRoleManager.AllRoles.FirstOrDefault(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(_roleAssignments.GetValueOrDefault(p.PlayerId)?.ToLower() ?? "HEHEXD"));
-            Api.Roles.AssignRole(p, role ?? CustomRoleManager.Special.Debugger, true);
+            MatchData.AssignRole(p, role ?? CustomRoleManager.Special.Debugger, true);
         });
     }
 

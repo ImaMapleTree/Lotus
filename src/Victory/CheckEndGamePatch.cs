@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.Logging;
 using Lotus.Managers.History;
 using Lotus.Managers.Hotkeys;
 using Lotus.Options;
@@ -18,6 +20,7 @@ namespace Lotus.Victory;
 [HarmonyPatch(typeof(LogicGameFlowNormal), nameof(LogicGameFlowNormal.CheckEndCriteria))]
 public class CheckEndGamePatch
 {
+    public static bool BeginWin;
     public static bool Deferred;
     private static DateTime slowDown = DateTime.Now;
     private static FixedUpdateLock _fixedUpdateLock = new FixedUpdateLock(0.1f);
@@ -33,8 +36,18 @@ public class CheckEndGamePatch
                 manualWin.Activate();
                 GameManager.Instance.LogicFlow.CheckEndCriteria();
             });
+        Hooks.PlayerHooks.PlayerDisconnectHook.Bind(nameof(CheckEndGamePatch), _ =>
+        {
+            if (BeginWin) return;
+            bool wasDeferred = Deferred;
+            Deferred = false;
+            _fixedUpdateLock.Unlock();
+            Prefix();
+            Deferred = wasDeferred;
+        });
     }
 
+    // ReSharper disable once UnusedMethodReturnValue.Global
     public static bool Prefix()
     {
         if (!AmongUsClient.Instance.AmHost) return true;
@@ -55,7 +68,8 @@ public class CheckEndGamePatch
         }
 
 
-        List<PlayerControl> winners = winDelegate.GetWinners();
+        List<PlayerControl> winners = winDelegate.GetWinners().DistinctBy(p => p.PlayerId).ToList();
+        if (winners == null!) winners = new List<PlayerControl>();
         bool impostorsWon = winners.Count == 0 || winners[0].Data.Role.IsImpostor;
 
         GameOverReason reason = winDelegate.GetWinReason() switch
@@ -75,7 +89,8 @@ public class CheckEndGamePatch
         VictoryScreen.ShowWinners(winDelegate.GetWinners(), reason);
 
         Deferred = true;
-        Async.Schedule(() => DelayedWin(reason), NetUtils.DeriveDelay(1f));
+        BeginWin = true;
+        Async.Schedule(() => DelayedWin(reason), NetUtils.DeriveDelay(0.6f));
 
         Profilers.Global.Sampler.Stop(id);
         return false;
@@ -84,6 +99,7 @@ public class CheckEndGamePatch
     private static void DelayedWin(GameOverReason reason)
     {
         Deferred = false;
+        BeginWin = false;
         VentLogger.Info("Ending Game", "DelayedWin");
         GameManager.Instance.RpcEndGame(reason, false);
         Async.Schedule(() => GameManager.Instance.EndGame(), 0.1f);

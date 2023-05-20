@@ -30,7 +30,7 @@ public class Vampire : Impostor, IVariableRole
         InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this));
         if (result is InteractionResult.Halt) return false;
 
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         bitten.Add(target.PlayerId);
         Game.MatchData.GameHistory.AddEvent(new BittenEvent(MyPlayer, target));
 
