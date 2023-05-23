@@ -41,7 +41,7 @@ public abstract class Subrole: CustomRole
     /// <returns>Set of factions</returns>
     public virtual HashSet<IFaction>? RegulatedFactions() => FactionRestrictions;
 
-    public bool IsAssignableTo(PlayerControl player)
+    public virtual bool IsAssignableTo(PlayerControl player)
     {
         CustomRole role = player.GetCustomRole();
         Type factionType = role.Faction.GetType();

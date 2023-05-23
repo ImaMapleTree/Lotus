@@ -1,3 +1,4 @@
+using Lotus.API.Odyssey;
 using Lotus.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -8,7 +9,11 @@ namespace Lotus.Roles.Subroles;
 public class Bait: Subrole
 {
     [RoleAction(RoleActionType.MyDeath)]
-    private void BaitDies(PlayerControl killer, Optional<PlayerControl> realKiller) => realKiller.OrElse(killer).ReportDeadBody(MyPlayer.Data);
+    private void BaitDies(PlayerControl killer, Optional<PlayerControl> realKiller)
+    {
+        if (Game.State is not GameState.Roaming) return;
+        realKiller.OrElse(killer).ReportDeadBody(MyPlayer.Data);
+    }
 
     public override string Identifier() => "★";
 

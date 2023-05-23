@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.Extensions;
+using Lotus.Managers.History.Events;
 using Lotus.Roles;
 using Lotus.Utilities;
 using VentLib.Utilities.Extensions;
@@ -19,7 +20,7 @@ public class FrozenPlayer
     public uint Level;
     public PlayerOutfit Outfit;
     public ulong GameID;
-    public string? CauseOfDeath;
+    public IDeathEvent? CauseOfDeath;
 
     public PlayerControl MyPlayer => NullablePlayer == null ? NullablePlayer ??= GetPlayer() : NullablePlayer;
 

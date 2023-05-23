@@ -78,6 +78,9 @@ public static class ModConstants
 
         [Localized(nameof(Incinerated))]
         public static string Incinerated = "Incinerated";
+
+        [Localized(nameof(Misfired))]
+        public static string Misfired = "Misfired";
     }
 
     public static Dictionary<string, string> Pets = new()

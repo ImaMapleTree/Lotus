@@ -20,7 +20,7 @@ public class PreventCommand
     public static void ListIllegalCombos(PlayerControl source, CommandContext _)
     {
         string illegalRoleText = IllegalRoleCombos.GetCurrentCombos().Select((li, i) => $"{i}) {GeneralExtensions.Join<string>(li)}").Join(delimiter: "\n");
-        Utils.SendMessage("Current Banned Combos:\n" + illegalRoleText, source.PlayerId);
+        ChatHandler.Send(source, "Current Banned Combos:\n" + illegalRoleText);
     }
 
     [Command("ban", "add", "b")]
@@ -42,9 +42,9 @@ public class PreventCommand
             }
         }).ToList();
 
-        if (failedRoleNames.Count > 0) Utils.SendMessage($"Failed to add. Invalid role names: {failedRoleNames.Select(s => $"\"{s}\"").Join()}", source.PlayerId);
+        if (failedRoleNames.Count > 0) ChatHandler.Send(source, $"Failed to add. Invalid role names: {failedRoleNames.Select(s => $"\"{s}\"").Join()}");
         else IllegalRoleCombos.AddIllegalCombo(roles);
-        Utils.SendMessage($"Successfully banned combo: {roleNames.Select(rn => $"\"{rn}\"").Join()}", source.PlayerId);
+        ChatHandler.Send(source, $"Successfully banned combo: {roleNames.Select(rn => $"\"{rn}\"").Join()}");
     }
 
     [Command("allow", "remove", "a")]
@@ -52,6 +52,6 @@ public class PreventCommand
     {
         List<string> currentCombo = IllegalRoleCombos.GetCurrentCombos()[index];
         IllegalRoleCombos.RemoveIllegalCombo(index);
-        Utils.SendMessage($"Successfully allowed combo: {currentCombo.Join()}", source.PlayerId);
+        ChatHandler.Send(source, $"Successfully allowed combo: {currentCombo.Join()}");
     }
 }

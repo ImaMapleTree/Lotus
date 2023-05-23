@@ -258,6 +258,6 @@ public static class PlayerControlExtensions
 
     public static bool IsAlive(this PlayerControl target)
     {
-        return target != null && !target.Data.IsDead && !target.Data.Disconnected && !MurderPatches.DeferredDeaths.Contains(target.PlayerId);
+        return target != null && !target.Data.IsDead && !target.Data.Disconnected;
     }
 }

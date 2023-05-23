@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using Hazel;
+using Lotus.API.Odyssey;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
@@ -48,6 +49,7 @@ public class PetPatch
 
         VentLogger.Trace($"{player.name} => Pet", "PetPatch");
         ActionHandle handle = ActionHandle.NoInit();
+        Game.TriggerForAll(RoleActionType.AnyPet, ref handle, player);
         player.Trigger(RoleActionType.OnPet, ref handle, __instance);
 
         handle = ActionHandle.NoInit();

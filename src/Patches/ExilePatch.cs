@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using AmongUs.Data;
 using HarmonyLib;
 using Lotus.API.Odyssey;
@@ -7,6 +8,7 @@ using Lotus.API.Vanilla.Meetings;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Managers.History.Events;
 using VentLib.Logging;
 using VentLib.Utilities;
 
@@ -56,7 +58,7 @@ static class ExileControllerWrapUpPatch
         Game.TriggerForAll(RoleActionType.AnyExiled, ref otherExiledHandle, exiled);
 
         Hooks.PlayerHooks.PlayerExiledHook.Propagate(new PlayerHookEvent(exiled.Object!));
-        Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerDeathHookEvent(exiled.Object!, ModConstants.DeathNames.Exiled));
+        Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerDeathHookEvent(exiled.Object!, new ExiledEvent(exiled.Object!, new List<PlayerControl>(), new List<PlayerControl>())));
     }
 
     static void WrapUpFinalizer()
@@ -70,28 +72,13 @@ static class ExileControllerWrapUpPatch
 
         Game.State = GameState.Roaming;
         Game.RenderAllForAll(force: true);
-        //if (GeneralOptions.GameplayOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
         Async.Schedule(() =>
         {
             ActionHandle handle = ActionHandle.NoInit();
             Game.TriggerForAll(RoleActionType.RoundStart, ref handle, false);
             Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
+            Game.SyncAll();
         }, 1f);
-
-
-
-        /*Async.Schedule(() =>
-        {
-            VentLogger.Fatal("TESTING!!!!!!!!!");
-
-            Game.GetAllPlayers().ForEach(p =>
-            {
-                p.RpcSetName("TEST TEST TEST!!");
-                NameUpdateProcess.Paused = true;
-            });
-
-            VentLogger.Fatal("Set All Player NaMES");
-        }, 8);*/
     }
 }
 

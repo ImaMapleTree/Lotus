@@ -57,6 +57,10 @@ public enum RoleActionType
     /// Parameters: (PlayerControl source, RoleAction action, object[] parameters)
     /// </summary>
     AnyPlayerAction,
+    /// <summary>
+    /// Triggers when any player pets
+    /// </summary>
+    AnyPet,
     OnPet,
     /// <summary>
     /// Triggers when the pet button is held down. This gets sent every 0.4 seconds if the button is held down. The
@@ -136,6 +140,7 @@ public enum RoleActionType
     /// </summary>
     /// <param name="victim"><see cref="PlayerControl"/> the dead player</param>
     /// <param name="killer"><see cref="PlayerControl"/> the killing player</param>
+    /// <param name="deathEvent"><see cref="Lotus.Managers.History.Events.IDeathEvent"/> the related death event </param>
     AnyDeath,
     /// <summary>
     /// Triggers when my player votes for someone (or skips)
@@ -181,10 +186,18 @@ public enum RoleActionType
     /// <b>IMPORTANT</b><br/>
     /// You CAN modify the meeting delegate at this time to change the results of the meeting. HOWEVER,
     /// modifying the votes will only change what is displayed during the meeting. You MUST also update the exiled player to change
-    /// the exiled player, as the votes WILL NOT be recalculated automatically at this point. <see cref="CheckForEndVotingPatch.CalculateExiledPlayer"/>
+    /// the exiled player, as the votes WILL NOT be recalculated automatically at this point. <see cref="MeetingDelegate.CalculateExiledPlayer"/>
     /// </summary>
     /// <param name="meetingDelegate"><see cref="MeetingDelegate"/> the meeting delegate for the current meeting</param>
     VotingComplete,
+    /// <summary>
+    /// Triggers when the meeting ends, this does not pass the meeting delegate as at this point everything has been finalized.
+    /// <param name="Exiled Player">><see cref="Optional{T}"/> the optional exiled player</param>
+    /// <param name="isTie"><see cref="bool"/> a boolean representing if the meeting tied</param>
+    /// <param name="player vote counts"<see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, int) representing the amount of votes a player got</param>
+    /// <param name="playerVoteStatus"><see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, List[Optional[byte]] containing the voting statuses of all players) 
+    /// </summary>
+    MeetingEnd,
     /// <summary>
     /// Triggers when a meeting is called
     /// </summary>

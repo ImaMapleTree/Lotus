@@ -18,11 +18,10 @@ public class StatCommand: ICommandReceiver
     [Localized("PlayerNotFound")]
     private static string _playerNotFoundMessage = "Player \"{0}\" not found";
 
-    public bool Receive(PlayerControl source, CommandContext context)
+    public void Receive(PlayerControl source, CommandContext context)
     {
         if (context.Args.Length == 0) GetPlayerStats(source, source);
         else GetPlayerStats(source, context.Join());
-        return true;
     }
 
     private void GetPlayerStats(PlayerControl requester, string name)
@@ -30,7 +29,7 @@ public class StatCommand: ICommandReceiver
         Optional<PlayerControl> searchedPlayer = PlayerControl.AllPlayerControls.ToArray().FirstOrOptional(p => p.Data.GetPlayerName(PlayerOutfitType.Default) == name);
         searchedPlayer.Handle(
             player => GetPlayerStats(requester, player),
-            () => Utils.SendMessage(string.Format(_playerNotFoundMessage, name), requester.PlayerId)
+            () => ChatHandler.Of(_playerNotFoundMessage.Formatted(name)).Send(requester)
         );
     }
 
@@ -48,6 +47,6 @@ public class StatCommand: ICommandReceiver
                 return current + $"{statistic.Name()}: {value}\n";
             });
 
-        Utils.SendMessage(statisticMessage, requester.PlayerId, "Statistics");
+        ChatHandler.Of(statisticMessage).Send(requester);
     }
 }

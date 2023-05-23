@@ -19,7 +19,7 @@ public class PlayerHistory
     public uint Level;
     public GameData.PlayerOutfit Outfit;
     public ulong GameID;
-    public string? CauseOfDeath;
+    public IDeathEvent? CauseOfDeath;
     public PlayerStatus Status;
 
     public PlayerHistory(FrozenPlayer frozenPlayer)

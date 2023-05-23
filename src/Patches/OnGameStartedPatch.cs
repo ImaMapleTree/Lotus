@@ -57,10 +57,10 @@ namespace Lotus.Patches
 
             Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
 
-            TextTable textTable = new TextTable("Player", "Role", "SubRoles");
+            TextTable textTable = new("ID", "Color", "Player", "Role", "SubRoles");
             Game.GetAllPlayers().Where(p => p != null).ForEach(p =>
             {
-                textTable.AddEntry(p.name, p.GetCustomRole().RoleName, p.GetSubroles().Fuse());
+                textTable.AddEntry((object)p.PlayerId, ModConstants.ColorNames[p.cosmetics.ColorId], p.name, p.GetCustomRole().RoleName, p.GetSubroles().Fuse());
             });
             VentLogger.Debug($"Role Assignments\n{textTable}", "RoleManager::SelectRoles~Postfix");
             

@@ -10,7 +10,7 @@ public class ImpostorFaction : Faction<ImpostorFaction>
 {
     public override Relation Relationship(ImpostorFaction sameFaction) => Relation.FullAllies;
 
-    public override bool AlliesSeeRole() => true;
+    public override bool CanSeeRole(PlayerControl player) => true;
 
     public override Color FactionColor() => Color.red;
 

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API;
@@ -62,17 +61,31 @@ public class Mastermind : Impostor
         return false;
     }
 
-    
+    [RoleAction(RoleActionType.AnyPet)]
+    public void InterceptPetAction(PlayerControl petter, ActionHandle handle)
+    {
+        if (!manipulatedPlayers.Contains(petter.PlayerId)) return;
+
+        PlayerControl? target = petter.GetPlayersInAbilityRangeSorted().FirstOrDefault();
+        if (target == null) return;
+        handle.Cancel();
+        DoManipulationKill(petter, target);
+    }
+
     [RoleAction(RoleActionType.AnyPlayerAction)]
     public void InterceptTargetAction(PlayerControl emitter, RoleAction action, ActionHandle handle, object[] parameters)
     {
         if (!manipulatedPlayers.Contains(emitter.PlayerId)) return;
-        if (action.ActionType is not (RoleActionType.OnPet or RoleActionType.Attack)) return;
-        
+        if (action.ActionType is not RoleActionType.Attack) return;
+
         PlayerControl? target = (PlayerControl?)(handle.ActionType is RoleActionType.Attack ? parameters[0] : emitter.GetPlayersInAbilityRangeSorted().FirstOrDefault());
         if (target == null) return;
         handle.Cancel();
-        
+        DoManipulationKill(emitter, target);
+    }
+
+    private void DoManipulationKill(PlayerControl emitter, PlayerControl target)
+    {
         CustomRole emitterRole = emitter.GetCustomRole();
         Remote<GameOptionOverride> killCooldown =  Game.MatchData.Roles.AddOverride(emitter.PlayerId, new GameOptionOverride(Override.KillCooldown, 0f));
         emitterRole.SyncOptions();
@@ -89,7 +102,8 @@ public class Mastermind : Impostor
     {
         if (target == null) return;
         Cooldown playerCooldown = expirationTimers[target.PlayerId] = timeToKill.Clone();
-        LiveString killIndicator = new(() => ManipulatedText + " " + Color.white.Colorize(playerCooldown + "s"), RoleColor); 
+        LiveString killIndicator = new(() => KillImploredText.Formatted(Color.white.Colorize(playerCooldown + "s")), RoleColor);
+        
         TextComponent textComponent = new(killIndicator, GameState.Roaming, viewers: target);
         remotes.GetOrCompute(target.PlayerId, () => new []{ (Remote<TextComponent>?)null, null})[1] = target.NameModel().GCH<TextHolder>().Add(textComponent);
         playerCooldown.StartThenRun(() => ExecuteSuicide(target));
@@ -150,13 +164,12 @@ public class Mastermind : Impostor
         [Localized(nameof(ManipulatedText))]
         public static string ManipulatedText = "Manipulated!";
 
-        [Localized(nameof(KillImploredText))]
-        public static string KillImploredText = "You <b>MUST</b> Kill Someone In {0}s";
+        [Localized(nameof(KillImploredText), ForceOverride = true)]
+        public static string KillImploredText = "You <b>MUST</b> Kill Someone In {0}\n(Use either your Kill or Pet button!)";
 
         [Localized(ModConstants.Options)]
         internal static class MastermindOptionTranslations
         {
-
             [Localized(nameof(ManipulationCooldown))]
             public static string ManipulationCooldown = "Manipulation Cooldown";
             

@@ -4,6 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.Chat;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
@@ -15,6 +16,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.GUI;
+using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
@@ -26,7 +28,7 @@ using VentLib.Utilities.Optionals;
 namespace Lotus.Roles.RoleGroups.Crew;
 
 [Localized("Roles.Vigilante")]
-public class Vigilante: CustomRole
+public class Vigilante: Crewmate
 {
 
     [Localized("SelectPlayer")]
@@ -94,12 +96,12 @@ public class Vigilante: CustomRole
             case VotingState.SelectingTarget:
                 if (!player.Exists()) {
                     votingState = playerSelected.Exists() ? VotingState.SelectingRole : VotingState.Finished;
-                    Utils.SendMessage(voteRoleInfo, MyPlayer.PlayerId);
+                    ChatHandler.Send(MyPlayer, voteRoleInfo);
                     break;
                 }
                 playerSelected = player;
                 string targetPlayerMessage = $"{selectPlayerMsg} {player.Get().name}\n{skipMsg}";
-                Utils.SendMessage(targetPlayerMessage, MyPlayer.PlayerId);
+                ChatHandler.Send(MyPlayer, targetPlayerMessage);
                 break;
             case VotingState.SelectingRole:
                 if (!player.Exists()) {
@@ -115,7 +117,7 @@ public class Vigilante: CustomRole
                 if (roleSelected >= catRoles.Count) roleSelected = 0;
                 lastPlayer = lp;
                 string targetRoleMessage = $"{selectRoleMsg} {catRoles[roleSelected].RoleName}\n{skipMsg}";
-                Utils.SendMessage(targetRoleMessage, MyPlayer.PlayerId);
+                ChatHandler.Send(MyPlayer, targetRoleMessage);
                 break;
             case VotingState.Finished:
                 break;
@@ -136,17 +138,12 @@ public class Vigilante: CustomRole
             Game.GetAllPlayers().Do(p => p.RpcSpecificMurderPlayer(murderedPlayer));
         } catch (Exception exception) {
             VentLogger.Exception(exception, "Error Assassinating", "Guesser");
-            Utils.SendMessage("An error has occured during assassination. Please report this to the host at the end of the game.", MyPlayer.PlayerId);
+            ChatHandler.Send(MyPlayer, "An error has occured during assassination. Please report this to the host at the end of the game.");
         }
     }
 
-
-    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
-            .Tab(DefaultTabs.CrewmateTab);
-
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor(new Color(0.89f, 0.88f, 0.52f));
+        base.Modify(roleModifier).RoleColor(new Color(0.89f, 0.88f, 0.52f));
 
     private enum VotingState
     {

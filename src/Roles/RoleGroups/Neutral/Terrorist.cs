@@ -34,7 +34,7 @@ public class Terrorist : Engineer
 
     private void TerroristWinCheck()
     {
-        if (!HasAllTasksDone) return;
+        if (!HasAllTasksComplete) return;
         ManualWin.Activate(MyPlayer, WinReason.TasksComplete, 900);
     }
 

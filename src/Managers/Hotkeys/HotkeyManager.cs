@@ -7,11 +7,17 @@ namespace Lotus.Managers.Hotkeys;
 public class HotkeyManager
 {
     private static readonly List<Hotkey> Hotkeys = new();
+
+    public static bool HoldingLeftShift;
+    public static bool HoldingRightShift;
+    
     
     [QuickPostfix(typeof(ControllerManager), nameof(ControllerManager.Update))]
     private static void DoHotkeyCheck()
     {
         Hotkeys.ForEach(h => h.Update());
+        HoldingLeftShift = Input.GetKey(KeyCode.LeftShift);
+        HoldingRightShift = Input.GetKey(KeyCode.RightShift);
     }
 
     public static Hotkey AddHokey(Hotkey hotkey)

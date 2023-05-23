@@ -29,6 +29,6 @@ public partial class TheUndead
             };
         }
 
-        public override bool AlliesSeeRole() => false;
+        public override bool CanSeeRole(PlayerControl player) => false;
     }
 }

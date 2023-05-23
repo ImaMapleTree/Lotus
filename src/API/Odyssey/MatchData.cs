@@ -24,7 +24,7 @@ public class MatchData
     public Dictionary<ulong, FrozenPlayer> FrozenPlayers = new();
     public VanillaRoleTracker VanillaRoleTracker = new();
     
-    public List<byte> UnreportableBodies = new();
+    public HashSet<byte> UnreportableBodies = new();
     public int MeetingsCalled;
     
     

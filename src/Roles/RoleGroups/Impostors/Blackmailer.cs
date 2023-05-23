@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.Chat;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
@@ -19,16 +20,12 @@ using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Optionals;
+using static Lotus.Roles.RoleGroups.Impostors.Blackmailer.Translations;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
-[Localized("Roles.Blackmailer")]
 public class Blackmailer: Shapeshifter
 {
-    [Localized("BlackmailMessage")]
-    private static string _blackmailedMessage = "You have been blackmailed! Sending a chat message will kill you.";
-    [Localized("BlackmailWarning")]
-    private static string _warningMessage = "You are not allowed to speak! If you speak again you may be killed.";
     private Remote<TextComponent>? blackmailingText;
     private Optional<PlayerControl> blackmailedPlayer = Optional<PlayerControl>.Null();
 
@@ -47,7 +44,7 @@ public class Blackmailer: Shapeshifter
         handle.Cancel();
         blackmailingText?.Delete();
         blackmailedPlayer = Optional<PlayerControl>.NonNull(target);
-        TextComponent textComponent = new(new LiveString("BLACKMAILED", Color.red), GameStates.IgnStates, viewers: MyPlayer);
+        TextComponent textComponent = new(new LiveString(BlackmailedText, Color.red), GameStates.IgnStates, viewers: MyPlayer);
         blackmailingText = target.NameModel().GetComponentHolder<TextHolder>().Add(textComponent);
     }
 
@@ -70,7 +67,7 @@ public class Blackmailer: Shapeshifter
         {
             string message = $"{RoleColor.Colorize(MyPlayer.name)} blackmailed {p.GetRoleColor().Colorize(p.name)}.";
             Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, p, message));
-            Utils.SendMessage(_blackmailedMessage, p.PlayerId);
+            ChatHandler.Of(BlackmailedMessage, RoleColor.Colorize(RoleName)).Send(p);
         });
     }
 
@@ -89,7 +86,7 @@ public class Blackmailer: Shapeshifter
         if (!blackmailedPlayer.Exists() || speaker.PlayerId != blackmailedPlayer.Get().PlayerId) return;
         if (currentWarnings++ < warnsUntilKick)
         {
-            Utils.SendMessage(_warningMessage, speaker.PlayerId);
+            ChatHandler.Of(WarningMessage, RoleColor.Colorize(RoleName)).Send(speaker);
             return;
         }
 
@@ -101,12 +98,35 @@ public class Blackmailer: Shapeshifter
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-            .SubOption(sub => sub.Name("Warnings Until Death")
+            .SubOption(sub => sub.KeyName("Warnings Until Death", Translations.Options.WarningsUntilDeath)
                 .AddIntRange(0, 5, 1)
                 .BindInt(i => warnsUntilKick = i)
                 .Build())
-            .SubOption(sub => sub.Name("Show Blackmailed to All")
+            .SubOption(sub => sub.KeyName("Show Blackmailed to All", Translations.Options.ShowBlackmailedToAll)
                 .AddOnOffValues()
                 .BindBool(b => showBlackmailedToAll = b)
                 .Build());
+
+    [Localized(nameof(Blackmailer))]
+    internal static class Translations
+    {
+        [Localized(nameof(BlackmailedMessage))]
+        public static string BlackmailedMessage = "You have been blackmailed! Sending a chat message will kill you.";
+        
+        [Localized(nameof(WarningMessage))]
+        public static string WarningMessage = "You are not allowed to speak! If you speak again you may be killed.";
+
+        [Localized(nameof(BlackmailedText))]
+        public static string BlackmailedText = "BLACKMAILED";
+        
+        [Localized(ModConstants.Options)]
+        internal static class Options
+        {
+            [Localized(nameof(WarningsUntilDeath))]
+            public static string WarningsUntilDeath = "Warnings Until Death";
+            
+            [Localized(nameof(ShowBlackmailedToAll))]
+            public static string ShowBlackmailedToAll = "SHow Blackmailed to All";
+        }
+    }
 }

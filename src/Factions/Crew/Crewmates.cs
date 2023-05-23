@@ -10,7 +10,7 @@ public class Crewmates : Faction<Crewmates>
 {
     public override Relation Relationship(Crewmates sameFaction) => Relation.FullAllies;
 
-    public override bool AlliesSeeRole() => false;
+    public override bool CanSeeRole(PlayerControl player) => false;
 
     public override Color FactionColor() => new(0.71f, 0.94f, 1f);
 

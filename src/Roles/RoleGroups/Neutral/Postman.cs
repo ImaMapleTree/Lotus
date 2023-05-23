@@ -13,6 +13,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using Lotus.Victory.Conditions;
 using Lotus.API;
+using Lotus.Chat;
 using Lotus.Extensions;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
@@ -92,7 +93,7 @@ public class Postman: Crewmate
     private void AnnounceGameWin()
     {
         if (!completedDelivery || TasksComplete != TotalTasks) return;
-        Async.Schedule(() => Utils.SendMessage(_postmanAnnouncement), 1f); 
+        Async.Schedule(() => ChatHandler.Send(null!, _postmanAnnouncement), 1f); 
     }
 
     [RoleAction(RoleActionType.RoundStart)]

@@ -30,13 +30,10 @@ public class CheckForEndVotingPatch
 
         // Calculate the exiled player once so that we can send the voting complete signal
         VentLogger.Trace($"End Vote Count: {meetingDelegate.CurrentVoteCount().Select(kv => $"{Utils.GetPlayerById(kv.Key).GetNameWithRole()}: {kv.Value}").Join()}");
-        (byte exiledPlayer, bool isTie) = CalculateExiledPlayer(meetingDelegate);
-        VentLogger.Trace($"Player With Most Votes: {Utils.PlayerById(exiledPlayer)}");
+        meetingDelegate.CalculateExiledPlayer();
+        VentLogger.Trace($"Player With Most Votes: {meetingDelegate.ExiledPlayer}");
+        byte exiledPlayer = meetingDelegate.ExiledPlayer?.PlayerId ?? 255;
         
-        // Set the meeting delegate exiled player since this is what we use to cascade information
-        GameData.PlayerInfo? playerInfo = GameData.Instance.AllPlayers.ToArray().FirstOrDefault(info => !isTie && info.PlayerId == exiledPlayer);
-        meetingDelegate.ExiledPlayer = playerInfo;
-        meetingDelegate.IsTie = isTie;
         
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.VotingComplete, ref handle, meetingDelegate);
@@ -57,26 +54,6 @@ public class CheckForEndVotingPatch
         if (meetingDelegate.ExiledPlayer != null) Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(meetingDelegate.ExiledPlayer, playerVotes));
         __instance.RpcVotingComplete(votingStates.ToArray(), meetingDelegate.ExiledPlayer, meetingDelegate.IsTie);
         return false;
-    }
-    
-    public static (byte exiledPlayer, bool isTie) CalculateExiledPlayer(MeetingDelegate meetingDelegate)
-    {
-        List<KeyValuePair<byte, int>> sortedVotes = meetingDelegate.CurrentVoteCount().Sorted(kvp => kvp.Value).Reverse().ToList();
-        bool isTie = false;
-        byte exiledPlayer = byte.MaxValue;
-        switch (sortedVotes.Count)
-        {
-            case 0: break;
-            case 1:
-                exiledPlayer = sortedVotes[0].Key;
-                break; 
-            case >= 2:
-                isTie = sortedVotes[0].Value == sortedVotes[1].Value;
-                exiledPlayer = sortedVotes[0].Key;
-                break;
-        }
-
-        return (exiledPlayer, isTie);
     }
 
     private static List<VoterState> GenerateVoterStates(MeetingDelegate meetingDelegate)
@@ -103,6 +80,13 @@ public class CheckForEndVotingPatch
     [QuickPrefix(typeof(MeetingHud), nameof(MeetingHud.VotingComplete))]
     public static void VotingCompletePatch(MeetingHud __instance, [HarmonyArgument(1)] GameData.PlayerInfo? playerInfo)
     {
-        if (AmongUsClient.Instance.AmHost) MeetingDelegate.Instance.ExiledPlayer = playerInfo;
+        if (!AmongUsClient.Instance.AmHost) return;
+        MeetingDelegate meetingDelegate = MeetingDelegate.Instance;
+        meetingDelegate.ExiledPlayer = playerInfo;
+        
+        ActionHandle noCancel = ActionHandle.NoInit();
+        Game.TriggerForAll(RoleActionType.MeetingEnd, ref noCancel, Optional<GameData.PlayerInfo>.Of(playerInfo), 
+            meetingDelegate.IsTie, new Dictionary<byte, int>(meetingDelegate.CurrentVoteCount()), new Dictionary<byte, List<Optional<byte>>>(meetingDelegate.CurrentVotes()));
+        
     }
 }

@@ -38,7 +38,7 @@ public abstract class Faction<T> : IFaction<T> where T: IFaction<T>
         return subFaction2.MainFactionRelationship();
     }
 
-    public abstract bool AlliesSeeRole();
+    public abstract bool CanSeeRole(PlayerControl player);
 
     public abstract Color FactionColor();
 

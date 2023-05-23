@@ -15,13 +15,14 @@ class TaskCompletePatch
 {
     public static void Prefix(PlayerControl __instance, uint idx)
     {
+        if (!AmongUsClient.Instance.AmHost) return;
         if (__instance == null) return;
         GameData.TaskInfo taskInfo = __instance.Data.FindTaskById(idx);
-        NormalPlayerTask? npt = ShipStatus.Instance.GetTaskById(taskInfo!.TypeId);
+        NormalPlayerTask? npt = taskInfo == null! ? null : ShipStatus.Instance.GetTaskById(taskInfo!.TypeId);
         VentLogger.Info($"Task Complete => {__instance.GetNameWithRole()} ({npt?.Length})", "CompleteTask");
 
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.TaskComplete, ref handle, __instance, Optional<NormalPlayerTask>.Of(npt));
-        if (npt != null) Hooks.PlayerHooks.PlayerTaskCompleteHook.Propagate(new PlayerTaskHookEvent(__instance, npt));
+        Hooks.PlayerHooks.PlayerTaskCompleteHook.Propagate(new PlayerTaskHookEvent(__instance, npt));
     }
 }

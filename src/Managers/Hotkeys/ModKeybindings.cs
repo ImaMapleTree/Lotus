@@ -1,3 +1,4 @@
+using System.IO;
 using Lotus.API.Odyssey;
 using Lotus.API.Vanilla;
 using Lotus.API.Vanilla.Meetings;
@@ -69,7 +70,8 @@ public class ModKeybindings
 
     private static void DumpLog()
     {
-        VentLogger.SendInGame(BasicCommands.DumpSuccess.Formatted(VentLogger.Dump()));
+        VentLogger.Dump();
+        VentLogger.SendInGame(BasicCommands.DumpSuccess);
     }
 
     private static void ProfileAll()

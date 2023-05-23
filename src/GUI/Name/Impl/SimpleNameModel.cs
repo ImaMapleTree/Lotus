@@ -9,6 +9,7 @@ using Lotus.GUI.Name.Interfaces;
 using Lotus.Extensions;
 using Lotus.Logging;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
@@ -82,9 +83,12 @@ public class SimpleNameModel : INameModel
         cacheString = renders.Select(s => s.Join(delimiter: " ".Repeat(spacing - 1))).Join(delimiter: "\n").TrimStart('\n').TrimEnd('\n').Replace("\n\n", "\n");
         if (sendToPlayer)
         {
-            /*VentLogger.Fatal($"Sending Name for {player.name}: {cacheString} to: {rplayer.name}");*/
             if (rPlayer.IsHost()) Api.Local.SetName(player, cacheString);
-            else RpcV3.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(rPlayer.GetClientId());
+            else
+            {
+                int clientId = rPlayer.GetClientId();
+                if (clientId != -1) RpcV3.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(clientId);
+            }
         }
         Profilers.Global.Sampler.Stop(id);
         return cacheString;

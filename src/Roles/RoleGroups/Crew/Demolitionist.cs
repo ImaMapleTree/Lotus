@@ -7,6 +7,9 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Roles.Subroles;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
@@ -15,8 +18,7 @@ namespace Lotus.Roles.RoleGroups.Crew;
 public class Demolitionist : Crewmate
 {
     private float demoTime;
-
-
+    
     [RoleAction(RoleActionType.MyDeath)]
     private void DemoDeath(PlayerControl killer)
     {
@@ -30,27 +32,29 @@ public class Demolitionist : Crewmate
         if (Game.State is not GameState.Roaming) return;
         if (killer.Data.IsDead || killer.inVent) return;
 
-        var interaction = new DelayedInteraction(new FatalIntent(true, () => new BombedEvent(killer, MyPlayer)), demoTime, this);
-        bool dead = MyPlayer.InteractWith(killer, interaction) is InteractionResult.Proceed;
-        Game.MatchData.GameHistory.AddEvent(new DemolitionistBombEvent(MyPlayer, killer, dead));
+        BombedEvent bombedEvent = new(killer, MyPlayer);
+        var interaction = new DelayedInteraction(new FatalIntent(true, () => bombedEvent), demoTime, this);
+        MyPlayer.InteractWith(killer, interaction);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .Tab(DefaultTabs.CrewmateTab)
             .SubOption(sub => sub
-                .Name("Demo Time")
+                .KeyName("Demo Time", Translations.Options.DemoTime)
                 .BindFloat(v => demoTime = v)
-                .AddFloatRange(0.5f, 10f, 0.25f, 2, "s")
+                .AddFloatRange(0.5f, 30f, 0.25f, 6, "s")
                 .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier).RoleColor("#5e2801");
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor("#5e2801");
 
-    private class DemolitionistBombEvent : KillEvent, IRoleEvent
+    [Localized(nameof(Demolitionist))]
+    private static class Translations
     {
-        public DemolitionistBombEvent(PlayerControl killer, PlayerControl victim, bool successful = true) : base(killer, victim, successful)
+        [Localized(ModConstants.Options)]
+        public static class Options
         {
+            public static string DemoTime = "Demo Time";
         }
     }
 }

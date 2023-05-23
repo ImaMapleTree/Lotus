@@ -22,27 +22,31 @@ namespace Lotus.Chat.Patches;
 internal static class OnChatPatch
 {
     internal static List<byte> UtilsSentList = new();
+    internal static bool EatMessage;
 
     [SuppressMessage("ReSharper", "InconsistentNaming")]
-    internal static void Prefix(ChatController __instance, PlayerControl sourcePlayer, string chatText)
+    internal static bool Prefix(ChatController __instance, PlayerControl sourcePlayer, string chatText)
     {
         VentLogger.Log(LogLevel.All, $"{sourcePlayer.name} => {chatText}");
         if (UtilsSentList.Contains(sourcePlayer.PlayerId))
         {
             UtilsSentList.RemoveAt(UtilsSentList.FindIndex(b => b == sourcePlayer.PlayerId));
-            return;
+            return true;
         }
         Hooks.PlayerHooks.PlayerMessageHook.Propagate(new PlayerMessageHookEvent(sourcePlayer, chatText));
         if (!UseWordList() || !PluginDataManager.ChatManager.HasBannedWord(chatText) || sourcePlayer.IsHost())
         {
-            if (PluginDataManager.TemplateCommandManager.CheckAndRunCommand(sourcePlayer, chatText)) return;
-            if (Game.State is GameState.InLobby) return;
+            if (PluginDataManager.TemplateCommandManager.CheckAndRunCommand(sourcePlayer, chatText)) return true;
+            bool eat = EatMessage;
+            EatMessage = false;
+            if (Game.State is GameState.InLobby) return !eat;
             ActionHandle handle = ActionHandle.NoInit();
             Game.TriggerForAll(RoleActionType.Chat, ref handle, sourcePlayer, chatText, Game.State, sourcePlayer.IsAlive());
-            return;
+            return !eat;
         }
         AmongUsClient.Instance.KickPlayer(sourcePlayer.GetClientId(), false);
-        Utils.SendMessage($"{sourcePlayer.name} was kicked by AutoKick.");
+        ChatHandler.Send($"{sourcePlayer.name} was kicked by AutoKick.");
+        return true;
     }
 
     public static bool UseWordList() => GeneralOptions.AdminOptions.AutoKick;

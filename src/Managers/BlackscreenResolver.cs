@@ -148,6 +148,9 @@ internal class BlackscreenResolver
                               "Unfortunately there's nothing further we can do at this point other than killing (you) the host." +
                               "The reasons for this are very complicated, but a lot of code went into preventing this from happening, but it's never guarantees this scenario won't occur.");
         PlayerControl.LocalPlayer.MurderPlayer(PlayerControl.LocalPlayer);
+        Game.MatchData.UnreportableBodies.Add(PlayerControl.LocalPlayer.PlayerId);
+        playerStates[0] = (true, false);
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcExileV2(), 6f);
         return PlayerControl.LocalPlayer;
     }
 

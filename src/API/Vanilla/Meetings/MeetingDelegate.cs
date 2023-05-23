@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Lotus.API.Player;
 using Lotus.Managers;
 using Lotus.Extensions;
 using VentLib.Logging;
@@ -88,4 +89,25 @@ public class MeetingDelegate
     }
 
     internal bool IsForceEnd() => isForceEnd;
+
+    public void CalculateExiledPlayer()
+    {
+        List<KeyValuePair<byte, int>> sortedVotes = this.CurrentVoteCount().Sorted(kvp => kvp.Value).Reverse().ToList();
+        bool isTie = false;
+        byte exiledPlayer = byte.MaxValue;
+        switch (sortedVotes.Count)
+        {
+            case 0: break;
+            case 1:
+                exiledPlayer = sortedVotes[0].Key;
+                break; 
+            case >= 2:
+                isTie = sortedVotes[0].Value == sortedVotes[1].Value;
+                exiledPlayer = sortedVotes[0].Key;
+                break;
+        }
+
+        this.ExiledPlayer = Players.PlayerById(exiledPlayer).Map(p => p.Data).OrElse(null!);
+        this.IsTie = isTie;
+    }
 }

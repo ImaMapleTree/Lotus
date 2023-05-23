@@ -31,6 +31,7 @@ namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Mafioso: Engineer
 {
+    
     internal static Color CashColor = new(1f, 0.82f, 0.18f);
     private static Color _gunColor = new(0.55f, 0.28f, 0.16f);
     private static Color _vestColor = new(1f, 0.9f, 0.3f);
@@ -39,6 +40,7 @@ public class Mafioso: Engineer
     
     private static string _colorizedCash;
     private bool modifyShopCosts;
+    private bool refreshTasks;
 
     private int cashFromBodies;
     private int gunCost;
@@ -162,6 +164,7 @@ public class Mafioso: Engineer
     [RoleAction(RoleActionType.Interaction)]
     private void HandleInteraction(Interaction interaction, ActionHandle handle)
     {
+        if (!hasVest) return;
         if (interaction.Intent() is not IFatalIntent) return;
         hasVest = false;
         switch (interaction)
@@ -188,6 +191,7 @@ public class Mafioso: Engineer
     protected override void OnTaskComplete(Optional<NormalPlayerTask> playerTask)
     {
         cashAmount += playerTask.Map(pt => pt.Length is NormalPlayerTask.TaskLength.Long ? 3 : 1).OrElse(1);
+        if (HasAllTasksComplete && refreshTasks) Tasks.AssignAdditionalTasks(this);
     }
 
     private void HandleSelfVote(ActionHandle handle)
@@ -255,6 +259,10 @@ public class Mafioso: Engineer
             .SubOption(sub => sub.KeyName("Cash from Reporting Bodies", CashFromReporting)
                 .AddIntRange(0, 10, 1, 2)
                 .BindInt(i => cashFromBodies = i)
+                .Build())
+            .SubOption(sub => sub.KeyName("Refresh Tasks When All Complete", RefreshTasks)
+                .AddOnOffValues()
+                .BindBool(b => refreshTasks = b)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => 
@@ -294,6 +302,9 @@ public class Mafioso: Engineer
         [Localized(ModConstants.Options)]
         internal static class MafiaOptionTranslations
         {
+            [Localized(nameof(RefreshTasks))]
+            public static string RefreshTasks = "Refresh Tasks When All Complete";
+            
             [Localized(nameof(StartsGameWithGun))]
             public static string StartsGameWithGun = "Starts Game With Gun";
             

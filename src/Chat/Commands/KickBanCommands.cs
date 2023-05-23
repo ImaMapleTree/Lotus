@@ -16,16 +16,12 @@ public class KickBanCommand : ICommandReceiver
     [Localized("KickMessage")] private static string _kickedMessage = "{0} was kicked by host.";
     [Localized("BanMessage")] private static string _banMessage = "{0} was banned by host.";
 
-    public bool Receive(PlayerControl source, CommandContext context)
+    public void Receive(PlayerControl source, CommandContext context)
     {
         bool ban = context.Alias == "ban";
         string message = ban ? _banMessage : _kickedMessage;
 
-        if (context.Args.Length == 0)
-        {
-            BasicCommands.PlayerIds(source, context);
-            return true;
-        }
+        if (context.Args.Length == 0) BasicCommands.PlayerIds(source, context);
 
         Optional<PlayerControl> targetPlayer = Optional<PlayerControl>.Null();
         string text = context.Join();
@@ -36,8 +32,7 @@ public class KickBanCommand : ICommandReceiver
         targetPlayer.Handle(player =>
         {
             AmongUsClient.Instance.KickPlayer(player.GetClientId(), ban);
-            Utils.SendMessage(string.Format(message, player.name), title: "Announcement");
-        }, () => Utils.SendMessage($"Unable to find player: {text}", source.PlayerId, "Announcement"));
-        return true;
+            ChatHandler.Of(message.Formatted(player.name), "Announcement").Send();
+        }, () => ChatHandler.Of($"Unable to find player: {text}", "Announcement").Send(source));
     }
 }

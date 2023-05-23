@@ -8,8 +8,9 @@ using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.API;
+using Lotus.API.Stats;
 using Lotus.Extensions;
-using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -18,13 +19,16 @@ namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 public class CrewPostor : Crewmate
 {
+    private bool refreshTasks;
     private bool warpToTarget;
     private bool canKillAllied;
 
     protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
+        if (HasAllTasksComplete && refreshTasks) Tasks.AssignAdditionalTasks(this);
+        
         if (MyPlayer.Data.IsDead) return;
-        List<PlayerControl> inRangePlayers = RoleUtils.GetPlayersWithinDistance(MyPlayer, 999, true).Where(p => canKillAllied || p.Relationship(MyPlayer) is not Relation.FullAllies).ToList();
+        List<PlayerControl> inRangePlayers = RoleUtils.GetPlayersWithinDistance(MyPlayer, 999, true).Where(p => canKillAllied || p.Relationship(MyPlayer) is Relation.None).ToList();
         if (inRangePlayers.Count == 0) return;
         PlayerControl target = inRangePlayers.GetRandom();
         var interaction = new RangedInteraction(new FatalIntent(!warpToTarget, () => new TaskDeathEvent(target, MyPlayer)), 0, this);
@@ -36,20 +40,26 @@ public class CrewPostor : Crewmate
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddTaskOverrideOptions(base.RegisterOptions(optionStream)
             .Tab(DefaultTabs.ImpostorsTab)
-            .SubOption(sub => sub.Name("Warp to Target")
+            .SubOption(sub => sub.KeyName("Warp to Target", Translations.Options.WarpToTarget)
                 .AddOnOffValues()
                 .BindBool(b => warpToTarget = b)
                 .Build()))
-            .SubOption(sub => sub.Name("Can Kill Allies")
+            .SubOption(sub => sub.KeyName("Can Kill Allies", Translations.Options.CanKillAllies)
                 .AddOnOffValues(false)
                 .BindBool(b => canKillAllied = b)
+                .Build())
+            .SubOption(sub => sub.KeyName("Refresh Tasks When All Complete", Translations.Options.RefreshTasks)
+                .AddOnOffValues()
+                .BindBool(b => refreshTasks = b)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .RoleColor(new Color(0.86f, 0.4f, 0f))
+            .RoleColor(ModConstants.Palette.MadmateColor)
             .SpecialType(SpecialType.Madmate)
             .Faction(FactionInstances.Madmates);
+
+    public override List<Statistic> Statistics() => new() { VanillaStatistics.Kills };
 
     class TaskKillEvent : KillEvent, IRoleEvent
     {
@@ -64,6 +74,23 @@ public class CrewPostor : Crewmate
     {
         public TaskDeathEvent(PlayerControl deadPlayer, PlayerControl? killer) : base(deadPlayer, killer)
         {
+        }
+    }
+
+    [Localized(nameof(CrewPostor))]
+    internal static class Translations
+    {
+        [Localized(ModConstants.Options)]
+        internal static class Options
+        {
+            [Localized(nameof(CanKillAllies))]
+            public static string CanKillAllies = "Can Kill Allies";
+            
+            [Localized(nameof(WarpToTarget))]
+            public static string WarpToTarget = "Warp To Target";
+            
+            [Localized(nameof(RefreshTasks))]
+            public static string RefreshTasks = "Refresh Tasks When All Complete";
         }
     }
 }

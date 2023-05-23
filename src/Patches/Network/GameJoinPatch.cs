@@ -28,7 +28,7 @@ class GameJoinPatch
         
         Hooks.NetworkHooks.GameJoinHook.Propagate(new GameJoinHookEvent(_lastGameId != __instance.GameId));
         _lastGameId = __instance.GameId;
-        Async.WaitUntil(() => PlayerControl.LocalPlayer, p => p != null, p => PluginDataManager.TitleManager.HandlePlayerJoin(), 0.1f, 20);
+        Async.WaitUntil(() => PlayerControl.LocalPlayer, p => p != null, p => PluginDataManager.TitleManager.ApplyTitleWithChatFix(p), 0.1f, 20);
         Async.Schedule(() => AddonManager.VerifyClientAddons(AddonManager.Addons.Select(AddonInfo.From).ToList()), NetUtils.DeriveDelay(0.5f));
     }
 }

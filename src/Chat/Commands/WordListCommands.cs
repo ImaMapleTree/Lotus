@@ -13,10 +13,7 @@ public class WordListCommands
     [Command("list")]
     private static void ListWords(PlayerControl source)
     {
-        Utils.SendMessage(
-            ChatManager.BannedWords.Select((w, i) => $"{i+1}) {w}").Join(delimiter: "\n"),
-            source.PlayerId
-            );
+        ChatHandler.Send(source, ChatManager.BannedWords.Select((w, i) => $"{i+1}) {w}").Join(delimiter: "\n"));
     }
 
     [Command("add")]
@@ -29,7 +26,7 @@ public class WordListCommands
     private static void Reload(PlayerControl source)
     {
         ChatManager.Reload();
-        Utils.SendMessage("Successfully Reloaded Wordlist", source.PlayerId);
+        ChatHandler.Send(source, "Successfully Reloaded Wordlist");
     }
 
     private static ChatManager ChatManager => PluginDataManager.ChatManager;

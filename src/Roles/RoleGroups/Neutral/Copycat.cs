@@ -17,8 +17,10 @@ using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Extensions;
 using Lotus.GUI.Name;
+using Lotus.Roles.RoleGroups.Impostors;
 using Lotus.RPC;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -30,7 +32,11 @@ public class Copycat: CustomRole
     /// <summary>
     /// A dict of role types and roles for the cat to fallback upon if the role cannot be copied properly (ex: Crewpostor bc Copycat cannot gain tasks)
     /// </summary>
-    public static readonly Dictionary<Type, Func<CustomRole>> FallbackTypes = new() { {typeof(CrewPostor), () => CustomRoleManager.Static.Madmate} };
+    public static readonly Dictionary<Type, Func<CustomRole>> FallbackTypes = new()
+    {
+        {typeof(CrewPostor), () => CustomRoleManager.Static.Madmate },
+        {typeof(Mafioso), () => CustomRoleManager.Static.Impostor }
+    };
     
     private bool copyIdentity;
     private bool copyRoleProgress;
@@ -57,6 +63,8 @@ public class Copycat: CustomRole
         CustomRole attackerRole = attacker.GetCustomRole();
         FallbackTypes.GetOptional(attackerRole.GetType()).IfPresent(r => attackerRole = r());
         CustomRole role = copyRoleProgress ? attackerRole : CustomRoleManager.GetCleanRole(attackerRole);
+        
+        VentLogger.Trace($"Copycat ({MyPlayer.name}) copying role of {attacker.name} : {role.RoleName}", "Copycat::AssignRole");
         MatchData.AssignRole(MyPlayer, role);
         
         role = MyPlayer.GetCustomRole();
@@ -75,8 +83,12 @@ public class Copycat: CustomRole
 
         if (!role.GetActions(RoleActionType.Shapeshift).Any())
         {
+            VentLogger.Trace("Adding shapeshift action to base role", "Copycat::AssignRole");
+            RoleAction action = this.GetActions(RoleActionType.Shapeshift).First().Item1.Clone();
+            action.Executer = this;
+            
             role.Editor = new BasicRoleEditor(role);
-            role.Editor!.AddAction(this.GetActions(RoleActionType.Shapeshift).First().Item1);
+            role.Editor!.AddAction(action);
         }
 
         if (copyIdentity) Async.Schedule(() => MyPlayer.CRpcShapeshift(attacker, false), 2);
@@ -109,6 +121,7 @@ public class Copycat: CustomRole
         roleModifier.RoleColor(new Color(1f, 0.7f, 0.67f))
             .VanillaRole(copyKillersRole ? RoleTypes.Shapeshifter : RoleTypes.Crewmate)
             .Faction(FactionInstances.Solo)
+            .RoleFlags(RoleFlag.CannotWinAlone)
             .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage)
             .SpecialType(SpecialType.Neutral);
 }

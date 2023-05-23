@@ -8,16 +8,11 @@ using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Roles;
 using Lotus.Roles.Internals;
-using Lotus.Utilities;
-using Lotus.Factions.Interfaces;
-using Lotus.Factions.Neutrals;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
 using VentLib.Options.Game;
-using VentLib.Options.IO;
 using VentLib.Utilities;
-using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Chat.Commands;
@@ -76,16 +71,13 @@ public class NowCommand: ICommandReceiver
                 continue;
             }
 
-            if (title != "")
-            {
-                Utils.SendMessage(content[..^1], source.PlayerId, title, leftAlign: true);
-            }
-            
+            if (title != "") ChatHandler.Of(content[..^1], title).LeftAlign().Send(source);
+
             title = $"★ {option.Name()} ★";
             content = "";
         }
         
-        Utils.SendMessage(content[..^1], source.PlayerId, title, leftAlign: true);
+        ChatHandler.Of(content[..^1], title).LeftAlign().Send(source);
     }
 
     private void ListRoleGroup(PlayerControl source, string title, IEnumerable<CustomRole> roles)
@@ -95,9 +87,8 @@ public class NowCommand: ICommandReceiver
     }
 
 
-    public bool Receive(PlayerControl source, CommandContext context)
+    public void Receive(PlayerControl source, CommandContext context)
     {
         if (context.Args.Length == 0) ListNormalOptions(source);
-        return true;
     }
 }

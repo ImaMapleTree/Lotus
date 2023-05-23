@@ -44,6 +44,8 @@ public static class AntiBlackoutLogic
             else if (player.IsAlive()) aliveCrewCount++;
             if (PlayerControl.LocalPlayer.GetVanillaRole().IsImpostor() && PlayerControl.LocalPlayer.PlayerId != exiledPlayer) aliveImpostorCount++;
 
+            VentLogger.Trace($"Alive Crew: {aliveCrewCount} | Alive Impostors: {aliveImpostorCount}");
+            
             bool IsFailure()
             {
                 bool failure = false;

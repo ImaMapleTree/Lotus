@@ -12,7 +12,15 @@ public static class MethodInfoExtension
 {
     public static object? InvokeAligned(this MethodInfo info, object obj, params object[] parameters)
     {
-        return info.Invoke(obj, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null, AlignFunctionParameters(info, parameters), null);
+        try
+        {
+            return info.Invoke(obj, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null, AlignFunctionParameters(info, parameters), null);
+        }
+        catch (Exception e)
+        {
+            string fullName = $"{info.ReflectedType?.FullName}.{info.Name}({string.Join(",", info.GetParameters().Select(o => $"{o.ParameterType} {o.Name}").ToArray())})";
+            throw new Exception($"Failed to align parameters for method \"{fullName}\". | Parameters = {parameters.Fuse()}", e);
+        }
     }
 
 

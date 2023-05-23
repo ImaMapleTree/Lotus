@@ -68,7 +68,7 @@ public class Executioner : CustomRole
             case ExeRoleChange.Opportunist:
                 MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
-            case ExeRoleChange.SchrodingerCat:
+            case ExeRoleChange.Copycat:
                 MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
                 break;
             case ExeRoleChange.Crewmate:
@@ -98,7 +98,7 @@ public class Executioner : CustomRole
                 .Bind(v => roleChangeWhenTargetDies = (int)v)
                 .Value(v => v.Text("Jester").Value(1).Color(new Color(0.93f, 0.38f, 0.65f)).Build())
                 .Value(v => v.Text("Opportunist").Value(2).Color(Color.green).Build())
-                .Value(v => v.Text("Schrodinger's Cat").Value(3).Color(Color.black).Build())
+                .Value(v => v.Text("Copycat").Value(3).Color(new Color(1f, 0.7f, 0.67f)).Build())
                 .Value(v => v.Text("Crewmate").Value(4).Color(new Color(0.71f, 0.94f, 1f)).Build())
                 .Value(v => v.Text("Off").Value(0).Color(Color.red).Build())
                 .Build());
@@ -111,7 +111,7 @@ public class Executioner : CustomRole
         None,
         Jester,
         Opportunist,
-        SchrodingerCat,
+        Copycat,
         Crewmate
     }
 }

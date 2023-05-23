@@ -1,5 +1,6 @@
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.Chat;
 using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
@@ -32,7 +33,9 @@ public class Sleuth: Subrole
 
         CustomRole role = Game.MatchData.Roles.GetMainRole(deadBody.PlayerId);
         string title = RoleColor.Colorize($"{_sleuthMessageTitle.Formatted(MyPlayer.name)}");
-        Async.Schedule(() => Utils.SendMessage(_sleuthMessage.Formatted(Game.MatchData.FrozenPlayers[gameId].Name, role), MyPlayer.PlayerId, title), 1f);
+        ChatHandler handler = ChatHandler.Of(_sleuthMessage.Formatted(Game.MatchData.FrozenPlayers[gameId].Name, role), title);
+        
+        Async.Schedule(() => handler.Send(MyPlayer), NetUtils.DeriveDelay(1.5f));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => AddRestrictToCrew(base.RegisterOptions(optionStream));

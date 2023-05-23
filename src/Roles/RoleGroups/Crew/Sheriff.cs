@@ -1,11 +1,9 @@
 using System.Collections.Generic;
 using AmongUs.GameOptions;
-using Il2CppSystem;
 using Lotus.API.Odyssey;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
-using Lotus.GUI.Name.Impl;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
@@ -13,8 +11,8 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Roles.Events;
 using Lotus.Roles.Overrides;
-using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -76,7 +74,10 @@ public class Sheriff : Crewmate
     {
         MyPlayer.RpcMurderPlayer(MyPlayer);
         if (!canKillCrewmates) return false;
-        bool killed = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
+
+        DeathEvent deathEvent = new MisfiredEvent(MyPlayer);
+        DirectInteraction directInteraction = new(new FatalIntent(false, () => deathEvent), this);
+        bool killed = MyPlayer.InteractWith(target, directInteraction) is InteractionResult.Proceed;
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, killed));
         return true;
     }

@@ -14,11 +14,11 @@ public class ModifiedAction: RoleAction
 
     public override void Execute(AbstractBaseRole role, object[] args)
     {
-        method.InvokeAligned(role.Editor!, args);
+        Method.InvokeAligned(role.Editor!, args);
     }
 
     public override void ExecuteFixed(AbstractBaseRole role)
     {
-        method.Invoke(role.Editor!, null);
+        Method.Invoke(role.Editor!, null);
     }
 }

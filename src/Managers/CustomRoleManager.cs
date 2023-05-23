@@ -16,6 +16,7 @@ using Lotus.Roles.RoleGroups.Undead.Roles;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
 using VentLib.Options;
+using VentLib.Options.Game;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using Medium = Lotus.Roles.RoleGroups.Crew.Medium;
@@ -176,6 +177,8 @@ public static class CustomRoleManager
         public Witch Witch = new Witch();
         public YinYanger YinYanger = new YinYanger();
 
+        private CustomRole MADMATE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>★ Madmates ★</size>").Color(ModConstants.Palette.MadmateColor).Tab(DefaultTabs.ImpostorsTab).Build());
+        
         public CrewPostor CrewPostor = new CrewPostor();
         public Madmate Madmate = new Madmate();
         public MadGuardian MadGuardian = new MadGuardian();
@@ -212,8 +215,8 @@ public static class CustomRoleManager
         public Swapper Swapper = new Swapper();
         public Transporter Transporter = new Transporter();
         public Trapster Trapster = new Trapster();
-        public Vigilante Vigilante = new Vigilante();
         public Veteran Veteran = new Veteran();
+        public Vigilante Vigilante = new Vigilante();
 
 
         //Neutrals
@@ -221,35 +224,38 @@ public static class CustomRoleManager
         // ReSharper disable once InconsistentNaming
         private CustomRole LOAD_NEUTRAL_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadNeutralOptions());
 
+        private CustomRole NEUTRAL_KILLING_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>★ Neutral Killing ★</size>").Color(ModConstants.Palette.KillingColor).Tab(DefaultTabs.NeutralTab).Build());
+
         public AgiTater AgiTater = new AgiTater();
-        public Amnesiac Amnesiac = new Amnesiac();
-        public Archangel Archangel = new Archangel();
         public Arsonist Arsonist = new Arsonist();
         public BloodKnight BloodKnight = new BloodKnight();
-        public Copycat Copycat = new Copycat();
         public Egoist Egoist = new Egoist();
+        public Hitman Hitman = new Hitman();
+        public Jackal Jackal = new Jackal();
+        public Juggernaut Juggernaut = new Juggernaut();
+        public Marksman Marksman = new Marksman();
+        public Necromancer Necromancer = new Necromancer();
+        public Occultist Occultist = new Occultist();
+        public PlagueBearer PlagueBearer = new PlagueBearer();
+        public Retributionist Retributionist = new Retributionist();
+        public Glitch Glitch = new Glitch();
+        public Werewolf Werewolf = new Werewolf();
+        
+        private CustomRole NEUTRAL_PASSIVE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>❀ Neutral Passive ❀</size>").Color(ModConstants.Palette.PassiveColor).Tab(DefaultTabs.NeutralTab).Build());
+        
+        public Amnesiac Amnesiac = new Amnesiac();
+        public Archangel Archangel = new Archangel();
+        public Copycat Copycat = new Copycat();
         public Executioner Executioner = new Executioner();
         public GuardianAngel GuardianAngel = new GuardianAngel();
         public Hacker Hacker = new Hacker();
-        public Hitman Hitman = new Hitman();
-        public Jackal Jackal = new Jackal();
         public Jester Jester = new Jester();
-        public Juggernaut Juggernaut = new Juggernaut();
-        public Marksman Marksman = new Marksman();
-
-        public Necromancer Necromancer = new Necromancer();
-
-        //neutral witch
         public Opportunist Opportunist = new Opportunist();
         public Phantom Phantom = new Phantom();
-        public PlagueBearer PlagueBearer = new PlagueBearer();
         public Postman Postman = new Postman();
-        public Retributionist Retributionist = new Retributionist();
         public Survivor Survivor = new Survivor();
         public Terrorist Terrorist = new Terrorist();
-        public Glitch Glitch = new Glitch();
         public Vulture Vulture = new Vulture();
-        public Werewolf Werewolf = new Werewolf();
 
         public CustomRole LOAD_MODIFIER_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadSubroleOptions());
     }
@@ -258,12 +264,15 @@ public static class CustomRoleManager
     {
         public Bait Bait = new Bait();
         public Bewilder Bewilder = new Bewilder();
+        public Bloodlust Bloodlust = new Bloodlust();
         public Diseased Diseased = new Diseased();
         public Flash Flash = new Flash();
         public Oblivious Oblivious = new Oblivious();
-        public Psychopath Psychopath = new Psychopath();
         public Sleuth Sleuth = new Sleuth();
+        public TieBreaker TieBreaker = new TieBreaker();
         public Torch Torch = new Torch();
+        public Watcher Watcher = new Watcher();
+        public Workhorse Workhorse = new Workhorse();
     }
 
     public class ExtraRoles

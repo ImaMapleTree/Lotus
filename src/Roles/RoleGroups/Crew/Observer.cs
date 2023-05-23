@@ -34,7 +34,7 @@ public class Observer: Crewmate
     {
         if (slowlyGainsVision)
             currentVisionMod = Mathf.Clamp(currentVisionMod + visionGain, 0, totalVisionMod);
-        if (HasAllTasksDone)
+        if (HasAllTasksComplete)
             currentVisionMod = totalVisionMod;
 
         SyncOptions();
@@ -43,7 +43,7 @@ public class Observer: Crewmate
     [RoleAction(RoleActionType.SabotageStarted)]
     private void IgnoreSabotageEffect()
     {
-        if (sabotageImmunity != 1 || !HasAllTasksDone) return;
+        if (sabotageImmunity != 1 || !HasAllTasksComplete) return;
         sabotageImmunity = 2;
         currentVisionMod *= 5;
         SyncOptions();
@@ -52,7 +52,7 @@ public class Observer: Crewmate
     [RoleAction(RoleActionType.SabotageFixed)]
     private void ClearIgnoreSabotageEffect()
     {
-        if (sabotageImmunity != 2 || !HasAllTasksDone) return;
+        if (sabotageImmunity != 2 || !HasAllTasksComplete) return;
         sabotageImmunity = 1;
         currentVisionMod /= 5;
         SyncOptions();

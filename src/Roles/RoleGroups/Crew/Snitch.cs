@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Factions.Crew;
@@ -10,8 +11,6 @@ using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
-using Lotus.Roles.Internals;
-using Lotus.Roles.RoleGroups.NeutralKilling;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -39,14 +38,16 @@ public class Snitch : Crewmate
     [RoleAction(RoleActionType.MyDeath)]
     private void ClearComponents() => indicatorComponents.ForEach(c => c.Delete());
 
+    
     protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         int remainingTasks = TotalTasks - TasksComplete;
         if (remainingTasks == SnitchWarningTasks)
         {
-            MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), GameStates.IgnStates));
+            PlayerControl[] trackablePlayers = Game.GetAllPlayers().Where(IsTrackable).ToArray();
+            MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), GameStates.IgnStates, viewers: trackablePlayers.AddItem(MyPlayer).ToArray()));
             if (EvilHaveArrow)
-                Game.GetAllPlayers().Where(IsTrackable).ForEach(p =>
+                trackablePlayers.ForEach(p =>
                 {
                     LiveString liveString = new(() => RoleUtils.CalculateArrow(p, MyPlayer, RoleColor));
                     var remote = p.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: p));

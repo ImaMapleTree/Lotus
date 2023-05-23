@@ -3,9 +3,7 @@ using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.API.Processes;
 using Lotus.API.Reactive;
-using Lotus.API.Reactive.HookEvents;
 using Lotus.Victory;
-using Lotus.Extensions;
 using Lotus.Patches.Actions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
@@ -48,15 +46,19 @@ internal class MeetingPrep
         Game.State = GameState.InMeeting;
 
         NameUpdateProcess.Paused = true;
+
+        if (reporter != null)
+        {
+            Game.GetAllPlayers().Where(p => p.IsShapeshifted()).ForEach(p => p.CRpcRevertShapeshift(false));
+            Async.Schedule(() => QuickStartMeeting(reporter), NetUtils.DeriveDelay(0.2f));
+        }
+        
         Game.RenderAllForAll(GameState.InMeeting, true);
         Async.Schedule(FixChatNames, NetUtils.DeriveDelay(4f));
 
-        _prepped = true;
         VentLogger.Trace("Finished Prepping", "MeetingPrep");
-        MeetingCalledTime = DateTime.Now;
-
-        if (reporter != null) Async.Schedule(() => QuickStartMeeting(reporter), NetUtils.DeriveDelay(0.2f));
-
+        _prepped = true;
+        
         CheckEndGamePatch.Deferred = true;
         Game.SyncAll();
         return _meetingDelegate;
@@ -65,9 +67,8 @@ internal class MeetingPrep
     private static void QuickStartMeeting(PlayerControl reporter)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        
-        Game.GetAllPlayers().Where(p => p.IsShapeshifted()).ForEach(p => p.CRpcRevertShapeshift(false));
-        
+    
+        MeetingCalledTime = DateTime.Now;    
         MeetingRoomManager.Instance.AssignSelf(reporter, Reported);
         DestroyableSingleton<HudManager>.Instance.OpenMeetingRoom(reporter);
         reporter.RpcStartMeeting(Reported);

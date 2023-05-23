@@ -148,6 +148,8 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
         bool isStartOfGame = Game.State is GameState.InIntro or GameState.InLobby;
 
+        PlayerControl[] alliedPlayers = Game.GetAllPlayers().Where(p => Relationship(p) is Relation.FullAllies).ToArray();
+        
         if (RealRole.IsCrewmate())
         {
             MyPlayer.RpcSetRole(RealRole);
@@ -163,11 +165,10 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         VentLogger.Trace($"Setting {MyPlayer.name} Role => {RealRole} | IsStartGame = {isStartOfGame}", "CustomRole::Assign");
         if (MyPlayer.IsHost()) MyPlayer.SetRole(RealRole);
         else RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetRole).Write((ushort)RealRole).Send(MyPlayer.GetClientId());
-
-        PlayerControl[] alliedPlayers = Game.GetAllPlayers().Where(p => Relationship(p) is Relation.FullAllies).ToArray();
+        
         VentLogger.Debug($"Player {MyPlayer.GetNameWithRole()} Allies: [{alliedPlayers.Select(p => p.name).Fuse()}]");
-        HashSet<byte> alliedPlayerIds = alliedPlayers.Select(p => p.PlayerId).ToHashSet();
-        int[] alliedPlayerClientIds = alliedPlayers.Select(p => p.GetClientId()).ToArray();
+        HashSet<byte> alliedPlayerIds = alliedPlayers.Where(p => Faction.CanSeeRole(p)).Select(p => p.PlayerId).ToHashSet();
+        int[] alliedPlayerClientIds = alliedPlayers.Where(p => Faction.CanSeeRole(p)).Select(p => p.GetClientId()).ToArray();
 
         PlayerControl[] crewmates = Game.GetAllPlayers().Where(p => p.GetVanillaRole().IsCrewmate()).ToArray();
         int[] crewmateClientIds = crewmates.Select(p => p.GetClientId()).ToArray();
@@ -186,15 +187,14 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).SendInclusive(crewmateClientIds);
         if (isStartOfGame) crewmates.ForEach(p => p.GetTeamInfo().AddVanillaImpostor(MyPlayer.PlayerId));
 
+        finishAssignment:
+        
         ShowRoleToTeammates(alliedPlayers);
-
         if (MyPlayer.IsHost()) Game.GetAlivePlayers().Except(alliedPlayers).ForEach(p => p.Data.Role.Role = RoleTypes.Crewmate);
 
-        finishAssignment:
-
         // This is for host
-        if (Relationship(PlayerControl.LocalPlayer) is Relation.FullAllies) MyPlayer.SetRole(RealRole);
-        else MyPlayer.SetRole(RealRole.IsImpostor() ? RoleTypes.Crewmate : RoleTypes.Impostor);
+        if (Relationship(PlayerControl.LocalPlayer) is Relation.FullAllies && Faction.CanSeeRole(PlayerControl.LocalPlayer)) MyPlayer.SetRole(RealRole);
+        else MyPlayer.SetRole(PlayerControl.LocalPlayer.GetVanillaRole().IsImpostor() ? RoleTypes.Crewmate : RoleTypes.Impostor);
 
         SyncOptions(new GameOptionOverride[] { new(Override.KillCooldown, 0.1f)} , true);
         HudManager.Instance.SetHudActive(true);
@@ -209,7 +209,6 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     private void ShowRoleToTeammates(IEnumerable<PlayerControl> allies)
     {
         // Currently only impostors can show each other their roles
-        if (!this.Faction.AlliesSeeRole()) return;
         RoleHolder roleHolder = MyPlayer.NameModel().GetComponentHolder<RoleHolder>();
         if (roleHolder.Count == 0)
         {
@@ -217,7 +216,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
             return;
         }
         RoleComponent roleComponent = roleHolder[0];
-        allies.ForEach(a => roleComponent.AddViewer(a));
+        allies.Where(Faction.CanSeeRole).ForEach(a => roleComponent.AddViewer(a));
     }
 
     private void SetupUI2(INameModel nameModel)

@@ -9,13 +9,7 @@ class BeginImpostorPatch
 {
     public static bool Prefix(IntroCutscene __instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam)
     {
-        if (PlayerControl.LocalPlayer.GetCustomRole().Faction is not Crewmates)
-        {
-            BeginCrewmatePatch.Prefix(__instance, ref yourTeam);
-            return true;
-        }
-
-
+        if (PlayerControl.LocalPlayer.GetCustomRole().Faction is not Crewmates) return true;
 
         yourTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
         yourTeam.Add(PlayerControl.LocalPlayer);

@@ -3,7 +3,9 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
 using Lotus.Logging;
+using UnityEngine.XR;
 using VentLib.Utilities.Extensions;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -21,18 +23,19 @@ public class TitleManager
 
     public TitleManager(DirectoryInfo directory)
     {
+        Hooks.PlayerHooks.PlayerJoinHook.Bind(nameof(TitleManager), _ => Game.GetAllPlayers().ForEach(ApplyTitleWithChatFix));
         if (!directory.Exists) directory.Create();
         this.directory = directory;
         LoadAll();
     }
 
-    public string ApplyTitle(string friendCode, string playerName)
+    public string ApplyTitle(string friendCode, string playerName, bool nameOnly = false)
     {
         if (!AmongUsClient.Instance.AmHost) return playerName;
         if (Game.State is not GameState.InLobby) return playerName;
         if (friendCode == "") return playerName;
         return titles.GetOptional(friendCode)
-            .Transform(p => p.LastOrDefault()?.ApplyTo(playerName) ?? playerName, () => playerName);
+            .Transform(p => p.LastOrDefault()?.ApplyTo(playerName, nameOnly) ?? playerName, () => playerName);
     }
 
     public CustomTitle? GetTitle(string friendCode)
@@ -42,10 +45,19 @@ public class TitleManager
         return friendCode == "" ? null : titles.GetOptional(friendCode).Map(c => c.LastOrDefault()).OrElse(null);
     }
 
-    public void HandlePlayerJoin()
+    public bool HasTitle(PlayerControl player)
+    {
+        if (Game.State is not GameState.InLobby) return false;
+        return player.FriendCode != "" && titles.ContainsKey(player.FriendCode);
+    }
+
+    public void ApplyTitleWithChatFix(PlayerControl player)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        Game.GetAllPlayers().ForEach(p => p.RpcSetName(p.name));
+        string playerName = player.name;
+        player.RpcSetName(ApplyTitle(player.FriendCode, playerName));
+        player.Data.Outfits[PlayerOutfitType.Default].PlayerName = ApplyTitle(player.FriendCode, playerName, true);
+        player.name = playerName;
     }
 
     public void Reload()

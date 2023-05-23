@@ -36,6 +36,11 @@ public class WinDelegate
 
         IWinCondition? condition = winConditions.FirstOrDefault(con => con.IsConditionMet(out winners));
         if (condition == null) return false;
+        if (winners == null!)
+        {
+            VentLogger.Warn("The list of winners was null. Please do ensure that the winner list is not null if the win condition is actually met.");
+            return false;
+        }
         winNotifiers.ForEach(notify => notify(this));
 
         if (forcedCancel) return false;

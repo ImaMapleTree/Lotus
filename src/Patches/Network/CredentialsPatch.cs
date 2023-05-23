@@ -3,7 +3,6 @@ using Lotus.Addons;
 using Lotus.GUI.Patches;
 using Lotus.Managers.Date;
 using TMPro;
-using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
@@ -34,7 +33,7 @@ public class VersionShowerStartPatch
     #endif
         ProjectLotus.CredentialsText += $"{_startColor.Colorize(ProjectLotus.ModName)}";
     #if !DEBUG
-        TOHPlugin.CredentialsText += $" v{TOHPlugin.PluginVersion}";
+        ProjectLotus.CredentialsText += $" v{ProjectLotus.PluginVersion}";
     #endif
     #if DEBUG
         ProjectLotus.CredentialsText += $": {_endColor.Colorize($"{ProjectLotus.Instance.Version().Branch}({ProjectLotus.Instance.Version().CommitNumber})")}";

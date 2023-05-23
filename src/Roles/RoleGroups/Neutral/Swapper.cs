@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Vanilla.Meetings;
+using Lotus.Chat;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
@@ -43,7 +45,7 @@ public class Swapper : Crewmate
         target1 = byte.MaxValue;
         target2 = byte.MaxValue;
         skippedAbility = false;
-        Async.Schedule(() => Utils.SendMessage(SwapperInfoMessage, MyPlayer.PlayerId, RoleColor.Colorize(SwapperAbility), true), 1f);
+        Async.Schedule(() => ChatHandler.Of(SwapperInfoMessage, RoleColor.Colorize(SwapperAbility)).LeftAlign().Send(MyPlayer), 1f);
     }
     
     [RoleAction(RoleActionType.MyVote)]
@@ -61,14 +63,14 @@ public class Swapper : Crewmate
                 // If the new voted player is target 1 then cancel swapping target 1
                 if (player.PlayerId == target1)
                 {
-                    Utils.SendMessage(SwapperUnselectMessage.Formatted(Utils.GetPlayerById(target1)?.name), MyPlayer.PlayerId, RoleColor.Colorize(SwapperAbility));
+                    CHandler().Message(SwapperUnselectMessage.Formatted(Players.FindPlayerById(target1)?.name)).Send(MyPlayer);
                     target1 = byte.MaxValue;
                     return;
                 }
 
                 currentSwaps--;
                 target2 = player.PlayerId;
-                Utils.SendMessage(SwapperSelectMessage2.Formatted(Utils.GetPlayerById(target2)?.name, Utils.GetPlayerById(target1)?.name), MyPlayer.PlayerId, RoleColor.Colorize(SwapperAbility));
+                CHandler().Message(SwapperSelectMessage2.Formatted(Utils.GetPlayerById(target2)?.name, Utils.GetPlayerById(target1)?.name)).Send(MyPlayer);
             }, () => meetingDelegate.CastVote(MyPlayer, Utils.PlayerById(target1)));
         }
         // Target 1 is not selected yet so this is either a complete skip or 
@@ -78,7 +80,7 @@ public class Swapper : Crewmate
             votedPlayer.Handle(player =>
             {
                 target1 = player.PlayerId;
-                Utils.SendMessage(SwapperSelectMessage1.Formatted(target1 == byte.MaxValue ? "No One" : player.name), MyPlayer.PlayerId, RoleColor.Colorize(SwapperAbility));
+                CHandler().Message(SwapperSelectMessage1.Formatted(target1 == byte.MaxValue ? "No One" : player.name)).Send(MyPlayer);
             }, () => skippedAbility = true);
         }
     }
@@ -88,7 +90,11 @@ public class Swapper : Crewmate
     {
         if (target1 == byte.MaxValue || target2 == byte.MaxValue) return;
         VentLogger.Trace($"Swapping Votes for {Utils.GetPlayerById(target1)?.name} <=> {Utils.GetPlayerById(target2)?.name}", "Swapper");
-        Async.Schedule(() => Utils.SendMessage(SwapperPublicMessage.Formatted(Utils.GetPlayerById(target1)?.name, Utils.GetPlayerById(target2)?.name), title: RoleColor.Colorize($"↔ {SwapperAbility} ↔")), 0.1f);
+        
+        ChatHandler handler = ChatHandler.Of(SwapperPublicMessage.Formatted(Utils.GetPlayerById(target1)?.name, Utils.GetPlayerById(target2)?.name))
+            .Title(t => t.Text(SwapperAbility).Color(RoleColor).PrefixSuffix("↔").Build());
+
+        Async.Schedule(() => handler.Send(), 0.1f);
         
         List<byte> votesForPlayer1 = new();
         List<byte> votesForPlayer2 = new();
@@ -121,12 +127,11 @@ public class Swapper : Crewmate
             meetingDelegate.RemoveVote(player, player2Optional);
             meetingDelegate.CastVote(player, player1Optional);
         });
-        
-        (byte exiledPlayer, bool isTie) = CheckForEndVotingPatch.CalculateExiledPlayer(meetingDelegate);
-        meetingDelegate.ExiledPlayer = Utils.GetPlayerById(exiledPlayer)?.Data;
-        meetingDelegate.IsTie = isTie;
+
+        meetingDelegate.CalculateExiledPlayer();
     }
 
+    private ChatHandler CHandler() => Chat.ChatHandler.Of(title: RoleColor.Colorize(SwapperAbility)).LeftAlign();
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)

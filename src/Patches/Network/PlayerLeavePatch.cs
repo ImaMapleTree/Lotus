@@ -29,7 +29,7 @@ class OnPlayerLeftPatch
         Game.NameModels.Remove(data.Character.PlayerId);
 
         ActionHandle uselessHandle = ActionHandle.NoInit();
-        if (Game.State is not GameState.InLobby)
+        if (Game.State is not (GameState.InLobby or GameState.InIntro))
         {
             PlayerControl.AllPlayerControls.ToArray().Trigger(RoleActionType.Disconnect, ref uselessHandle, data.Character);
             Game.MatchData.Roles.MainRoles.GetValueOrDefault(data.Character.PlayerId)?.HandleDisconnect();

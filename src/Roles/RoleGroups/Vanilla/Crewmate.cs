@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 using AmongUs.GameOptions;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Stats;
 using Lotus.Factions;
@@ -23,12 +25,12 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
 {
     public int TotalTasks => initialized ? tasks : taskSupplier?.Invoke() ?? 0;
     public int TasksComplete;
-    public bool HasAllTasksDone => TasksComplete >= TotalTasks;
+    public bool HasAllTasksComplete => TasksComplete >= TotalTasks;
 
     public bool HasOverridenTasks;
     public bool HasCommonTasks;
-    public int ShortTasks;
-    public int LongTasks;
+    public int ShortTasks = -1;
+    public int LongTasks = -1;
 
     private int tasks;
     private Func<int>? taskSupplier;
@@ -65,6 +67,7 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
     public virtual bool HasTasks() => true;
 
     public virtual bool TasksApplyToTotal() => true;
+    
 
     /// <summary>
     /// Sets up the task counter for crewmate roles. If you extend this class and want this done automatically please call base.Setup()

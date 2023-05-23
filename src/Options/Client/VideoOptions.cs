@@ -2,6 +2,7 @@ using System;
 using Lotus.Logging;
 using UnityEngine;
 using VentLib.Localization.Attributes;
+using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
 using VentLib.Utilities;
@@ -12,7 +13,7 @@ namespace Lotus.Options.Client;
 [Localized(ModConstants.Options)]
 public class VideoOptions
 {
-    public static object[] FpsLimits = { 24, 30, 60, 120, 144, 240, 265, Int32.MaxValue };
+    public static object[] FpsLimits = { 24, 30, 60, 75, 120, 144, 240, Int32.MaxValue };
 
     public int TargetFps
     {
@@ -31,6 +32,7 @@ public class VideoOptions
 
     public VideoOptions()
     {
+        OptionManager optionManager = OptionManager.GetManager();
         fpsOption = new GameOptionBuilder()
             .Key("Max Framerate")
             .Name("Max Framerate")
@@ -39,6 +41,7 @@ public class VideoOptions
             .Values(2, FpsLimits)
             .BindInt(i =>
             {
+                optionManager.DelaySave();
                 Application.targetFrameRate = _targetFps = i;
                 Async.Schedule(() => Application.targetFrameRate = _targetFps, 1f);
             })

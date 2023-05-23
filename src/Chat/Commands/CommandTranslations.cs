@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using UnityEngine;
 using VentLib.Localization.Attributes;
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable ConvertToConstant.Global

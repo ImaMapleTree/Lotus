@@ -6,7 +6,7 @@ public partial class TheUndead
 {
     public class Origin : TheUndead, ISubFaction<TheUndead>
     {
-        public override bool AlliesSeeRole() => true;
+        public override bool CanSeeRole(PlayerControl player) => true;
 
         public Relation MainFactionRelationship() => Relation.FullAllies;
 

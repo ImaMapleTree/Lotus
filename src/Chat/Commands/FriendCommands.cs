@@ -20,31 +20,32 @@ public class FriendCommands: CommandTranslations, ICommandReceiver
         {
             if (p.FriendCode == null)
             {
-                Utils.SendMessage(FriendsCommandTranslations.NoFriendcodeText.Formatted(p.name), source.PlayerId);
+                ChatHandler.Of(FriendsCommandTranslations.NoFriendcodeText.Formatted(p.name)).LeftAlign().Send(source);
                 return;
             }
             PluginDataManager.FriendManager.AddFriend(p.FriendCode);
-            Utils.SendMessage(FriendsCommandTranslations.SuccessText.Formatted(p.name, p.FriendCode), source.PlayerId);
+            ChatHandler.Of(FriendsCommandTranslations.SuccessText.Formatted(p.name, p.FriendCode)).LeftAlign().Send(source);
         }
         
         if (context.Args.Length == 0)
         {
-            Utils.SendMessage(InvalidUsage, source.PlayerId, ModConstants.Palette.InvalidUsage.Colorize(InvalidUsage));
+            ChatHandlers.InvalidCmdUsage().Send(source);
             return;
         }
 
         if (int.TryParse(context.Args[0], out int value))
-            Utils.PlayerById(value).Handle(AFriend, () => Utils.SendMessage(PlayerNotFoundText.Formatted(""), source.PlayerId));
+            Utils.PlayerById(value).Handle(AFriend, () => ChatHandler.Of(PlayerNotFoundText.Formatted("")).Send(source));
         else
             PlayerControl.AllPlayerControls.ToArray().FirstOrOptional(p => p.name == context.Join())
-                .Handle(AFriend, () => Utils.SendMessage(PlayerNotFoundText.Formatted(context.Join()), source.PlayerId));
+                .Handle(AFriend, () => 
+                    ChatHandler.Of(PlayerNotFoundText.Formatted(context.Join())).Send(source));
     }
 
     [Command("remove", "r")]
     public static void RemoveFriend(PlayerControl source, int index)
     {
         string friend = PluginDataManager.FriendManager.RemoveFriend(index - 1);
-        Utils.SendMessage(FriendsCommandTranslations.RemoveText.Formatted(friend), source.PlayerId);
+        ChatHandler.Of(FriendsCommandTranslations.RemoveText.Formatted(friend)).Send(source);
     }
     
     [Command("list", "l")]
@@ -55,7 +56,7 @@ public class FriendCommands: CommandTranslations, ICommandReceiver
             .Select((t2, i) => $"{i + 1}. {t2.f}{LastKnownAsString(t2.Item2)}")
             .Fuse("\n");
         
-        Utils.SendMessage(friends, source.PlayerId, leftAlign: true);
+        ChatHandler.Of(friends).LeftAlign().Send(source);
     }
 
     private static string LastKnownAsString(string? name)
@@ -79,9 +80,8 @@ public class FriendCommands: CommandTranslations, ICommandReceiver
         public static string LastKnownAsText = "Known As: {0}";
     }
 
-    public bool Receive(PlayerControl source, CommandContext context)
+    public void Receive(PlayerControl source, CommandContext context)
     {
         if (context.Args.Length == 0) BasicCommands.PlayerIds(source, context);
-        return true;
     }
 }

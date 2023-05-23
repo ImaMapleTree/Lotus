@@ -18,6 +18,7 @@ using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using Object = UnityEngine.Object;
 
 namespace Lotus.Roles;
 
@@ -27,14 +28,17 @@ public static class RoleUtils
 
     public static string CalculateArrow(PlayerControl source, PlayerControl target, Color? color = null)
     {
-        if (!target.IsAlive()) return "";
+        return !target.IsAlive() ? "" : CalculateArrow(source, target.GetTruePosition(), color);
+    }
+
+    public static string CalculateArrow(PlayerControl source, Vector2 target, Color? color = null)
+    {
         Vector2 sourcePosition = source.GetTruePosition();
-        Vector2 targetPosition = target.GetTruePosition();
-        float distance = Vector2.Distance(sourcePosition, targetPosition);
+        float distance = Vector2.Distance(sourcePosition, target);
         if (distance < ModConstants.ArrowActivationMin) return Arrows[8].ToString();
 
-        float deltaX = targetPosition.x - sourcePosition.x;
-        float deltaY = targetPosition.y - sourcePosition.y;
+        float deltaX = target.x - sourcePosition.x;
+        float deltaY = target.y - sourcePosition.y;
 
         float angle = Mathf.Atan2(deltaY, deltaX) * Mathf.Rad2Deg;
         if (angle < 0)

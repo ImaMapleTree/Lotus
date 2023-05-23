@@ -12,6 +12,7 @@ using Lotus.Extensions;
 using Lotus.Factions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -22,13 +23,15 @@ using static Lotus.Roles.RoleGroups.Neutral.Hacker.HackerTranslations.HackerOpti
 
 namespace Lotus.Roles.RoleGroups.Neutral;
 
-public class Hacker: CustomRole
+public class Hacker: Engineer
 {
     private List<SabotageType> sabotages = new();
     private int sabotageTotal;
     private int sabotageCount;
     private bool fixingDoorsGivesPoint;
     private bool hackerCanVent;
+
+    public override bool HasTasks() => false;
 
     [UIComponent(UI.Counter)]
     private string HackerCounter() => RoleUtils.Counter(sabotageCount, sabotageTotal, RoleColor);
@@ -57,9 +60,10 @@ public class Hacker: CustomRole
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .Tab(DefaultTabs.NeutralTab)
-            .SubOption(sub => sub.KeyName("Hacker Can Vent", GColor(HackerCanVent))
+            .SubOption(sub => AddVentingOptions(sub.KeyName("Hacker Can Vent", GColor(HackerCanVent))
                 .AddOnOffValues()
                 .BindBool(b => hackerCanVent = b)
+                .ShowSubOptionPredicate(b => (bool)b))
                 .Build())
             .SubOption(sub => sub.KeyName("Hacker Sabotage Amount", GColor(HackerSabotagePointAmount))
                 .BindInt(i => sabotageTotal = i)

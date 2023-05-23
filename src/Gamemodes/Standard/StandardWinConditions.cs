@@ -22,6 +22,7 @@ public static class StandardWinConditions
             if (allPlayers.Count != 1) return false;
 
             PlayerControl lastPlayer = allPlayers[0];
+            winners = new List<PlayerControl> { lastPlayer };
             return lastPlayer.GetCustomRole().Faction is Solo;
         }
 

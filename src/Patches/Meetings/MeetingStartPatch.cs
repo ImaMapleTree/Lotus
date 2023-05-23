@@ -59,6 +59,7 @@ public class MeetingStartPatch
         Hooks.MeetingHooks.MeetingCalledHook.Propagate(new MeetingHookEvent(reporter, MeetingPrep.Reported, meetingDelegate));
         Hooks.GameStateHooks.RoundEndHook.Propagate(new GameStateHookEvent(Game.MatchData));
         Game.MatchData.MeetingsCalled++;
+        Game.SyncAll(); // This syncs up all the cooldowns to fix doubling after meeting
     }
 
     public static void Postfix(MeetingHud __instance)

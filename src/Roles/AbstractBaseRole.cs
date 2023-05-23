@@ -175,24 +175,24 @@ public abstract class AbstractBaseRole
         List<RoleAction> currentActions = this.roleActions.GetValueOrDefault(action.ActionType, new List<RoleAction>());
 
         if (action.Attribute.Override != null) {
-            int overrideIndex = currentActions.FindIndex(m => m.method.Name == action.Attribute.Override);
+            int overrideIndex = currentActions.FindIndex(m => m.Method.Name == action.Attribute.Override);
             if (overrideIndex != -1) currentActions[overrideIndex] = action;
             this.roleActions[action.ActionType] = currentActions;
             return;
         }
 
-        VentLogger.Log(LogLevel.All, $"Registering Action {action.ActionType} => {action.method.Name} (from: \"{action.method.DeclaringType}\")", "RegisterAction");
+        VentLogger.Log(LogLevel.All, $"Registering Action {action.ActionType} => {action.Method.Name} (from: \"{action.Method.DeclaringType}\")", "RegisterAction");
         if (action.ActionType is RoleActionType.FixedUpdate &&
             currentActions.Count > 0)
             throw new ConstraintException("RoleActionType.FixedUpdate is limited to one per class. If you're inheriting a class that uses FixedUpdate you can add Override=METHOD_NAME to your annotation to override its Update method.");
 
-        if (action.Attribute.Subclassing || action.method.DeclaringType == this.GetType())
+        if (action.Attribute.Subclassing || action.Method.DeclaringType == this.GetType())
             currentActions.Add(action);
 
         this.roleActions[action.ActionType] = currentActions;
     }
 
-    public void  Trigger(RoleActionType actionType, ref ActionHandle handle, params object[] parameters)
+    public void Trigger(RoleActionType actionType, ref ActionHandle handle, params object[] parameters)
     {
         if (!AmongUsClient.Instance.AmHost || Game.State is GameState.InLobby) return;
 
@@ -226,6 +226,8 @@ public abstract class AbstractBaseRole
                     Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(MyPlayer, action, parameters));
                     Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer, action, parameters);
                 }
+
+                handle.ActionType = actionType;
 
                 if (handle.IsCanceled) continue;
 
@@ -565,14 +567,14 @@ public abstract class AbstractBaseRole
         {
             if (action.Behaviour is ModifiedBehaviour.PatchBefore)
             {
-                object? result = action.method.InvokeAligned(args);
-                if (action.method.ReturnType == typeof(bool) && (result == null || (bool)result))
+                object? result = action.Method.InvokeAligned(args);
+                if (action.Method.ReturnType == typeof(bool) && (result == null || (bool)result))
                     baseMethod.InvokeAligned(args);
                 return;
             }
 
             baseMethod.InvokeAligned(args);
-            action.method.InvokeAligned(args);
+            action.Method.InvokeAligned(args);
         }
 
         

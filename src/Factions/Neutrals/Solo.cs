@@ -17,7 +17,7 @@ public class Solo : Faction<Solo>
 
     public override Relation Relationship(Solo sameFaction) => Relation.None;
 
-    public override bool AlliesSeeRole() => RoleOptions.NeutralOptions.KnowAlliedRoles;
+    public override bool CanSeeRole(PlayerControl player) => RoleOptions.NeutralOptions.KnowAlliedRoles;
 
     public override Color FactionColor() => Color.gray;
 

@@ -10,6 +10,7 @@ using Lotus.Addons;
 using Lotus.API;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
+using Lotus.Chat;
 using Lotus.Gamemodes;
 using Lotus.GUI.Menus;
 using Lotus.GUI.Patches;
@@ -150,7 +151,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
             rpc.Send(new[] { player.GetClientId() }, new BatchList<Option>(OptionManager.GetManager().GetOptions()));
         }
 
-        if (PluginDataManager.TemplateManager.TryFormat(player, "lobby-join", out string message)) Utils.SendMessage(message, player.PlayerId);
+        if (PluginDataManager.TemplateManager.TryFormat(player, "lobby-join", out string message)) ChatHandler.Of(message).Send(player);
         Hooks.NetworkHooks.ReceiveVersionHook.Propagate(new ReceiveVersionHookEvent(player, version));
     }
 }

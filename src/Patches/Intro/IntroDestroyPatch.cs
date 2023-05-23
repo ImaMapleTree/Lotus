@@ -1,25 +1,22 @@
-using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Hazel;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
-using Lotus.API.Vanilla;
 using Lotus.Options;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
-using Lotus.Logging;
+using Lotus.Roles;
 using Lotus.RPC;
+using UnityEngine;
 using VentLib.Logging;
-using VentLib.Networking.RPC;
-using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -43,9 +40,12 @@ class IntroDestroyPatch
 
         if (GeneralOptions.MayhemOptions.RandomSpawn) Game.GetAllPlayers().Do(p => Game.RandomSpawn.Spawn(p));
 
-        Async.Schedule(SetShapeshifters, NetUtils.DeriveDelay(0.15f));
-        Async.Schedule(ForceApplyPets, 0.3f);
+        string pet = GeneralOptions.MiscellaneousOptions.AssignedPet;
+        pet = pet != "Random" ? pet : ModConstants.Pets.Values.ToList().GetRandom();
+        
+        Async.Schedule(() => Game.GetAllPlayers().ForEach(p => Async.Execute(PreGameSetup(p, pet))), NetUtils.DeriveDelay(0.05f));
         Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.6f));
+        
         Game.GetAllPlayers().Select(p => new FrozenPlayer(p)).ForEach(p => Game.MatchData.FrozenPlayers[p.GameID] = p);
 
         VentLogger.Trace("Intro Scene Ending", "IntroCutscene");
@@ -64,33 +64,31 @@ class IntroDestroyPatch
             .ForEach(p => p.SetKillCooldown(p.GetCustomRole().GetOverride(Override.KillCooldown)?.GetValue() as float? ?? AUSettings.KillCooldown()));
     }
 
-    // Used to circumvent anti-cheat
-    private static void SetShapeshifters()
+    private static IEnumerator PreGameSetup(PlayerControl player, string pet)
     {
-        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null).ForEach(p => p.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3));
-    }
+        if (player == null) yield break;
+        player.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3);
+        yield return new WaitForSeconds(0.15f);
+        if (player == null) yield break;
+        
+        GameData.PlayerInfo playerData = player.Data;
+        if (playerData == null) yield break;
 
-    private static void ForceApplyPets()
-    {
-        Game.GetAllPlayers().ForEach(p => p.RpcSetName(p.name));
-        string pet = GeneralOptions.MiscellaneousOptions.AssignedPet;
-        pet = pet != "Random" ? pet : ModConstants.Pets.Values.ToList().GetRandom();
-        GameData.Instance.AllPlayers.ToArray().ForEach(pi =>
+        CustomRole role = player.GetCustomRole();
+        if (role is not ITaskHolderRole taskHolder || !taskHolder.TasksApplyToTotal())
         {
-            if (pi?.Object == null) return;
+            VentLogger.Trace($"Clearing Tasks For: {player.name}", "SyncTasks");
+            playerData.Tasks.Clear();
+        }
 
-            if (pi.Object.GetCustomRole() is not ITaskHolderRole taskHolder || !taskHolder.TasksApplyToTotal())
-            {
-                VentLogger.Trace($"Clearing Tasks For: {pi.Object.name}", "SyncTasks");
-                pi.Tasks.Clear();
-            }
+        var outfit = playerData.Outfits[PlayerOutfitType.Default];
 
-            if (pi.Object.AmOwner) pi.Object.SetPet(pet);
+        if (player.AmOwner) player.SetPet(pet);
 
-            var outfit = pi.Outfits[PlayerOutfitType.Default];
-            outfit.PetId = pet;
-        });
-        GeneralRPC.SendGameData();
-        Game.GetAllPlayers().ForEach(p => p.CRpcShapeshift(p, false));
+        outfit.PetId = pet;
+        Players.SendPlayerData(playerData, player.GetClientId());
+        yield return new WaitForSeconds(NetUtils.DeriveDelay(0.05f));
+        if (player == null) yield break;
+        player.CRpcShapeshift(player, false);
     }
 }

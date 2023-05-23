@@ -9,6 +9,7 @@ using Lotus.API.Odyssey;
 using Lotus.Chat;
 using Lotus.Roles;
 using Lotus.Extensions;
+using Lotus.Roles.Subroles;
 using VentLib.Options;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -21,7 +22,8 @@ public class Template
 
     public string Text;
     public string? Tag;
-    
+
+
     public Template(string text)
     {
         Text = text.Replace("\\n", "\n");
@@ -62,7 +64,12 @@ public class Template
         { "$PlayerCount", _ => PlayerControl.AllPlayerControls.Count.ToString() },
         { "@Name", player => ((PlayerControl) player).name },
         { "@Color", player => ModConstants.ColorNames[((PlayerControl) player).cosmetics.bodyMatProperties.ColorId] },
-        { "@Role", player => ((PlayerControl) player).GetCustomRole().RoleName },
+        { "@Role", player =>
+            {
+                CustomRole role = ((PlayerControl)player).GetCustomRole();
+                return role.RoleColor.Colorize(role.RoleName);
+            }
+        },
         { "@Blurb", player => ((PlayerControl) player).GetCustomRole().Blurb },
         { "@Description", player => ((PlayerControl) player).GetCustomRole().Description },
         { "@Options", player => OptionUtils.OptionText(((PlayerControl) player).GetCustomRole().RoleOptions) },
@@ -70,6 +77,7 @@ public class Template
         { "@Subroles", player => ((PlayerControl) player).GetSubroles().Select(r => r.RoleColor.Colorize(r.RoleName)).Fuse() },
         { "@Modifiers", player => ((PlayerControl) player).GetSubroles().Select(r => r.RoleColor.Colorize(r.RoleName)).Fuse() },
         { "@Mods", player => ((PlayerControl) player).GetSubroles().Select(r => r.RoleColor.Colorize(r.RoleName)).Fuse() },
+        { "@ModsDescriptive", player => ModifierText((PlayerControl) player) },
         { "^Role_Name", role => ((CustomRole) role).RoleName },
         { "^Role_Description", role => ((CustomRole) role).Description },
         { "^Role_Blurb", role => ((CustomRole) role).Blurb },
@@ -80,6 +88,7 @@ public class Template
 
     public static readonly Dictionary<string, string> TemplateVariables = new()
     {
+        { "\"$\" Variables", "Variables that start with \"$\" are static variables that are independent of the template viewer."},
         { "$RoomCode", "The current room code." },
         { "$Host", "The host's name." },
         { "$AUVersion", "The current version of Among Us." },
@@ -90,20 +99,43 @@ public class Template
         { "$Time", "The current time (based on the host)." },
         { "$Players", "A list of all player names separated by a comma." },
         { "$PlayerCount", "A count of all players currently in the lobby." },
-        { "@Name", "The players's name." },
-        { "@Color", "The players's color." },
-        { "@Role", "The players's role." },
-        { "@Blurb", "The players's role blurb." },
-        { "@Description", "The players's role description." },
-        { "@Options", "The players's role options." },
-        { "@Faction", "The players's faction." },
-        { "@Subroles", "The players's subroles (modifiers)" },
-        { "@Modifiers", "Identical to @Subroles, shows the player's subroles (modifiers)" }
+        { "\"@\" Variables", "Variables that start with \"@\" pertain specifically to the viewing player. For example, @Role is the Role of the player viewing this template."},
+        { "@Name", "The player's name." },
+        { "@Color", "The player's color." },
+        { "@Role", "The player's role." },
+        { "@Blurb", "The player's role blurb." },
+        { "@Description", "The player's role description." },
+        { "@Options", "The player's role options." },
+        { "@Faction", "The player's faction." },
+        { "@Subroles", "The player's subroles (modifiers) as a list of names" },
+        { "@Modifiers", "Identical to @Subroles, shows the player's subroles (modifiers) as a list of names" },
+        { "@ModsDescriptive", "Uses the modifier-info template to display descriptive info about each of a player's modifiers" },
+        { "\"^\" Variables", "Variables that start with \"^\" followed by a word and underscore are variables that relate to the first word before the underscore. For example, ^Role_Options refers to the options of a specific role. These variables are used in a select few places and when usable, should be mentioned under /t tags." },
+        { "^Role_Name", "The name of the related role." },
+        { "^Role_Description", "The description of the related role." },
+        { "^Role_Blurb", "The blurb of the related role." },
+        { "^Role_Options", "The options of the related role." },
+        { "^Role_Faction", "The faction of the related role." },
+        { "^Role_Basis", "The vanilla basis of the related role." },
     };
 
     private static readonly Dictionary<string, Func<object, string, string>> VariableValues = new()
     {
         { "%Option", (_, qualifier) => OptionManager.GetManager().GetOption(qualifier)?.GetValueText() ?? "Unknown Option" },
     };
+
+    private static string ModifierText(PlayerControl player)
+    {
+        if (PluginDataManager.TemplateManager.HasTemplate("modifier-info"))
+        {
+            return player.GetSubroles().Select(sr => !PluginDataManager.TemplateManager.TryFormat(sr, "modifier-info", out string text) ? "" : text).Fuse("\n\n");
+        }
+
+        return "<b>Modifiers:</b>\n" + player.GetSubroles().Select(sr =>
+        {
+            string identifierText = sr is Subrole subrole ? sr.RoleColor.Colorize(subrole.Identifier()!) + " " : "";
+            return $"{identifierText}{sr.RoleColor.Colorize(sr.RoleName)}\n{sr.Description}";
+        }).Fuse("\n\n");
+    }
 
 }

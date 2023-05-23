@@ -44,9 +44,11 @@ public class Trapster : Crewmate
             .SubOption(sub => sub
                 .KeyName("Trapped Duration", TrappedDuration)
                 .Bind(v => trappedDuration = (float)v)
-                .AddFloatRange(1, 10, 0.5f, 8, "s")
+                .AddFloatRange(1, 45, 0.5f, 8, "s")
                 .Build());
 
+
+    
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.35f, 0.56f, 0.82f));
 
     [Localized(nameof(Trapster))]

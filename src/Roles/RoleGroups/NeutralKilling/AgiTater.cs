@@ -185,6 +185,7 @@ public class AgiTater: NeutralKillingBase
         {
             remote?.Delete();
             bombText?.Delete();
+            Owner = byte.MaxValue;
             return true;
         }
 

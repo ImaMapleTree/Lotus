@@ -163,22 +163,23 @@ public class VanillaStatistics
         Hooks.PlayerHooks.PlayerTaskCompleteHook.Bind(StatisticsHookKey, taskEvent =>
         {
             UniquePlayerId uniqueId = taskEvent.Player.UniquePlayerId();
-            switch (taskEvent.PlayerTask.Length)
-            {
-                case NormalPlayerTask.TaskLength.Common:
-                    CommonTasksComplete.Update(uniqueId, i => i + 1);
-                    break;
-                case NormalPlayerTask.TaskLength.Short:
-                    ShortTasksComplete.Update(uniqueId, i => i + 1);
-                    break;
-                case NormalPlayerTask.TaskLength.Long:
-                    LongTasksComplete.Update(uniqueId, i => i + 1);
-                    break;
-                case NormalPlayerTask.TaskLength.None:
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
+            if (taskEvent.PlayerTask != null)
+                switch (taskEvent.PlayerTask.Length)
+                {
+                    case NormalPlayerTask.TaskLength.Common:
+                        CommonTasksComplete.Update(uniqueId, i => i + 1);
+                        break;
+                    case NormalPlayerTask.TaskLength.Short:
+                        ShortTasksComplete.Update(uniqueId, i => i + 1);
+                        break;
+                    case NormalPlayerTask.TaskLength.Long:
+                        LongTasksComplete.Update(uniqueId, i => i + 1);
+                        break;
+                    case NormalPlayerTask.TaskLength.None:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
             TasksComplete.Update(uniqueId, i => i + 1);
         });
         // Sabotage Stuff

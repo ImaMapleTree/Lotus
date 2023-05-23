@@ -8,6 +8,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using Lotus.API;
+using Lotus.Chat;
 using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -49,7 +50,7 @@ public class Bodyguard: Crewmate
             if (Game.GetAlivePlayers().All(p => p.PlayerId != b)) guardedPlayer = Optional<byte>.Null();
         });
 
-        Utils.SendMessage($"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}\n{VotePlayerMessage}", MyPlayer.PlayerId);
+        ChatHandler.Send(MyPlayer, $"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}\n{VotePlayerMessage}");
     }
 
     [RoleAction(RoleActionType.MyVote)]
@@ -68,7 +69,7 @@ public class Bodyguard: Crewmate
         else if (!guardedPlayer.Exists()) guardedPlayer = votedPlayer.Map(p => p.PlayerId);
         else guardedPlayer = guardedPlayer.Exists() ? new Optional<byte>() : new Optional<byte>(guardedPlayer.Get());
 
-        Utils.SendMessage($"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}", MyPlayer.PlayerId);
+        ChatHandler.Send(MyPlayer, $"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}");
     }
 
     [RoleAction(RoleActionType.AnyInteraction)]
@@ -81,8 +82,7 @@ public class Bodyguard: Crewmate
         switch (intent)
         {
             case IHelpfulIntent when !protectAgainstHelpfulInteraction:
-            case INeutralIntent when !protectAgainstNeutralInteraction:
-            case IFatalIntent fatalIntent when fatalIntent.IsRanged():
+            case INeutralIntent when !protectAgainstNeutralInteraction: 
                 return;
         }
 

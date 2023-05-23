@@ -49,6 +49,7 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
     [RoleAction(RoleActionType.Attack, Subclassing = false)]
     public virtual bool TryKill(PlayerControl target)
     {
+        if (Relationship(target) is Relation.FullAllies) return false;
         InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;

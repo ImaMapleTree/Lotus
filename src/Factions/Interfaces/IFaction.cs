@@ -8,7 +8,7 @@ public interface IFaction
 
     public Relation Relationship(IFaction other);
 
-    public bool AlliesSeeRole();
+    public bool CanSeeRole(PlayerControl player);
 
     public Color FactionColor();
 }

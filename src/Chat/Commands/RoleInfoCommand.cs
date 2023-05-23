@@ -37,7 +37,7 @@ public class RoleInfoCommand
         CustomRole role = source.GetCustomRole();
         string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.FactionColor().Colorize(role.Faction.Name())}):";
         output += $"\n{role.Description}";
-        Utils.SendMessage(output, source.PlayerId, leftAlign: true);
+        ChatHandler.Of(output).LeftAlign().Send(source);
     }
 
     [Command(CommandFlag.InGameOnly, "o", "option", "options")]

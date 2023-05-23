@@ -3,7 +3,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Chat.Patches;
-using Lotus.Logging;
+using Lotus.Managers;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -67,7 +67,7 @@ public class ChatHandler
         return this;
     }
 
-    public void Send() => Send(null);
+    public void Send() => Send((PlayerControl)null!);
 
     public void Send(PlayerControl? targetPlayer)
     {
@@ -77,16 +77,19 @@ public class ChatHandler
 
     public static ChatHandler Of(string? message = null, string? title = null)
     {
-        ChatHandler ch = new ChatHandler();
+        ChatHandler ch = new();
         ch.message = message?.Replace("\\n", "\n");
         if (title != null) ch.title = title;
         return ch;
     }
 
+    public static void Send(string message) => Send(null!, message, null);
+    
     public static void Send(string message, string title) => Send(null, message, title);
 
     public static void Send(PlayerControl? player, string message, string? title = null, bool leftAligned = false)
     {
+        if (!AmongUsClient.Instance.AmHost) return;
         PlayerControl? sender;
         Async.Schedule(() =>
         {
@@ -113,7 +116,7 @@ public class ChatHandler
                     .End()
                     .Send(player.GetClientId());
             }
-            sender.RpcSetName(name);
+            if (PluginDataManager.TitleManager.HasTitle(sender)) PluginDataManager.TitleManager.ApplyTitleWithChatFix(sender);
         }, 0.125f);
     }
 
@@ -125,7 +128,6 @@ public class ChatHandler
         OnChatPatch.UtilsSentList.Add(sender.PlayerId);
         DestroyableSingleton<HudManager>.Instance.Chat.AddChat(sender, message);
         sender.SetName(name);
-        // TODO:  look at this tomorrow
     }
 
     private static void MassSend(PlayerControl sender, string message, string title, bool leftAligned)

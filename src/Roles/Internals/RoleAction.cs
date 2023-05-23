@@ -11,11 +11,12 @@ public class RoleAction
     public bool Blockable { get; }
 
     internal RoleActionAttribute Attribute;
-    internal MethodInfo method;
+    internal MethodInfo Method;
+    internal object? Executer;
 
     public RoleAction(RoleActionAttribute attribute, MethodInfo method)
     {
-        this.method = method;
+        this.Method = method;
         this.TriggerWhenDead = attribute.WorksAfterDeath;
         this.ActionType = attribute.ActionType;
         this.Priority = attribute.Priority;
@@ -25,12 +26,17 @@ public class RoleAction
 
     public virtual void Execute(AbstractBaseRole role, object[] args)
     {
-        method.InvokeAligned(role, args);
+        Method.InvokeAligned(Executer ?? role, args);
     }
 
     public virtual void ExecuteFixed(AbstractBaseRole role)
     {
-        method.Invoke(role, null);
+        Method.Invoke(Executer ?? role, null);
+    }
+
+    public RoleAction Clone()
+    {
+        return (RoleAction)this.MemberwiseClone();
     }
 
     public override string ToString() => $"RoleAction(type={ActionType}, Priority={Priority}, Blockable={Blockable})";

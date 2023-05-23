@@ -109,7 +109,6 @@ public class Medic: Crewmate
         targetLockedIn = false;
         guardedPlayer = byte.MaxValue;
     }
-    
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0f, 0.4f, 0f));
 

@@ -14,6 +14,6 @@ public class KillOverlayPatch
         DevLogger.Log("Showing Kill Animation");
         bool show = (DateTime.Now - _lastOverlay).TotalSeconds > 0.5f;
         _lastOverlay = DateTime.Now;
-        return show;
+        return false;
     }
 }

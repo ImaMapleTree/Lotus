@@ -15,7 +15,7 @@ using static Lotus.Roles.RoleGroups.Crew.Repairman.RepairmanTranslations.Repairm
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
-public class Repairman: Crewmate
+public class Repairman: Engineer
 {
     private bool repairmanCanVent;
     private List<SabotageType> sabotages = new();
@@ -30,9 +30,10 @@ public class Repairman: Crewmate
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-            .SubOption(sub => sub.KeyName($"{nameof(Repairman)} Can Vent", TranslationUtil.Colorize(RepairmanCanVent, RoleColor))
+            .SubOption(sub => AddVentingOptions(sub.KeyName($"{nameof(Repairman)} Can Vent", TranslationUtil.Colorize(RepairmanCanVent, RoleColor))
                 .AddOnOffValues()
                 .BindBool(b => repairmanCanVent = b)
+                .ShowSubOptionPredicate(b => (bool)b))
                 .Build())
             .SubOption(sub => sub.KeyName("Fast Fixes Lights", FastFixLights)
                 .AddOnOffValues()

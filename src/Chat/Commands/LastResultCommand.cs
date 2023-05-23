@@ -5,6 +5,7 @@ using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.Managers.History;
 using Lotus.Options;
+using Microsoft.VisualBasic;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -55,14 +56,14 @@ public class LastResultCommand: CommandTranslations
             return;
         }
         
+        
+        string coloredName = ((Color)Palette.PlayerColors[foundPlayer.Outfit.ColorId]).Colorize(ModConstants.ColorNames[foundPlayer.Outfit.ColorId]);
 
-        Color playerColor = Palette.PlayerColors[foundPlayer.Outfit.ColorId];
-
-        string statusText = foundPlayer.Status is PlayerStatus.Dead ? foundPlayer.CauseOfDeath ?? foundPlayer.Status.ToString() : foundPlayer.Status.ToString();
+        string statusText = foundPlayer.Status is PlayerStatus.Dead ? foundPlayer.CauseOfDeath?.SimpleName() ?? foundPlayer.Status.ToString() : foundPlayer.Status.ToString();
         string playerStatus = StatusColor(foundPlayer.Status).Colorize(statusText);
 
-        string winnerText = winners.Contains(foundPlayer.PlayerId) ? WinnerColor.Colorize("★ " + Translations.WinnerText + " ★") : "";
-        string titleText = $"{playerColor.Colorize($"{name} {winnerText}")}\n";
+        string winnerText = winners.Contains(foundPlayer.PlayerId) ? WinnerColor.Colorize(" ★ " + Translations.WinnerText + " ★") : "";
+        string titleText = $"{name} {coloredName}{winnerText}\n";
         titleText += $"{Translations.RoleText.Formatted(foundPlayer.Role.RoleColor.Colorize(foundPlayer.Role.RoleName))} ({playerStatus})\n";
         if (foundPlayer.Subroles.Count > 0) titleText += Translations.ModifierText.Formatted(foundPlayer.Subroles.Select(sr => sr.RoleColor.Colorize(sr.RoleName)).Fuse());
 
@@ -76,11 +77,12 @@ public class LastResultCommand: CommandTranslations
     
     public static void GeneralResults(PlayerControl source)
     {
+        if (PlayerHistories == null) return;
         HashSet<byte> winners = Game.MatchData.GameHistory.LastWinners.Select(p => p.MyPlayer.PlayerId).ToHashSet();
         string text = GeneralColor3.Colorize("<b>Translations.ResultsText</b>") + "\n";
-        text = PlayerHistories!.OrderBy(p => winners.Contains(p.PlayerId) ? (int)p.Status : 99 + (int)p.Status).Select(p => CreateSmallPlayerResult(p, winners.Contains(p.PlayerId)))
+        text = PlayerHistories.OrderBy(p => winners.Contains(p.PlayerId) ? (int)p.Status : 99 + (int)p.Status).Select(p => CreateSmallPlayerResult(p, winners.Contains(p.PlayerId)))
             .Fuse("<line-height=3.1>\n</line-height>");
-        ChatHandler.Of("\n".Repeat(PlayerHistories!.Count - 1) + ".", text).LeftAlign().Send(source);
+        ChatHandler.Of("\n".Repeat(PlayerHistories.Count - 1), text).LeftAlign().Send(source);
     }
 
     private static string CreateSmallPlayerResult(PlayerHistory history, bool isWinner)
@@ -88,12 +90,15 @@ public class LastResultCommand: CommandTranslations
         string indent = "    ";
         string winnerPrefix = isWinner ? WinnerColor.Colorize("★ ") : indent;
         
-        string statusText = history.Status is PlayerStatus.Dead ? history.CauseOfDeath ?? history.Status.ToString() : history.Status.ToString();
+        string statusText = history.Status is PlayerStatus.Dead ? history.CauseOfDeath?.SimpleName() ?? history.Status.ToString() : history.Status.ToString();
         string playerStatus = StatusColor(history.Status).Colorize(statusText);
         
         string statText = history.Role.Statistics().FirstOrOptional().Map(t => $" <size=1.5>[{t.Name()}: {t.GetGenericValue(history.UniquePlayerId)}]</size>").OrElse("");
+
+        int colorId = history.Outfit.ColorId;
+        string coloredName = ((Color)Palette.PlayerColors[colorId]).Colorize(ModConstants.ColorNames[colorId]);
         
-        return $"<line-height=1.73>{winnerPrefix}{history.Name} <size=1.6>({playerStatus})</size>\n{indent}<size=1.9>{history.Role.RoleColor.Colorize(history.Role.RoleName)}</size> {statText}</line-height>";
+        return $"<line-height=1.82>{winnerPrefix}{history.Name} : {coloredName} <size=1.5>({playerStatus})</size>\n{indent}<size=1.9>{history.Role.RoleColor.Colorize(history.Role.RoleName)}</size> {statText}</line-height>";
     } 
     
     private static ChatHandler ErrorHandler(PlayerControl source) => new ChatHandler().Title(t => t.Text(CommandError).Color(KillingColor).Build()).Player(source).LeftAlign();

@@ -44,7 +44,7 @@ public class VanillaCrewmateWin: IFactionWinCondition
     {
         PlayerControl player = role.MyPlayer;
         if (!player.IsAlive()) return false;
-        if (role.Faction is Crewmates) return false;
+        if (role.Faction.Relationship(FactionInstances.Crewmates) is not Relation.None) return false;
         return player.GetVanillaRole().IsImpostor() && !role.RoleFlags.HasFlag(RoleFlag.CannotWinAlone);
     }
 

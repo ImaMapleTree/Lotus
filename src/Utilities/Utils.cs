@@ -14,6 +14,7 @@ using Lotus.Options;
 using Lotus.Roles.Extra;
 using Lotus.Roles.Interfaces;
 using Lotus.API;
+using Lotus.Chat;
 using Lotus.Extensions;
 using Lotus.Roles;
 using Lotus.Roles.Legacy;
@@ -45,41 +46,6 @@ public static class Utils
     {
         if (p.GetCustomRole().RealRole.IsImpostor()) return false;
         return p.GetCustomRole() is ITaskHolderRole taskHolderRole && taskHolderRole.HasTasks();
-    }
-
-    // GM.Ref<GM>()
-    public static void ShowActiveSettingsHelp(byte PlayerId = byte.MaxValue)
-    {
-        SendMessage(Localizer.Translate("StaticOptions.ActiveSettingsHelp") + ":", PlayerId);
-
-        if (GeneralOptions.GameplayOptions.SyncMeetings)
-        {
-            SendMessage(Localizer.Translate("StaticOptions.SyncButton.Info"), PlayerId);
-        }
-
-        /*if (StaticOptions.SabotageTimeControl)
-        {
-            SendMessage(Localizer.Translate("StaticOptions.SabotageTimeControl.Info"), PlayerId);
-        }*/
-
-        if (GeneralOptions.MayhemOptions.UseRandomMap)
-        {
-            SendMessage(Localizer.Translate("StaticOptions.RandomMap.Info"), PlayerId);
-        }
-
-        if (GeneralOptions.AdminOptions.HostGM)
-        {
-            SendMessage(CustomRoleManager.Special.GM.RoleName + Localizer.Translate("StaticOptions.EnableGMInfo"), PlayerId);
-        }
-
-        foreach (var role in CustomRoleManager.AllRoles)
-        {
-            if (role is Fox or Troll) continue;
-            if (role.IsEnable() && !role.IsVanilla())
-                SendMessage(role.RoleName + Localizer.Translate($"StaticOptions.{role.EnglishRoleName}.Description"), PlayerId);
-        }
-
-        if (GeneralOptions.DebugOptions.NoGameEnd) SendMessage(Localizer.Translate("StaticOptions.NoGameEndInfo"), PlayerId);
     }
 
     /*public static void ShowActiveSettings(byte PlayerId = byte.MaxValue)
@@ -200,14 +166,6 @@ public static class Utils
         );
 
     }*/
-
-    public static void SendMessage(string text, byte sendTo = byte.MaxValue, string title = "", bool leftAlign = false)
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-        if (title == "") title = "<color=#aaaaff>" + Localizer.Translate("Announcements.SystemMessage") + "</color>";
-        text = text.Replace("\\n", "\n");
-        ChatUpdatePatch.MessagesToSend.Enqueue((text, sendTo, title, leftAlign && PlayerById(sendTo).Map(p => p.IsHost()).OrElse(false)));
-    }
 
     public static PlayerControl? GetPlayerById(int playerId) => PlayerControl.AllPlayerControls.ToArray().FirstOrDefault(pc => pc.PlayerId == playerId);
 
