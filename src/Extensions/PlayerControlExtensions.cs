@@ -1,23 +1,27 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AmongUs.GameOptions;
+using HarmonyLib;
 using Hazel;
 using InnerNet;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers;
 using Lotus.Roles;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.Subroles;
-using Lotus.Patches.Actions;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
+using VentLib.Utilities.Collections;
 using GameStates = Lotus.API.GameStates;
 
 namespace Lotus.Extensions;
@@ -31,12 +35,45 @@ public static class PlayerControlExtensions
         if (player == null) return;
         CustomRole role = player.GetCustomRole();
         List<CustomRole> subroles = player.GetSubroles();
-        role.Trigger(action, ref handle, parameters);
-        if (handle is { IsCanceled: true }) return;
-        foreach (CustomRole subrole in subroles)
+        if (action is RoleActionType.FixedUpdate)
         {
-            subrole.Trigger(action, ref handle, parameters);
+            role.Trigger(action, ref handle, parameters);
             if (handle is { IsCanceled: true }) return;
+            foreach (CustomRole subrole in subroles)
+            {
+                subrole.Trigger(action, ref handle, parameters);
+                if (handle is { IsCanceled: true }) return;
+            }
+            return;
+        }
+
+        handle.ActionType = action;
+        parameters = parameters.AddToArray(handle);
+
+        foreach ((RoleAction? roleAction, AbstractBaseRole? abstractBaseRole) in role.GetActions(action).Concat(subroles.SelectMany(sr => sr.GetActions(action))).OrderBy(a => a.Item1.Priority))
+        {
+            PlayerControl myPlayer = abstractBaseRole.MyPlayer;
+            if (handle.IsCanceled) continue;
+            if (myPlayer == null || !myPlayer.IsAlive() && !roleAction.TriggerWhenDead) continue;
+
+            try
+            {
+                if (action.IsPlayerAction())
+                {
+                    Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(myPlayer, roleAction, parameters));
+                    Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, myPlayer, roleAction, parameters);
+                }
+
+                handle.ActionType = action;
+
+                if (handle.IsCanceled) continue;
+
+                roleAction.Execute(abstractBaseRole, parameters);
+            }
+            catch (Exception e)
+            {
+                VentLogger.Exception(e, $"Failed to execute RoleAction {action}.");
+            }
         }
     }
 
@@ -120,12 +157,20 @@ public static class PlayerControlExtensions
         if (player.AmOwner) player.SetKillTimer(time);
         else
         {
-            player.GetCustomRole().SyncOptions(new List<GameOptionOverride> { new(Override.KillCooldown, time * 2)} );
-            player.RpcMark();
-            player.GetCustomRole().SyncOptions();
+            // IMPORTANT: This could be a possible "issue" area
+            CustomRole playerRole = player.GetCustomRole();
+            Remote<GameOptionOverride> remote = playerRole.AddOverride(new GameOptionOverride(Override.KillCooldown, time * 2));
+            playerRole.SyncOptions();
+
+            Async.Schedule(() => player.RpcMark(), NetUtils.DeriveDelay(0.5f));
+
+            Async.Schedule(() =>
+            {
+                remote.Delete();
+                playerRole.SyncOptions();
+            }, time);
         }
     }
-
 
     public static void RpcSpecificMurderPlayer(this PlayerControl killer, PlayerControl? target = null)
     {
@@ -140,24 +185,16 @@ public static class PlayerControlExtensions
         }
     }
 
-
     public static void RpcResetAbilityCooldown(this PlayerControl target)
     {
         if (!AmongUsClient.Instance.AmHost) return; //ホスト以外が実行しても何も起こさない
-        VentLogger.Old($"アビリティクールダウンのリセット:{target.name}({target.PlayerId})", "RpcResetAbilityCooldown");
-        if (PlayerControl.LocalPlayer == target)
-        {
-            //targetがホストだった場合
-            PlayerControl.LocalPlayer.Data.Role.SetCooldown();
-        }
-        else
-        {
-            //targetがホスト以外だった場合
-            MessageWriter writer = AmongUsClient.Instance.StartRpcImmediately(target.NetId, (byte)RpcCalls.ProtectPlayer, SendOption.None, target.GetClientId());
-            writer.WriteNetObject(target);
-            writer.Write(0);
-            AmongUsClient.Instance.FinishRpcImmediately(writer);
-        }
+        VentLogger.Trace($"Resetting Ability Cooldown for {target.name}", "ResetAbilityCooldown");
+
+        if (target.AmOwner) PlayerControl.LocalPlayer.Data.Role.SetCooldown();
+        else RpcV3.Mass(SendOption.Reliable)
+                .Start(target.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).End()
+                .Start(target.NetId, RpcCalls.MurderPlayer).Write(target).End()
+                .Send(target.GetClientId());
     }
     public static void RpcDesyncRepairSystem(this PlayerControl target, SystemTypes systemType, int amount)
     {
@@ -168,7 +205,7 @@ public static class PlayerControlExtensions
         AmongUsClient.Instance.FinishRpcImmediately(messageWriter);
     }
 
-    public static T GetCustomRole<T>(this PlayerControl player) where T : CustomRole
+    public static T? GetCustomRole<T>(this PlayerControl player) where T : CustomRole
     {
         return (player.GetCustomRole() as T) ?? player.GetSubrole<T>();
     }
@@ -217,7 +254,7 @@ public static class PlayerControlExtensions
     {
         VentLogger.Trace($"Exiled (V2): {player.GetNameWithRole()}");
         player.Exiled();
-        RpcV3.Immediate(player.NetId, RpcCalls.Exiled, SendOption.None).Send();
+        RpcV3.Immediate(player.NetId, RpcCalls.Exiled, SendOption.None);
     }
 
     public static void NoCheckStartMeeting(this PlayerControl reporter, GameData.PlayerInfo target)

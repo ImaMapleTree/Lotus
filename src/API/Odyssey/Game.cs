@@ -13,7 +13,6 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Victory;
 using Lotus.Extensions;
-using Lotus.Managers;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
@@ -30,10 +29,10 @@ public static class Game
             Cleanup(true);
         });
     }
-    
+
     private static readonly Dictionary<byte, ulong> GameIDs = new();
     private static ulong _gameID;
-    
+
     public static MatchData? LastMatch;
     public static MatchData MatchData = new();
     public static Dictionary<byte, INameModel> NameModels = new();
@@ -67,7 +66,11 @@ public static class Game
         GetAllPlayers()
             .Where(p => roles.Any(r => r.GetType() == p.GetCustomRole().GetType()) || p.GetSubroles().Any(s => s.GetType() == roles.GetType()));
 
-    public static void SyncAll() => GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
+    public static void SyncAll() => GetAllPlayers().Do(p =>
+    {
+        p.GetCustomRole().SyncOptions();
+        p.GetSubroles().ForEach(r => r.SyncOptions());
+    });
 
     public static void TriggerForAll(RoleActionType action, ref ActionHandle handle, params object[] parameters) => GetAllPlayers().Trigger(action, ref handle, parameters);
 
@@ -89,7 +92,6 @@ public static class Game
                 if (role.MyPlayer == null || !role.MyPlayer.IsAlive() && !roleAction.TriggerWhenDead) return;
                 roleAction.Execute(role, parameters);
             }
-
         }
     }
 

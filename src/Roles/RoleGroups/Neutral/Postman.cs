@@ -93,7 +93,7 @@ public class Postman: Crewmate
     private void AnnounceGameWin()
     {
         if (!completedDelivery || TasksComplete != TotalTasks) return;
-        Async.Schedule(() => ChatHandler.Send(null!, _postmanAnnouncement), 1f); 
+        Async.Schedule(() => ChatHandler.Of(_postmanAnnouncement).Send(), 1f); 
     }
 
     [RoleAction(RoleActionType.RoundStart)]

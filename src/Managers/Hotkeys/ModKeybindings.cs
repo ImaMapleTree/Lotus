@@ -20,34 +20,36 @@ namespace Lotus.Managers.Hotkeys;
 [LoadStatic]
 public class ModKeybindings
 {
+    private static bool hudActive = true;
+
     static ModKeybindings()
     {
         // Dump Log
         Bind(KeyCode.F1, KeyCode.LeftControl).Do(DumpLog);
-        
+
         // Profile All
         Bind(KeyCode.F2).Do(ProfileAll);
-        
+
         // Kill Player (Suicide)
         Bind(KeyCode.LeftShift, KeyCode.D, KeyCode.Return)
             .If(p => p.HostOnly().State(Game.IgnStates))
             .Do(Suicide);
-        
+
         // Close Meeting
         Bind(KeyCode.LeftShift, KeyCode.M, KeyCode.Return)
             .If(p => p.HostOnly().State(GameState.InMeeting))
             .Do(() => MeetingHud.Instance.RpcClose());
-        
+
         // Instant begin game
         Bind(KeyCode.LeftShift)
             .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown))
             .Do(() => GameStartManager.Instance.countDownTimer = 0);
-        
+
         // Restart countdown timer
         Bind(KeyCode.C)
             .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown))
             .Do(() => GameStartManager.Instance.ResetStartState());
-        
+
         // Reset Game Options
         Bind(KeyCode.LeftControl, KeyCode.Delete)
             .If(p => p.Predicate(() => Object.FindObjectOfType<GameOptionsMenu>()))
@@ -66,6 +68,8 @@ public class ModKeybindings
         Bind(KeyCode.LeftControl, KeyCode.T)
             .If(p => p.State(GameState.InLobby))
             .Do(ReloadTranslations);
+
+        Bind(KeyCode.F7).Do(() => HudManager.Instance.gameObject.SetActive(hudActive = !hudActive));
     }
 
     private static void DumpLog()

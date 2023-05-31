@@ -10,6 +10,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Options;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -50,7 +51,7 @@ public class Bastion: Engineer
         }
     }
 
-    [RoleAction(RoleActionType.RoundStart)]
+    [RoleAction(RoleActionType.RoundStart, triggerAfterDeath: true)]
     private void RefreshBastion()
     {
         currentBombs = bombsPerRounds;
@@ -71,7 +72,7 @@ public class Bastion: Engineer
                 .KeyName("Plant Bomb Cooldown", PlantBombCooldown)
                 .BindFloat(v => VentCooldown = v)
                 .Value(1f)
-                .AddFloatRange(2, 120, 2.5f, 8, "s")
+                .AddFloatRange(2, 120, 2.5f, 8, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .KeyName("Bombs per Round", BombsPerRound)
@@ -94,7 +95,7 @@ public class Bastion: Engineer
             public static string PlantBombCooldown = "Plant Bomb Cooldown";
 
             [Localized(nameof(BombsPerRound))]
-            public static string BombsPerRound = "Bombs per Rounds";
+            public static string BombsPerRound = "Bombs per Round";
         }
     }
 }

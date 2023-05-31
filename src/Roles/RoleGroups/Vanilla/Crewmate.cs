@@ -12,6 +12,7 @@ using Lotus.Managers.History.Events;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Patches.Systems;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
@@ -67,7 +68,17 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
     public virtual bool HasTasks() => true;
 
     public virtual bool TasksApplyToTotal() => true;
-    
+
+    protected void AssignAdditionalTasks()
+    {
+        Tasks.AssignAdditionalTasks(this, callback: RecomputeTaskTotal);
+    }
+
+    private void RecomputeTaskTotal(RpcSetTasksPatch.TasksOverride tasksOverride)
+    {
+        tasks += tasksOverride.ShortTasks + tasksOverride.LongTasks;
+    }
+
 
     /// <summary>
     /// Sets up the task counter for crewmate roles. If you extend this class and want this done automatically please call base.Setup()

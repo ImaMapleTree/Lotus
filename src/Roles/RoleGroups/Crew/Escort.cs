@@ -15,6 +15,7 @@ using Lotus.Utilities;
 using Lotus.API;
 using Lotus.API.Vanilla.Sabotages;
 using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -100,16 +101,16 @@ public class Escort: Crewmate
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Roleblock Cooldown")
                 .BindFloat(roleblockCooldown.SetDuration)
-                .AddFloatRange(0, 120, 2.5f, 18, "s")
+                .AddFloatRange(0, 120, 2.5f, 18, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Roleblock Duration")
                 .BindFloat(v => roleblockDuration = v)
                 .Value(v => v.Text("Until Meeting").Value(-1f).Build())
-                .AddFloatRange(5, 120, 5, suffix: "s")
+                .AddFloatRange(5, 120, 5, suffix: GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => 
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(1f, 0.73f, 0.92f));
 
 
@@ -155,7 +156,7 @@ public class Escort: Crewmate
             Async.Schedule(() => text.Delete(), 1f);
 
             if (BlockedCounter != null) return;
-            LiveString liveString = new(() => RelRbIndicator(BlockDuration!.TimeRemaining()));
+            LiveString liveString = new(() => RelRbIndicator(BlockDuration?.TimeRemaining() ?? 60));
             BlockedCounter = thisPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: thisPlayer));
         }
 

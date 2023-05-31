@@ -10,6 +10,6 @@ public class CrewmateLottery: RoleLottery
 {
     public CrewmateLottery() : base(CustomRoleManager.Static.Crewmate)
     {
-        CustomRoleManager.AllRoles.Where(r => r is { Faction: Crewmates, IsSubrole: false }).ForEach(r => AddRole(r));
+        CustomRoleManager.AllRoles.Where(r => r.Faction is Crewmates && !r.RoleFlags.HasFlag(RoleFlag.IsSubrole)).ForEach(r => AddRole(r));
     }
 }

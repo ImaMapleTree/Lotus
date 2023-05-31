@@ -65,20 +65,30 @@ static class ExileControllerWrapUpPatch
     {
         if (!AmongUsClient.Instance.AmHost) return;
 
-        MeetingDelegate.Instance.BlackscreenResolver.ClearBlackscreen();
-
-        SoundManager.Instance.ChangeMusicVolume(DataManager.Settings.Audio.MusicVolume);
-        VentLogger.Debug("Start Task Phase", "Phase");
-
-        Game.State = GameState.Roaming;
-        Game.RenderAllForAll(force: true);
-        Async.Schedule(() =>
+        try
         {
-            ActionHandle handle = ActionHandle.NoInit();
-            Game.TriggerForAll(RoleActionType.RoundStart, ref handle, false);
-            Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
-            Game.SyncAll();
-        }, 1f);
+            MeetingDelegate.Instance.BlackscreenResolver.ClearBlackscreen(BeginRoundStart);
+            SoundManager.Instance.ChangeMusicVolume(DataManager.Settings.Audio.MusicVolume);
+            VentLogger.Debug("Start Task Phase", "Phase");
+        }
+        catch
+        {
+            BeginRoundStart();
+        }
+    }
+
+    /// <summary>
+    /// Called after Clear Blackscreen is done processing
+    /// </summary>
+    private static void BeginRoundStart()
+    {
+        Game.RenderAllForAll(force: true);
+        Game.State = GameState.Roaming;
+        ActionHandle handle = ActionHandle.NoInit();
+        VentLogger.Debug("Triggering RoundStart Action!!", "Exile::BeginRoundStart");
+        Game.TriggerForAll(RoleActionType.RoundStart, ref handle, false);
+        Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
+        Game.SyncAll();
     }
 }
 

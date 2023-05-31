@@ -41,7 +41,7 @@ public class VideoOptions
             .Values(2, FpsLimits)
             .BindInt(i =>
             {
-                optionManager.DelaySave();
+                optionManager.DelaySave(0);
                 Application.targetFrameRate = _targetFps = i;
                 Async.Schedule(() => Application.targetFrameRate = _targetFps, 1f);
             })

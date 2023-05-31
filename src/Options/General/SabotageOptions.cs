@@ -118,8 +118,8 @@ public class SabotageOptions
             .BindInt(i => PolusReactorCountdown = i)
             .BuildAndRegister());
 
-        AllOptions.Add(Builder("Airship Reactor Countdown")
-            .Name(AuMap.Airship + " " + SabotageOptionTranslations.ReactorCountdown)
+        AllOptions.Add(Builder("Airship Crash Course Countdown")
+            .Name(AuMap.Airship + " " + SabotageOptionTranslations.CrashCourseCountdown)
             .BindInt(i => AirshipReactorCountdown = i)
             .BuildAndRegister());
 
@@ -153,7 +153,7 @@ public class SabotageOptions
         .Tab(DefaultTabs.GeneralTab)
         .Color(_optionColor)
         .Value(v => v.Text(SabotageOptionTranslations.DefaultValue).Value(-1).Color(Color.cyan).Build())
-        .AddIntRange(5, 120, 5, 0, "s");
+        .AddIntRange(5, 120, 5, 0, GeneralOptionTranslations.SecondsSuffix);
 
     [Localized("Sabotage")]
     private static class SabotageOptionTranslations
@@ -173,6 +173,9 @@ public class SabotageOptions
         [Localized(nameof(OxygenCountdown))]
         public static string OxygenCountdown = "Oxygen Countdown";
 
+        [Localized(nameof(CrashCourseCountdown))]
+        public static string CrashCourseCountdown = "Crash Course Countdown";
+
         [Localized(nameof(DisableReactor))]
         public static string DisableReactor = "Disable Reactor";
 
@@ -189,6 +192,6 @@ public class SabotageOptions
         public static string DisableDoors = "Disable Doors";
 
         [Localized(nameof(DisableHelicopters))]
-        public static string DisableHelicopters = "Disable Helicopter";
+        public static string DisableHelicopters = "Disable Crash Course";
     }
 }

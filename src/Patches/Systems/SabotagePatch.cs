@@ -11,7 +11,9 @@ using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.API;
+using Lotus.API.Vanilla.Meetings;
 using Lotus.Extensions;
+using Lotus.Roles;
 using VentLib.Logging;
 using Impostor = Lotus.Roles.RoleGroups.Vanilla.Impostor;
 
@@ -36,13 +38,16 @@ public static class SabotagePatch
             case SystemTypes.Sabotage:
                 if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.CallSabotage)) return false;
                 if (player.GetCustomRole() is not ISabotagerRole sabotager || !sabotager.CanSabotage()) return false;
+                if (player.GetCustomRole().RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotSabotage)) return false;
+                if (MeetingPrep.Prepped) return false;
+
                 SabotageCountdown = -1;
                 SabotageType sabotage = (SystemTypes)amount switch
                 {
                     SystemTypes.Electrical => SabotageType.Lights,
                     SystemTypes.Comms => SabotageType.Communications,
                     SystemTypes.LifeSupp => SabotageType.Oxygen,
-                    SystemTypes.Reactor => SabotageType.Reactor,
+                    SystemTypes.Reactor => AUSettings.MapId() == 4 ? SabotageType.Helicopter : SabotageType.Reactor,
                     SystemTypes.Laboratory => SabotageType.Reactor,
                     _ => throw new Exception("Invalid Sabotage Type")
                 };
@@ -54,6 +59,7 @@ public static class SabotagePatch
                 if (!handle.IsCanceled) CurrentSabotage = sabo;
                 Hooks.SabotageHooks.SabotageCalledHook.Propagate(new SabotageHookEvent(sabo));
                 VentLogger.Debug($"Sabotage Started: {sabo}");
+                Game.SyncAll();
                 break;
             case SystemTypes.Electrical:
                 if (amount > 64) return true;
@@ -117,11 +123,25 @@ public static class SabotagePatch
                 CurrentSabotage = null;
                 VentLogger.Info($"Oxygen Sabotage Fixed by {player.name}", "SabotageFix");
                 break;
+            case SystemTypes.Reactor when CurrentSabotage?.SabotageType() is SabotageType.Helicopter:
+                if (!__instance.TryGetSystem(systemType, out systemInstance)) break;
+                HeliSabotageSystem heliSabotage = systemInstance!.Cast<HeliSabotageSystem>();
+                int heliNum = amount & 3;
+                if (heliSabotage.CompletedConsoles.Contains((byte)heliNum)) break;
+                Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
+                Hooks.SabotageHooks.SabotagePartialFixHook.Propagate(new SabotageHookEvent(CurrentSabotage));
+                if (heliSabotage.UserCount == 0) break;
+                Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
+                Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
+                CurrentSabotage = null;
+                VentLogger.Info($"Helicopter Sabotage Fixed by {player.name}", "SabotageFix");
+                break;
             case SystemTypes.Laboratory:
             case SystemTypes.Reactor:
                 if (CurrentSabotage?.SabotageType() != SabotageType.Reactor) break;
                 if (!__instance.TryGetSystem(systemType, out systemInstance)) break;
-                ReactorSystemType reactor = systemInstance!.Cast<ReactorSystemType>();
+                ReactorSystemType? reactor = systemInstance!.TryCast<ReactorSystemType>();
+                if (reactor == null) break;
                 int reactNum = amount & 3;
                 if (reactor.UserConsolePairs.ToList().Any(p => p.Item2 == reactNum)) break;
                 Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
@@ -143,6 +163,7 @@ public static class SabotagePatch
                 return true;
         }
 
+        Game.SyncAll();
         return !handle.IsCanceled;
     }
 }

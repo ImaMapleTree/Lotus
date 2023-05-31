@@ -9,6 +9,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Options;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -77,7 +78,7 @@ public class Vampiress : Impostor
             .SubOption(sub => sub
                 .Name("Kill Delay")
                 .BindFloat(v => killDelay = v)
-                .AddFloatRange(2.5f, 60f, 2.5f, 2, "s")
+                .AddFloatRange(2.5f, 60f, 2.5f, 2, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

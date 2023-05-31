@@ -25,7 +25,7 @@ namespace Lotus.Roles.Subroles;
 
 public class Bloodlust: Subrole
 {
-    private static Type[] _incompatibleRoles =
+    public static Type[] IncompatibleRoles =
     {
         typeof(Crusader),
         typeof(Observer),
@@ -35,11 +35,11 @@ public class Bloodlust: Subrole
         typeof(Copycat),
         typeof(Phantom)
     };
-    
+
     private bool restrictedToCompatibleRoles;
     private static ColorGradient _psychoGradient = new(new Color(0.41f, 0.1f, 0.18f), new Color(0.85f, 0.77f, 0f));
     private bool requiresBaseKillMethod;
-    
+
 
     public override string Identifier() => "";
 
@@ -71,11 +71,13 @@ public class Bloodlust: Subrole
     {
         HashSet<Type>? restrictedRoles = base.RestrictedRoles();
         if (!restrictedToCompatibleRoles) return restrictedRoles;
-        _incompatibleRoles.ForEach(r => restrictedRoles?.Add(r));
+        IncompatibleRoles.ForEach(r => restrictedRoles?.Add(r));
         return restrictedRoles;
     }
 
-    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => 
+    public override CompatabilityMode RoleCompatabilityMode => CompatabilityMode.Blacklisted;
+
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddRestrictToCrew(base.RegisterOptions(optionStream))
             .SubOption(sub => sub.KeyName("Restrict to Compatible Roles", Translations.Options.RestrictToCompatbileRoles)
                 .BindBool(b => restrictedToCompatibleRoles = b)

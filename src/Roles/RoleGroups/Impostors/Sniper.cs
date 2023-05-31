@@ -150,7 +150,7 @@ public class Sniper: Shapeshifter
                 .SubOption(sub2 => sub2
                     .Name("Load Bullet Cooldown")
                     .Bind(v => loadBulletCooldown.Duration = Convert.ToSingle(v))
-                    .AddFloatRange(5, 120, 2.5f, 5, "s")
+                    .AddFloatRange(5, 120, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .SubOption(sub2 => sub2
                     .Name("Max Loaded Bullets")

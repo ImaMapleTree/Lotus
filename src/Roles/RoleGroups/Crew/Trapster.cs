@@ -4,6 +4,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Options;
 using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -44,11 +45,11 @@ public class Trapster : Crewmate
             .SubOption(sub => sub
                 .KeyName("Trapped Duration", TrappedDuration)
                 .Bind(v => trappedDuration = (float)v)
-                .AddFloatRange(1, 45, 0.5f, 8, "s")
+                .AddFloatRange(1, 45, 0.5f, 8, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
 
-    
+
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.35f, 0.56f, 0.82f));
 
     [Localized(nameof(Trapster))]

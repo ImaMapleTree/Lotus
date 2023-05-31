@@ -19,6 +19,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -114,11 +115,11 @@ public class Swooper: Impostor
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => base.RegisterOptions(optionStream)
         .SubOption(sub => sub.Name("Invisibility Cooldown")
-            .AddFloatRange(5, 120, 2.5f, 16, "s")
+            .AddFloatRange(5, 120, 2.5f, 16, GeneralOptionTranslations.SecondsSuffix)
             .BindFloat(swooperCooldown.SetDuration)
             .Build())
         .SubOption(sub => sub.Name("Swooping Duration")
-            .AddFloatRange(5, 60, 1f, 5, "s")
+            .AddFloatRange(5, 60, 1f, 5, GeneralOptionTranslations.SecondsSuffix)
             .BindFloat(swoopingDuration.SetDuration)
             .Build())
         .SubOption(sub => sub.Name("Ends Swooping at initial Vent")

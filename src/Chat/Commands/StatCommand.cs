@@ -1,6 +1,5 @@
 using System.Linq;
 using Lotus.API.Stats;
-using Lotus.Utilities;
 using Lotus.Extensions;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;

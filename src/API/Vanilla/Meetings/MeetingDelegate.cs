@@ -4,6 +4,7 @@ using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API.Player;
 using Lotus.Managers;
 using Lotus.Extensions;
+using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -109,5 +110,10 @@ public class MeetingDelegate
 
         this.ExiledPlayer = Players.PlayerById(exiledPlayer).Map(p => p.Data).OrElse(null!);
         this.IsTie = isTie;
+
+        string mostVotedPlayer = this.ExiledPlayer?.Object != null ? this.ExiledPlayer.Object.name : "Unknown";
+        VentLogger.Trace($"Calculated player votes. Player with most votes = {mostVotedPlayer}, isTie = {isTie}");
+
+        if (IsTie) this.ExiledPlayer = null;
     }
 }

@@ -6,6 +6,7 @@ namespace Lotus.Managers.Reporting;
 public enum ReportTag
 {
     KickByAnticheat,
+    KickByPacket,
     Performance
 }
 

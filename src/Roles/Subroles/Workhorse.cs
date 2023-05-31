@@ -12,7 +12,7 @@ public class Workhorse: Subrole
     private int additionalShortTasks;
     private int additionalLongTasks;
     
-    public override string Identifier() => "<size=2.5>+</size>";
+    public override string Identifier() => "<size=2.2>Θ</size>";
 
     protected override void PostSetup()
     {

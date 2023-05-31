@@ -12,14 +12,15 @@ public class FixedUpdateLock: ICloneOnSetup<FixedUpdateLock>
     public TimeUnit TimeUnit;
     private DateTime lastAcquire = DateTime.Now;
 
-    public FixedUpdateLock(): this(ModConstants.RoleFixedUpdateCooldown)
+    public FixedUpdateLock(bool beginUnlocked = true): this(ModConstants.RoleFixedUpdateCooldown, beginUnlocked: beginUnlocked)
     {
     }
     
-    public FixedUpdateLock(double duration, TimeUnit timeUnit = TimeUnit.Seconds)
+    public FixedUpdateLock(double duration, TimeUnit timeUnit = TimeUnit.Seconds, bool beginUnlocked = true)
     {
         LockDuration = duration;
         TimeUnit = timeUnit;
+        if (beginUnlocked) Unlock();
     }
 
     public bool AcquireLock()

@@ -21,7 +21,7 @@ class RpcReporter: IReportProducer
         Hooks.GameStateHooks.GameStartHook.Bind(ReporterHookKey, RefreshOnState);
         Hooks.GameStateHooks.GameEndHook.Bind(ReporterHookKey, RefreshOnState);
         Hooks.NetworkHooks.RpcHook.Bind(ReporterHookKey, HandleRpcEvent);
-        ReportManager.AddProducer(this, ReportTag.KickByAnticheat);
+        ReportManager.AddProducer(this, ReportTag.KickByAnticheat, ReportTag.KickByPacket);
     }
 
     private void RefreshOnState(GameStateHookEvent hookEvent)
@@ -44,7 +44,7 @@ class RpcReporter: IReportProducer
             string timestamp = tuple.Item1.ToString("hh:mm:ss");
             RpcMeta meta = tuple.Item2;
 
-            string target = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(meta.NetId).name;
+            string target = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(meta.NetId)?.name;
             string recipient = Utils.PlayerByClientId(meta.Recipient).Map(p => p.name).OrElse("Unknown") + $" (Id: {meta.Recipient})";
             string rpc = ((RpcCalls)meta.CallId).Name();
 

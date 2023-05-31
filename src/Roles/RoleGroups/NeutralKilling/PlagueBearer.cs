@@ -28,7 +28,7 @@ namespace Lotus.Roles.RoleGroups.NeutralKilling;
 public class PlagueBearer: NeutralKillingBase
 {
     private static readonly Pestilence Pestilence = new();
-    
+
     [NewOnSetup] private List<Remote<IndicatorComponent>> indicatorRemotes = new();
     [NewOnSetup] private HashSet<byte> infectedPlayers = null!;
     private int cooldownSetting;
@@ -91,7 +91,7 @@ public class PlagueBearer: NeutralKillingBase
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        AddKillCooldownOptions(base.RegisterOptions(optionStream), Translations.Options.InfectCooldown, "Infect Cooldown");
+        AddKillCooldownOptions(base.RegisterOptions(optionStream), key: "Infect Cooldown", name: Translations.Options.InfectCooldown);
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
@@ -103,7 +103,7 @@ public class PlagueBearer: NeutralKillingBase
     [Localized(nameof(PlagueBearer))]
     private static class Translations
     {
-        [Localized(nameof(InfectedHistoryMessage), ForceOverride = true)]
+        [Localized(nameof(InfectedHistoryMessage))]
         public static string InfectedHistoryMessage = "{0}::0 infected {1}::1.";
 
         [Localized(ModConstants.Options)]
@@ -113,5 +113,5 @@ public class PlagueBearer: NeutralKillingBase
             public static string InfectCooldown = "Infect Cooldown";
         }
     }
-    
+
 }

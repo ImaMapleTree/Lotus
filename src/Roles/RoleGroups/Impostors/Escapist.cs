@@ -7,6 +7,7 @@ using Lotus.Utilities;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -68,11 +69,11 @@ public class Escapist: Impostor
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Cooldown After Mark")
-                .AddFloatRange(0, 60, 2.5f, 2, "s")
+                .AddFloatRange(0, 60, 2.5f, 2, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(canEscapeCooldown.SetDuration)
                 .Build())
             .SubOption(sub => sub.Name("Cooldown After Escape")
-                .AddFloatRange(0, 180, 2.5f, 16, "s")
+                .AddFloatRange(0, 180, 2.5f, 16, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(canMarkCooldown.SetDuration)
                 .Build())
             .SubOption(sub => sub.Name("Clear Mark After Meeting")

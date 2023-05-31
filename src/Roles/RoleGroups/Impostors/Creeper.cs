@@ -1,6 +1,7 @@
 using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
+using Lotus.Options;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals.Attributes;
@@ -20,7 +21,7 @@ public class Creeper : Shapeshifter
     private bool creeperProtectedByShields;
     private float explosionRadius;
     private Cooldown gracePeriod;
-    
+
     [UIComponent(UI.Text)]
     public string GracePeriodText() => gracePeriod.IsReady() ? "" : Color.red.Colorize(CreeperTranslations.ExplosionGracePeriod).Formatted(gracePeriod + "s");
 
@@ -32,7 +33,7 @@ public class Creeper : Shapeshifter
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target) => canKillNormally && base.TryKill(target);
-    
+
     [RoleAction(RoleActionType.OnPet)]
     [RoleAction(RoleActionType.Shapeshift)]
     private void CreeperExplode()
@@ -42,15 +43,15 @@ public class Creeper : Shapeshifter
             FatalIntent intent = new(true, () => new BombedEvent(p, MyPlayer));
             MyPlayer.InteractWith(p, new DirectInteraction(intent, this));
         });
-        
+
         FatalIntent suicideIntent = new(false, () => new BombedEvent(MyPlayer, MyPlayer));
-        MyPlayer.InteractWith(MyPlayer, creeperProtectedByShields 
-            ? new DirectInteraction(suicideIntent, this) 
+        MyPlayer.InteractWith(MyPlayer, creeperProtectedByShields
+            ? new DirectInteraction(suicideIntent, this)
             : new UnblockedInteraction(suicideIntent, this)
         );
     }
-    
-    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => 
+
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.KeyName("Can Kill Normally", CanKillNormal)
                 .AddOnOffValues()
@@ -67,7 +68,7 @@ public class Creeper : Shapeshifter
                 .BindFloat(f => explosionRadius = f)
                 .Build())
             .SubOption(sub => sub.KeyName("Creeper Grace Period", CreeperGracePeriod)
-                .AddFloatRange(0, 60, 2.5f, 4, "s")
+                .AddFloatRange(0, 60, 2.5f, 4, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(gracePeriod.SetDuration)
                 .Build());
 
@@ -76,7 +77,7 @@ public class Creeper : Shapeshifter
     {
         [Localized(nameof(ExplosionGracePeriod))]
         public static string ExplosionGracePeriod = "Explosion Grace Period: {0}";
-        
+
         [Localized(ModConstants.Options)]
         internal static class CreeperOptionTranslations
         {
@@ -91,7 +92,7 @@ public class Creeper : Shapeshifter
 
             [Localized(nameof(CreeperGracePeriod))]
             public static string CreeperGracePeriod = "Grace Period";
-            
+
             [Localized(nameof(CreeperProtection))]
             public static string CreeperProtection = "Protected by Shielding";
 

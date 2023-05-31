@@ -33,7 +33,7 @@ public class Hacker: Engineer
 
     public override bool HasTasks() => false;
 
-    [UIComponent(UI.Counter)]
+    [UIComponent(UI.Counter, ViewMode.Additive, GameState.Roaming, GameState.InMeeting)]
     private string HackerCounter() => RoleUtils.Counter(sabotageCount, sabotageTotal, RoleColor);
 
     [RoleAction(RoleActionType.SabotagePartialFix)]

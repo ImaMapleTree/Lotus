@@ -22,11 +22,11 @@ namespace Lotus.Roles.RoleGroups.Crew;
 public class Oracle: Crewmate
 {
     private static ColorGradient _oracleGradient = new(new Color(0.49f, 0.57f, 0.84f), new Color(0.67f, 0.36f, 0.76f));
-    
+
     private Optional<byte> selectedPlayer = Optional<byte>.Null();
     private bool targetLockedIn;
     private bool initialSkip;
-    
+
 
     [RoleAction(RoleActionType.RoundEnd)]
     private void OracleSendMessage()
@@ -106,23 +106,23 @@ public class Oracle: Crewmate
     {
         [Localized(nameof(OracleMessageTitle))]
         public static string OracleMessageTitle = "Oracle Ability";
-        
+
         [Localized(nameof(VotePlayerInfo))]
         public static string VotePlayerInfo = "Vote to select a player to reveal on your death. You can re-vote a player to unselect them.\nAfter confirming your target cannot be changed.";
-        
-        [Localized(nameof(SelectRole), ForceOverride = true)]
+
+        [Localized(nameof(SelectRole))]
         public static string SelectRole = "You have selected: {0}";
-        
-        [Localized(nameof(UnselectRole), ForceOverride = true)]
+
+        [Localized(nameof(UnselectRole))]
         public static string UnselectRole = "You have unselected: {0}";
 
         [Localized(nameof(VoteNormallyMessage))]
         public static string VoteNormallyMessage = "You may now vote normally";
-        
+
         [Localized(nameof(SkipMessage))]
         public static string SkipMessage = "Press \"Skip Vote\" to continue.";
 
         [Localized(nameof(RevealMessage))]
-        public static string RevealMessage = "The Oracle has revealed to all that {0} is the {1}::0";
+        public static string RevealMessage = "The Oracle has revealed to all that {0} is the {1}";
     }
 }

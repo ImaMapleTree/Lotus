@@ -28,6 +28,8 @@ public class StandardRoleAssignmentLogic
     public static void AssignRoles(List<PlayerControl> allPlayers)
     {
         List<PlayerControl> unassignedPlayers = new(allPlayers);
+        unassignedPlayers.Shuffle();
+        
         RoleDistribution distribution = GeneralOptions.GameplayOptions.OptimizeRoleAssignment
             ? OptimizeRoleAlgorithm.OptimizeDistribution()
             : OptimizeRoleAlgorithm.NonOptimizedDistribution();
@@ -71,7 +73,8 @@ public class StandardRoleAssignmentLogic
             {
                 if (nkRoles > distribution.MaximumNeutralKilling || loops >= 10) break;
                 loops++;
-                neutralKillingLottery = new NeutralKillingLottery(); // Refresh the lottery again to fulfill the minimum requirement
+                if (!neutralKillingLottery.HasNext()) 
+                    neutralKillingLottery = new NeutralKillingLottery(); // Refresh the lottery again to fulfill the minimum requirement
                 continue;
             }
             MatchData.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(role));
@@ -91,7 +94,8 @@ public class StandardRoleAssignmentLogic
             {
                 if (neutralRoles > distribution.MinimumNeutralPassive || loops >= 10) break;
                 loops++;
-                neutralLottery = new NeutralLottery(); // Refresh the lottery again to fulfill the minimum requirement
+                if (!neutralLottery.HasNext()) 
+                    neutralLottery = new NeutralLottery(); // Refresh the lottery again to fulfill the minimum requirement
                 continue;
             }
             MatchData.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(role));

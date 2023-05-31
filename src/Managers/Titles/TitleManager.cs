@@ -4,8 +4,6 @@ using System.Linq;
 using System.Reflection;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
-using Lotus.Logging;
-using UnityEngine.XR;
 using VentLib.Utilities.Extensions;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -17,13 +15,13 @@ public class TitleManager
     private DirectoryInfo directory;
     private Dictionary<string, List<CustomTitle>> titles = null!;
 
-    private static IDeserializer _titleDeserializer = new DeserializerBuilder()
+    private static readonly IDeserializer TitleDeserializer = new DeserializerBuilder()
         .WithNamingConvention(PascalCaseNamingConvention.Instance)
         .Build();
 
     public TitleManager(DirectoryInfo directory)
     {
-        Hooks.PlayerHooks.PlayerJoinHook.Bind(nameof(TitleManager), _ => Game.GetAllPlayers().ForEach(ApplyTitleWithChatFix));
+        Hooks.NetworkHooks.ReceiveVersionHook.Bind(nameof(TitleManager), _ => Game.GetAllPlayers().ForEach(ApplyTitleWithChatFix));
         if (!directory.Exists) directory.Create();
         this.directory = directory;
         LoadAll();
@@ -58,6 +56,11 @@ public class TitleManager
         player.RpcSetName(ApplyTitle(player.FriendCode, playerName));
         player.Data.Outfits[PlayerOutfitType.Default].PlayerName = ApplyTitle(player.FriendCode, playerName, true);
         player.name = playerName;
+    }
+
+    public void ClearTitle(PlayerControl player)
+    {
+        player.RpcSetName(player.name);
     }
 
     public void Reload()
@@ -109,6 +112,6 @@ public class TitleManager
             result = reader.ReadToEnd();
         }
 
-        return _titleDeserializer.Deserialize<CustomTitle>(result);
+        return TitleDeserializer.Deserialize<CustomTitle>(result);
     }
 }

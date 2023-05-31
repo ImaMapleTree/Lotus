@@ -11,6 +11,9 @@ namespace Lotus.Victory.Conditions;
 public class VanillaImpostorWin: IFactionWinCondition
 {
     private static readonly List<IFaction> ImpostorFaction = new() { FactionInstances.Impostors };
+
+    public List<IFaction> Factions() => ImpostorFaction;
+
     public bool IsConditionMet(out List<IFaction> factions)
     {
         factions = ImpostorFaction;
@@ -31,7 +34,6 @@ public class VanillaImpostorWin: IFactionWinCondition
                 if (role.Faction.Relationship(FactionInstances.Crewmates) is Relation.FullAllies) continue;
                 if (role.MyPlayer.GetVanillaRole().IsImpostor()) aliveKillers++;
             }
-            
         }
 
         return aliveImpostors > 0 && aliveImpostors >= aliveOthers && aliveKillers == 0;

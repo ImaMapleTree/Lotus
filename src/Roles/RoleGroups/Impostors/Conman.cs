@@ -6,6 +6,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Options;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
@@ -49,11 +50,11 @@ public class Conman : Impostor
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddKillCooldownOptions(base.RegisterOptions(optionStream))
             .SubOption(sub => sub.KeyName("Discussion Time Decrease", DiscussionTimeDecrease)
-                .AddIntRange(0, 120, 5, 6, "s")
+                .AddIntRange(0, 120, 5, 6, GeneralOptionTranslations.SecondsSuffix)
                 .BindInt(f => discussionTimeDecrease = f)
                 .Build())
             .SubOption(sub => sub.KeyName("Voting Time Decrease", VotingTimeDecrease)
-                .AddIntRange(0, 120, 5, 3, "s")
+                .AddIntRange(0, 120, 5, 3, GeneralOptionTranslations.SecondsSuffix)
                 .BindInt(f => votingTimeDecrease = f)
                 .Build())
             .SubOption(sub => sub.KeyName("Affect Anonymous Voting", AffectAnonymousVoting)

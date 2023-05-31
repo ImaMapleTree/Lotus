@@ -2,6 +2,7 @@ using Lotus.API;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Options;
 using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -64,7 +65,7 @@ public class Speedrunner : Crewmate
                 .SubOption(sub2 => sub2
                     .Name("Temporary Boost Duration")
                     .Bind(v => smalRewardDuration = (float)v)
-                    .AddFloatRange(2f, 12f, 0.5f, 2, "s")
+                    .AddFloatRange(2f, 12f, 0.5f, 2, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .Build())
             .SubOption(sub => sub

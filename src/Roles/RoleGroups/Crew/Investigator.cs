@@ -17,6 +17,7 @@ using Lotus.Options;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
+using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -47,11 +48,11 @@ public class Investigator : Crewmate
             .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
             .ShowSubOptionPredicate(i => (int)i == 2), false)
     };
-        
+
     // 2 = Color red, 1 = Color green
     public static Dictionary<Type, int> RoleColoringDictionary = new();
     [NewOnSetup] private List<byte> investigated = null!;
-    
+
     [UIComponent(UI.Cooldown)]
     private Cooldown abilityCooldown = null!;
 
@@ -73,12 +74,12 @@ public class Investigator : Crewmate
 
         investigated.Add(player.PlayerId);
         CustomRole role = player.GetCustomRole();
-        
+
         int setting = RoleTypeBuilders.FirstOrOptional(rtb => rtb.predicate(role)).Map(rtb => rtb.allColored ? 2 : 1).OrElse(0);
         if (setting == 0) setting = RoleColoringDictionary.GetValueOrDefault(role.GetType(), 1);
 
         Color color = setting == 2 ? Color.green : Color.red;
-        
+
         NameComponent nameComponent = new(new LiveString(player.name, color), GameStates.IgnStates, ViewMode.Replace, MyPlayer);
         player.NameModel().GetComponentHolder<NameHolder>().Add(nameComponent);
     }
@@ -89,7 +90,7 @@ public class Investigator : Crewmate
             .SubOption(sub => sub
                 .KeyName("Investigate Cooldown", InvestigateCooldown)
                 .BindFloat(abilityCooldown.SetDuration)
-                .AddFloatRange(2.5f, 120, 2.5f, 10, "s")
+                .AddFloatRange(2.5f, 120, 2.5f, 10, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
@@ -115,7 +116,9 @@ public class Investigator : Crewmate
         RoleTypeBuilders.ForEach(rtb =>
         {
             rtb.builder.BindInt(i => rtb.allColored = i == 1);
-            RoleOptions.Children.Add(rtb.builder.Build());
+            Option option = rtb.builder.Build();
+            RoleOptions.AddChild(option);
+            option.Register(loadMode: OptionLoadMode.LoadOrCreate);
         });
     }
 
@@ -127,7 +130,7 @@ public class Investigator : Crewmate
         {
             [Localized(nameof(InvestigateCooldown))]
             public static string InvestigateCooldown = "Investigate Cooldown";
-            
+
             [Localized(nameof(NeutralKillingRed))]
             public static string NeutralKillingRed = "Neutral::1 Killing::2 Are Red::0";
 
@@ -138,5 +141,5 @@ public class Investigator : Crewmate
             public static string MadmateRed = "Madmates::1 Are Red::0";
         }
     }
-    
+
 }

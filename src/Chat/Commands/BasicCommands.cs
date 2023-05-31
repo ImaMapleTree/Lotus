@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using BepInEx.Bootstrap;
 using Lotus.API.Odyssey;
 using Lotus.Factions.Neutrals;
 using Lotus.Managers;
@@ -10,8 +11,11 @@ using Lotus.Roles;
 using Lotus.Roles.Internals;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Logging;
 using Lotus.Managers.Friends;
 using Lotus.Managers.Templates;
+using Lotus.Roles.Subroles;
+using TMPro;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -20,6 +24,8 @@ using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
+using Object = UnityEngine.Object;
+using Type = Il2CppSystem.Type;
 
 namespace Lotus.Chat.Commands;
 
@@ -28,7 +34,7 @@ public class BasicCommands: CommandTranslations
 {
     [Localized("Color.NotInRange")] public static string ColorNotInRangeMessage = "{0} is not in range of valid colors.";
     [Localized(nameof(Winners))] public static string Winners = "Winners";
-    [Localized("Dump.Success", ForceOverride = true)] public static string DumpSuccess = "Successfully dumped log. Check your logs folder for a \"dump.log!\"";
+    [Localized("Dump.Success")] public static string DumpSuccess = "Successfully dumped log. Check your logs folder for a \"dump.log!\"";
     [Localized("Ids.PlayerIdMessage")] public static string PlayerIdMessage = "{0}'s player ID is {1}";
 
     [Command("perc", "percentage", "percentages")]
@@ -41,6 +47,7 @@ public class BasicCommands: CommandTranslations
 
         string FactionName(CustomRole role)
         {
+            if (role is Subrole) return "Modifiers";
             if (role.Faction is not Solo) return role.Faction.Name();
             return role.SpecialType is SpecialType.NeutralKilling ? "Neutral Killers" : "Neutral";
         }
@@ -55,7 +62,8 @@ public class BasicCommands: CommandTranslations
             string fName = FactionName(r);
             if (factionName != fName)
             {
-                text += $"\n{HostOptionTranslations.RoleCategory.Formatted(fName)}\n";
+                if (factionName == "Modifiers") text += $"\n★ {factionName}\n";
+                else text += $"\n{HostOptionTranslations.RoleCategory.Formatted(fName)}\n";
                 factionName = fName;
             }
 
@@ -157,14 +165,14 @@ public class BasicCommands: CommandTranslations
     [Command("view", "v")]
     public static void View(PlayerControl source, int id) => TemplateCommands.Preview(source, id);
 
-    [Command(CommandFlag.HostOnly, "title reload", "tload")]
+    [Command(CommandFlag.HostOnly, "tload")]
     public static void ReloadTitles(PlayerControl source)
     {
         PluginDataManager.TitleManager.Reload();
         ChatHandler.Of("Successfully reloaded titles.").Send(source);
     }
 
-    [Command("mods", "modifiers", "subroles")]
+    [Command("mods", "modifiers", "subroles", "mod")]
     public static void Modifiers(PlayerControl source)
     {
         ChatHandler.Of(new Template("@ModsDescriptive").Format(source), "Modifiers").LeftAlign().Send(source);

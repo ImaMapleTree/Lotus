@@ -5,10 +5,9 @@ using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Chat.Patches;
 
-
-class ChatBubblePatch
+static class ChatBubblePatch
 {
-    internal static Queue<int> SetLeftQueue = new();
+    internal static readonly Queue<int> SetLeftQueue = new();
 
     [QuickPostfix(typeof(ChatBubble), nameof(ChatBubble.SetRight))]
     public static void SetBubbleRight(ChatBubble __instance)
@@ -21,26 +20,7 @@ class ChatBubblePatch
     [QuickPostfix(typeof(ChatBubble), nameof(ChatBubble.SetLeft))]
     public static void SetBubbleLeft(ChatBubble __instance)
     {
+        SetLeftQueue.TryDequeue(out int _);
         __instance.TextArea.richText = true;
     }
 }
-
-
-/*[HarmonyPatch(typeof(ChatBubble), nameof(ChatBubble.SetName))]
-class ChatBubbleSetNamePatch
-{
-    public static void Prefix(ChatBubble __instance)
-    {
-        PlayerControl relatedPlayer = __instance.playerInfo.Object;
-        if (relatedPlayer == null) return;
-        DynamicName name = relatedPlayer.GetDynamicName();
-        relatedPlayer.RpcSetName(name.RawName);
-        __instance.NameText.color = Color.white;
-    }
-
-    /*public static void Postfix(ChatBubble __instance)
-    {
-        PlayerControl relatedPlayer = __instance.playerInfo.Object;
-        if (relatedPlayer == null) return; ;
-    }#1#
-}*/

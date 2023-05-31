@@ -10,6 +10,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -68,7 +69,7 @@ public class Deathknight : UndeadRole
                 .BindBool(b => CanBecomeNecromancer = b)
                 .Build())
             .SubOption(sub => sub.Name("Influence Cooldown")
-                .AddFloatRange(5f, 120f, 2.5f, 7, "s")
+                .AddFloatRange(5f, 120f, 2.5f, 7, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(influenceCooldown.SetDuration)
                 .Build())
             .SubOption(sub => sub.Name("Influence Range")

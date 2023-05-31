@@ -8,8 +8,9 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
-using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Factions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -57,14 +58,14 @@ public class Vampire : Impostor, IVariableRole
 
     public CustomRole Variation() => _vampiress;
 
-    public bool AssignVariation() => Random.RandomRange(0, 100) <= _vampiress.Chance;
+    public bool AssignVariation() => Random.RandomRange(0, 100) < _vampiress.Chance;
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub
                 .Name("Kill Delay")
                 .Bind(v => killDelay = (float)v)
-                .AddFloatRange(2.5f, 60f, 2.5f, 2, "s")
+                .AddFloatRange(2.5f, 60f, 2.5f, 2, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

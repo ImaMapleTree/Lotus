@@ -182,6 +182,11 @@ public class VanillaStatistics
                 }
             TasksComplete.Update(uniqueId, i => i + 1);
         });
+        Hooks.PlayerHooks.PlayerShapeshiftHook.Bind(StatisticsHookKey, ss =>
+        {
+            Shapeshifts.Update(ss.Player.UniquePlayerId(), i => i + 1);
+        });
+
         // Sabotage Stuff
         Hooks.SabotageHooks.SabotageCalledHook.Bind(StatisticsHookKey, sabotageEvent =>
         {
@@ -217,7 +222,7 @@ public class VanillaStatistics
         {
             sabotageFixEvent.Fixer.IfPresent(fixer => SabotagesFixed.Update(fixer.UniquePlayerId(), i => i + 1));
         });
-        
+
         // =================
         // Meetings (Voting)
         // =================
@@ -245,7 +250,19 @@ public class VanillaStatistics
                 PlayersExiled.Update(p.UniquePlayerId(), i => i + 1);
             });
         });
-        
+
+        // =====================
+        // Results
+        // ====================
+        Hooks.ResultHooks.WinnersHook.Bind(StatisticsHookKey, winners =>
+        {
+            winners.Winners.ForEach(w => Wins.Update(UniquePlayerId.FromFriendCode(w.FriendCode), i => i + 1));
+        });
+        Hooks.ResultHooks.LosersHook.Bind(StatisticsHookKey, losers =>
+        {
+            losers.Losers.ForEach(w => Losses.Update(UniquePlayerId.FromFriendCode(w.FriendCode), i => i + 1));
+        });
+
     }
 
     private static void SetupStatisticTracking()

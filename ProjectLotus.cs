@@ -55,17 +55,15 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
     public static readonly string ModColor = "#4FF918";
 
     public static readonly bool ShowDiscordButton = true;
-    public static readonly string DiscordInviteUrl = "https://discord.gg/tohtor";
+    
 
     public static readonly bool DevVersion = true;
-    public static readonly string DevVersionStr = "Alpha 12.05.2023";
+    public static readonly string DevVersionStr = "Alpha 24.05.2023";
 
     public Harmony Harmony { get; } = new(PluginGuid);
-    public static string CredentialsText;
+    public static string CredentialsText = null!;
 
     public static RProfiler Profiler = new("General");
-    public static bool Initialized;
-
     public static ModUpdater ModUpdater = null!;
     
 
@@ -79,8 +77,9 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         PluginDataManager.TemplateManager.RegisterTag("lobby-join", "Tag for the template shown to players joining the lobby.");
         
         ModUpdater = ModUpdater.Default();
-        ModUpdater.EstablishConnection("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");
+        ModUpdater.EstablishConnection();
         ModUpdater.RegisterReleaseCallback(BeginUpdate, true);
+        RpcMonitor.Enable();
     }
 
     private void BeginUpdate(Release release)
@@ -127,7 +126,6 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         GamemodeManager.Setup();
         ShowerPages.InitPages();
         //OptionManager.AllHolders.AddRange(OptionManager.Options().SelectMany(opt => opt.GetHoldersRecursive()));
-        Initialized = true;
         Profiler.Sampler.Stop(id);
 
     }
@@ -147,8 +145,8 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
     {
         if (version is not NoVersion)
         {
-            ModRPC rpc = Vents.FindRPC((uint)ModCalls.SendOptionPreview)!;
-            rpc.Send(new[] { player.GetClientId() }, new BatchList<Option>(OptionManager.GetManager().GetOptions()));
+            //ModRPC rpc = Vents.FindRPC((uint)ModCalls.SendOptionPreview)!;
+            //rpc.Send(new[] { player.GetClientId() }, new BatchList<Option>(OptionManager.GetManager().GetOptions()));
         }
 
         if (PluginDataManager.TemplateManager.TryFormat(player, "lobby-join", out string message)) ChatHandler.Of(message).Send(player);

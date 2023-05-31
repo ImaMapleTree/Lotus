@@ -11,6 +11,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -139,7 +140,7 @@ public class FireWorker: Shapeshifter
                 .SubOption(sub2 => sub2
                     .Name("FireWorks Ability Cooldown")
                     .BindFloat(v => fireworkCooldown.Duration = v)
-                    .AddFloatRange(0, 120, 2.5f,8, "s").Build())
+                    .AddFloatRange(0, 120, 2.5f,8, GeneralOptionTranslations.SecondsSuffix).Build())
                 .Build())
             .SubOption(sub => sub
                 .Name("Firework Explosion Radius")
@@ -148,7 +149,7 @@ public class FireWorker: Shapeshifter
             .SubOption(sub => sub
                 .Name("Firework Delay")
                 .BindFloat(v => fireworkDelay = v)
-                .AddFloatRange(0f, 10f, 0.25f, 4, "s")
+                .AddFloatRange(0f, 10f, 0.25f, 4, GeneralOptionTranslations.SecondsSuffix)
                 .ShowSubOptionPredicate(v => (float)v > 0.26f)
                 .SubOption(sub2 => sub2
                     .Name("Warn Players Before Explosion")

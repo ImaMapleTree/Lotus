@@ -53,7 +53,7 @@ public class BloodKnight : NeutralKillingBase
              .SubOption(opt =>
                 opt.Name("Protection Duration")
                 .BindFloat(v => protectionAmt = v)
-                .AddFloatRange(2.5f, 180, 2.5f, 5, "s")
+                .AddFloatRange(2.5f, 180, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(opt =>
                 opt.Name("Can Vent")

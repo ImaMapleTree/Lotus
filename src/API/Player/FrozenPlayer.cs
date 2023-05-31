@@ -36,8 +36,12 @@ public class FrozenPlayer
         Role = player.GetCustomRole();
         Subroles = player.GetSubroles();
         GameID = player.GetGameID();
-        
-        Hooks.PlayerHooks.PlayerDeathHook.Bind($"{nameof(FrozenPlayer)}-{PlayerId}", pd => CauseOfDeath = pd.CauseOfDeath, true);
+
+        Hooks.PlayerHooks.PlayerDeathHook.Bind($"{nameof(FrozenPlayer)}-{PlayerId}", pd =>
+        {
+            if (pd.Player == null || pd.Player.PlayerId != PlayerId) return;
+            CauseOfDeath = pd.CauseOfDeath;
+        }, true);
         this.NullablePlayer = player;
     }
 

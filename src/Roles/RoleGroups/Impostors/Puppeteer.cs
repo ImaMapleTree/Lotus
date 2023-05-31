@@ -78,7 +78,7 @@ public class Puppeteer: Vanilla.Impostor
     [RoleAction(RoleActionType.RoundStart, triggerAfterDeath: true)]
     private void ClearPuppets()
     {
-        cursedPlayers.ForEach(RemovePuppet);
+        cursedPlayers.ToArray().ForEach(RemovePuppet);
         cursedPlayers.Clear();
     }
     

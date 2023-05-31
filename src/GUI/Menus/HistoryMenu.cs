@@ -1,4 +1,4 @@
-using System;
+/*using System;
 using System.Collections.Generic;
 using Lotus.Managers.History.Events;
 using Lotus.Utilities;
@@ -170,7 +170,7 @@ public class HistoryMenu
         playerTransform.localPosition += new Vector3(0.1f, 0f);
 
         /*bubble.MaskArea.material.SetInt(PlayerMaterial.MaskLayer, 0);
-        bubble.Background.material.SetInt(PlayerMaterial.MaskLayer, 0);*/
+        bubble.Background.material.SetInt(PlayerMaterial.MaskLayer, 0);#1#
         HistoryMenuIntermediate.GetOutfit(playerId).IfPresent(outfit => bubble.Player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.ScrollingUI, false, false));
 
         bubble.TextArea.overrideColorTags = false;
@@ -219,4 +219,4 @@ public class HistoryMenu
     }
 
     public bool Exists() => chatOptional.Exists();
-}
+}*/

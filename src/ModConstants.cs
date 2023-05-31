@@ -36,6 +36,8 @@ public static class ModConstants
 
     public const string Infinity = "∞";
 
+    public const string DiscordInvite = "https://discord.gg/tohtor";
+
     public static class Palette
     {
         public static Color InfinityColor = new(0.77f, 0.71f, 1f);
@@ -43,6 +45,7 @@ public static class ModConstants
         public static Color PassiveColor = new(1f, 0.87f, 0.91f);
         public static Color KillingColor = new(1f, 0.27f, 0.18f);
         public static Color MadmateColor = new(0.73f, 0.18f, 0.02f);
+        public static Color ModifierColor = new(0.44f, 0.27f, 0.81f);
 
         public static Color GeneralColor1 = new(0.15f, 0.27f, 0.33f);
         public static Color GeneralColor2 = new(0.16f, 0.62f, 0.56f);
@@ -51,6 +54,7 @@ public static class ModConstants
         public static Color GeneralColor5 = new(0.91f, 0.44f, 0.32f);
 
 
+        public static Color GlobalColor = new(1f, 0.61f, 0.33f);
         public static Color InvalidUsage = new(1f, 0.67f, 0.11f);
         public static Color WinnerColor = new(1f, 0.83f, 0.24f);
     }
@@ -108,7 +112,7 @@ public static class ModConstants
         { "Poro", "pet_poro" },
         { "Magmate", "pet_Lava" },
         { "Crewmate", "pet_Crewmate" },
-        { "Pouka", "pet_Pouka" },
+        { "Pouka", "pet_D2PoukaPet" },
         { "Ro-Bot", "pet_Robot" },
         { "Snowball", "pet_Snow" },
         { "Squig", "pet_Squig" },

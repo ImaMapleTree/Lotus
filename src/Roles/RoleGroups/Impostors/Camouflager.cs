@@ -6,6 +6,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Options;
 using Lotus.Roles.Internals;
 using Lotus.RPC;
 using VentLib.Options.Game;
@@ -45,12 +46,12 @@ public class Camouflager: Shapeshifter
             .SubOption(sub => sub
                 .Name("Camouflage Cooldown")
                 .Bind(v => ShapeshiftCooldown = (float)v)
-                .AddFloatRange(5, 120, 2.5f, 5, "s")
+                .AddFloatRange(5, 120, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Camouflage Duration")
                 .Bind(v => ShapeshiftDuration = (float)v)
-                .AddFloatRange(5, 60, 2.5f, 5, "s")
+                .AddFloatRange(5, 60, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Can Vent")

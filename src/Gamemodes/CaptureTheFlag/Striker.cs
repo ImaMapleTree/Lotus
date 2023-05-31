@@ -91,7 +91,7 @@ public class Striker: Impostor
             .SubOption(sub => sub
                 .Name("Kill Cooldown")
                 .BindFloat(v => this.KillCooldown = v)
-                .AddFloatRange(0.5f, 10f, 0.25f, 4, "s")
+                .AddFloatRange(0.5f, 10f, 0.25f, 4, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Speed Boost Additive")
@@ -100,13 +100,13 @@ public class Striker: Impostor
                 .Build())
             .SubOption(sub => sub
                 .Name("Speed Boost Duration")
-                .AddFloatRange(0, 10, 0.25f, 6, "s")
+                .AddFloatRange(0, 10, 0.25f, 6, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(v => duration = v)
                 .Build())
             .SubOption(sub => sub
                 .Name("Speed Boost Cooldown")
                 .BindFloat(v => speedCooldown.Duration = v)
-                .AddFloatRange(0, 120, 2.5f, 16, "s")
+                .AddFloatRange(0, 120, 2.5f, 16, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier modifier) =>

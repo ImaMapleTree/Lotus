@@ -65,7 +65,7 @@ public static class RoleUtils
             return distanceApart <= distance;
         });
 
-        return sorted ? distancePlayers.Sorted(p => distances[p.PlayerId]) : distancePlayers;
+        return sorted ? distancePlayers.OrderBy(p => distances[p.PlayerId]) : distancePlayers;
     }
 
     public static IEnumerable<PlayerControl> GetPlayersOutsideDistance(PlayerControl source, float distance)
@@ -124,10 +124,10 @@ public static class RoleUtils
             return InteractionResult.Halt;
         }
         ActionHandle handle = ActionHandle.NoInit();
-        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null && p.PlayerId != interaction.Emitter().MyPlayer.PlayerId).Trigger(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
+        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null).Trigger(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
         if (player.PlayerId != target.PlayerId) target.Trigger(RoleActionType.Interaction, ref handle, player, interaction);
         if (!handle.IsCanceled || interaction is IUnblockedInteraction) interaction.Intent().Action(player, target);
-        if (handle.IsCanceled) interaction.Intent().Halted(player, target);
+        else if (handle.Cancellation is ActionHandle.CancelType.Normal) interaction.Intent().Halted(player, target);
         return handle.IsCanceled ? InteractionResult.Halt : InteractionResult.Proceed;
     }
 

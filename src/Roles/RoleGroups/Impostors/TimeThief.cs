@@ -6,6 +6,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
+using Lotus.Options;
 using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Logging;
@@ -22,7 +23,7 @@ public class TimeThief : Vanilla.Impostor
 
     [UIComponent(UI.Counter)]
     public string TimeStolenCounter() => RoleUtils.Counter(kills * meetingTimeSubtractor + "s", color: RoleColor);
-    
+
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
@@ -62,12 +63,12 @@ public class TimeThief : Vanilla.Impostor
             .SubOption(sub => sub
                 .Name("Meeting Time Stolen")
                 .Bind(v => meetingTimeSubtractor = (int)v)
-                .AddIntRange(5, 120, 5, 4, "s")
+                .AddIntRange(5, 120, 5, 4, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Minimum Voting Time")
                 .Bind(v => minimumVotingTime = (int)v)
-                .AddIntRange(5, 120, 5, 1, "s")
+                .AddIntRange(5, 120, 5, 1, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Return Stolen Time After Death")

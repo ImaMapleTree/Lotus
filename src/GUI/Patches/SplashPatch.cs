@@ -56,7 +56,8 @@ class SplashPatch
         AccountTab accountTab = Object.FindObjectOfType<AccountTab>();
         AccountTabPatch.ModifyAccountTabLocation(accountTab);
 
-        AdjustBottomButtons(GameObject.Find("BottomButtons"));
+
+        AdjustBottomButtons(__instance, GameObject.Find("BottomButtons"));
 
         var tohLogo = new GameObject("titleLogo_TOH");
         tohLogo.transform.position = new Vector3(4.55f, -1.5f);
@@ -100,9 +101,15 @@ class SplashPatch
         return splashArt;
     }
 
-    private static void AdjustBottomButtons(GameObject buttonContainer)
+    private static void AdjustBottomButtons(MainMenuManager menuManager, GameObject buttonContainer)
     {
-        buttonContainer.FindChild<PassiveButton>("StatsButton").gameObject.SetActive(false);
+        PassiveButton statsButton = buttonContainer.FindChild<PassiveButton>("StatsButton");
+        PassiveButton discordButton = Object.Instantiate(statsButton, menuManager.transform);
+        discordButton.GetComponentInChildren<SpriteRenderer>().sprite = AssetLoader.LoadSprite("main_menu.discord_button_icon.png", 1000);
+        discordButton.transform.localPosition -= new Vector3(0.65f, 2.5f);
+        discordButton.Modify(() => Application.OpenURL(ModConstants.DiscordInvite));
+        
+        statsButton.gameObject.SetActive(false);
 
         PassiveButton optionsButton = buttonContainer.FindChild<PassiveButton>("OptionsButton");
         optionsButton.gameObject.SetActive(false);

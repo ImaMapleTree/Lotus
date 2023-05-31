@@ -10,7 +10,10 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.API;
+using Lotus.API.Vanilla.Sabotages;
 using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Patches.Systems;
 using Lotus.Roles.Events;
 using Lotus.Roles.Overrides;
 using UnityEngine;
@@ -94,7 +97,7 @@ public class Sheriff : Crewmate
             .SubOption(sub => sub
                 .Name("Kill Cooldown")
                 .BindFloat(this.shootCooldown.SetDuration)
-                .AddFloatRange(0, 120, 2.5f, 12, "s")
+                .AddFloatRange(0, 120, 2.5f, 12, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Total Shots")
@@ -116,10 +119,10 @@ public class Sheriff : Crewmate
     // Sheriff is not longer a desync role for simplicity sake && so that they can do tasks
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .VanillaRole(RoleTypes.Crewmate)
-            .DesyncRole(!isSheriffDesync ? null : RoleTypes.Impostor)
+            .DesyncRole(isSheriffDesync ? RoleTypes.Impostor : RoleTypes.Crewmate)
             .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod(), () => isSheriffDesync)
+            .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod() / 5, () => isSheriffDesync && SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Lights)
             .OptionOverride(Override.KillCooldown, () => shootCooldown.Duration)
-            .RoleAbilityFlags(RoleAbilityFlag.CannotVent)
+            .RoleAbilityFlags(RoleAbilityFlag.CannotVent | RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.IsAbleToKill)
             .RoleColor(new Color(0.97f, 0.8f, 0.27f));
 }

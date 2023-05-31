@@ -28,7 +28,7 @@ public class RoleActionAttribute: Attribute
     /// </summary>
     public bool Subclassing = true;
 
-    public RoleActionAttribute(RoleActionType actionType, bool triggerAfterDeath = false, bool blockable = true, Priority priority = Priority.NoPriority)
+    public RoleActionAttribute(RoleActionType actionType, bool triggerAfterDeath = false, bool blockable = true, Priority priority = Priority.Normal)
     {
         this.ActionType = actionType;
         this.WorksAfterDeath = triggerAfterDeath || actionType is RoleActionType.MyDeath or RoleActionType.SelfExiled;
@@ -41,9 +41,13 @@ public class RoleActionAttribute: Attribute
 
 public enum Priority
 {
-    First,
-    NoPriority,
-    Last
+    First = 0,
+    VeryHigh = 200,
+    High = 400,
+    Normal = 600,
+    Low = 800,
+    VeryLow = 1000,
+    Last = int.MaxValue
 }
 
 public enum RoleActionType
@@ -132,7 +136,7 @@ public enum RoleActionType
     /// </summary>
     /// <param name="player"><see cref="PlayerControl"/> the player completing the task</param>
     /// <param name="task"><see cref="Optional"/> an optional of <see cref="PlayerTask"/>, containing the task that was done</param>
-    /// <param name="taskLength"><see cref="Lotus.Patches.Actions.TaskLength"/> the length of the completed task</param>
+    /// <param name="taskLength"><see cref="NormalPlayerTask.TaskLength"/> the length of the completed task</param>
     TaskComplete,
     FixedUpdate,
     /// <summary>
@@ -195,7 +199,7 @@ public enum RoleActionType
     /// <param name="Exiled Player">><see cref="Optional{T}"/> the optional exiled player</param>
     /// <param name="isTie"><see cref="bool"/> a boolean representing if the meeting tied</param>
     /// <param name="player vote counts"<see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, int) representing the amount of votes a player got</param>
-    /// <param name="playerVoteStatus"><see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, List[Optional[byte]] containing the voting statuses of all players) 
+    /// <param name="playerVoteStatus"><see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, List[Optional[byte]] containing the voting statuses of all players)
     /// </summary>
     MeetingEnd,
     /// <summary>

@@ -1,3 +1,4 @@
+using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using VentLib.Options.Game;
 
@@ -11,12 +12,12 @@ public class Morphling : Shapeshifter
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Shapeshift Cooldown")
-                .AddFloatRange(0, 120, 2.5f, 12, "s")
+                .AddFloatRange(0, 120, 2.5f, 12, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(f => ShapeshiftCooldown = f)
                 .Build())
             .SubOption(sub => sub.Name("Shapeshift Duration")
                 .Value(1f)
-                .AddFloatRange(2, 120, 2.5f, 6, "s")
+                .AddFloatRange(2, 120, 2.5f, 6, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(f => ShapeshiftDuration = f)
                 .Build());
 }

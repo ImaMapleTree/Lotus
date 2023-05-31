@@ -107,12 +107,12 @@ public class Archangel : CustomRole
             .SubOption(sub => sub
                 .Name("Protect Duration")
                 .BindFloat(v => protectDuration.Duration = v)
-                .AddFloatRange(2.5f, 180f, 2.5f, 11, "s")
+                .AddFloatRange(2.5f, 180f, 2.5f, 11, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Protect Cooldown")
                 .BindFloat(v => protectCooldown.Duration = v)
-                .AddFloatRange(2.5f, 180f, 2.5f, 5, "s")
+                .AddFloatRange(2.5f, 180f, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Target Knows They have A GA")

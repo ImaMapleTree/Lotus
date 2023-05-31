@@ -13,11 +13,13 @@ using Lotus.Roles.RoleGroups.Undead;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
 using Lotus.API;
+using Lotus.API.Player;
 using Lotus.Extensions;
 using Lotus.Factions.Interfaces;
 using Lotus.Roles.Internals;
 using VentLib.Logging;
 using VentLib.Options.Game.Tabs;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Gamemodes.Standard;
@@ -76,6 +78,8 @@ public class StandardGamemode: Gamemode
                 holders.Components().ForEach(components => components.AddViewer(player));
             }
         );
+
+        player.NameModel().Render(force: true);
     }
 
     private static void FixNeutralTeamingWinners(WinDelegate winDelegate)

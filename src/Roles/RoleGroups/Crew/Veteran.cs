@@ -12,6 +12,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -79,11 +80,11 @@ public class Veteran : Crewmate
                 .AddIntRange(1, 10, 1, 9).Build())
             .SubOption(sub => sub.Name("Alert Cooldown")
                 .Bind(v => veteranCooldown.Duration = (float)v)
-                .AddFloatRange(2.5f, 120, 2.5f, 5, "s")
+                .AddFloatRange(2.5f, 120, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub.Name("Alert Duration")
                 .Bind(v => veteranDuration.Duration = (float)v)
-                .AddFloatRange(1, 20, 0.25f, 10, "s").Build())
+                .AddFloatRange(1, 20, 0.25f, 10, GeneralOptionTranslations.SecondsSuffix).Build())
             .SubOption(sub => sub.Name("Kill Crewmates")
                 .Bind(v => canKillCrewmates = (bool)v)
                 .AddOnOffValues().Build())

@@ -13,14 +13,14 @@ public class MultiplicativeOverride: GameOptionOverride
     public MultiplicativeOverride(Override option, Func<object> valueSupplier, Func<bool>? condition = null) : base(option, valueSupplier, condition)
     {
     }
-    
+
     public override void ApplyTo(IGameOptions options)
     {
         if (!Condition?.Invoke() ?? false) return;
         object value = Option.GetValue(options);
         Option.SetValue(options, Multiply(value));
     }
-    
+
     private object? Multiply(dynamic? originalValue)
     {
         dynamic? myValue = GetValue();

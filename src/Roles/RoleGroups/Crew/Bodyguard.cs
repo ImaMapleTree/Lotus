@@ -77,12 +77,13 @@ public class Bodyguard: Crewmate
     {
         Intent intent = interaction.Intent();
         if (Game.State is not GameState.Roaming) return;
+        if (actor.PlayerId == MyPlayer.PlayerId) return;
         if (!guardedPlayer.Exists() || target.PlayerId != guardedPlayer.Get()) return;
 
         switch (intent)
         {
             case IHelpfulIntent when !protectAgainstHelpfulInteraction:
-            case INeutralIntent when !protectAgainstNeutralInteraction: 
+            case INeutralIntent when !protectAgainstNeutralInteraction:
                 return;
         }
 
@@ -94,8 +95,8 @@ public class Bodyguard: Crewmate
         InteractionResult result = MyPlayer.InteractWith(actor, DirectInteraction.FatalInteraction.Create(this));
 
         if (result is InteractionResult.Proceed) Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, actor));
-        
-        
+
+
         actor.GetCustomRole().GetActions(RoleActionType.Attack)
             .FirstOrOptional()
             .Handle(t => t.Item1.Execute(t.Item2, new object[] { MyPlayer} ),
@@ -105,7 +106,7 @@ public class Bodyguard: Crewmate
                     Game.MatchData.GameHistory.AddEvent(new KillEvent(actor, MyPlayer));
             });
     }
-    
+
     [RoleAction(RoleActionType.Disconnect)]
     private void HandleDisconnect(PlayerControl player)
     {
@@ -153,13 +154,13 @@ public class Bodyguard: Crewmate
 
         [Localized("VotePlayerInfo")]
         public static string VotePlayerMessage = "Vote to select a player to guard.";
-        
+
         [Localized(ModConstants.Options)]
         public static class BodyguardOptions
         {
             [Localized(nameof(BeneficialInteractionProtection))]
             public static string BeneficialInteractionProtection = "Protect against Beneficial::0 Interactions";
-            
+
             [Localized(nameof(NeutralInteractionProtection))]
             public static string NeutralInteractionProtection = "Protect against Neutral::0 Interactions";
         }

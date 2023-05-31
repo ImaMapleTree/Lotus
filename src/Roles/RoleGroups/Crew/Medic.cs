@@ -34,15 +34,14 @@ public class Medic: Crewmate
 
     private Remote<IndicatorComponent>? protectedIndicator;
 
+    private static string CrossText = "<size=3><b>+</b></size>";
+
     [RoleAction(RoleActionType.RoundEnd)]
     private void RoundEndMessage()
     {
         confirmedVote = false;
-        string title = new ChatHandler.TitleBuilder().PrefixSuffix("<b>+</b>").Text(RoleName).Color(crossColor).Build();
-        ChatHandler handler = ChatHandler.Of(title).Player(MyPlayer).LeftAlign();
-        if (guardedPlayer == byte.MaxValue) handler.Message(MedicHelpMessage).Send();
-        else if (mode is GuardMode.AnyMeeting) 
-            handler.Message(ProtectingMessage.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send();
+        if (guardedPlayer == byte.MaxValue) CHandler(MedicHelpMessage).Send(MyPlayer);
+        else if (mode is GuardMode.AnyMeeting) CHandler(ProtectingMessage.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send(MyPlayer);
     }
 
     [RoleAction(RoleActionType.AnyInteraction)]
@@ -50,7 +49,7 @@ public class Medic: Crewmate
     {
         if (Game.State is not GameState.Roaming) return;
         if (guardedPlayer != target.PlayerId) return;
-        
+
         if (interaction.Intent() is not (IHostileIntent or IFatalIntent)) return;
         handle.Cancel();
         Game.MatchData.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, killer));
@@ -60,17 +59,16 @@ public class Medic: Crewmate
     [RoleAction(RoleActionType.MyVote)]
     private void HandleMedicVote(Optional<PlayerControl> votedPlayer, ActionHandle handle)
     {
-        string title = new ChatHandler.TitleBuilder().PrefixSuffix("<b>+</b>").Text(RoleName).Color(crossColor).Build();
-        ChatHandler handler = ChatHandler.Of(title: title).Player(MyPlayer).LeftAlign();
         if (confirmedVote) return;
         // If guarded player is selected, and mode is any meeting then skip
         if (targetLockedIn && guardedPlayer != byte.MaxValue && mode is not GuardMode.AnyMeeting) return;
-        
+
         handle.Cancel();
-        
+
         if (confirmedVote = !votedPlayer.Exists())
         {
-            handler.Message(ReturnToNormalVoting.Formatted(NoOneText)).Send();
+            guardedPlayer = byte.MaxValue;
+            CHandler(ReturnToNormalVoting.Formatted(NoOneText)).Send(MyPlayer);
             return;
         }
 
@@ -82,7 +80,7 @@ public class Medic: Crewmate
         if (confirmedVote = guardedPlayer == player)
         {
             targetLockedIn = true;
-            handler.Message(ReturnToNormalVoting.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send();
+            CHandler(ReturnToNormalVoting.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send(MyPlayer);
             return;
         }
 
@@ -90,8 +88,8 @@ public class Medic: Crewmate
         guardedPlayer = player;
         protectedIndicator = voted.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent("<b>+</b>", crossColor, Game.IgnStates, MyPlayer));
         Game.GetDeadPlayers().ForEach(p => protectedIndicator?.Get().AddViewer(p));
-        
-        handler.Message(SelectedPlayerMessage.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send();
+
+        CHandler(SelectedPlayerMessage.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send(MyPlayer);
     }
 
     [RoleAction(RoleActionType.AnyExiled)]
@@ -105,10 +103,14 @@ public class Medic: Crewmate
 
         protectedIndicator?.Delete();
         if (!resetGuard) return;
-    
+
         targetLockedIn = false;
         guardedPlayer = byte.MaxValue;
     }
+
+    public ChatHandler CHandler(string message) => new ChatHandler()
+        .Title(t => t.PrefixSuffix(CrossText).Color(RoleColor).Text(RoleName).Build())
+        .LeftAlign().Message(message);
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0f, 0.4f, 0f));
 
@@ -134,10 +136,10 @@ public class Medic: Crewmate
     {
         [Localized(nameof(ProtectingMessage))]
         public static string ProtectingMessage = "You are currently protecting: {0}";
-        
+
         [Localized(nameof(MedicHelpMessage))]
         public static string MedicHelpMessage = "You are a medic! Your duty: to save innocent lives! Vote a player to protect next round! Alternatively, you can skip here to return to normal voting.";
-        
+
         [Localized(nameof(SelectedPlayerMessage))]
         public static string SelectedPlayerMessage = "You have decided to protect {0}. Vote them again to confirm your choice, or Skip to return to normal voting.";
 

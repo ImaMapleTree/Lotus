@@ -17,17 +17,17 @@ namespace Lotus.API.Odyssey;
 public class MatchData
 {
     internal ulong MatchID;
-    
+
     public GameHistory GameHistory = new();
     public DateTime StartTime = DateTime.Now;
 
     public Dictionary<ulong, FrozenPlayer> FrozenPlayers = new();
     public VanillaRoleTracker VanillaRoleTracker = new();
-    
+
     public HashSet<byte> UnreportableBodies = new();
     public int MeetingsCalled;
-    
-    
+
+
     public RoleData Roles = new();
 
 
@@ -49,10 +49,10 @@ public class MatchData
 
         public void AddMainRole(byte playerId, CustomRole role) => MainRoles[playerId] = role;
         public void AddSubrole(byte playerId, CustomRole subrole) => SubRoles.GetOrCompute(playerId, () => new List<CustomRole>()).Add(subrole);
-        
+
         public CustomRole GetMainRole(byte playerId) => MainRoles.GetValueOrDefault(playerId, CustomRoleManager.Default);
         public List<CustomRole> GetSubroles(byte playerId) => SubRoles.GetOrCompute(playerId, () => new List<CustomRole>());
-        
+
     }
 
 
@@ -62,6 +62,7 @@ public class MatchData
     public static void AssignRole(PlayerControl player, CustomRole role, bool sendToClient = false)
     {
         CustomRole assigned = Game.MatchData.Roles.MainRoles[player.PlayerId] = role.Instantiate(player);
+        Game.MatchData.FrozenPlayers.GetOptional(player.GetGameID()).IfPresent(fp => fp.Role = assigned);
         if (Game.State is GameState.InLobby or GameState.InIntro) player.GetTeamInfo().MyRole = role.RealRole;
         if (sendToClient) assigned.Assign();
     }

@@ -9,6 +9,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -70,7 +71,7 @@ public class Mare: Vanilla.Impostor
                 .SubOption(sub2 => sub2
                     .Name("Normal Kill Cooldown")
                     .Bind(v => normalKillCooldown = (float)v)
-                    .AddFloatRange(0, 120, 2.5f, 10, "s")
+                    .AddFloatRange(0, 120, 2.5f, 10, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .Build())
             .SubOption(sub => sub
@@ -80,7 +81,7 @@ public class Mare: Vanilla.Impostor
             .SubOption(sub => sub
                 .Name("Kill Cooldown During Sabotage")
                 .Bind(v => reducedKillCooldown = (float)v)
-                .AddFloatRange(0, 60, 5, 3, "s").Build())
+                .AddFloatRange(0, 60, 5, 3, GeneralOptionTranslations.SecondsSuffix).Build())
             .SubOption(sub => sub
                 .Name("Specific Sabotage Settings")
                 .ShowSubOptionPredicate(v => (bool)v)

@@ -80,6 +80,12 @@ public class GameOptionOverride
             case Override.EngVentDuration:
                 options.SetFloat(FloatOptionNames.EngineerInVentMaxTime, (float)(GetValue() ?? AUSettings.EngineerInVentMaxTime()));
                 break;
+            case Override.VitalsCooldown:
+                options.SetFloat(FloatOptionNames.ScientistCooldown, (float)(GetValue() ?? AUSettings.ScientistCooldown()));
+                break;
+            case Override.VitalsBatteryCharge:
+                options.SetFloat(FloatOptionNames.ScientistBatteryCharge, (float)(GetValue() ?? AUSettings.ScientistBatteryCharge()));
+                break;
             case Override.CanUseVent:
             default:
                 VentLogger.Warn($"Invalid Option Override: {this}", "ApplyOverride");

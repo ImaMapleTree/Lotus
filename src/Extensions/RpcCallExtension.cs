@@ -4,7 +4,7 @@ public static class RpcCallExtension
 {
     public static string Name(this RpcCalls rpcCalls)
     {
-        return (rpcCalls) switch
+        return rpcCalls switch
         {
             RpcCalls.PlayAnimation => "PlayAnimation",
             RpcCalls.CompleteTask => "CompleteTask",

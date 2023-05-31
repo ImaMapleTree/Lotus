@@ -6,11 +6,13 @@ using Lotus.Managers.Hotkeys;
 using Lotus.Roles;
 using Lotus.Utilities;
 using Lotus.Managers.Templates;
+using Lotus.Roles.Subroles;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
 using VentLib.Localization;
 using VentLib.Localization.Attributes;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Chat.Commands;
@@ -65,14 +67,30 @@ public class HelpCmd: ICommandReceiver
             if (!PluginDataManager.TemplateManager.TryFormat(matchingRole, "help-role", out string formatted))
                 formatted = $"{matchingRole.RoleName} ({matchingRole.Faction.Name()})\n{matchingRole.Blurb}\n{matchingRole.Description}\n\nOptions:\n{OptionUtils.OptionText(matchingRole.RoleOptions)}";
             
-            if (source.IsHost() && HotkeyManager.HoldingLeftShift)
-                ChatHandler.Of(formatted).LeftAlign().Send();
-            else if (source.IsHost() && HotkeyManager.HoldingRightShift)
-                Game.GetDeadPlayers().ForEach(p => ChatHandler.Of(formatted).LeftAlign().Send(p));
-            else
-            {
-                ChatHandler.Of(formatted).LeftAlign().Send(source);
-            }
+            SendSpecial(source, formatted);
+        }
+    }
+
+    [Command("mod", "modifier", "mods")]
+    public static void Modifiers(PlayerControl source)
+    {
+        string message = CustomRoleManager.ModifierRoles.Select(m =>
+        {
+            string identifierText = m is Subrole subrole ? m.RoleColor.Colorize(subrole.Identifier()!) + " " : "";
+            return $"{identifierText}{m.RoleColor.Colorize(m.RoleName)}\n{m.Description}";
+        }).Fuse("\n\n");
+        
+        SendSpecial(source, message);
+    }
+
+    private static void SendSpecial(PlayerControl source, string message)
+    {
+        if (source.IsHost() && HotkeyManager.HoldingLeftShift)
+            ChatHandler.Of(message).LeftAlign().Send();
+        else if (source.IsHost() && HotkeyManager.HoldingRightShift)
+            Game.GetDeadPlayers().ForEach(p => ChatHandler.Of(message).LeftAlign().Send(p));
+        else {
+            ChatHandler.Of(message).LeftAlign().Send(source);
         }
     }
 

@@ -1,4 +1,5 @@
 using Lotus.API.Odyssey;
+using Lotus.Utilities;
 using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Patches;
@@ -12,9 +13,12 @@ public class BasicWrapperPatches
     {
         __instance.cosmetics.SetName(name);
         __instance.cosmetics.SetNameMask(true);
-        if (Game.State is GameState.InLobby) __instance.name = name;
+        if (Game.State is GameState.InLobby) __instance.name = name.RemoveHtmlTags();
         return false;
     }
+
+
+
 
     /*[QuickPrefix(typeof(PlayerControl), nameof(PlayerControl.RpcSetName))]
     public static void WrapRpcSetNamePatch(PlayerControl __instance, ref string name)
@@ -22,7 +26,7 @@ public class BasicWrapperPatches
         if (!AmongUsClient.Instance.AmHost) return;
         if (Game.State is not GameState.InLobby) return;
         if (__instance == null) return;
-        
+
         CustomTitle? title = PluginDataManager.TitleManager.GetTitle(__instance.FriendCode);
         if (title == null) return;
 
@@ -34,6 +38,7 @@ public class BasicWrapperPatches
         name = fullTitle;
     }
 
+
     [QuickPostfix(typeof(PlayerControl), nameof(PlayerControl.RpcSetName))]
     public static void WrapRpcSetNamePostfix(PlayerControl __instance)
     {
@@ -41,7 +46,7 @@ public class BasicWrapperPatches
         if (Game.State is not GameState.InLobby) return;
         PlayerNames.GetOptional(__instance.PlayerId).IfPresent(i => __instance.name = i);
     }
-    
+
 
     private static void FixChatName(PlayerControl player, string chatName)
     {

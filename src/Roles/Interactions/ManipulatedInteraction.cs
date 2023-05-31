@@ -12,4 +12,6 @@ public class ManipulatedInteraction : DirectInteraction, IManipulatedInteraction
     }
 
     public PlayerControl Manipulator() => manipulator;
+
+    public override Interaction Modify(Intent intent) => new ManipulatedInteraction(intent, Emitter(), manipulator);
 }

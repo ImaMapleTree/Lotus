@@ -18,6 +18,12 @@ public class Hooks
         public static readonly Hook<GameStateHookEvent> GameEndHook = new SimpleHook<GameStateHookEvent>();
     }
 
+    public static class ResultHooks
+    {
+        public static readonly Hook<WinnersHookEvent> WinnersHook = new SimpleHook<WinnersHookEvent>();
+        public static readonly Hook<LosersHookEvent> LosersHook = new SimpleHook<LosersHookEvent>();
+    }
+
     public static class NetworkHooks
     {
         public static readonly Hook<GameJoinHookEvent> GameJoinHook = new SimpleHook<GameJoinHookEvent>();
@@ -39,9 +45,11 @@ public class Hooks
         public static readonly Hook<PlayerMessageHookEvent> PlayerMessageHook = new SimpleHook<PlayerMessageHookEvent>();
         public static readonly Hook<PlayerActionHookEvent> PlayerActionHook = new SimpleHook<PlayerActionHookEvent>();
         public static readonly Hook<PlayerTaskHookEvent> PlayerTaskCompleteHook = new SimpleHook<PlayerTaskHookEvent>();
-        
+
         public static readonly Hook<PlayerMurderHookEvent> PlayerMurderHook = new SimpleHook<PlayerMurderHookEvent>();
         public static readonly Hook<PlayerDeathHookEvent> PlayerDeathHook = new SimpleHook<PlayerDeathHookEvent>();
+        public static readonly Hook<PlayerShapeshiftHookEvent> PlayerShapeshiftHook = new SimpleHook<PlayerShapeshiftHookEvent>();
+
         public static readonly Hook<PlayerHookEvent> PlayerExiledHook = new SimpleHook<PlayerHookEvent>();
     }
 

@@ -43,15 +43,14 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
 
     public virtual bool CanVent() => (BaseCanVent && !RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotVent)) || GeneralOptions.MayhemOptions.AllRolesCanVent;
-    
+
     public virtual void HandleDisconnect() {}
-    
+
     public Relation Relationship(PlayerControl player) => Relationship(player.GetCustomRole());
-    
+
     public virtual Relation Relationship(CustomRole role)
     {
         if (this.Faction is Solo && role.Faction is Solo)
-        {
             return Options.RoleOptions.NeutralOptions.NeutralTeamingMode switch
             {
                 NeutralTeaming.All => Relation.FullAllies,
@@ -59,9 +58,8 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
                 NeutralTeaming.SameRole => RelatedRoles.Contains(role.GetType()) ? Relation.FullAllies : Relation.None,
                 _ => Relation.None
             };
-        }
-        
-        return this.Relationship(role.Faction);
+
+        return Faction.Relationship(role);
     }
 
     private RemoteList<GameOptionOverride> currentOverrides = new();
@@ -129,12 +127,13 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     public void SyncOptions(IEnumerable<GameOptionOverride>? newOverrides = null, bool official = false)
     {
         if (MyPlayer == null || !AmongUsClient.Instance.AmHost) return;
-        List<GameOptionOverride> thisList = new(currentOverrides);
+        List<GameOptionOverride> thisList = new(this.roleSpecificGameOptionOverrides);
 
-        thisList.AddRange(this.roleSpecificGameOptionOverrides);
-        if (newOverrides != null) thisList.AddRange(newOverrides);
-        
+        thisList.AddRange(currentOverrides);
         thisList.AddRange(Game.MatchData.Roles.GetOverrides(MyPlayer.PlayerId));
+
+        if (newOverrides != null) thisList.AddRange(newOverrides);
+
 
         IGameOptions modifiedOptions = DesyncOptions.GetModifiedOptions(thisList);
         if (official) RpcV3.Immediate(PlayerControl.LocalPlayer.NetId, RpcCalls.SyncSettings).Write(modifiedOptions).Send(MyPlayer.GetClientId());
@@ -149,7 +148,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         bool isStartOfGame = Game.State is GameState.InIntro or GameState.InLobby;
 
         PlayerControl[] alliedPlayers = Game.GetAllPlayers().Where(p => Relationship(p) is Relation.FullAllies).ToArray();
-        
+
         if (RealRole.IsCrewmate())
         {
             MyPlayer.RpcSetRole(RealRole);
@@ -165,7 +164,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         VentLogger.Trace($"Setting {MyPlayer.name} Role => {RealRole} | IsStartGame = {isStartOfGame}", "CustomRole::Assign");
         if (MyPlayer.IsHost()) MyPlayer.SetRole(RealRole);
         else RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetRole).Write((ushort)RealRole).Send(MyPlayer.GetClientId());
-        
+
         VentLogger.Debug($"Player {MyPlayer.GetNameWithRole()} Allies: [{alliedPlayers.Select(p => p.name).Fuse()}]");
         HashSet<byte> alliedPlayerIds = alliedPlayers.Where(p => Faction.CanSeeRole(p)).Select(p => p.PlayerId).ToHashSet();
         int[] alliedPlayerClientIds = alliedPlayers.Where(p => Faction.CanSeeRole(p)).Select(p => p.GetClientId()).ToArray();
@@ -188,7 +187,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         if (isStartOfGame) crewmates.ForEach(p => p.GetTeamInfo().AddVanillaImpostor(MyPlayer.PlayerId));
 
         finishAssignment:
-        
+
         ShowRoleToTeammates(alliedPlayers);
         if (MyPlayer.IsHost()) Game.GetAlivePlayers().Except(alliedPlayers).ForEach(p => p.Data.Role.Role = RoleTypes.Crewmate);
 
@@ -216,7 +215,11 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
             return;
         }
         RoleComponent roleComponent = roleHolder[0];
-        allies.Where(Faction.CanSeeRole).ForEach(a => roleComponent.AddViewer(a));
+        allies.Where(Faction.CanSeeRole).ForEach(a =>
+        {
+            VentLogger.Trace($"Showing Role {EnglishRoleName} to {a.name}", "ShowRoleToTeammates");
+            roleComponent.AddViewer(a);
+        });
     }
 
     private void SetupUI2(INameModel nameModel)
@@ -224,7 +227,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         GameState[] gameStates = { GameState.InIntro, GameState.Roaming, GameState.InMeeting };
 
         if (this is Subrole subrole) nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(subrole, gameStates, viewers: MyPlayer));
-        else nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(this, gameStates, ViewMode.Replace, MyPlayer));
+        else nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(this, gameStates, ViewMode.Additive, MyPlayer));
         SetupUiFields(nameModel);
         SetupUiMethods(nameModel);
     }

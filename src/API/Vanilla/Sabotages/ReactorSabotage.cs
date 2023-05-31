@@ -39,7 +39,6 @@ public class ReactorSabotage : ISabotage
 
         reactor.Countdown = 10005f;
         reactor.IsDirty = true;
-        Async.Schedule(() => VentLogger.Info($"Reactor Countdown: {reactor.Countdown}"), 1f);
         SabotagePatch.CurrentSabotage = null;
         Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
         return true;

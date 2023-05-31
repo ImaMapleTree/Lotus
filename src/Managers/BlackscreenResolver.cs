@@ -1,6 +1,9 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.RPC;
 using Lotus.Utilities;
@@ -38,11 +41,11 @@ internal class BlackscreenResolver
         if (deadPlayer != null) Async.Schedule(() => StoreAndTeleport(deadPlayer), 1.5f);
     }
 
-    internal void ClearBlackscreen()
+    internal void ClearBlackscreen(Action callback)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         float deferredTime = 0; // Used if needing to teleport the player
-        Async.Schedule(ProcessPatched, NetUtils.DeriveDelay(0.7f));
+        Async.Schedule(() => ProcessPatched(callback), NetUtils.DeriveDelay(0.7f));
         if (unpatchable.Count == 0) return;
 
         bool updated = !TryGetDeadPlayer(out PlayerControl? deadPlayer);
@@ -85,7 +88,7 @@ internal class BlackscreenResolver
         return unpatchablePlayers;
     }
 
-    private void ProcessPatched()
+    private void ProcessPatched(Action callback)
     {
         GameData.Instance.AllPlayers.ToArray().Where(i => i != null).ForEach(info =>
         {
@@ -96,6 +99,7 @@ internal class BlackscreenResolver
         });
         GeneralRPC.SendGameData();
         CheckEndGamePatch.Deferred = false;
+        callback();
     }
 
     private bool TryGetDeadPlayer(out PlayerControl? deadPlayer)
@@ -135,6 +139,16 @@ internal class BlackscreenResolver
 
     private static HashSet<byte> SendPatchedData(byte exiledPlayer)
     {
+        Players.PlayerById(exiledPlayer).IfPresent(p =>
+        {
+            string name = AUSettings.ConfirmImpostor() ? $"<b>{p.GetCustomRole().RoleName}</b>\n{p.name}" : p.name;
+            p.Data.PlayerName = p.Data.DefaultOutfit.PlayerName = name;
+            p.SetName(name);
+            Players.SendPlayerData(p.Data, autoSetName: false);
+        });
+
+
+
         HostRpc.RpcDebug("Game Data BEFORE Patch");
         HashSet<byte> unpatchable = AntiBlackoutLogic.PatchedData(exiledPlayer);
         HostRpc.RpcDebug("Game Data AFTER Patch");

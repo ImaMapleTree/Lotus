@@ -2,9 +2,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.API;
 using Lotus.Extensions;
 using Lotus.RPC;
 using VentLib.Logging;
@@ -40,6 +41,7 @@ public static class ShapeshiftPatch
         Game.TriggerForAll(shapeshifting ? RoleActionType.AnyShapeshift : RoleActionType.AnyUnshapeshift, ref handle, __instance, target);
         if (!handle.IsCanceled) return true;
         Async.Schedule(() => __instance.CRpcShapeshift(__instance, false), NetUtils.DeriveDelay(1.2f));
+        Hooks.PlayerHooks.PlayerShapeshiftHook.Propagate(new PlayerShapeshiftHookEvent(__instance, target.Data, !shapeshifting));
         return false;
     }
 }

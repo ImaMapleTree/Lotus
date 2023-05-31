@@ -99,7 +99,7 @@ public class Template
         { "$Time", "The current time (based on the host)." },
         { "$Players", "A list of all player names separated by a comma." },
         { "$PlayerCount", "A count of all players currently in the lobby." },
-        { "\"@\" Variables", "Variables that start with \"@\" pertain specifically to the viewing player. For example, @Role is the Role of the player viewing this template."},
+        { "\n\"@\" Variables", "Variables that start with \"@\" pertain specifically to the viewing player. For example, @Role is the Role of the player viewing this template."},
         { "@Name", "The player's name." },
         { "@Color", "The player's color." },
         { "@Role", "The player's role." },
@@ -110,7 +110,7 @@ public class Template
         { "@Subroles", "The player's subroles (modifiers) as a list of names" },
         { "@Modifiers", "Identical to @Subroles, shows the player's subroles (modifiers) as a list of names" },
         { "@ModsDescriptive", "Uses the modifier-info template to display descriptive info about each of a player's modifiers" },
-        { "\"^\" Variables", "Variables that start with \"^\" followed by a word and underscore are variables that relate to the first word before the underscore. For example, ^Role_Options refers to the options of a specific role. These variables are used in a select few places and when usable, should be mentioned under /t tags." },
+        { "\n\"^\" Variables", "Variables that start with \"^\" followed by a word and underscore are variables that relate to the first word before the underscore. For example, ^Role_Options refers to the options of a specific role. These variables are used in a select few places and when usable, should be mentioned under /t tags." },
         { "^Role_Name", "The name of the related role." },
         { "^Role_Description", "The description of the related role." },
         { "^Role_Blurb", "The blurb of the related role." },
@@ -131,7 +131,7 @@ public class Template
             return player.GetSubroles().Select(sr => !PluginDataManager.TemplateManager.TryFormat(sr, "modifier-info", out string text) ? "" : text).Fuse("\n\n");
         }
 
-        return "<b>Modifiers:</b>\n" + player.GetSubroles().Select(sr =>
+        return player.GetSubroles().Select(sr =>
         {
             string identifierText = sr is Subrole subrole ? sr.RoleColor.Colorize(subrole.Identifier()!) + " " : "";
             return $"{identifierText}{sr.RoleColor.Colorize(sr.RoleName)}\n{sr.Description}";

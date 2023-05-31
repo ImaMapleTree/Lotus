@@ -27,14 +27,15 @@ public partial class Medium: Crewmate, IModdable
     [UIComponent(UI.Indicator)]
     private string Arrows() => hasArrowsToBodies ? Object.FindObjectsOfType<DeadBody>()
         .Where(b => !Game.MatchData.UnreportableBodies.Contains(b.ParentId))
-        .Select(b => RoleUtils.CalculateArrow(MyPlayer, b.TruePosition, RoleColor)).Fuse("") : ""; 
+        .Select(b => RoleUtils.CalculateArrow(MyPlayer, b.TruePosition, RoleColor)).Fuse("") : "";
 
 
+    [RoleAction(RoleActionType.AnyDeath)]
     private void AnyPlayerDeath(PlayerControl player, IDeathEvent deathEvent)
     {
         killerDictionary[player.PlayerId] = deathEvent.Instigator().Map(p => p.GetCustomRole());
     }
-    
+
     [RoleAction(RoleActionType.SelfReportBody)]
     private void MediumDetermineRole(GameData.PlayerInfo reported)
     {
@@ -49,7 +50,7 @@ public partial class Medium: Crewmate, IModdable
             .Send(MyPlayer);
     }
 
-    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => 
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.KeyName("Has Arrows to Bodies", Translations.Options.HasArrowsToBody)
                 .AddOnOffValues(false)
@@ -63,8 +64,8 @@ public partial class Medium: Crewmate, IModdable
     {
         [Localized(nameof(MediumTitle))]
         public static string MediumTitle = "Meditation";
-        
-        [Localized(nameof(MediumMessage), ForceOverride = true)]
+
+        [Localized(nameof(MediumMessage))]
         public static string MediumMessage =
             "You've reported a body, and after great discussion with its spirits. You've determined the killer's role was {0}.";
 

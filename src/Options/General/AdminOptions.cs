@@ -96,7 +96,7 @@ public class AdminOptions
     private class AdminOptionTranslations
     {
         [Localized("SectionTitle")]
-        public static string AdminTitle = "Admin Options";
+        public static string AdminTitle = "Host Options";
 
         [Localized("HostGM")]
         public static string HostGmText = "Host GM";

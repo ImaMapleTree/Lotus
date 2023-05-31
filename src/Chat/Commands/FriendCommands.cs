@@ -5,7 +5,6 @@ using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
 using VentLib.Localization.Attributes;
-using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Chat.Commands;

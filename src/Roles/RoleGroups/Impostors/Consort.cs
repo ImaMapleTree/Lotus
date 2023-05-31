@@ -11,6 +11,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -25,7 +26,7 @@ public class Consort : Impostor
 
     [NewOnSetup] private Dictionary<byte, Escort.BlockDelegate> blockedPlayers;
 
-    [UIComponent(UI.Cooldown)] 
+    [UIComponent(UI.Cooldown)]
     private Cooldown roleblockCooldown;
 
     [UIComponent(UI.Text)]
@@ -84,7 +85,7 @@ public class Consort : Impostor
         handle.Cancel();
         blockDelegate.UpdateDelegate();
     }
-    
+
     [RoleAction(RoleActionType.SabotageStarted)]
     private void BlockSabotage(PlayerControl caller, ActionHandle handle)
     {
@@ -109,13 +110,13 @@ public class Consort : Impostor
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Roleblock Cooldown")
                 .BindFloat(roleblockCooldown.SetDuration)
-                .AddFloatRange(0, 120, 2.5f, 18, "s")
+                .AddFloatRange(0, 120, 2.5f, 18, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Roleblock Duration")
                 .BindFloat(v => roleblockDuration = v)
                 .Value(v => v.Text("Until Meeting").Value(-1f).Build())
-                .AddFloatRange(5, 120, 5, suffix: "s")
+                .AddFloatRange(5, 120, 5, suffix: GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
 

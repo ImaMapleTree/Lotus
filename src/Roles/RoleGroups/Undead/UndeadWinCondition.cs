@@ -6,15 +6,15 @@ using Lotus.Factions.Interfaces;
 using Lotus.Factions.Undead;
 using Lotus.Roles.RoleGroups.Undead.Roles;
 using Lotus.Victory.Conditions;
-using Lotus.API;
 using Lotus.Extensions;
-using VentLib.Logging;
 
 namespace Lotus.Roles.RoleGroups.Undead;
 
 public class UndeadWinCondition : IFactionWinCondition
 {
     private static readonly List<IFaction> UndeadFactions = new() { FactionInstances.TheUndead, new TheUndead.Unconverted(null!, null!) };
+    public List<IFaction> Factions() => UndeadFactions;
+
     public bool IsConditionMet(out List<IFaction> factions)
     {
         factions = UndeadFactions;

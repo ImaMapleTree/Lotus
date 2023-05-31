@@ -15,6 +15,7 @@ using Lotus.Roles.Interactions;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
@@ -31,13 +32,13 @@ namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Mafioso: Engineer
 {
-    
+
     internal static Color CashColor = new(1f, 0.82f, 0.18f);
     private static Color _gunColor = new(0.55f, 0.28f, 0.16f);
     private static Color _vestColor = new(1f, 0.9f, 0.3f);
     private static Color _bulletColor = new(0.37f, 0.37f, 0.37f);
     private static Color _revealerColor = ModConstants.Palette.GeneralColor5;
-    
+
     private static string _colorizedCash;
     private bool modifyShopCosts;
     private bool refreshTasks;
@@ -57,9 +58,9 @@ public class Mafioso: Engineer
 
     private byte selectedShopItem = byte.MaxValue;
     private bool hasVoted;
-    
+
     private Cooldown gunCooldown = null!;
-    
+
     private ShopItem[] shopItems;
     private ShopItem[] currentShopItems;
 
@@ -67,7 +68,7 @@ public class Mafioso: Engineer
 
     [UIComponent(UI.Counter, ViewMode.Absolute, GameState.InMeeting)]
     private string DisableTaskCounter() => "";
-    
+
     [UIComponent(UI.Counter, gameStates: GameState.Roaming)]
     private string BulletCounter()
     {
@@ -140,7 +141,7 @@ public class Mafioso: Engineer
         MyPlayer.InteractWith(closestPlayer, DirectInteraction.FatalInteraction.Create(this));
         killedPlayers.Add(closestPlayer.PlayerId);
     }
-    
+
     [RoleAction(RoleActionType.SelfReportBody)]
     private void OnReportBody(GameData.PlayerInfo deadPlayer)
     {
@@ -164,8 +165,17 @@ public class Mafioso: Engineer
     [RoleAction(RoleActionType.Interaction)]
     private void HandleInteraction(Interaction interaction, ActionHandle handle)
     {
+        switch (interaction.Intent())
+        {
+            case IFatalIntent:
+                if (Relationship(interaction.Emitter()) is Relation.FullAllies) handle.Cancel();
+                break;
+            case IHostileIntent:
+                if (Relationship(interaction.Emitter()) is Relation.FullAllies) handle.Cancel();
+                return;
+        }
+
         if (!hasVest) return;
-        if (interaction.Intent() is not IFatalIntent) return;
         hasVest = false;
         switch (interaction)
         {
@@ -187,11 +197,12 @@ public class Mafioso: Engineer
         hasRevealer = false;
         closestPlayer.NameModel().GCH<RoleHolder>().LastOrDefault()?.AddViewer(MyPlayer);
     }
-    
+
     protected override void OnTaskComplete(Optional<NormalPlayerTask> playerTask)
     {
-        cashAmount += playerTask.Map(pt => pt.Length is NormalPlayerTask.TaskLength.Long ? 3 : 1).OrElse(1);
-        if (HasAllTasksComplete && refreshTasks) Tasks.AssignAdditionalTasks(this);
+        cashAmount += playerTask.Map(pt => pt.Length is NormalPlayerTask.TaskLength.Long ? 2 : 1).OrElse(1);
+        if (HasAllTasksComplete && refreshTasks) AssignAdditionalTasks();
+
     }
 
     private void HandleSelfVote(ActionHandle handle)
@@ -215,16 +226,16 @@ public class Mafioso: Engineer
         }
         ShopItem item = currentShopItems[selectedShopItem];
         cashAmount -= item.Cost;
-        if (item.Color != _gunColor && cashAmount > 0) handle.Cancel();
+        if (item.Color != _gunColor && cashAmount > 0 && hasVoted) handle.Cancel();
         GetChatHandler().Message(PurchaseItemMessage.Formatted(item.Name, cashAmount)).Send();
         item.Action();
         currentShopItems = shopItems.Where(si => si.Enabled && si.Cost <= cashAmount).ToArray();
     }
-    
+
     private ChatHandler GetChatHandler() => ChatHandler.Of(title: RoleColor.Colorize(RoleName)).Player(MyPlayer).LeftAlign();
-    
-    
-    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => 
+
+
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.KeyName("Modify Shop Costs", ModifyShopCosts)
                 .AddOnOffValues(false)
@@ -253,7 +264,7 @@ public class Mafioso: Engineer
                 .Build())
             .SubOption(sub => sub.KeyName("Gun Cooldown", GunCooldown)
                 .Value(v =>  v.Text(GeneralOptionTranslations.GlobalText).Color(new Color(1f, 0.61f, 0.33f)).Value(-1f).Build())
-                .AddFloatRange(0, 120, 2.5f, 0, "s")
+                .AddFloatRange(0, 120, 2.5f, 0, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(gunCooldown.SetDuration)
                 .Build())
             .SubOption(sub => sub.KeyName("Cash from Reporting Bodies", CashFromReporting)
@@ -265,8 +276,12 @@ public class Mafioso: Engineer
                 .BindBool(b => refreshTasks = b)
                 .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => 
-        base.Modify(roleModifier).RoleColor(Color.red).Faction(FactionInstances.Impostors);
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
+        base.Modify(roleModifier)
+            .RoleColor(Color.red)
+            .Faction(FactionInstances.Impostors)
+            .RoleAbilityFlags(RoleAbilityFlag.IsAbleToKill)
+            .OptionOverride(Override.CrewLightMod, () => AUSettings.ImpostorLightMod());
 
     [Localized(nameof(Mafioso))]
     internal static class MafiaTranslations
@@ -304,22 +319,22 @@ public class Mafioso: Engineer
         {
             [Localized(nameof(RefreshTasks))]
             public static string RefreshTasks = "Refresh Tasks When All Complete";
-            
+
             [Localized(nameof(StartsGameWithGun))]
             public static string StartsGameWithGun = "Starts Game With Gun";
-            
+
             [Localized(nameof(ModifyShopCosts))]
             public static string ModifyShopCosts = "Modify Shop Costs";
-            
+
             [Localized(nameof(GunCost))]
             public static string GunCost = "Gun Cost";
-            
+
             [Localized(nameof(BulletCost))]
             public static string BulletCost = "Bullet Cost";
-            
+
             [Localized(nameof(VestCost))]
             public static string VestCost = "Vest Cost";
-            
+
             [Localized(nameof(RoleRevealerCost))]
             public static string RoleRevealerCost = "Role Revealer Cost";
 

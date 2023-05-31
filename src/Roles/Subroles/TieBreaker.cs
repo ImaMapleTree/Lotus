@@ -29,6 +29,7 @@ public class TieBreaker: Subrole
             if (!highestVotePlayers.Contains(votedPlayer)) continue;
             ChatHandler.Of(Translations.TieBreakerMessage.Formatted(RoleName), RoleColor.Colorize(RoleName)).Send();
             meetingDelegate.ExiledPlayer = Players.PlayerById(votedPlayer).Map(p => p.Data).OrElse(null!);
+            meetingDelegate.IsTie = false;
             break;
         }
     }

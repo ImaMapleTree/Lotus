@@ -3,11 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.Factions;
 using Lotus.Factions.Interfaces;
-using Lotus.Logging;
 using Lotus.Extensions;
 using VentLib.Options.Game;
 using VentLib.Utilities;
-using VentLib.Utilities.Extensions;
 
 namespace Lotus.Roles.Subroles;
 
@@ -15,26 +13,26 @@ public abstract class Subrole: CustomRole
 {
     public readonly HashSet<IFaction> FactionRestrictions = new();
     public readonly HashSet<Type> RoleRestrictions = new();
-    
+
     public abstract string? Identifier();
-    
+
     /// <summary>
     /// Returns the <see cref="CompatabilityMode"/> handling for set of types returned by <see cref="RestrictedRoles"/>
     /// </summary>
     public virtual CompatabilityMode RoleCompatabilityMode => RoleRestrictions.Count > 0 ? CompatabilityMode.Whitelisted : CompatabilityMode.Blacklisted;
-    
+
     /// <summary>
     /// Returns the <see cref="CompatabilityMode"/> handling for set of factions returned by <see cref="RegulatedFactions"/>
     /// </summary>
     public virtual CompatabilityMode FactionCompatabilityMode => FactionRestrictions.Count > 0 ? CompatabilityMode.Whitelisted : CompatabilityMode.Blacklisted;
-    
+
     /// <summary>
     /// A set of types of roles that this role is either restricted to or against determined by <see cref="RoleCompatabilityMode"/>
     /// </summary>
     /// <returns>Set of role types</returns>
     public virtual HashSet<Type>? RestrictedRoles() => RoleRestrictions;
-    
-    
+
+
     /// <summary>
     /// A set of factions that this role is either restricted to or against determined by <see cref="FactionCompatabilityMode"/>
     /// </summary>
@@ -44,6 +42,8 @@ public abstract class Subrole: CustomRole
     public virtual bool IsAssignableTo(PlayerControl player)
     {
         CustomRole role = player.GetCustomRole();
+        if (role.BannedModifiers().Contains(this.GetType())) return false;
+
         Type factionType = role.Faction.GetType();
         if (RegulatedFactions() != null)
         {
@@ -53,13 +53,13 @@ public abstract class Subrole: CustomRole
         }
 
         if (RestrictedRoles() == null || RestrictedRoles()!.Count == 0) return true;
-        
+
         bool anyMatchRoles = RestrictedRoles()!.Any(r => r == role.GetType());
         if (anyMatchRoles && RoleCompatabilityMode is CompatabilityMode.Blacklisted) return false;
         return anyMatchRoles || FactionCompatabilityMode is not CompatabilityMode.Whitelisted;
     }
-    
-    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier.Subrole(true);
+
+    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier.RoleFlags(RoleFlag.IsSubrole);
 
     protected GameOptionBuilder AddRestrictToCrew(GameOptionBuilder builder, bool defaultOn = false)
     {
@@ -81,11 +81,11 @@ public abstract class Subrole: CustomRole
 public enum CompatabilityMode
 {
     /// <summary>
+    /// Excludes items from assignment
+    /// </summary>
+    Blacklisted,
+    /// <summary>
     /// Exclusively includes items for assignment
     /// </summary>
     Whitelisted,
-    /// <summary>
-    /// Excludes items from assignment
-    /// </summary>
-    Blacklisted
 }

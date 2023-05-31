@@ -14,9 +14,9 @@ public class GeneralOptions
     public static DebugOptions DebugOptions;
     public static GameplayOptions GameplayOptions;
     public static MayhemOptions MayhemOptions;
+    public static MeetingOptions MeetingOptions;
     public static MiscellaneousOptions MiscellaneousOptions;
     public static SabotageOptions SabotageOptions;
-    public static VoteOptions VoteOptions;
 
     public static List<GameOption> AllOptions = new();
 
@@ -29,6 +29,9 @@ public class GeneralOptions
 
         SabotageOptions = new SabotageOptions();
         AllOptions.AddRange(SabotageOptions.AllOptions);
+
+        MeetingOptions = new MeetingOptions();
+        AllOptions.AddRange(MeetingOptions.AllOptions);
 
         MayhemOptions = new MayhemOptions();
         AllOptions.AddRange(MayhemOptions.AllOptions);

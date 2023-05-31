@@ -8,6 +8,7 @@ using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using Component = UnityEngine.Component;
+using Object = UnityEngine.Object;
 
 namespace Lotus.Extensions;
 
@@ -20,6 +21,11 @@ public static class DebugExtensions
     }
 
     public static void Debug(this IEnumerable<Component> components)
+    {
+        DevLogger.Log(components.Select(c => (c.TypeName(), c.name)).Join());
+    }
+    
+    public static void Debug(this IEnumerable<Object> components)
     {
         DevLogger.Log(components.Select(c => (c.TypeName(), c.name)).Join());
     }

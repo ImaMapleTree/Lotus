@@ -15,6 +15,7 @@ using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Roles.RoleGroups.Undead.Roles;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
+using Lotus.Roles.Subroles.Romantics;
 using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Utilities.Attributes;
@@ -40,7 +41,7 @@ public static class CustomRoleManager
         .GetFields()
         .Select(f => (CustomRole)f.GetValue(Static)!)
         .ToList();
-    
+
     public static readonly List<CustomRole> ModifierRoles = Mods.GetType()
         .GetFields()
         .Select(f => (CustomRole)f.GetValue(Mods)!)
@@ -86,7 +87,7 @@ public static class CustomRoleManager
         if (id == -1) id = 0;
         return AllRoles[id];
     }
-    
+
     internal static void LinkEditor(Type editorType)
     {
         if (!editorType.IsAssignableTo(typeof(AbstractBaseRole.RoleEditor)))
@@ -178,7 +179,7 @@ public static class CustomRoleManager
         public YinYanger YinYanger = new YinYanger();
 
         private CustomRole MADMATE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>★ Madmates ★</size>").Color(ModConstants.Palette.MadmateColor).Tab(DefaultTabs.ImpostorsTab).Build());
-        
+
         public CrewPostor CrewPostor = new CrewPostor();
         public Madmate Madmate = new Madmate();
         public MadGuardian MadGuardian = new MadGuardian();
@@ -240,9 +241,9 @@ public static class CustomRoleManager
         public Retributionist Retributionist = new Retributionist();
         public Glitch Glitch = new Glitch();
         public Werewolf Werewolf = new Werewolf();
-        
+
         private CustomRole NEUTRAL_PASSIVE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>❀ Neutral Passive ❀</size>").Color(ModConstants.Palette.PassiveColor).Tab(DefaultTabs.NeutralTab).Build());
-        
+
         public Amnesiac Amnesiac = new Amnesiac();
         public Archangel Archangel = new Archangel();
         public Copycat Copycat = new Copycat();
@@ -265,12 +266,15 @@ public static class CustomRoleManager
         public Bait Bait = new Bait();
         public Bewilder Bewilder = new Bewilder();
         public Bloodlust Bloodlust = new Bloodlust();
+        public Deadly Deadly = new Deadly();
         public Diseased Diseased = new Diseased();
         public Flash Flash = new Flash();
         public Oblivious Oblivious = new Oblivious();
+        public Romantic Romantic = new Romantic();
         public Sleuth Sleuth = new Sleuth();
         public TieBreaker TieBreaker = new TieBreaker();
         public Torch Torch = new Torch();
+        public Unstoppable Unstoppable = new Unstoppable();
         public Watcher Watcher = new Watcher();
         public Workhorse Workhorse = new Workhorse();
     }
@@ -281,7 +285,7 @@ public static class CustomRoleManager
 
         public GM GM = new GM();
         public Debugger Debugger = new Debugger();
-        
+
         //double shot
         //flash
         public Fox Fox = new();

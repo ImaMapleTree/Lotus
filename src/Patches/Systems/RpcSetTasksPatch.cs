@@ -11,10 +11,10 @@ using Lotus.Extensions;
 namespace Lotus.Patches.Systems;
 
 [HarmonyPatch(typeof(GameData), nameof(GameData.RpcSetTasks))]
-class RpcSetTasksPatch
+public class RpcSetTasksPatch
 {
     internal static readonly Queue<TasksOverride> TaskQueue = new();
-    
+
     public static bool Prefix(GameData __instance, byte playerId, ref Il2CppStructArray<byte> taskTypeIds)
     {
         if (!AmongUsClient.Instance.AmHost) return true;
@@ -23,13 +23,13 @@ class RpcSetTasksPatch
         // This function mostly deals with override, so if not overriding immediately exit
 
         TasksOverride? tasksOverride = TaskQueue.Count == 0 ? null : TaskQueue.Dequeue();
-        
+
         int shortTaskCount = -1;
         int longTaskCount = -1;
         bool overrideTasks = false;
         bool hasCommonTasks = false;
         bool hasTasks = tasksOverride != null;
-        
+
         switch (role)
         {
             case IOverridenTaskHolderRole overridenTaskRole:
@@ -43,14 +43,17 @@ class RpcSetTasksPatch
                 hasTasks = holderRole.HasTasks();
                 break;
         }
-        
+
         if (!hasTasks) return true;
-        
+
         if (shortTaskCount == -1) shortTaskCount = AUSettings.NumShortTasks();
         if (longTaskCount == -1) longTaskCount = AUSettings.NumLongTasks();
 
+
         if (tasksOverride != null)
         {
+            if (tasksOverride.ShortTasks == -1) tasksOverride.ShortTasks = shortTaskCount;
+            if (tasksOverride.LongTasks == -1) tasksOverride.LongTasks = longTaskCount;
             if (tasksOverride.TaskAssignmentMode is TaskAssignmentMode.Add)
             {
                 shortTaskCount += tasksOverride.ShortTasks;
@@ -90,7 +93,7 @@ class RpcSetTasksPatch
             usedTaskTypes,
             longTasks
         );
-        
+
         int start3 = 0;
         ShipStatus.Instance.AddTasksFromList(
             ref start3,
@@ -105,7 +108,7 @@ class RpcSetTasksPatch
         // If tasks apply to total then we're good, otherwise do our custom sending
         return true;
     }
-    
+
 
     private static void WriteTaskArray(Il2CppStructArray<byte> taskIds, MessageWriter writer) => writer.WriteBytesAndSize(taskIds);
 

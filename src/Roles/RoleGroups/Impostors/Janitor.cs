@@ -37,8 +37,8 @@ public class Janitor: Vanilla.Impostor
 
         if (!cleanOnKill) return base.TryKill(target);
 
-        if (MyPlayer.InteractWith(target, new DirectInteraction(new FakeFatalIntent(), this)) is InteractionResult.Halt) return false;
         MyPlayer.RpcMark(target);
+        if (MyPlayer.InteractWith(target, new DirectInteraction(new FakeFatalIntent(), this)) is InteractionResult.Halt) return false;
         RpcV3.Standard(MyPlayer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
         target.RpcExileV2();
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target));

@@ -12,4 +12,6 @@ public class DelayedInteraction : DirectInteraction, IDelayedInteraction
     }
 
     public float Delay() => delay;
+
+    public override Interaction Modify(Intent intent) => new DelayedInteraction(intent, delay, Emitter());
 }

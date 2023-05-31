@@ -19,7 +19,7 @@ public class Repairman: Engineer
 {
     private bool repairmanCanVent;
     private List<SabotageType> sabotages = new();
-    
+
     [RoleAction(RoleActionType.SabotagePartialFix)]
     private void SaboMasterFixes(ISabotage sabotage, PlayerControl fixer)
     {
@@ -27,6 +27,7 @@ public class Repairman: Engineer
         bool result = sabotage is DoorSabotage doorSabotage ? doorSabotage.FixRoom(MyPlayer) : sabotage.Fix(MyPlayer);
         if (result) Game.MatchData.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{ModConstants.HColor1.Colorize(MyPlayer.name)} fixed {sabotage.SabotageType()}."));
     }
+
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
@@ -75,24 +76,24 @@ public class Repairman: Engineer
         {
             [Localized(nameof(RepairmanCanVent))]
             public static string RepairmanCanVent = "Repairman::0 Can Vent";
-            
+
             [Localized(nameof(FastFixLights))]
             public static string FastFixLights = "Fast Fixes Lights";
-            
+
             [Localized(nameof(FastFixReactor))]
             public static string FastFixReactor = "Fast Fixes Reactor";
-            
+
             [Localized(nameof(FastFixOxygen))]
             public static string FastFixOxygen = "Fast Fixes Oxygen";
-            
+
             [Localized(nameof(FastFixComms))]
             public static string FastFixComms = "Fast Fixes Comms";
-            
+
             [Localized(nameof(FastFixDoors))]
             public static string FastFixDoors = "Fast Fixes Doors";
-            
+
             [Localized(nameof(FastFixHelicopter))]
-            public static string FastFixHelicopter = "Fast Fixes Helicopter";
+            public static string FastFixHelicopter = "Fast Fixes Crash Course";
         }
     }
 }

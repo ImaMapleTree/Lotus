@@ -23,6 +23,8 @@ public class DirectInteraction : Interaction
 
     public Intent Intent() => intent;
 
+    public virtual Interaction Modify(Intent intent) => new DirectInteraction(intent, role);
+
     public class Stub
     {
         private Intent intent;

@@ -38,6 +38,9 @@ public static class GeneralOptionTranslations
     [Localized(nameof(NoOneText))]
     public static string NoOneText = "No One";
 
+    [Localized(nameof(NoneText))]
+    public static string NoneText = "None";
+
     [Localized(nameof(DurationText))]
     public static string DurationText = "Duration";
 
@@ -49,4 +52,7 @@ public static class GeneralOptionTranslations
 
     [Localized(nameof(CustomText))]
     public static string CustomText = "Custom";
+
+    [Localized(nameof(SecondsSuffix))]
+    public static string SecondsSuffix = "s";
 }

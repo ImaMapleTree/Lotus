@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Lotus.API.Odyssey;
@@ -50,6 +51,7 @@ public class CustomTitle
         public string? Text { get; set; }
         public string? Color { get; set; }
         public string? Gradient { get; set; }
+        public int GradientDegree { get; set; } = -1;
         public bool Spaced { get; set; } = true;
         internal ColorGradient? InternalGradient;
         internal Color? InternalColor;
@@ -62,13 +64,13 @@ public class CustomTitle
                 return "";
             }
 
-
+            if (GradientDegree == -1) GradientDegree = Math.Max(1, Text.Length / 9);
+            
             List<(string rich, string richValue, string text)> tuples = _tagRegex.Matches(Text).Select(m => m.Groups).Select(g => (g[2].Value, g[3].Value, g[4].Value)).ToList();
             string modifiedText = _tagRegex.Replace(Text, "⚡");
-
-
+            
             if (InternalGradient == null && Gradient != null) InternalGradient = CreateGradient(Gradient);
-            if (InternalGradient != null) return ApplySize(InternalGradient.Apply(modifiedText), tuples);
+            if (InternalGradient != null) return ApplySize(InternalGradient.Apply(modifiedText, GradientDegree), tuples);
 
             if (Color == null) return ApplySize(modifiedText, tuples);
             InternalColor = ParseToColor(Color);
@@ -77,9 +79,10 @@ public class CustomTitle
 
         internal string GenerateName(string name)
         {
+            if (GradientDegree == -1) GradientDegree = Math.Max(1, name.Length / 9);
             if (InternalGradient == null && Gradient != null) InternalGradient = CreateGradient(Gradient);
             if (InternalColor == null && Color != null) InternalColor = ParseToColor(Color);
-            if (InternalGradient != null) name = InternalGradient.Apply(name);
+            if (InternalGradient != null) name = InternalGradient.Apply(name, GradientDegree);
             else if (InternalColor != null && InternalColor != UnityEngine.Color.white) name = InternalColor.Value.Colorize(name);
             return ApplySize(name, new List<(string rich, string richValue, string text)>());
         }
@@ -89,8 +92,7 @@ public class CustomTitle
             string text = Size != null ? $"<size={Size}>{name}</size>" : name;
             tuples.ForEach(t =>
             {
-                string htmlValue = t.richValue == "" ? "" : $"={t.richValue}";
-                string html = $"<{t.rich}{htmlValue}>{t.text}</{t.rich}>";
+                string html = $"<{t.rich}{t.richValue}>{t.text}</{t.rich}>";
                 text = text.ReplaceN("⚡", html, 1);
             });
             return text;

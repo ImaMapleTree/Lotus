@@ -1,3 +1,4 @@
+using Lotus.Roles;
 using UnityEngine;
 
 namespace Lotus.Factions.Interfaces;
@@ -7,6 +8,8 @@ public interface IFaction
     public string Name();
 
     public Relation Relationship(IFaction other);
+
+    public Relation Relationship(CustomRole otherRole);
 
     public bool CanSeeRole(PlayerControl player);
 

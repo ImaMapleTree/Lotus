@@ -65,10 +65,12 @@ public abstract class AbstractBaseRole
 
     public string RoleName {
         get {
-            string name = Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.RoleName", useCache: false);
-            return name == "N/A" ? EnglishRoleName : name;
+            string name = Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.RoleName");
+            return OverridenRoleName ?? (name == "N/A" ? EnglishRoleName : name);
         }
     }
+
+    public string? OverridenRoleName;
 
     public RoleTypes RealRole => DesyncRole ?? VirtualRole;
     public RoleTypes? DesyncRole;
@@ -76,7 +78,6 @@ public abstract class AbstractBaseRole
     public IFaction Faction { get; set; } = FactionInstances.Solo;
     public SpecialType SpecialType = SpecialType.None;
     public Color RoleColor = Color.white;
-    public bool IsSubrole { get; private set; }
     public int Chance { get; private set;  }
     public int Count { get; private set; }
     public int AdditionalChance { get; private set; }
@@ -90,6 +91,8 @@ public abstract class AbstractBaseRole
     internal Assembly DeclaringAssembly = Assembly.GetCallingAssembly();
 
     public virtual List<Statistic> Statistics() => new();
+    public virtual HashSet<Type> BannedModifiers() => new();
+
     public string EnglishRoleName { get; private set; }
     private readonly Dictionary<RoleActionType, List<RoleAction>> roleActions = new();
 
@@ -272,7 +275,7 @@ public abstract class AbstractBaseRole
             field.SetValue(this, cos.CloneIndiscriminate());
             return;
         }
-        
+
         MethodInfo? cloneMethod = field.FieldType.GetMethod("Clone", AccessFlags.InstanceAccessFlags, Array.Empty<Type>());
         if (currentValue == null || cloneMethod == null || !setupRules.UseCloneIfPresent)
             try {
@@ -443,12 +446,6 @@ public abstract class AbstractBaseRole
         }
 
 
-        public RoleModifier Subrole(bool isSubrole)
-        {
-            myRole.IsSubrole = isSubrole;
-            return this;
-        }
-
         public RoleModifier OptionOverride(Override option, object? value, Func<bool>? condition = null)
         {
             myRole.roleSpecificGameOptionOverrides.Add(new GameOptionOverride(option, value, condition));
@@ -502,15 +499,17 @@ public abstract class AbstractBaseRole
             return this;
         }
 
-        public RoleModifier RoleFlags(RoleFlag roleFlags)
+        public RoleModifier RoleFlags(RoleFlag roleFlags, bool replace = false)
         {
-            myRole.RoleFlags = roleFlags;
+            if (replace) myRole.RoleFlags = roleFlags;
+            else myRole.RoleFlags |= roleFlags;
             return this;
         }
 
-        public RoleModifier RoleAbilityFlags(RoleAbilityFlag roleAbilityFlags)
+        public RoleModifier RoleAbilityFlags(RoleAbilityFlag roleAbilityFlags, bool replace = false)
         {
-            myRole.RoleAbilityFlags = roleAbilityFlags;
+            if (replace) myRole.RoleAbilityFlags = roleAbilityFlags;
+            else myRole.RoleAbilityFlags |= roleAbilityFlags;
             return this;
         }
     }
@@ -555,7 +554,7 @@ public abstract class AbstractBaseRole
         public virtual GameOptionBuilder HookOptions(GameOptionBuilder optionStream) {
             return optionStream;
         }
-        
+
         public virtual void AddAction(RoleAction action)
         {
             FrozenRole.roleActions[action.ActionType].Add(action);
@@ -577,7 +576,7 @@ public abstract class AbstractBaseRole
             action.Method.InvokeAligned(args);
         }
 
-        
+
 
         private void SetupActions()
         {

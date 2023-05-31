@@ -10,6 +10,8 @@ namespace Lotus.Victory.Conditions;
 
 public interface IFactionWinCondition: IWinCondition
 {
+    List<IFaction> Factions();
+
     bool IWinCondition.IsConditionMet(out List<PlayerControl> winners)
     {
         winners = null;

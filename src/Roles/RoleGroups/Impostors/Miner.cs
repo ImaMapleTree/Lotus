@@ -1,5 +1,6 @@
 using Lotus.GUI;
 using Lotus.GUI.Name;
+using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
@@ -41,6 +42,6 @@ public class Miner : Impostor
         base.RegisterOptions(optionStream).SubOption(sub =>
             sub.Name("Miner Ability Cooldown")
                 .BindFloat(minerAbilityCooldown.SetDuration)
-                .AddFloatRange(5, 50, 2.5f, 5, "s")
+                .AddFloatRange(5, 50, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 }

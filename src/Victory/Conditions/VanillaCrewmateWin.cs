@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Factions;
-using Lotus.Factions.Crew;
 using Lotus.Factions.Interfaces;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
@@ -14,6 +13,8 @@ public class VanillaCrewmateWin: IFactionWinCondition
 {
     private static readonly List<IFaction> CrewmateFaction = new() { FactionInstances.Crewmates };
     private WinReason winReason = WinReason.TasksComplete;
+
+    public List<IFaction> Factions() => CrewmateFaction;
 
     public bool IsConditionMet(out List<IFaction> factions)
     {
@@ -45,7 +46,7 @@ public class VanillaCrewmateWin: IFactionWinCondition
         PlayerControl player = role.MyPlayer;
         if (!player.IsAlive()) return false;
         if (role.Faction.Relationship(FactionInstances.Crewmates) is not Relation.None) return false;
-        return player.GetVanillaRole().IsImpostor() && !role.RoleFlags.HasFlag(RoleFlag.CannotWinAlone);
+        return (player.GetVanillaRole().IsImpostor() || role.RoleAbilityFlags.HasFlag(RoleAbilityFlag.IsAbleToKill)) && !role.RoleFlags.HasFlag(RoleFlag.CannotWinAlone);
     }
 
     private static bool CheckTaskCompletion()

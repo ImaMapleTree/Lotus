@@ -89,7 +89,7 @@ public class RandomSpawn
     };
 
     private Dictionary<string, Vector2> usedLocations = null!;
-    private List<string>? availableLocations = null!;
+    private List<string>? availableLocations;
 
     private void ResetLocations()
     {

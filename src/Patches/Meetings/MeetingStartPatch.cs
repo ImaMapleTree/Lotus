@@ -44,7 +44,7 @@ public class MeetingStartPatch
                     if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-first", out string firstMeetingMessage))
                         ChatHandler.Of(firstMeetingMessage).LeftAlign().Send(p);
                 }
-                else if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-subsequent", out string subsequentMeeting)) 
+                else if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-subsequent", out string subsequentMeeting))
                     ChatHandler.Of(subsequentMeeting).LeftAlign().Send(p);
 
                 if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-start", out string message))
@@ -64,7 +64,7 @@ public class MeetingStartPatch
 
     public static void Postfix(MeetingHud __instance)
     {
-        SoundManager.Instance.ChangeMusicVolume(0f);
+        /*SoundManager.Instance.ChangeMusicVolume(0f);*/
         if (AmongUsClient.Instance.AmHost) __instance.playerStates.ToArray()
             .FirstOrOptional(ps => ps.TargetPlayerId == PlayerControl.LocalPlayer.PlayerId)
             .IfPresent(voteArea => voteArea.NameText.text = PlayerControl.LocalPlayer.NameModel().Render(sendToPlayer: false, force: true));

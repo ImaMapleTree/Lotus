@@ -6,5 +6,8 @@ namespace Lotus.Roles;
 public enum RoleAbilityFlag
 {
     CannotVent = 1,
-    CannotSabotage = 2
+    CannotSabotage = 2,
+    IsAbleToKill = 4,
 }
+
+

@@ -10,7 +10,6 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
-using Lotus.API;
 using Lotus.Chat;
 using Lotus.Extensions;
 using UnityEngine;

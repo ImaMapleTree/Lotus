@@ -18,6 +18,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Victory;
 using Lotus.Extensions;
 using Lotus.Managers;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -124,7 +125,7 @@ public class Necromancer : UndeadRole
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Convert Cooldown")
-                .AddFloatRange(15f, 120f, 5f, 9, "s")
+                .AddFloatRange(15f, 120f, 5f, 9, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(convertCooldown.SetDuration)
                 .Build())
             .SubOption(sub => sub.Name("Immune to Partially Converted")

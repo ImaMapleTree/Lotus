@@ -6,6 +6,8 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Options;
 using Lotus.Roles.Interfaces;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -49,9 +51,9 @@ public partial class SerialKiller : Impostor, IModdable
             paused = true;
             return;
         }
-        
+
         VentLogger.Trace($"Serial Killer ({MyPlayer.name}) Commiting Suicide", "SerialKiller::CheckForSuicide");
-        
+
         MyPlayer.RpcMurderPlayer(MyPlayer);
         Game.MatchData.GameHistory.AddEvent(new SuicideEvent(MyPlayer));
     }
@@ -60,7 +62,11 @@ public partial class SerialKiller : Impostor, IModdable
     private void SetupSuicideTimer()
     {
         paused = beginsAfterFirstKill && !hasKilled;
-        if (!paused) DeathTimer.Start();
+        if (!paused)
+        {
+            DevLogger.Log("Restarting Timer");
+            DeathTimer.Start();
+        }
     }
 
     [RoleAction(RoleActionType.RoundEnd)]
@@ -71,7 +77,7 @@ public partial class SerialKiller : Impostor, IModdable
             .SubOption(sub => sub
                 .KeyName("Time Until Suicide", SerialKillerTranslations.SerialKillerOptionTranslations.TimeUntilSuicide)
                 .Bind(v => DeathTimer.Duration = (float)v)
-                .AddFloatRange(5, 120, 2.5f, 30, "s")
+                .AddFloatRange(5, 120, 2.5f, 30, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .KeyName("Timer Begins After First Kill", SerialKillerTranslations.SerialKillerOptionTranslations.TimerAfterFirstKill)
@@ -91,7 +97,7 @@ public partial class SerialKiller : Impostor, IModdable
         {
             [Localized(nameof(TimeUntilSuicide))]
             public static string TimeUntilSuicide = "Time Until Suicide";
-            
+
             [Localized(nameof(TimerAfterFirstKill))]
             public static string TimerAfterFirstKill = "Timer Begins After First Kill";
         }

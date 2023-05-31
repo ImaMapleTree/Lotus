@@ -26,7 +26,7 @@ public class CrewPostor : Crewmate
     protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         if (HasAllTasksComplete && refreshTasks) Tasks.AssignAdditionalTasks(this);
-        
+
         if (MyPlayer.Data.IsDead) return;
         List<PlayerControl> inRangePlayers = RoleUtils.GetPlayersWithinDistance(MyPlayer, 999, true).Where(p => canKillAllied || p.Relationship(MyPlayer) is Relation.None).ToList();
         if (inRangePlayers.Count == 0) return;
@@ -55,6 +55,7 @@ public class CrewPostor : Crewmate
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
+            .RoleAbilityFlags(RoleAbilityFlag.IsAbleToKill)
             .RoleColor(ModConstants.Palette.MadmateColor)
             .SpecialType(SpecialType.Madmate)
             .Faction(FactionInstances.Madmates);
@@ -85,10 +86,10 @@ public class CrewPostor : Crewmate
         {
             [Localized(nameof(CanKillAllies))]
             public static string CanKillAllies = "Can Kill Allies";
-            
+
             [Localized(nameof(WarpToTarget))]
             public static string WarpToTarget = "Warp To Target";
-            
+
             [Localized(nameof(RefreshTasks))]
             public static string RefreshTasks = "Refresh Tasks When All Complete";
         }

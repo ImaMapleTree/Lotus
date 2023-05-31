@@ -28,12 +28,12 @@ public abstract class MadCrewmate : Engineer
                 .BindBool(b => canVent = b)
                 .SubOption(sub2 => sub2.Name("Vent Cooldown")
                     .BindFloat(f => this.VentCooldown = f)
-                    .AddFloatRange(0, 60, 2.5f, 8, "s")
+                    .AddFloatRange(0, 60, 2.5f, 8, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .SubOption(sub2 => sub2.Name("Vent Duration")
                     .BindFloat(f => this.VentDuration = f)
                     .Value(1f)
-                    .AddFloatRange(2, 120, 2.5f, 4, "s")
+                    .AddFloatRange(2, 120, 2.5f, 4, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .Build()));
 

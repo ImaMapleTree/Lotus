@@ -59,11 +59,11 @@ public class Psychic: Crewmate
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-            .SubOption(sub => sub.KeyName("Highlighted Players", TranslationUtil.Colorize(Translations.Options.MaxHighlightedPlayers, ModConstants.Palette.KillingColor))
+            .SubOption(sub => sub.KeyName("Highlighted Players", Translations.Options.MaxHighlightedPlayers)
                 .AddIntRange(1, 14, 1, 2)
                 .BindInt(i => numberOfPlayers = i)
                 .Build())
-            .SubOption(sub => sub.KeyName("Non-impostor Killing Are Evil", Translations.Options.AllKillingRolesAreEvil)
+            .SubOption(sub => sub.KeyName("Non-impostor Killing Are Evil", TranslationUtil.Colorize(Translations.Options.AllKillingRolesAreEvil, ModConstants.Palette.KillingColor))
                 .AddOnOffValues()
                 .BindBool(b => nonImpostorAreEvil = b)
                 .Build());

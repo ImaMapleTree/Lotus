@@ -30,7 +30,7 @@ public class Survivor : CustomRole
     [UIComponent(UI.Indicator)]
     private string GetVestString() => vestDuration.IsReady() ? "" : RoleColor.Colorize("♣");
 
-    
+
     protected override void PostSetup()
     {
         remainingVests = vestUsages;
@@ -65,12 +65,12 @@ public class Survivor : CustomRole
             .SubOption(sub => sub
                 .Name("Vest Duration")
                 .BindFloat(vestDuration.SetDuration)
-                .AddFloatRange(2.5f, 180f, 2.5f, 11, "s")
+                .AddFloatRange(2.5f, 180f, 2.5f, 11, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Vest Cooldown")
                 .BindFloat(vestCooldown.SetDuration)
-                .AddFloatRange(2.5f, 180f, 2.5f, 5, "s")
+                .AddFloatRange(2.5f, 180f, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub.Name("Vest Usages")
                 .BindInt(i => vestUsages = i)

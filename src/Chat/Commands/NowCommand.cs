@@ -29,6 +29,7 @@ public class NowCommand: ICommandReceiver
         ListImpostorOptions(source);
         ListNeutralKillers(source);
         ListNeutralPassive(source);
+        ListModifiers(source);
     }
 
     [Command("crewmates", "crewmate", "crew", "cr")]
@@ -57,6 +58,13 @@ public class NowCommand: ICommandReceiver
         string title = ModConstants.Palette.PassiveColor.Colorize("★ Neutrals ★");
         ListRoleGroup(source, title, CustomRoleManager.AllRoles.Where(r => r.SpecialType is SpecialType.Neutral));
     }
+
+    [Command("mods", "mod", "subroles", "modifiers", "modifier")]
+    public void ListModifiers(PlayerControl source)
+    {
+        string title = ModConstants.Palette.ModifierColor.Colorize("★ Modifiers ★");
+        ListRoleGroup(source, title, CustomRoleManager.ModifierRoles);
+    } 
 
     public void ListNormalOptions(PlayerControl source)
     {

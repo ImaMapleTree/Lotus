@@ -13,7 +13,7 @@ public class ProtectedRpc
         if (AmongUsClient.Instance.IsGameOver || !AmongUsClient.Instance.AmHost) return;
         if (target == null) return;
         GameData.PlayerInfo data = target.Data;
-        if (data == null || data.IsDead) return;
+        if (data == null) return;
 
         if (MeetingHud.Instance != null)
         {

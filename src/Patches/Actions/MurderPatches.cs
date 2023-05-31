@@ -14,7 +14,7 @@ namespace Lotus.Patches.Actions;
 
 public static class MurderPatches
 {
-    
+
     [QuickPrefix(typeof(PlayerControl), nameof(PlayerControl.CheckMurder))]
     public static bool Prefix(PlayerControl __instance, PlayerControl target)
     {
@@ -23,8 +23,8 @@ public static class MurderPatches
 
         VentLogger.Debug($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}", "CheckMurder");
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.KillPlayers)) return false;
-        
-        
+
+
         if (target.Data == null || target.inVent || target.inMovingPlat)
         {
             VentLogger.Trace($"Unable to kill {target.name}. Invalid Status", "CheckMurder");
@@ -53,7 +53,7 @@ public static class MurderPatches
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (!target.Data.IsDead) return;
-        
+
         VentLogger.Trace($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}{(target.protectedByGuardian ? "(Protected)" : "")}", "MurderPlayer");
 
         IDeathEvent deathEvent = Game.MatchData.GameHistory.GetCauseOfDeath(target.PlayerId)
@@ -61,7 +61,7 @@ public static class MurderPatches
                 ? new SuicideEvent(__instance)
                 : new DeathEvent(target, __instance)
             );
-        
+
         Game.MatchData.GameHistory.AddEvent(deathEvent);
         Game.MatchData.GameHistory.SetCauseOfDeath(target.PlayerId, deathEvent);
 
@@ -69,6 +69,7 @@ public static class MurderPatches
         ActionHandle ignored = ActionHandle.NoInit();
         target.Trigger(RoleActionType.MyDeath, ref ignored, __instance, deathEvent.Instigator(), deathEvent);
         Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, __instance, deathEvent.Instigator(), deathEvent);
+
 
         PlayerMurderHookEvent playerMurderHookEvent = new(__instance, target, deathEvent);
         Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);

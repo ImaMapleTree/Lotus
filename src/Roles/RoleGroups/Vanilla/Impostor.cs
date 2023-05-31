@@ -22,7 +22,7 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
 
     public virtual bool CanSabotage() => canSabotage && !RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotSabotage);
     protected bool canSabotage = true;
-    
+
     public float KillCooldown
     {
         set => killCooldown = value;
@@ -49,18 +49,17 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
     [RoleAction(RoleActionType.Attack, Subclassing = false)]
     public virtual bool TryKill(PlayerControl target)
     {
-        if (Relationship(target) is Relation.FullAllies) return false;
         InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }
 
-    protected GameOptionBuilder AddKillCooldownOptions(GameOptionBuilder optionBuilder, string name = "Kill Cooldown", string key = "Kill Cooldown", int defaultIndex = 0)
+    protected GameOptionBuilder AddKillCooldownOptions(GameOptionBuilder optionBuilder, string key = "Kill Cooldown", string name = "Kill Cooldown", int defaultIndex = 0)
     {
         return optionBuilder.SubOption(sub => sub.Name(name)
             .Key(key)
             .Value(v => v.Text(GeneralOptionTranslations.GlobalText).Color(new Color(1f, 0.61f, 0.33f)).Value(DefaultFloatValue).Build())
-            .AddFloatRange(0, 120, 2.5f, defaultIndex, "s")
+            .AddFloatRange(0, 120, 2.5f, defaultIndex, GeneralOptionTranslations.SecondsSuffix)
             .BindFloat(f => KillCooldown = f)
             .Build());
     }
@@ -71,7 +70,8 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
             .Faction(FactionInstances.Impostors)
             .CanVent(true)
             .OptionOverride(Override.KillCooldown, () => KillCooldown)
-            .RoleColor(Color.red);
+            .RoleColor(Color.red)
+            .RoleAbilityFlags(RoleAbilityFlag.IsAbleToKill);
 
     public override List<Statistic> Statistics() => new() { VanillaStatistics.Kills };
 }

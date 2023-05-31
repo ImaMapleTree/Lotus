@@ -14,12 +14,7 @@ public static class EnumerableExtensions
             list.Add(item);
         return list;
     }
-
-    public static T Random<T>(this IEnumerable<T> source, Func<T, bool> filter)
-    {
-        return source.Where(filter).ToList().GetRandom();
-    }
-
+    
     private static Random rng = new Random();
 
     public static void Shuffle<T>(this IList<T> list)

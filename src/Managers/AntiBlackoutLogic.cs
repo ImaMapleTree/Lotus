@@ -45,7 +45,7 @@ public static class AntiBlackoutLogic
             if (PlayerControl.LocalPlayer.GetVanillaRole().IsImpostor() && PlayerControl.LocalPlayer.PlayerId != exiledPlayer) aliveImpostorCount++;
 
             VentLogger.Trace($"Alive Crew: {aliveCrewCount} | Alive Impostors: {aliveImpostorCount}");
-            
+
             bool IsFailure()
             {
                 bool failure = false;
@@ -53,7 +53,7 @@ public static class AntiBlackoutLogic
                 if (aliveImpostorCount == 0) failure |= unpatchable.Add(player.PlayerId);
                 return failure;
             }
-            
+
 
             // Go until failure, or aliveCrew > aliveImpostor
             int index = 0;
@@ -68,7 +68,7 @@ public static class AntiBlackoutLogic
 
             // No matter what, if crew is less than impostor alive, we're unpatchable
             if (aliveCrewCount <= aliveImpostorCount) unpatchable.Add(player.PlayerId);
-            
+
 
             GeneralRPC.SendGameData(player.GetClientId());
         }

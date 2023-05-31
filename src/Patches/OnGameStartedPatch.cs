@@ -1,17 +1,11 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.Gamemodes;
-using Lotus.GUI.Menus;
 using Lotus.Managers;
 using Lotus.Roles.RoleGroups.NeutralKilling;
-using Lotus.API;
 using Lotus.Extensions;
-using Lotus.Options;
-using Lotus.Roles;
-using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -30,10 +24,7 @@ namespace Lotus.Patches
 
         public static void Postfix(AmongUsClient __instance)
         {
-            HistoryMenuIntermediate.HistoryMenuButton.IfPresent(button => button.SetActive(false));
-
             ProjectLotus.ResetCamPlayerList = new List<byte>();
-            /*StaticOptions.UsedButtonCount = 0;*/
             FallFromLadder.Reset();
 
             Game.State = GameState.InIntro;

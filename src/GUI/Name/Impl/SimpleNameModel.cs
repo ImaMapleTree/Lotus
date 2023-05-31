@@ -3,11 +3,13 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Extensions;
 using Lotus.Logging;
+using Lotus.RPC;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -88,6 +90,13 @@ public class SimpleNameModel : INameModel
             {
                 int clientId = rPlayer.GetClientId();
                 if (clientId != -1) RpcV3.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(clientId);
+                if (player.PlayerId == rPlayer.PlayerId && !player.IsAlive())
+                {
+                    player.Data.PlayerName = player.name;
+                    Players.SendPlayerData(player.Data, clientId, autoSetName: false);
+                    DevLogger.Log($"Sending Player Name: {player.Data.PlayerName}");
+                    HostRpc.RpcDebug("Hahahahahha");
+                }
             }
         }
         Profilers.Global.Sampler.Stop(id);

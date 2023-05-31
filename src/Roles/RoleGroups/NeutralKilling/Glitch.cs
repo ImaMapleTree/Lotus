@@ -9,6 +9,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -81,7 +82,7 @@ public class Glitch: NeutralKillingBase
         handle.Cancel();
         blockDelegate.UpdateDelegate();
     }
-    
+
     [RoleAction(RoleActionType.SabotageStarted)]
     private void BlockSabotage(PlayerControl caller, ActionHandle handle)
     {
@@ -98,7 +99,7 @@ public class Glitch: NeutralKillingBase
                 .Name("Hacking Duration")
                 .BindFloat(v => roleblockDuration = v)
                 .Value(v => v.Text("Until Meeting").Value(-1f).Build())
-                .AddFloatRange(5, 120, 5, suffix: "s")
+                .AddFloatRange(5, 120, 5, suffix: GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(Color.green);

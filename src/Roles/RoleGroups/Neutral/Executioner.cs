@@ -68,8 +68,8 @@ public class Executioner : CustomRole
             case ExeRoleChange.Opportunist:
                 MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
-            case ExeRoleChange.Copycat:
-                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
+            case ExeRoleChange.SchrodingersCat:
+                MatchData.AssignRole(MyPlayer, Copycat.SchrodingersCat!);
                 break;
             case ExeRoleChange.Crewmate:
                 MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
@@ -111,7 +111,7 @@ public class Executioner : CustomRole
         None,
         Jester,
         Opportunist,
-        Copycat,
+        SchrodingersCat,
         Crewmate
     }
 }

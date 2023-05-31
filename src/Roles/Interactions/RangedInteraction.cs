@@ -11,5 +11,7 @@ public class RangedInteraction : DirectInteraction, IRangedInteraction
         this.distance = distance;
     }
 
+    public override Interaction Modify(Intent intent) => new RangedInteraction(intent, distance, Emitter());
+
     public float Distance() => distance;
 }

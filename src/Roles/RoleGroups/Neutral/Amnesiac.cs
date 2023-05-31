@@ -1,36 +1,39 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Factions;
 using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.Roles.RoleGroups.Impostors;
 using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Legacy;
+using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
+using Object = UnityEngine.Object;
 
 namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Amnesiac : CustomRole
 {
+    public static HashSet<Type> AmnesiacBannedModifiers = new() { typeof(Oblivious) };
     private bool stealExactRole;
     private bool hasArrowsToBodies;
 
     [UIComponent(UI.Indicator)]
     private string Arrows() => hasArrowsToBodies ? Object.FindObjectsOfType<DeadBody>()
         .Where(b => !Game.MatchData.UnreportableBodies.Contains(b.ParentId))
-        .Select(b => RoleUtils.CalculateArrow(MyPlayer, b.TruePosition, RoleColor)).Fuse("") : ""; 
-    
+        .Select(b => RoleUtils.CalculateArrow(MyPlayer, b.TruePosition, RoleColor)).Fuse("") : "";
+
     [RoleAction(RoleActionType.AnyReportedBody)]
     public void AmnesiacRememberAction(PlayerControl reporter, GameData.PlayerInfo reported, ActionHandle handle)
     {
@@ -39,7 +42,7 @@ public class Amnesiac : CustomRole
         if (reporter.PlayerId != MyPlayer.PlayerId) return;
         CustomRole targetRole = reported.GetCustomRole();
         Copycat.FallbackTypes.GetOptional(targetRole.GetType()).IfPresent(r => targetRole = r());
-        
+
         if (!stealExactRole)
         {
             if (targetRole.SpecialType == SpecialType.NeutralKilling) { }
@@ -50,7 +53,7 @@ public class Amnesiac : CustomRole
             else
                 targetRole = CustomRoleManager.Static.Terrorist;
         }
-        
+
         CustomRole newRole = CustomRoleManager.GetCleanRole(targetRole);
 
         MatchData.AssignRole(MyPlayer, newRole);
@@ -59,6 +62,8 @@ public class Amnesiac : CustomRole
         role.DesyncRole = RoleTypes.Impostor;
         handle.Cancel();
     }
+
+    public override HashSet<Type> BannedModifiers() => AmnesiacBannedModifiers;
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
@@ -73,7 +78,7 @@ public class Amnesiac : CustomRole
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.RoleColor(new Color(0.51f, 0.87f, 0.99f))
-            .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.CannotVent)
+            .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.CannotVent | RoleAbilityFlag.IsAbleToKill)
             .SpecialType(SpecialType.Neutral)
             .DesyncRole(RoleTypes.Impostor)
             .Faction(FactionInstances.Solo);
@@ -91,5 +96,5 @@ public class Amnesiac : CustomRole
             public static string HasArrowsToBody = "Has Arrows to Bodies";
         }
     }
-    
+
 }

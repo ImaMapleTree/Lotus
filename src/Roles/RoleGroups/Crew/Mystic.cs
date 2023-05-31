@@ -4,15 +4,24 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Options;
 using Lotus.Roles.Subroles;
 using UnityEngine;
+using VentLib;
+using VentLib.Networking.RPC;
+using VentLib.Networking.RPC.Attributes;
 using VentLib.Options.Game;
+using VentLib.Options.IO;
 using VentLib.Utilities;
+using VentLib.Utilities.Collections;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Mystic : Crewmate
 {
+    private static ModRPC reactorFlashRpc = Vents.FindRPC((uint)RoleRPC.ReactorFlash)!;
+
     private float flashDuration;
     private bool sendAudioAlert;
 
@@ -21,36 +30,47 @@ public class Mystic : Crewmate
     {
         if (MyPlayer.Data.IsDead) return;
         if (deadPlayer.GetSubrole<Bait>() != null) return;
-        
-        
-        GameOptionOverride[] overrides = { new(Override.CrewLightMod, 0f) };
-        SyncOptions(overrides);
+
+
+        Remote<GameOptionOverride> optionOverride = AddOverride(new GameOptionOverride(Override.CrewLightMod, 0f));
+        SyncOptions();
 
         bool didReactorAlert = false;
         if (sendAudioAlert && SabotagePatch.CurrentSabotage?.SabotageType() is not SabotageType.Reactor)
         {
-            RoleUtils.PlayReactorsForPlayer(MyPlayer);
             didReactorAlert = true;
+            if (!MyPlayer.IsModded()) RoleUtils.PlayReactorsForPlayer(MyPlayer);
+            else if (MyPlayer.IsHost()) reactorFlashRpc.InvokeTrampoline(false);
+            else reactorFlashRpc.Send(new[] { MyPlayer.GetClientId() }, false);
         }
 
-        Async.Schedule(() => MysticRevertAlert(didReactorAlert), NetUtils.DeriveDelay(flashDuration));
-
+        Async.Schedule(() => MysticRevertAlert(optionOverride, didReactorAlert), NetUtils.DeriveDelay(flashDuration));
     }
 
-    private void MysticRevertAlert(bool didReactorAlert)
+    private void MysticRevertAlert(Remote<GameOptionOverride> remote, bool didReactorAlert)
     {
+        remote.Delete();
         SyncOptions();
         if (!didReactorAlert) return;
-        RoleUtils.EndReactorsForPlayer(MyPlayer);
+        if (!MyPlayer.IsModded()) RoleUtils.EndReactorsForPlayer(MyPlayer);
+        else if (MyPlayer.IsHost()) reactorFlashRpc.InvokeTrampoline(true);
+        else reactorFlashRpc.Send(new[] { MyPlayer.GetClientId() }, true);
     }
 
+    [ModRPC(RoleRPC.ReactorFlash, invocation: MethodInvocation.ExecuteAfter)]
+    private static void ReactorFlash(bool finish)
+    {
+        if (finish) HudManager.Instance.StopReactorFlash();
+        else HudManager.Instance.StartReactorFlash();
+    }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub
                 .Name("Flash Duration")
                 .Bind(v => flashDuration = (float)v)
-                .AddFloatRange(0.2f, 1.5f, 0.1f, 4, "s")
+                .AddFloatRange(0.5f, 1.5f, 0.1f, 0, GeneralOptionTranslations.SecondsSuffix)
+                .IOSettings(io => io.UnknownValueAction = ADEAnswer.UseDefault)
                 .Build())
             .SubOption(sub => sub
                 .Name("Send Audio Alert")

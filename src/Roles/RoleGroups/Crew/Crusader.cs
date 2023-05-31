@@ -38,6 +38,7 @@ public class Crusader: Crewmate, ISabotagerRole
     private void AnyPlayerTargeted(PlayerControl killer, PlayerControl target, Interaction interaction, ActionHandle handle)
     {
         if (Game.State is not GameState.Roaming) return;
+        if (killer.PlayerId == MyPlayer.PlayerId) return;
         if (!protectedPlayer.Exists()) return;
         if (target.PlayerId != protectedPlayer.Get()) return;
         Intent intent = interaction.Intent();
@@ -86,7 +87,7 @@ public class Crusader: Crewmate, ISabotagerRole
         {
             [Localized(nameof(BeneficialInteractionProtection))]
             public static string BeneficialInteractionProtection = "Protect against Beneficial::0 Interactions";
-            
+
             [Localized(nameof(NeutralInteractionProtection))]
             public static string NeutralInteractionProtection = "Protect against Neutral::0 Interactions";
         }

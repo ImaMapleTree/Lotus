@@ -11,7 +11,7 @@ public class TextBoxPatch
     public static void Postfix(TextBoxTMP __instance, char i, ref bool __result)
     {
         /*Async.Schedule(() => DevLogger.Log($"{__instance.text} | {__instance.text.Length} | {(int)__instance.text[0]}"), 0.01f);*/
-        __result = i != 8 && i is not ('\r' or '\n');
+        __result = i > 31 && i is not ('\r' or '\n');
     }
 
     [QuickPrefix(typeof(TextBoxTMP), nameof(TextBoxTMP.SetText))]

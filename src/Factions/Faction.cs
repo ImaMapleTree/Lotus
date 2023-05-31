@@ -1,4 +1,5 @@
 using Lotus.Factions.Interfaces;
+using Lotus.Roles;
 using UnityEngine;
 using VentLib.Logging;
 
@@ -37,6 +38,8 @@ public abstract class Faction<T> : IFaction<T> where T: IFaction<T>
         //VentLogger.Info($"this is not subfaction: {this}");
         return subFaction2.MainFactionRelationship();
     }
+
+    public virtual Relation Relationship(CustomRole otherRole) => Relationship(otherRole.Faction);
 
     public abstract bool CanSeeRole(PlayerControl player);
 

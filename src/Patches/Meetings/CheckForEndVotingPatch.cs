@@ -2,7 +2,9 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Meetings;
@@ -31,17 +33,18 @@ public class CheckForEndVotingPatch
         // Calculate the exiled player once so that we can send the voting complete signal
         VentLogger.Trace($"End Vote Count: {meetingDelegate.CurrentVoteCount().Select(kv => $"{Utils.GetPlayerById(kv.Key).GetNameWithRole()}: {kv.Value}").Join()}");
         meetingDelegate.CalculateExiledPlayer();
-        VentLogger.Trace($"Player With Most Votes: {meetingDelegate.ExiledPlayer}");
+
+
         byte exiledPlayer = meetingDelegate.ExiledPlayer?.PlayerId ?? 255;
-        
-        
+
+
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.VotingComplete, ref handle, meetingDelegate);
 
         // WE DO NOT RECALCULATE THE EXILED PLAYER!
         // This means its up to roles that modify the meeting delegate to properly update the exiled player
 
-        
+
         // Generate voter states to reflect voting
         List<VoterState> votingStates = GenerateVoterStates(meetingDelegate);
 
@@ -76,17 +79,17 @@ public class CheckForEndVotingPatch
         });
         return votingStates;
     }
-    
+
     [QuickPrefix(typeof(MeetingHud), nameof(MeetingHud.VotingComplete))]
     public static void VotingCompletePatch(MeetingHud __instance, [HarmonyArgument(1)] GameData.PlayerInfo? playerInfo)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         MeetingDelegate meetingDelegate = MeetingDelegate.Instance;
         meetingDelegate.ExiledPlayer = playerInfo;
-        
+
         ActionHandle noCancel = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.MeetingEnd, ref noCancel, Optional<GameData.PlayerInfo>.Of(playerInfo), 
+        Game.TriggerForAll(RoleActionType.MeetingEnd, ref noCancel, Optional<GameData.PlayerInfo>.Of(playerInfo),
             meetingDelegate.IsTie, new Dictionary<byte, int>(meetingDelegate.CurrentVoteCount()), new Dictionary<byte, List<Optional<byte>>>(meetingDelegate.CurrentVotes()));
-        
+
     }
 }

@@ -43,7 +43,7 @@ public class CTFGamemode: Gamemode
             .Tab(CTFTab)
             .IsHeader(true)
             .BindFloat(v => GameDuration = v)
-            .AddFloatRange(60, 600, 15f, 3, "s")
+            .AddFloatRange(60, 600, 15f, 3, GeneralOptionTranslations.SecondsSuffix)
             .Build());
     }
 

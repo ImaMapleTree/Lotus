@@ -4,6 +4,7 @@ using System.Linq;
 using AmongUs.GameOptions;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.Factions.Interfaces;
 using Lotus.GUI.Name.Components;
@@ -17,18 +18,24 @@ using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Extensions;
 using Lotus.GUI.Name;
+using Lotus.Logging;
+using Lotus.Roles.Interfaces;
 using Lotus.Roles.RoleGroups.Impostors;
 using Lotus.RPC;
+using Lotus.Utilities;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using Random = UnityEngine.Random;
 
 namespace Lotus.Roles.RoleGroups.Neutral;
 
-public class Copycat: CustomRole
+public class Copycat: CustomRole, IVariableRole
 {
+    public static SchrodingersCat? SchrodingersCat;
     /// <summary>
     /// A dict of role types and roles for the cat to fallback upon if the role cannot be copied properly (ex: Crewpostor bc Copycat cannot gain tasks)
     /// </summary>
@@ -37,21 +44,24 @@ public class Copycat: CustomRole
         {typeof(CrewPostor), () => CustomRoleManager.Static.Madmate },
         {typeof(Mafioso), () => CustomRoleManager.Static.Impostor }
     };
-    
+
+    public bool KillerKnowsCopycat;
     private bool copyIdentity;
     private bool copyRoleProgress;
-    private bool copyKillersRole;
     private bool turned;
 
     public override bool CanVent() => false;
 
+    public CustomRole Variation() => SchrodingersCat!;
+
+    public bool AssignVariation() => Random.RandomRange(0, 100) <= SchrodingersCat!.Chance;
+
     [RoleAction(RoleActionType.Interaction)]
-    private void CopycatAttacked(PlayerControl actor, Interaction interaction, ActionHandle handle)
+    protected void CopycatAttacked(PlayerControl actor, Interaction interaction, ActionHandle handle)
     {
         if (turned || interaction.Intent() is not IFatalIntent) return;
         turned = true;
-        if (!copyKillersRole) AssignFaction(actor.GetCustomRole().Faction);
-        else AssignRole(actor);
+        AssignRole(actor);
         handle.Cancel();
     }
 
@@ -63,12 +73,19 @@ public class Copycat: CustomRole
         CustomRole attackerRole = attacker.GetCustomRole();
         FallbackTypes.GetOptional(attackerRole.GetType()).IfPresent(r => attackerRole = r());
         CustomRole role = copyRoleProgress ? attackerRole : CustomRoleManager.GetCleanRole(attackerRole);
-        
+
         VentLogger.Trace($"Copycat ({MyPlayer.name}) copying role of {attacker.name} : {role.RoleName}", "Copycat::AssignRole");
         MatchData.AssignRole(MyPlayer, role);
-        
+
         role = MyPlayer.GetCustomRole();
         role.RoleColor = RoleColor;
+
+        role.OverridenRoleName = Translations.CatFactionChangeName.Formatted(role.RoleName);
+        RoleComponent roleComponent = MyPlayer.NameModel().GCH<RoleHolder>().Last();
+        roleComponent.SetMainText(new LiveString(role.RoleName, RoleColor));
+        Players.GetAllPlayers().Where(p => role.Relationship(p) is Relation.FullAllies).ForEach(p => roleComponent.AddViewer(p));
+
+        if (attacker.Relationship(MyPlayer) is Relation.FullAllies) attacker.NameModel().GCH<RoleHolder>().First().AddViewer(MyPlayer);
 
         Game.MatchData.GameHistory.AddEvent(new RoleChangeEvent(MyPlayer, role, this));
 
@@ -79,14 +96,14 @@ public class Copycat: CustomRole
             MyPlayer.RpcMark(MyPlayer);
             role.SyncOptions();
         }, NetUtils.DeriveDelay(0.05f));
-        
+
 
         if (!role.GetActions(RoleActionType.Shapeshift).Any())
         {
             VentLogger.Trace("Adding shapeshift action to base role", "Copycat::AssignRole");
             RoleAction action = this.GetActions(RoleActionType.Shapeshift).First().Item1.Clone();
             action.Executer = this;
-            
+
             role.Editor = new BasicRoleEditor(role);
             role.Editor!.AddAction(action);
         }
@@ -94,34 +111,43 @@ public class Copycat: CustomRole
         if (copyIdentity) Async.Schedule(() => MyPlayer.CRpcShapeshift(attacker, false), 2);
     }
 
-    private void AssignFaction(IFaction faction)
-    {
-        Faction = faction;
-        RoleColor = Faction.FactionColor();
-        MyPlayer.NameModel().GetComponentHolder<RoleHolder>().Add(new RoleComponent(this, GameStates.IgnStates, ViewMode.Replace, viewers: MyPlayer));
-    }
-
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-            .SubOption(sub => sub.Name("Copy Attacker's Role")
-                .AddOnOffValues(false)
-                .ShowSubOptionPredicate(o => (bool)o)
-                .SubOption(sub2 => sub2.Name("Copy Role's Status")
+            .SubOption(sub2 => sub2.KeyName("Copy Role's Progress", Translations.Options.CopyRoleProgress)
                     .AddOnOffValues(false)
                     .BindBool(b => copyRoleProgress = b)
                     .Build())
-                .SubOption(sub2 => sub2.Name("Copy Attacker's Identity")
-                    .AddOnOffValues(false)
-                    .BindBool(b => copyIdentity = b)
-                    .Build())
-                .BindBool(b => copyKillersRole = b)
+            .SubOption(sub2 => sub2.KeyName("Shapeshift Into Attacker", Translations.Options.ShapeshiftIntoAttacker)
+                .AddOnOffValues(false)
+                .BindBool(b => copyIdentity = b)
+                .Build())
+            .SubOption(sub => sub.KeyName("Killer Knows Copycat", TranslationUtil.Colorize(Translations.Options.KillerKnowsCopycat, RoleColor))
+                .AddOnOffValues()
+                .BindBool(b => KillerKnowsCopycat = b)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.RoleColor(new Color(1f, 0.7f, 0.67f))
-            .VanillaRole(copyKillersRole ? RoleTypes.Shapeshifter : RoleTypes.Crewmate)
+            .VanillaRole(RoleTypes.Shapeshifter)
             .Faction(FactionInstances.Solo)
             .RoleFlags(RoleFlag.CannotWinAlone)
             .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage)
-            .SpecialType(SpecialType.Neutral);
+            .SpecialType(SpecialType.Neutral)
+            .LinkedRoles(SchrodingersCat ??= new SchrodingersCat());
+
+    [Localized(nameof(Copycat))]
+    private static class Translations
+    {
+        [Localized(nameof(CatFactionChangeName))]
+        public static string CatFactionChangeName = "{0}cat";
+
+        [Localized(ModConstants.Options)]
+        public static class Options
+        {
+            public static string CopyAttackersRole = "Copy Attacker's Role";
+            public static string CopyRoleProgress = "Copy Role's Progress";
+            public static string ShapeshiftIntoAttacker = "Shapeshift Into Attacker";
+            public static string KillerKnowsCopycat = "Killer Knows Copycat::0";
+        }
+    }
 }

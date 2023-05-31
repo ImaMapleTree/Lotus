@@ -6,6 +6,7 @@ using Lotus.Utilities;
 using Lotus.Victory;
 using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Options;
 using VentLib.Options;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -70,7 +71,7 @@ public class ColorwarsGamemode: Gamemode
             .LocaleName("Gamemodes.Colorwars.Options.GracePeriod")
             .Tab(ColorwarsTab)
             .IsHeader(true)
-            .AddFloatRange(0, 30, 1f, 5, "s")
+            .AddFloatRange(0, 30, 1f, 5, GeneralOptionTranslations.SecondsSuffix)
             .BindFloat(v => GracePeriod = v)
             .BuildAndRegister(colorwarsManager);
 

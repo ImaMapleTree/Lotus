@@ -32,6 +32,8 @@ public class Vulture : CustomRole
     private bool hasArrowsToBodies;
     private bool isEatMode = true;
 
+    
+    
     [UIComponent(UI.Counter)]
     private string BodyCounter() => RoleUtils.Counter(bodyCount, bodyAmount, RoleColor);
     
