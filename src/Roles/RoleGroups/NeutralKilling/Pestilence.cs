@@ -1,22 +1,24 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Options;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Managers.History.Events;
+using Lotus.Options;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
+using static Lotus.Roles.RoleGroups.NeutralKilling.Pestilence.Translations.Options;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 public class Pestilence: NeutralKillingBase
 {
@@ -24,25 +26,17 @@ public class Pestilence: NeutralKillingBase
     /// A list of roles that the pestilence is immune against, this should only be populated by external addons if they want to add an immunity to pestilence lazily
     /// </summary>
     public static List<Type> ImmuneRoles = new();
-    public bool ImmuneToManipulated;
-    public bool ImmuneToRangedAttacks;
-    public bool ImmuneToDelayedAttacks;
-    public bool ImmuneToArsonist;
-    public bool UnblockableAttacks;
 
-    /// <summary>
-    /// More redundancy because of how this role is done, if you have a default setting you need to be set you can add it here via an action
-    /// </summary>
-    public List<Action> DefaultSetters;
+    private bool immuneToManipulated;
+    private bool immuneToRangedAttacks;
+    private bool immuneToDelayedAttacks;
+    private bool immuneToArsonist;
+    private bool unblockableAttacks;
+
 
     public Pestilence()
     {
         RelatedRoles.Add(typeof(PlagueBearer));
-        DefaultSetters = new List<Action>
-        {
-            () => ImmuneToManipulated = false, () => ImmuneToRangedAttacks = false,
-            () => ImmuneToDelayedAttacks = false, () => ImmuneToArsonist = false
-        };
     }
 
     protected override void PostSetup()
@@ -54,7 +48,7 @@ public class Pestilence: NeutralKillingBase
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        if (!UnblockableAttacks) return base.TryKill(target);
+        if (!unblockableAttacks) return base.TryKill(target);
         MyPlayer.InteractWith(target, new UnblockedInteraction(new FatalIntent(), this));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
         return true;
@@ -71,32 +65,88 @@ public class Pestilence: NeutralKillingBase
         {
 
             case IUnblockedInteraction: return;
-            case IDelayedInteraction when ImmuneToDelayedAttacks:
-            case IRangedInteraction when ImmuneToRangedAttacks:
+            case IDelayedInteraction when immuneToDelayedAttacks:
+            case IRangedInteraction when immuneToRangedAttacks:
                 canceled = true;
                 break;
             case IIndirectInteraction indirectInteraction:
                 if (indirectInteraction.Emitter() is AgiTater) canceled = true;
-                if (indirectInteraction.Emitter() is Arsonist && ImmuneToArsonist) canceled = true;
+                if (indirectInteraction.Emitter() is Arsonist && immuneToArsonist) canceled = true;
                 break;
-            case IManipulatedInteraction when ImmuneToManipulated:
+            case IManipulatedInteraction when immuneToManipulated:
             default:
                 canceled = true;
                 TryKill(actor);
                 break;
         }
 
-        // TODO: add immunity list
+        if (ImmuneRoles.Contains(actor.GetCustomRole().GetType())) canceled = true;
         if (canceled) handle.Cancel();
     }
 
-    public void SetDefaultSettings()
-    {
-        DefaultSetters.ForEach(setter => setter());
-    }
-
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream).Tab(DefaultTabs.HiddenTab);
+        AddKillCooldownOptions(base.RegisterOptions(optionStream))
+            .Tab(DefaultTabs.HiddenTab)
+            .SubOption(sub2 => sub2
+                .KeyName("Unblockable Kill", UnblockableKill)
+                .AddOnOffValues(false)
+                .BindBool(b => unblockableAttacks = b)
+                .Build())
+            .SubOption(sub2 => sub2
+                .KeyName("Invincibility Settings", InvincibilitySettings)
+                .Value(v => v.Text(GeneralOptionTranslations.DefaultText).Value(false).Color(Color.cyan).Build())
+                .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(true).Color(new Color(0.45f, 0.31f, 0.72f)).Build())
+                .ShowSubOptionPredicate(o => (bool)o)
+                .SubOption(sub3 =>  sub3
+                    .KeyName("Immune to Manipulated Attackers", ImmuneManipulatorAttackers)
+                    .AddOnOffValues(false)
+                    .BindBool(b => immuneToManipulated = b)
+                    .Build())
+                .SubOption(sub3 => sub3
+                    .KeyName("Immune to Ranged Attacks", ImmuneRangedAttacks)
+                    .AddOnOffValues(false)
+                    .BindBool(b => immuneToRangedAttacks = b)
+                    .Build())
+                .SubOption(sub3 => sub3
+                    .KeyName("Immune to Delayed Attacks", ImmuneDelayedAttacks)
+                    .AddOnOffValues(false)
+                    .BindBool(b => immuneToDelayedAttacks = b)
+                    .Build())
+                .SubOption(sub3 => sub3
+                    .KeyName("Immune to Arsonist Ignite", ImmuneArsonistIgnite)
+                    .AddOnOffValues(false)
+                    .BindBool(b => immuneToArsonist = b)
+                    .Build())
+                .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.22f, 0.22f, 0.22f));
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
+        base.Modify(roleModifier)
+            .RoleColor(new Color(0.22f, 0.22f, 0.22f))
+            .RoleFlags(RoleFlag.TransformationRole);
+
+    [Localized(nameof(Pestilence))]
+    internal static class Translations
+    {
+        [Localized(ModConstants.Options)]
+        public static class Options
+        {
+            [Localized(nameof(UnblockableKill))]
+            public static string UnblockableKill = "Unblockable Kill";
+
+            [Localized(nameof(InvincibilitySettings))]
+            public static string InvincibilitySettings = "Invincibility Settings";
+
+            [Localized(nameof(ImmuneManipulatorAttackers))]
+            public static string ImmuneManipulatorAttackers = "Immune to Manipulated Attackers";
+
+            [Localized(nameof(ImmuneRangedAttacks))]
+            public static string ImmuneRangedAttacks = "Immune to Ranged Attacks";
+
+            [Localized(nameof(ImmuneDelayedAttacks))]
+            public static string ImmuneDelayedAttacks = "Immune to Delayed Attacks";
+
+            [Localized(nameof(ImmuneArsonistIgnite))]
+            public static string ImmuneArsonistIgnite = "Immune to Arsonist Ignite";
+        }
+    }
 }

@@ -2,21 +2,22 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
-using TOHTOR.Roles.RoleGroups.Crew.Potions;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Impl;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Roles.RoleGroups.Crew.Potions;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 [Localized("Roles.Alchemist")]
 public partial class Alchemist: Crewmate
@@ -48,7 +49,7 @@ public partial class Alchemist: Crewmate
             .ToList();
     }
 
-    [UIComponent(UI.Counter, ViewMode.Replace)]
+    [UIComponent(UI.Counter, ViewMode.Replace, GameState.Roaming, GameState.InMeeting)]
     private string RemoveCounter() => "";
 
     [UIComponent(UI.Role, ViewMode.Absolute)]

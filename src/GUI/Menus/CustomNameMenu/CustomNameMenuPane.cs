@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TOHTOR.GUI.Menus.CustomNameMenu;
+namespace Lotus.GUI.Menus.CustomNameMenu;
 
 public class CustomNameMenuPane
 {

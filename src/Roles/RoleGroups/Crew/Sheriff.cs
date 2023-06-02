@@ -1,27 +1,34 @@
+using System;
 using System.Collections.Generic;
 using AmongUs.GameOptions;
-using Il2CppSystem;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Patches.Systems;
+using Lotus.Roles.Events;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Sheriff : Crewmate
 {
+    public static HashSet<Type> SheriffBannedModifiers = new() { typeof(Workhorse) };
+    public override HashSet<Type> BannedModifiers() => !isSheriffDesync ? new HashSet<Type>() : SheriffBannedModifiers;
+
     private int totalShots;
     private bool oneShotPerRound;
     private bool canKillCrewmates;
@@ -67,17 +74,20 @@ public class Sheriff : Crewmate
         shotsRemaining--;
         shootCooldown.Start();
 
-        if (target.Relationship(MyPlayer) is Relation.FullAllies) Suicide(target);
+        if (Relationship(target) is Relation.FullAllies) return Suicide(target);
         return MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
     }
 
-    private void Suicide(PlayerControl target)
+    private bool Suicide(PlayerControl target)
     {
         MyPlayer.RpcMurderPlayer(MyPlayer);
+        if (!canKillCrewmates) return false;
 
-        if (!canKillCrewmates) return;
-        bool killed = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
+        DeathEvent deathEvent = new MisfiredEvent(MyPlayer);
+        DirectInteraction directInteraction = new(new FatalIntent(false, () => deathEvent), this);
+        bool killed = MyPlayer.InteractWith(target, directInteraction) is InteractionResult.Proceed;
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, killed));
+        return true;
     }
     // OPTIONS
 
@@ -92,7 +102,7 @@ public class Sheriff : Crewmate
             .SubOption(sub => sub
                 .Name("Kill Cooldown")
                 .BindFloat(this.shootCooldown.SetDuration)
-                .AddFloatRange(0, 120, 2.5f, 12, "s")
+                .AddFloatRange(0, 120, 2.5f, 12, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Total Shots")
@@ -114,8 +124,10 @@ public class Sheriff : Crewmate
     // Sheriff is not longer a desync role for simplicity sake && so that they can do tasks
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .VanillaRole(RoleTypes.Crewmate)
-            .DesyncRole(!isSheriffDesync ? null : RoleTypes.Impostor)
-            .CanVent(false)
+            .DesyncRole(isSheriffDesync ? RoleTypes.Impostor : RoleTypes.Crewmate)
+            .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod(), () => isSheriffDesync)
+            .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod() / 5, () => isSheriffDesync && SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Lights)
+            .OptionOverride(Override.KillCooldown, () => shootCooldown.Duration)
+            .RoleAbilityFlags(RoleAbilityFlag.CannotVent | RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.IsAbleToKill)
             .RoleColor(new Color(0.97f, 0.8f, 0.27f));
 }

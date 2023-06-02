@@ -1,15 +1,17 @@
 using System;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.RPC;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Roles.Internals;
+using Lotus.RPC;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Camouflager: Shapeshifter
 {
@@ -31,11 +33,12 @@ public class Camouflager: Shapeshifter
 
     [RoleAction(RoleActionType.MeetingCalled)]
     [RoleAction(RoleActionType.Unshapeshift)]
-    private void CamouflagerUnshapeshift()
+    private void CamouflagerUnshapeshift(ActionHandle handle)
     {
         if (!camouflaged) return;
         camouflaged = false;
-        Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
+        if (handle.ActionType is not RoleActionType.MeetingCalled)
+            Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -43,12 +46,12 @@ public class Camouflager: Shapeshifter
             .SubOption(sub => sub
                 .Name("Camouflage Cooldown")
                 .Bind(v => ShapeshiftCooldown = (float)v)
-                .AddFloatRange(5, 120, 2.5f, 5, "s")
+                .AddFloatRange(5, 120, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Camouflage Duration")
                 .Bind(v => ShapeshiftDuration = (float)v)
-                .AddFloatRange(5, 60, 2.5f, 5, "s")
+                .AddFloatRange(5, 60, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Can Vent")

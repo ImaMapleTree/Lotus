@@ -2,21 +2,21 @@ extern alias JBAnnotations;
 using System.Collections.Generic;
 using System.Linq;
 using JBAnnotations::JetBrains.Annotations;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Gamemodes.Standard.Lotteries;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Roles.Subroles;
-using TOHTOR.Utilities;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Gamemodes.Standard.Lotteries;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Subroles;
+using Lotus.Extensions;
+using Lotus.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes.Standard;
+namespace Lotus.Gamemodes.Standard;
 
 public class StandardRoleAssignmentLogic
 {
@@ -28,6 +28,8 @@ public class StandardRoleAssignmentLogic
     public static void AssignRoles(List<PlayerControl> allPlayers)
     {
         List<PlayerControl> unassignedPlayers = new(allPlayers);
+        unassignedPlayers.Shuffle();
+        
         RoleDistribution distribution = GeneralOptions.GameplayOptions.OptimizeRoleAssignment
             ? OptimizeRoleAlgorithm.OptimizeDistribution()
             : OptimizeRoleAlgorithm.NonOptimizedDistribution();
@@ -37,10 +39,10 @@ public class StandardRoleAssignmentLogic
         while (GeneralOptions.DebugOptions.NameBasedRoleAssignment && j < unassignedPlayers.Count)
         {
             PlayerControl player = unassignedPlayers[j];
-            CustomRole? role = CustomRoleManager.AllRoles.FirstOrDefault(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(player.name?.ToLower() ?? "HEHXD"));
+            CustomRole? role = CustomRoleManager.AllRoles.FirstOrDefault(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(player.name.ToLower() ?? "HEHXD"));
             if (role != null && role.GetType() != typeof(Crewmate))
             {
-                Api.Roles.AssignRole(player, role);
+                MatchData.AssignRole(player, role);
                 unassignedPlayers.Pop(j);
             }
             else j++;
@@ -48,8 +50,15 @@ public class StandardRoleAssignmentLogic
 
         // ASSIGN IMPOSTOR ROLES
         ImpostorLottery impostorLottery = new();
-        for (int i = 0; i < distribution.Impostors && unassignedPlayers.Count > 0; i++)
-            Api.Roles.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(impostorLottery.Next()));
+        int impostorCount = 0;
+        while (impostorCount < distribution.Impostors && unassignedPlayers.Count > 0)
+        {
+            CustomRole role = impostorLottery.Next();
+            if (role.GetType() == typeof(Impostor) && impostorLottery.HasNext()) continue;
+            MatchData.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(role));
+            impostorCount++;
+        }
+
         // =====================
 
         // ASSIGN NEUTRAL ROLES
@@ -64,10 +73,11 @@ public class StandardRoleAssignmentLogic
             {
                 if (nkRoles > distribution.MaximumNeutralKilling || loops >= 10) break;
                 loops++;
-                neutralKillingLottery = new NeutralKillingLottery(); // Refresh the lottery again to fulfill the minimum requirement
+                if (!neutralKillingLottery.HasNext()) 
+                    neutralKillingLottery = new NeutralKillingLottery(); // Refresh the lottery again to fulfill the minimum requirement
                 continue;
             }
-            Api.Roles.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(role));
+            MatchData.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(role));
             nkRoles++;
         }
         // --------------------------
@@ -84,10 +94,11 @@ public class StandardRoleAssignmentLogic
             {
                 if (neutralRoles > distribution.MinimumNeutralPassive || loops >= 10) break;
                 loops++;
-                neutralLottery = new NeutralLottery(); // Refresh the lottery again to fulfill the minimum requirement
+                if (!neutralLottery.HasNext()) 
+                    neutralLottery = new NeutralLottery(); // Refresh the lottery again to fulfill the minimum requirement
                 continue;
             }
-            Api.Roles.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(role));
+            MatchData.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(role));
             neutralRoles++;
         }
         // --------------------------
@@ -99,7 +110,7 @@ public class StandardRoleAssignmentLogic
 
         // ASSIGN CREWMATE ROLES
         CrewmateLottery crewmateLottery = new();
-        while (unassignedPlayers.Count > 0) Api.Roles.AssignRole(unassignedPlayers.PopRandom(), crewmateLottery.Next());
+        while (unassignedPlayers.Count > 0) MatchData.AssignRole(unassignedPlayers.PopRandom(), crewmateLottery.Next());
         // ====================
         
         // ASSIGN SUB-ROLES
@@ -143,9 +154,9 @@ public class StandardRoleAssignmentLogic
                 if (variant is Subrole subrole)
                 {
                     if (!(assigned = subrole.IsAssignableTo(victim))) continue;
-                    Api.Roles.AssignSubrole(victim, subrole);
+                    MatchData.AssignSubrole(victim, subrole);
                 }
-                else Api.Roles.AssignRole(victim, variant);
+                else MatchData.AssignRole(victim, variant);
             }
         }
     }

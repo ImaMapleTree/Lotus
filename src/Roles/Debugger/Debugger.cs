@@ -2,19 +2,19 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Utilities;
-using TOHTOR.Victory.Conditions;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
+using Lotus.Managers;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.Debugger;
+namespace Lotus.Roles.Debugger;
 
 public class Debugger: CustomRole
 {

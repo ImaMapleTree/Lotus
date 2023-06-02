@@ -1,16 +1,16 @@
 using System;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
+using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Version;
 using Version = VentLib.Version.Version;
 
-namespace TOHTOR.Patches.Intro;
+namespace Lotus.Patches.Intro;
 
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.CoBegin))]
 class CoBeginPatch

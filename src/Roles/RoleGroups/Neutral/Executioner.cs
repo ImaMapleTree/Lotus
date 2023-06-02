@@ -1,25 +1,26 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Victory.Conditions;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Impostors;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Neutrals;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Executioner : CustomRole
 {
@@ -55,6 +56,7 @@ public class Executioner : CustomRole
         win.Activate();
     }
 
+    [RoleAction(RoleActionType.Disconnect)]
     [RoleAction(RoleActionType.AnyDeath)]
     private void CheckChangeRole(PlayerControl dead)
     {
@@ -62,16 +64,16 @@ public class Executioner : CustomRole
         switch ((ExeRoleChange)roleChangeWhenTargetDies)
         {
             case ExeRoleChange.Jester:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
                 break;
             case ExeRoleChange.Opportunist:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
-            case ExeRoleChange.SchrodingerCat:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
+            case ExeRoleChange.SchrodingersCat:
+                MatchData.AssignRole(MyPlayer, Copycat.SchrodingersCat!);
                 break;
             case ExeRoleChange.Crewmate:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
                 break;
             case ExeRoleChange.None:
             default:
@@ -97,20 +99,20 @@ public class Executioner : CustomRole
                 .Bind(v => roleChangeWhenTargetDies = (int)v)
                 .Value(v => v.Text("Jester").Value(1).Color(new Color(0.93f, 0.38f, 0.65f)).Build())
                 .Value(v => v.Text("Opportunist").Value(2).Color(Color.green).Build())
-                .Value(v => v.Text("Schrodinger's Cat").Value(3).Color(Color.black).Build())
+                .Value(v => v.Text("Copycat").Value(3).Color(new Color(1f, 0.7f, 0.67f)).Build())
                 .Value(v => v.Text("Crewmate").Value(4).Color(new Color(0.71f, 0.94f, 1f)).Build())
                 .Value(v => v.Text("Off").Value(0).Color(Color.red).Build())
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor(new Color(0.55f, 0.17f, 0.33f)).Faction(FactionInstances.Solo).RoleFlags(RoleFlag.CannotWinAlone);
+        roleModifier.RoleColor(new Color(0.55f, 0.17f, 0.33f)).Faction(FactionInstances.Solo).RoleFlags(RoleFlag.CannotWinAlone).SpecialType(SpecialType.Neutral);
 
     private enum ExeRoleChange
     {
         None,
         Jester,
         Opportunist,
-        SchrodingerCat,
+        SchrodingersCat,
         Crewmate
     }
 }

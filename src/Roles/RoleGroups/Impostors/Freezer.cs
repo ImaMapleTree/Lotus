@@ -1,11 +1,12 @@
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.GUI;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
+using Lotus.Options;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Freezer : Vanilla.Shapeshifter
 {
@@ -62,12 +63,12 @@ public class Freezer : Vanilla.Shapeshifter
             .SubOption(sub => sub
                 .Name("Freeze Cooldown")
                 .Bind(v => freezeCooldown = (float)v)
-                .AddFloatRange(5f, 120f, 2.5f, 10, "s")
+                .AddFloatRange(5f, 120f, 2.5f, 10, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Freeze Duration")
                 .Bind(v => freezeDuration.Duration = (float)v)
-                .AddFloatRange(5f, 60f, 2.5f, 4, "s")
+                .AddFloatRange(5f, 60f, 2.5f, 4, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Can Vent")

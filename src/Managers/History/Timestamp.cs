@@ -1,9 +1,9 @@
 using System;
 using System.Globalization;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
+using Lotus.API;
 
-namespace TOHTOR.Managers.History;
+namespace Lotus.Managers.History;
 
 /// <summary>
 /// Simple class that stores its creation time
@@ -20,6 +20,8 @@ public class Timestamp
     public bool IsBefore(Timestamp other) => time.CompareTo(other.time) < 0;
 
     public bool IsAfter(Timestamp other) => time.CompareTo(other.time) > 0;
+
+    public TimeSpan TimeSpan() => time;
 
     public override string ToString() => time.ToString();
 

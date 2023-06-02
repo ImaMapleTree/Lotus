@@ -1,14 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
+using Lotus.API.Player;
+using Lotus.Managers;
+using Lotus.Extensions;
+using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using static MeetingHud;
 
-namespace TOHTOR.API.Vanilla.Meetings;
+namespace Lotus.API.Vanilla.Meetings;
 
 public class MeetingDelegate
 {
@@ -28,13 +30,13 @@ public class MeetingDelegate
         BlackscreenResolver = new BlackscreenResolver(this);
     }
 
-    public void AddVote(PlayerControl player, Optional<PlayerControl> target)
+    public void CastVote(PlayerControl player, Optional<PlayerControl> target)
     {
         VentLogger.Trace($"{player.GetNameWithRole()} casted vote for {target.Map(p => p.GetNameWithRole()).OrElse("No One")}");
-        AddVote(player.PlayerId, target.Map(p => p.PlayerId));
+        CastVote(player.PlayerId, target.Map(p => p.PlayerId));
     }
 
-    public void AddVote(byte playerId, Optional<byte> target)
+    public void CastVote(byte playerId, Optional<byte> target)
     {
         currentVotes.GetOrCompute(playerId, () => new List<Optional<byte>>()).Add(target);
     }
@@ -88,4 +90,30 @@ public class MeetingDelegate
     }
 
     internal bool IsForceEnd() => isForceEnd;
+
+    public void CalculateExiledPlayer()
+    {
+        List<KeyValuePair<byte, int>> sortedVotes = this.CurrentVoteCount().Sorted(kvp => kvp.Value).Reverse().ToList();
+        bool isTie = false;
+        byte exiledPlayer = byte.MaxValue;
+        switch (sortedVotes.Count)
+        {
+            case 0: break;
+            case 1:
+                exiledPlayer = sortedVotes[0].Key;
+                break; 
+            case >= 2:
+                isTie = sortedVotes[0].Value == sortedVotes[1].Value;
+                exiledPlayer = sortedVotes[0].Key;
+                break;
+        }
+
+        this.ExiledPlayer = Players.PlayerById(exiledPlayer).Map(p => p.Data).OrElse(null!);
+        this.IsTie = isTie;
+
+        string mostVotedPlayer = this.ExiledPlayer?.Object != null ? this.ExiledPlayer.Object.name : "Unknown";
+        VentLogger.Trace($"Calculated player votes. Player with most votes = {mostVotedPlayer}, isTie = {isTie}");
+
+        if (IsTie) this.ExiledPlayer = null;
+    }
 }

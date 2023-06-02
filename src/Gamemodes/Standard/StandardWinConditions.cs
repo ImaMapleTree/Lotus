@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.Managers;
-using TOHTOR.Roles.Legacy;
-using TOHTOR.Roles.Subroles;
-using TOHTOR.Victory.Conditions;
+using Lotus.API.Odyssey;
+using Lotus.Factions.Neutrals;
+using Lotus.Managers;
+using Lotus.Roles.Subroles;
+using Lotus.Victory.Conditions;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Roles.Legacy;
 
-namespace TOHTOR.Gamemodes.Standard;
+namespace Lotus.Gamemodes.Standard;
 
 public static class StandardWinConditions
 {
@@ -22,25 +22,27 @@ public static class StandardWinConditions
             if (allPlayers.Count != 1) return false;
 
             PlayerControl lastPlayer = allPlayers[0];
+            winners = new List<PlayerControl> { lastPlayer };
             return lastPlayer.GetCustomRole().Faction is Solo;
         }
 
         public WinReason GetWinReason() => WinReason.FactionLastStanding;
     }
 
-    
+
 
     public class LoversWin : IWinCondition
     {
         public bool IsConditionMet(out List<PlayerControl> winners)
         {
             winners = null;
-            if (Game.GetAlivePlayers().Count() > 3) return false;
+            return false;
+            /*if (Game.GetAlivePlayers().Count() > 3) return false;
             List<PlayerControl> lovers = Game.FindAlivePlayersWithRole(CustomRoleManager.Special.LoversReal).ToList();
             if (lovers.Count != 2) return false;
             LoversReal loversRealRole = lovers[0].GetSubrole<LoversReal>()!;
             winners = lovers;
-            return loversRealRole.Partner != null && loversRealRole.Partner.PlayerId == lovers[1].PlayerId;
+            return loversRealRole.Partner != null && loversRealRole.Partner.PlayerId == lovers[1].PlayerId;*/
         }
 
         public WinReason GetWinReason() => WinReason.RoleSpecificWin;

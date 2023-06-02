@@ -1,25 +1,23 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.Patches.Systems;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.GUI;
+using Lotus.Patches.Systems;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 public static class RoleUtils
 {
@@ -27,14 +25,17 @@ public static class RoleUtils
 
     public static string CalculateArrow(PlayerControl source, PlayerControl target, Color? color = null)
     {
-        if (!target.IsAlive()) return "";
+        return !target.IsAlive() ? "" : CalculateArrow(source, target.GetTruePosition(), color);
+    }
+
+    public static string CalculateArrow(PlayerControl source, Vector2 target, Color? color = null)
+    {
         Vector2 sourcePosition = source.GetTruePosition();
-        Vector2 targetPosition = target.GetTruePosition();
-        float distance = Vector2.Distance(sourcePosition, targetPosition);
+        float distance = Vector2.Distance(sourcePosition, target);
         if (distance < ModConstants.ArrowActivationMin) return Arrows[8].ToString();
 
-        float deltaX = targetPosition.x - sourcePosition.x;
-        float deltaY = targetPosition.y - sourcePosition.y;
+        float deltaX = target.x - sourcePosition.x;
+        float deltaY = target.y - sourcePosition.y;
 
         float angle = Mathf.Atan2(deltaY, deltaX) * Mathf.Rad2Deg;
         if (angle < 0)
@@ -61,7 +62,7 @@ public static class RoleUtils
             return distanceApart <= distance;
         });
 
-        return sorted ? distancePlayers.Sorted(p => distances[p.PlayerId]) : distancePlayers;
+        return sorted ? distancePlayers.OrderBy(p => distances[p.PlayerId]) : distancePlayers;
     }
 
     public static IEnumerable<PlayerControl> GetPlayersOutsideDistance(PlayerControl source, float distance)
@@ -120,10 +121,10 @@ public static class RoleUtils
             return InteractionResult.Halt;
         }
         ActionHandle handle = ActionHandle.NoInit();
-        PlayerControl.AllPlayerControls.ToArray().Where(p => p.PlayerId != interaction.Emitter().MyPlayer.PlayerId).Trigger(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
+        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null).Trigger(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
         if (player.PlayerId != target.PlayerId) target.Trigger(RoleActionType.Interaction, ref handle, player, interaction);
         if (!handle.IsCanceled || interaction is IUnblockedInteraction) interaction.Intent().Action(player, target);
-        if (handle.IsCanceled) interaction.Intent().Halted(player, target);
+        else if (handle.Cancellation is ActionHandle.CancelType.Normal) interaction.Intent().Halted(player, target);
         return handle.IsCanceled ? InteractionResult.Halt : InteractionResult.Proceed;
     }
 

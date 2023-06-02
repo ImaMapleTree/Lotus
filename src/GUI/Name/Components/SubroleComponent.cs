@@ -1,18 +1,18 @@
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Roles.Subroles;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name.Impl;
+using Lotus.Roles.Subroles;
+using Lotus.API;
 
-namespace TOHTOR.GUI.Name.Components;
+namespace Lotus.GUI.Name.Components;
 
 public class SubroleComponent : SimpleComponent
 {
-    public SubroleComponent(Subrole subrole, GameState[] gameStates, ViewMode viewMode = Impl.ViewMode.Additive, params PlayerControl[] viewers) : base("", gameStates, viewMode, viewers)
+    public SubroleComponent(Subrole subrole, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive, params PlayerControl[] viewers) : base("", gameStates, viewMode, viewers)
     {
         this.SetMainText(new LiveString(subrole.Identifier() ?? "", subrole.RoleColor));
     }
 
-    public SubroleComponent(Subrole subrole, GameState gameState, ViewMode viewMode = Impl.ViewMode.Additive, params PlayerControl[] viewers) : this(subrole, new []{gameState}, viewMode, viewers)
+    public SubroleComponent(Subrole subrole, GameState gameState, ViewMode viewMode = Name.ViewMode.Additive, params PlayerControl[] viewers) : this(subrole, new []{gameState}, viewMode, viewers)
     {
     }
 }

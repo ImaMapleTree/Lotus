@@ -1,18 +1,19 @@
 using System;
 using AmongUs.Data;
+using Lotus.GUI.Menus.OptionsMenu.Components;
+using Lotus.Options;
+using Lotus.Options.Client;
+using Lotus.Utilities;
 using TMPro;
-using TOHTOR.GUI.Menus.OptionsMenu.Components;
-using TOHTOR.Options;
-using TOHTOR.Options.Client;
-using TOHTOR.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
+using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Utilities.GameObjectUtils;
+using static Lotus.Utilities.GameObjectUtils;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Submenus;
+namespace Lotus.GUI.Menus.OptionsMenu.Submenus;
 
 [RegisterInIl2Cpp]
 public class GraphicsMenu: MonoBehaviour, IBaseOptionMenuComponent
@@ -81,31 +82,30 @@ public class GraphicsMenu: MonoBehaviour, IBaseOptionMenuComponent
         resolutionSlider.GetComponentInChildren<TextMeshPro>().transform.localPosition += new Vector3(1f, 0.2f);
         resolutionText = graphicsContent.FindChild<TextMeshPro>("ResolutionText_TMP");
         resolutionSlider.OnValueChange = new UnityEvent();
-        resolutionSlider.OnValueChange.AddListener(((Action)(() =>
+        resolutionSlider.OnValueChange.AddListener((Action)(() =>
         {
             temporaryResolutionIndex = Mathf.RoundToInt(resolutionSlider.Value * 9);
             (int width, int height) = ResolutionUtils.ResolutionsSixteenNine[temporaryResolutionIndex];
             resolutionText.text = $"{width} x {height}";
             if (!opening) applyGameObject.SetActive(true);
-        })));
+        }));
         resolutionText.transform.localPosition += new Vector3(2f, 0.625f);
 
 
         fpsSlider = Instantiate(resolutionSlider, anchor.transform);
         fpsSlider.transform.localScale = new Vector3(1.1f, 1.2f, 1f);
-        //fpsSlider.transform.localPosition += new Vector3(0.2f, -1f);
         TextMeshPro fpsTextLabel = fpsSlider.GetComponentInChildren<TextMeshPro>();
         fpsTextLabel.transform.localPosition += new Vector3(1f, 0.2f);
         fpsSlider.transform.localPosition -= new Vector3(0f, 0.65f);
         fpsSlider.OnValueChange = new UnityEvent();
-        fpsSlider.OnValueChange.AddListener(((Action)(() =>
+        fpsSlider.OnValueChange.AddListener((Action)(() =>
         {
             int index = Mathf.RoundToInt(fpsSlider.Value * 7);
             int fps = (int)VideoOptions.FpsLimits[index];
             temporaryFps = fps;
             SetFpsText();
             if (!opening) applyGameObject.SetActive(true);
-        })));
+        }));
         fpsText = Instantiate(resolutionText, fpsSlider.transform);
         fpsText.transform.localPosition += new Vector3(2f, 0.625f);
 

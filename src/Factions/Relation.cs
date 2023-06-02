@@ -1,4 +1,4 @@
-namespace TOHTOR.Factions;
+namespace Lotus.Factions;
 
 public enum Relation
 {

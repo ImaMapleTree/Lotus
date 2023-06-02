@@ -1,7 +1,7 @@
 using HarmonyLib;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 
-namespace TOHTOR.Patches.Systems;
+namespace Lotus.Patches.Systems;
 
 // This is not a very fun patch
 /*[HarmonyPatch(typeof(Console), nameof(Console.CanUse))]

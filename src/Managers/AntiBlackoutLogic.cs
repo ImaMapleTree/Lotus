@@ -1,14 +1,14 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using static GameData;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 public static class AntiBlackoutLogic
 {
@@ -44,6 +44,8 @@ public static class AntiBlackoutLogic
             else if (player.IsAlive()) aliveCrewCount++;
             if (PlayerControl.LocalPlayer.GetVanillaRole().IsImpostor() && PlayerControl.LocalPlayer.PlayerId != exiledPlayer) aliveImpostorCount++;
 
+            VentLogger.Trace($"Alive Crew: {aliveCrewCount} | Alive Impostors: {aliveImpostorCount}");
+
             bool IsFailure()
             {
                 bool failure = false;
@@ -51,7 +53,7 @@ public static class AntiBlackoutLogic
                 if (aliveImpostorCount == 0) failure |= unpatchable.Add(player.PlayerId);
                 return failure;
             }
-            
+
 
             // Go until failure, or aliveCrew > aliveImpostor
             int index = 0;
@@ -66,7 +68,7 @@ public static class AntiBlackoutLogic
 
             // No matter what, if crew is less than impostor alive, we're unpatchable
             if (aliveCrewCount <= aliveImpostorCount) unpatchable.Add(player.PlayerId);
-            
+
 
             GeneralRPC.SendGameData(player.GetClientId());
         }

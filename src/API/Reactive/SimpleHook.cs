@@ -2,7 +2,7 @@ using System;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Reactive;
+namespace Lotus.API.Reactive;
 
 public class SimpleHook<T> : OrderedDictionary<string, Action<T>>, Hook<T> where T: IHookEvent
 {

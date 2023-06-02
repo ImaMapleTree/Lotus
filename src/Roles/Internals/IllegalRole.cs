@@ -1,6 +1,6 @@
 using System;
 
-namespace TOHTOR.Roles.Internals;
+namespace Lotus.Roles.Internals;
 
 public sealed class IllegalRole: CustomRole
 {

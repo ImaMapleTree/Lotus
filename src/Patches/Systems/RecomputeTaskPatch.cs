@@ -1,12 +1,12 @@
 using System;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Legacy;
-using TOHTOR.Utilities;
+using Lotus.Roles.Interfaces;
+using Lotus.Utilities;
+using Lotus.Roles.Legacy;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Patches.Systems;
+namespace Lotus.Patches.Systems;
 
 [HarmonyPatch(typeof(GameData), nameof(GameData.RecomputeTaskCounts))]
 public class RecomputeTaskPatch

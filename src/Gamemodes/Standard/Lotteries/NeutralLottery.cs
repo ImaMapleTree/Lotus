@@ -1,10 +1,10 @@
 using System.Linq;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Roles.Internals;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes.Standard.Lotteries;
+namespace Lotus.Gamemodes.Standard.Lotteries;
 
 public class NeutralLottery: RoleLottery
 {

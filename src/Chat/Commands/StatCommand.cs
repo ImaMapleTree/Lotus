@@ -1,7 +1,6 @@
 using System.Linq;
-using TOHTOR.API.Stats;
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.API.Stats;
+using Lotus.Extensions;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
@@ -9,7 +8,7 @@ using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Localized("Commands.Stats")]
 [Command(CommandFlag.LobbyOnly, "stats", "stat")]
@@ -29,7 +28,7 @@ public class StatCommand: ICommandReceiver
         Optional<PlayerControl> searchedPlayer = PlayerControl.AllPlayerControls.ToArray().FirstOrOptional(p => p.Data.GetPlayerName(PlayerOutfitType.Default) == name);
         searchedPlayer.Handle(
             player => GetPlayerStats(requester, player),
-            () => Utils.SendMessage(string.Format(_playerNotFoundMessage, name), requester.PlayerId)
+            () => ChatHandler.Of(_playerNotFoundMessage.Formatted(name)).Send(requester)
         );
     }
 
@@ -47,6 +46,6 @@ public class StatCommand: ICommandReceiver
                 return current + $"{statistic.Name()}: {value}\n";
             });
 
-        Utils.SendMessage(statisticMessage, requester.PlayerId, "Statistics");
+        ChatHandler.Of(statisticMessage).Send(requester);
     }
 }

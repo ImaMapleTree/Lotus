@@ -1,24 +1,24 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Archangel : CustomRole
 {
@@ -76,16 +76,16 @@ public class Archangel : CustomRole
         switch (roleChangeWhenTargetDies)
         {
             case GARoleChange.Jester:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Jester);
                 break;
             case GARoleChange.Opportunist:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
             case GARoleChange.SchrodingerCat:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Copycat);
                 break;
             case GARoleChange.Crewmate:
-                Api.Roles.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
                 break;
             case GARoleChange.None:
             default:
@@ -107,12 +107,12 @@ public class Archangel : CustomRole
             .SubOption(sub => sub
                 .Name("Protect Duration")
                 .BindFloat(v => protectDuration.Duration = v)
-                .AddFloatRange(2.5f, 180f, 2.5f, 11, "s")
+                .AddFloatRange(2.5f, 180f, 2.5f, 11, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Protect Cooldown")
                 .BindFloat(v => protectCooldown.Duration = v)
-                .AddFloatRange(2.5f, 180f, 2.5f, 5, "s")
+                .AddFloatRange(2.5f, 180f, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Target Knows They have A GA")

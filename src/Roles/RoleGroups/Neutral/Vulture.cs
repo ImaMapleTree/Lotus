@@ -1,46 +1,56 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Victory.Conditions;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Options;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
+using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
+using static Lotus.Roles.RoleGroups.Neutral.Vulture.Translations.Options;
+using Object = UnityEngine.Object;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
-[Localized($"Roles.{nameof(Vulture)}")]
 public class Vulture : CustomRole
 {
+    public static HashSet<Type> VultureBannedModifiers = new() { typeof(Oblivious), typeof(Sleuth) };
+    public override HashSet<Type> BannedModifiers() => canSwitchMode ? new HashSet<Type>() : VultureBannedModifiers;
     private static Color _modeColor = new(0.73f, 0.18f, 0.02f);
-    
+
     private int bodyCount;
     private int bodyAmount;
     private bool canUseVents;
     private bool impostorVision;
     private bool canSwitchMode;
+    private bool hasArrowsToBodies;
     private bool isEatMode = true;
-    
-    [Localized("EatingModeText")]
-    private static string _eatingModeText = "Feasting";
 
-    [Localized("ReportingModeText")]
-    private static string _reportingModeText = "Reporting";
+
 
     [UIComponent(UI.Counter)]
     private string BodyCounter() => RoleUtils.Counter(bodyCount, bodyAmount, RoleColor);
-    
+
     [UIComponent(UI.Text)]
-    private string DisplayModeText() => canSwitchMode ? _modeColor.Colorize(isEatMode ? _eatingModeText : _reportingModeText) : "";
-    
+    private string DisplayModeText() => canSwitchMode ? _modeColor.Colorize(isEatMode ? Translations.EatingModeText : Translations.ReportingModeText) : "";
+
+    [UIComponent(UI.Indicator)]
+    private string Arrows() => hasArrowsToBodies ? Object.FindObjectsOfType<DeadBody>()
+        .Where(b => !Game.MatchData.UnreportableBodies.Contains(b.ParentId))
+        .Select(b => RoleUtils.CalculateArrow(MyPlayer, b.TruePosition, RoleColor)).Fuse("") : "";
+
     [RoleAction(RoleActionType.SelfReportBody)]
     private void EatBody(GameData.PlayerInfo body, ActionHandle handle)
     {
@@ -60,26 +70,31 @@ public class Vulture : CustomRole
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-        .Tab(DefaultTabs.NeutralTab)
+            .Tab(DefaultTabs.NeutralTab)
             .SubOption(sub => sub
-                .Name("Required Bodies")
-                .Bind(v => bodyAmount = (int)v)
+                .KeyName("Required Bodies", RequiredBodies)
+                .BindInt(v => bodyAmount = v)
                 .AddIntRange(1, 10, 1, 2)
                 .Build())
             .SubOption(opt =>
-                opt.Name("Has Impostor Vision")
-                .Bind(v => impostorVision = (bool)v)
+                opt.KeyName("Has Impostor Vision", HasImpostorVision)
+                .BindBool(v => impostorVision = v)
                 .AddOnOffValues()
                 .Build())
             .SubOption(opt =>
-                opt.Name("Can Switch between Eat and Report")
-                .Bind(v => canSwitchMode = (bool)v)
+                opt.KeyName("Can Switch between Eat and Report", SwitchModes)
+                .BindBool(v => canSwitchMode = v)
                 .AddOnOffValues()
                 .Build())
-            .SubOption(opt => opt.Name("Can Use Vents")
-                .Bind(v => canUseVents = (bool)v)
+            .SubOption(opt => opt.KeyName("Can Use Vents", CanUseVent)
+                .BindBool(v => canUseVents = v)
+                .AddOnOffValues()
+                .Build())
+            .SubOption(sub => sub.KeyName("Has Arrow To Bodies", HasArrowsToBody)
+                .BindBool(b => hasArrowsToBodies = b)
                 .AddOnOffValues()
                 .Build());
+
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.RoleColor(new Color(0.64f, 0.46f, 0.13f))
@@ -88,4 +103,33 @@ public class Vulture : CustomRole
             .CanVent(canUseVents)
             .SpecialType(SpecialType.Neutral)
             .OptionOverride(Override.CrewLightMod, () => AUSettings.ImpostorLightMod(), () => impostorVision);
+
+    [Localized(nameof(Vulture))]
+    internal static class Translations
+    {
+        [Localized(nameof(EatingModeText))]
+        public static string EatingModeText = "Feasting";
+
+        [Localized(nameof(ReportingModeText))]
+        public static string ReportingModeText = "Reporting";
+
+        [Localized(ModConstants.Options)]
+        public static class Options
+        {
+            [Localized(nameof(RequiredBodies))]
+            public static string RequiredBodies = "Required Bodies";
+
+            [Localized(nameof(HasImpostorVision))]
+            public static string HasImpostorVision = "Has Impostor Vision";
+
+            [Localized(nameof(SwitchModes))]
+            public static string SwitchModes = "Can Switch between Eat and Report";
+
+            [Localized(nameof(CanUseVent))]
+            public static string CanUseVent = "Can Use Vents";
+
+            [Localized(nameof(HasArrowsToBody))]
+            public static string HasArrowsToBody = "Has Arrows to Bodies";
+        }
+    }
 }

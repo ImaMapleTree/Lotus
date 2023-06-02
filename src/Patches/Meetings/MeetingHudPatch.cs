@@ -1,14 +1,14 @@
 using HarmonyLib;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.Options;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Options;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Patches.Meetings;
+namespace Lotus.Patches.Meetings;
 
 
 [HarmonyPatch(typeof(PlayerVoteArea), nameof(PlayerVoteArea.SetHighlighted))]
@@ -38,13 +38,11 @@ class MeetingHudOnDestroyPatch
 
     private static void PostMeetingSetups()
     {
-        bool noVenting = GeneralOptions.GameplayOptions.ForceNoVenting;
         bool randomSpawn = GeneralOptions.MayhemOptions.RandomSpawn;
 
         Game.GetAllPlayers().ForEach(p =>
         {
             if (randomSpawn) Game.RandomSpawn.Spawn(p);
-            if (noVenting && !p.GetCustomRole().BaseCanVent) Async.Schedule(() => VentApi.ForceNoVenting(p), 0.1f);
         });
     }
 }

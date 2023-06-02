@@ -1,7 +1,8 @@
-using TOHTOR.Options;
+using Lotus.Options;
+using VentLib.Options;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class GameOptionBuilderExtensions
 {

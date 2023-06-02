@@ -1,17 +1,17 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Patches;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Legacy;
+using Lotus.API.Odyssey;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.GUI.Patches;
+using Lotus.Roles.Legacy;
 using UnityEngine;
 using VentLib.Logging;
 
-namespace TOHTOR.Patches.Network;
+namespace Lotus.Patches.Network;
 
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.FixedUpdate))]
 class ShipFixedUpdatePatch
@@ -24,12 +24,12 @@ class ShipFixedUpdatePatch
         Game.CurrentGamemode.FixedUpdate();
 
         //ここより下、ホストのみが実行する
-        if (CustomRoleManager.Static.Vampire.IsEnabled() && TOHPlugin.RefixCooldownDelay >= 0)
-            TOHPlugin.RefixCooldownDelay -= Time.fixedDeltaTime;
+        if (CustomRoleManager.Static.Vampire.IsEnabled() && ProjectLotus.RefixCooldownDelay >= 0)
+            ProjectLotus.RefixCooldownDelay -= Time.fixedDeltaTime;
 
-        else if (!float.IsNaN(TOHPlugin.RefixCooldownDelay))
+        else if (!float.IsNaN(ProjectLotus.RefixCooldownDelay))
         {
-            TOHPlugin.RefixCooldownDelay = float.NaN;
+            ProjectLotus.RefixCooldownDelay = float.NaN;
             VentLogger.Old("Refix Cooldown", "CoolDown");
         }
     }

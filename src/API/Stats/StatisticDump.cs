@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TOHTOR.API.Stats;
+namespace Lotus.API.Stats;
 
 public class StatisticDump
 {

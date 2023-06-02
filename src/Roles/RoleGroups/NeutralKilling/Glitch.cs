@@ -1,22 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Roles.RoleGroups.Crew.Escort;
+using static Lotus.Roles.RoleGroups.Crew.Escort;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 [Localized("Roles.Glitch")]
 public class Glitch: NeutralKillingBase
@@ -31,7 +32,7 @@ public class Glitch: NeutralKillingBase
     private float roleblockDuration;
     private bool hackingMode;
 
-    [NewOnSetup] private Dictionary<byte, BlockDelegate> blockedPlayers;
+    [NewOnSetup] private Dictionary<byte, Escort.BlockDelegate> blockedPlayers;
 
     [UIComponent(UI.Text)]
     private string BlockingText() => textColor.Colorize(hackingMode ? _glitchHackingMode : _glitchKillingMode);
@@ -47,8 +48,8 @@ public class Glitch: NeutralKillingBase
 
         if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
-        blockedPlayers[target.PlayerId] = BlockDelegate.Block(target, MyPlayer, roleblockDuration);
-        MyPlayer.RpcGuardAndKill(target);
+        blockedPlayers[target.PlayerId] = Escort.BlockDelegate.Block(target, MyPlayer, roleblockDuration);
+        MyPlayer.RpcMark(target);
         Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, $"{RoleColor.Colorize(MyPlayer.name)} hacked {target.GetRoleColor().Colorize(target.name)}."));
 
         if (roleblockDuration > 0) Async.Schedule(() => blockedPlayers.Remove(target.PlayerId), roleblockDuration);
@@ -81,21 +82,11 @@ public class Glitch: NeutralKillingBase
         handle.Cancel();
         blockDelegate.UpdateDelegate();
     }
-    
+
     [RoleAction(RoleActionType.SabotageStarted)]
     private void BlockSabotage(PlayerControl caller, ActionHandle handle)
     {
         BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(caller.PlayerId);
-        if (blockDelegate == null) return;
-
-        handle.Cancel();
-        blockDelegate.UpdateDelegate();
-    }
-
-    [RoleAction(RoleActionType.AnyReportedBody)]
-    private void BlockReport(PlayerControl reporter, ActionHandle handle)
-    {
-        BlockDelegate? blockDelegate = blockedPlayers.GetValueOrDefault(reporter.PlayerId);
         if (blockDelegate == null) return;
 
         handle.Cancel();
@@ -108,7 +99,7 @@ public class Glitch: NeutralKillingBase
                 .Name("Hacking Duration")
                 .BindFloat(v => roleblockDuration = v)
                 .Value(v => v.Text("Until Meeting").Value(-1f).Build())
-                .AddFloatRange(5, 120, 5, suffix: "s")
+                .AddFloatRange(5, 120, 5, suffix: GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(Color.green);

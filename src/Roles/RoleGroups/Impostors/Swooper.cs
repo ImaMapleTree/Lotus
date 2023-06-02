@@ -2,23 +2,24 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -26,12 +27,11 @@ using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Swooper: Impostor
 {
     private bool canVentNormally;
-    private bool endsAtOriginalVent;
     private bool canBeSeenByAllied;
     private bool remainInvisibleOnKill;
     private Optional<Vent> initialVent = null!;
@@ -49,7 +49,7 @@ public class Swooper: Impostor
     {
         if (!remainInvisibleOnKill || swoopingDuration.IsReady()) return base.TryKill(target);
         InteractionResult result = MyPlayer.InteractWith(target, new DirectInteraction(new FatalIntent(true), this));
-        MyPlayer.RpcGuardAndKill(MyPlayer);
+        MyPlayer.RpcMark(MyPlayer);
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }
@@ -78,8 +78,14 @@ public class Swooper: Impostor
         swoopingDuration.Start();
         Game.MatchData.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{MyPlayer.name} began swooping."));
         lastEntered = DateTime.Now;
-        Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive(unaffected.Select(p => p.GetClientId()).ToArray()), 0.4f);
+        Async.Schedule(() => KickFromVent(vent, unaffected), 0.4f);
         Async.Schedule(EndSwooping, swoopingDuration.Duration);
+    }
+
+    private void KickFromVent(Vent vent, List<PlayerControl> unaffected)
+    {
+        if (MyPlayer.AmOwner) MyPlayer.MyPhysics.BootFromVent(vent.Id);
+        RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive(unaffected.Select(p => p.GetClientId()).ToArray());
     }
 
     [RoleAction(RoleActionType.VentExit)]
@@ -97,16 +103,7 @@ public class Swooper: Impostor
         int ventId = initialVent.Map(v => v.Id).OrElse(0);
         VentLogger.Trace($"Ending Swooping (ID: {ventId})");
 
-        Async.Schedule(() =>
-        {
-            if (endsAtOriginalVent && initialVent.Exists())
-            {
-                Vector2 position = initialVent.Get().transform.position;
-                Utils.Teleport(MyPlayer.NetTransform, new Vector2(position.x, position.y + 0.3636f));
-            }
-            MyPlayer.MyPhysics.RpcBootFromVent(ventId);
-        }, 0.4f);
-
+        Async.Schedule(() => MyPlayer.MyPhysics.RpcBootFromVent(ventId), 0.4f);
         swooperCooldown.Start();
     }
 
@@ -114,16 +111,12 @@ public class Swooper: Impostor
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => base.RegisterOptions(optionStream)
         .SubOption(sub => sub.Name("Invisibility Cooldown")
-            .AddFloatRange(5, 120, 2.5f, 16, "s")
+            .AddFloatRange(5, 120, 2.5f, 16, GeneralOptionTranslations.SecondsSuffix)
             .BindFloat(swooperCooldown.SetDuration)
             .Build())
         .SubOption(sub => sub.Name("Swooping Duration")
-            .AddFloatRange(5, 60, 1f, 5, "s")
+            .AddFloatRange(5, 60, 1f, 5, GeneralOptionTranslations.SecondsSuffix)
             .BindFloat(swoopingDuration.SetDuration)
-            .Build())
-        .SubOption(sub => sub.Name("Ends Swooping at initial Vent")
-            .AddOnOffValues()
-            .BindBool(b => endsAtOriginalVent = b)
             .Build())
         .SubOption(sub => sub.Name("Can be Seen By Allies")
             .AddOnOffValues()

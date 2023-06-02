@@ -1,20 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Interfaces;
-using TOHTOR.Logging;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.API.Player;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Interfaces;
+using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.RPC;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.GUI.Name.Impl;
+namespace Lotus.GUI.Name.Impl;
 
 public class SimpleNameModel : INameModel
 {
@@ -48,8 +51,8 @@ public class SimpleNameModel : INameModel
     {
         this.player = player;
         SetHolders();
-        this.unalteredName = player.Data.PlayerName;
-        NameHolder.Add(new NameComponent(new LiveString(unalteredName, Color.white), new[] { GameState.Roaming, GameState.InMeeting}, ViewMode.Replace));
+        this.unalteredName = player.name;
+        NameHolder.Add(new NameComponent(new LiveString(unalteredName, Color.white), new[] { GameState.Roaming, GameState.InMeeting}));
     }
 
     public string Unaltered() => unalteredName;
@@ -82,9 +85,19 @@ public class SimpleNameModel : INameModel
         cacheString = renders.Select(s => s.Join(delimiter: " ".Repeat(spacing - 1))).Join(delimiter: "\n").TrimStart('\n').TrimEnd('\n').Replace("\n\n", "\n");
         if (sendToPlayer)
         {
-            /*VentLogger.Fatal($"Sending Name for {player.name}: {cacheString} to: {rplayer.name}");*/
             if (rPlayer.IsHost()) Api.Local.SetName(player, cacheString);
-            else RpcV3.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(rPlayer.GetClientId());
+            else
+            {
+                int clientId = rPlayer.GetClientId();
+                if (clientId != -1) RpcV3.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(clientId);
+                if (!player.IsAlive())
+                {
+                    player.Data.PlayerName = player.name;
+                    Players.SendPlayerData(player.Data, clientId, autoSetName: false);
+                    DevLogger.Log($"Sending Player Name: {player.Data.PlayerName}");
+                    HostRpc.RpcDebug("Hahahahahha");
+                }
+            }
         }
         Profilers.Global.Sampler.Stop(id);
         return cacheString;
@@ -96,4 +109,6 @@ public class SimpleNameModel : INameModel
     {
         return (T)componentHolders.First(f => f is T);
     }
+
+    public T GCH<T>() where T : IComponentHolder => GetComponentHolder<T>();
 }

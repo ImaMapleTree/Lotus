@@ -1,15 +1,19 @@
 using System;
+using Lotus.Logging;
+using UnityEngine;
 using VentLib.Localization.Attributes;
+using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Options.Client;
+namespace Lotus.Options.Client;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class VideoOptions
 {
-    public static object[] FpsLimits = { 24, 30, 60, 120, 144, 240, 265, Int32.MaxValue };
+    public static object[] FpsLimits = { 24, 30, 60, 75, 120, 144, 240, Int32.MaxValue };
 
     public int TargetFps
     {
@@ -28,13 +32,19 @@ public class VideoOptions
 
     public VideoOptions()
     {
+        OptionManager optionManager = OptionManager.GetManager();
         fpsOption = new GameOptionBuilder()
             .Key("Max Framerate")
             .Name("Max Framerate")
             .Description("Maximum Framerate for the Application")
             .IOSettings(s => s.UnknownValueAction = ADEAnswer.Allow)
             .Values(2, FpsLimits)
-            .BindInt(i => _targetFps = i)
+            .BindInt(i =>
+            {
+                optionManager.DelaySave(0);
+                Application.targetFrameRate = _targetFps = i;
+                Async.Schedule(() => Application.targetFrameRate = _targetFps, 1f);
+            })
             .BuildAndRegister();
     }
 

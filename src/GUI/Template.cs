@@ -3,7 +3,7 @@ using TMPro;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.GUI;
+namespace Lotus.GUI;
 
 public static class Template
 {

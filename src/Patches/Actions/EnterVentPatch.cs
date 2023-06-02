@@ -1,24 +1,25 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using Hazel;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Gamemodes;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.Gamemodes;
+using Lotus.Roles;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.API;
+using Lotus.API.Stats;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches.Actions;
+namespace Lotus.Patches.Actions;
 
 [HarmonyPatch(typeof(Vent), nameof(Vent.EnterVent))]
 class EnterVentPatch
 {
-    internal static Dictionary<byte, Vector2?> lastVentLocation = new();
+    internal static Dictionary<byte, Vector2?> LastVentLocation = new();
 
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
@@ -29,17 +30,23 @@ class EnterVentPatch
         ActionHandle vented = ActionHandle.NoInit();
         pc.Trigger(RoleActionType.MyEnterVent, ref vented, __instance);
 
-        if (!role.CanVent() || vented.IsCanceled) {
+        if (!role.CanVent())
+        {
             VentLogger.Trace($"{pc.GetNameWithRole()} cannot enter vent. Booting.");
+            Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.01f);
+            return;
+        }
+        
+        if (vented.IsCanceled) {
+            VentLogger.Trace($"{pc.GetNameWithRole()} vent action got canceled. Booting.");
             Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.4f);
             return;
         }
 
         vented = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.AnyEnterVent, ref vented, __instance, pc);
-        if (vented.IsCanceled)
-            Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.4f);
-        else lastVentLocation[pc.PlayerId] = new Vector2(__instance.Offset.x, __instance.Offset.y);
+        if (vented.IsCanceled) Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.4f);
+        else VanillaStatistics.TimesVented.Update(pc.PlayerId, i => i + 1);
     }
 }
 
@@ -51,8 +58,7 @@ class ExitVentPatch
         if (!AmongUsClient.Instance.AmHost) return;
         ActionHandle exitVent = ActionHandle.NoInit();
         pc.Trigger(RoleActionType.VentExit, ref exitVent, __instance);
-        //if (exitVent.IsCanceled) Async.Schedule(() => pc.MyPhysics.RpcEnterVent(__instance.Id), 0.0f);
         if (exitVent.IsCanceled) Async.Schedule(() => RpcV3.Immediate(pc.MyPhysics.NetId, RpcCalls.EnterVent, SendOption.None).WritePacked(__instance.Id).Send(), 0.5f);
-        else EnterVentPatch.lastVentLocation.Remove(pc.PlayerId);
+        else EnterVentPatch.LastVentLocation.Remove(pc.PlayerId);
     }
 }

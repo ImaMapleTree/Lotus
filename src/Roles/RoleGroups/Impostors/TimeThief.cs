@@ -1,15 +1,18 @@
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Options;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class TimeThief : Vanilla.Impostor
 {
@@ -17,6 +20,9 @@ public class TimeThief : Vanilla.Impostor
     private int meetingTimeSubtractor;
     private int minimumVotingTime;
     private bool returnTimeAfterDeath;
+
+    [UIComponent(UI.Counter)]
+    public string TimeStolenCounter() => RoleUtils.Counter(kills * meetingTimeSubtractor + "s", color: RoleColor);
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
@@ -57,12 +63,12 @@ public class TimeThief : Vanilla.Impostor
             .SubOption(sub => sub
                 .Name("Meeting Time Stolen")
                 .Bind(v => meetingTimeSubtractor = (int)v)
-                .AddIntRange(5, 120, 5, 4, "s")
+                .AddIntRange(5, 120, 5, 4, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Minimum Voting Time")
                 .Bind(v => minimumVotingTime = (int)v)
-                .AddIntRange(5, 120, 5, 1, "s")
+                .AddIntRange(5, 120, 5, 1, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Return Stolen Time After Death")

@@ -2,12 +2,12 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.API;
+using Lotus.API;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes.CaptureTheFlag;
+namespace Lotus.Gamemodes.CaptureTheFlag;
 
 public class CTFAssignRoles
 {

@@ -1,9 +1,9 @@
-using TOHTOR.Extensions;
-using TOHTOR.Options;
-using TOHTOR.Roles;
+using Lotus.Roles;
+using Lotus.Extensions;
+using Lotus.Options;
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Managers.History;
+namespace Lotus.Managers.History;
 
 [Localized("HistoryEvent")]
 public class RoleChangeEvent: HistoryEvent

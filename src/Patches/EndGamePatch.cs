@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Options;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Options;
 using VentLib.Logging;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnGameEnd))]
 class EndGamePatch
@@ -37,6 +37,5 @@ class EndGamePatch
 
         KillLog = "asdoksdoksadpsako";
         VentLogger.Old("-----------ゲーム終了-----------", "Phase");
-        TOHPlugin.VisibleTasksCount = false;
     }
 }

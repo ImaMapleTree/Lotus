@@ -1,7 +1,7 @@
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Interactions.Interfaces;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Extensions;
 
-namespace TOHTOR.Roles.Interactions;
+namespace Lotus.Roles.Interactions;
 
 public class DirectInteraction : Interaction
 {
@@ -13,15 +13,17 @@ public class DirectInteraction : Interaction
     private CustomRole role;
     private Intent intent;
 
-    public DirectInteraction(Intent intent, CustomRole? customRole = null)
+    public DirectInteraction(Intent intent, CustomRole customRole)
     {
         this.intent = intent;
-        this.role = customRole!;
+        this.role = customRole;
     }
 
     public CustomRole Emitter() => role;
 
     public Intent Intent() => intent;
+
+    public virtual Interaction Modify(Intent intent) => new DirectInteraction(intent, role);
 
     public class Stub
     {

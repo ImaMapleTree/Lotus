@@ -1,8 +1,8 @@
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers.History.Events;
+using Lotus.API.Odyssey;
+using Lotus.Managers.History.Events;
+using Lotus.API;
 
-namespace TOHTOR.Roles.Events;
+namespace Lotus.Roles.Events;
 
 public class CursedEvent : TargetedAbilityEvent, IRoleEvent
 {

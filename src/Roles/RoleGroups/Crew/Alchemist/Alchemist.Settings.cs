@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.RoleGroups.Crew.Potions;
+using Lotus.Roles.RoleGroups.Crew.Potions;
+using Lotus.Extensions;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public partial class Alchemist
 {

@@ -1,15 +1,17 @@
-using TOHTOR.Roles.Interactions.Interfaces;
+using Lotus.Roles.Interactions.Interfaces;
 
-namespace TOHTOR.Roles.Interactions;
+namespace Lotus.Roles.Interactions;
 
 public class RangedInteraction : DirectInteraction, IRangedInteraction
 {
     private readonly float distance;
 
-    public RangedInteraction(Intent intent, float distance, CustomRole? customRole = null) : base(intent, customRole)
+    public RangedInteraction(Intent intent, float distance, CustomRole customRole) : base(intent, customRole)
     {
         this.distance = distance;
     }
+
+    public override Interaction Modify(Intent intent) => new RangedInteraction(intent, distance, Emitter());
 
     public float Distance() => distance;
 }

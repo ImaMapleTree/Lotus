@@ -1,13 +1,13 @@
 using System.Collections.Generic;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
+using Lotus.Managers;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Options.General;
+namespace Lotus.Options.General;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class AdminOptions
 {
     private static Color _optionColor = CustomRoleManager.Special.GM.RoleColor;
@@ -96,7 +96,7 @@ public class AdminOptions
     private class AdminOptionTranslations
     {
         [Localized("SectionTitle")]
-        public static string AdminTitle = "Admin Options";
+        public static string AdminTitle = "Host Options";
 
         [Localized("HostGM")]
         public static string HostGmText = "Host GM";

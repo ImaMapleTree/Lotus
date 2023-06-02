@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Components;
+namespace Lotus.GUI.Menus.OptionsMenu.Components;
 
 [RegisterInIl2Cpp]
 public class SimpleDropdownButton: MonoBehaviour

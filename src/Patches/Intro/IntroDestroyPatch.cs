@@ -1,29 +1,29 @@
-using System.Collections.Generic;
+using System;
+using System.Collections;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Hazel;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.API.Vanilla;
-using TOHTOR.Extensions;
-using TOHTOR.Logging;
-using TOHTOR.Options;
-using TOHTOR.Player;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.RPC;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.API.Player;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Options;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
+using Lotus.Options.General;
+using Lotus.Roles;
+using Lotus.Roles.Extra;
+using Lotus.RPC;
+using UnityEngine;
 using VentLib.Logging;
-using VentLib.Networking.RPC;
-using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Patches.Intro;
+namespace Lotus.Patches.Intro;
 
 
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.OnDestroy))]
@@ -35,17 +35,14 @@ class IntroDestroyPatch
         if (!GameStates.IsInGame) return;
         if (!AmongUsClient.Instance.AmHost) return;
 
-        if (TOHPlugin.NormalOptions.MapId != 4)
-        {
-            PlayerControl.AllPlayerControls.ToArray().Do(pc => pc.RpcResetAbilityCooldown());
-            if (GeneralOptions.GameplayOptions.FixFirstKillCooldown) FixFirstKillCooldown();
-        }
+        if (PlayerControl.LocalPlayer.GetCustomRole() is GM) PlayerControl.LocalPlayer.RpcExileV2();
 
-        DisperseAndPreventVenting();
+        string pet = GeneralOptions.MiscellaneousOptions.AssignedPet;
+        pet = pet != "Random" ? pet : ModConstants.Pets.Values.ToList().GetRandom();
 
-        Async.Schedule(SetShapeshifters, NetUtils.DeriveDelay(0.15f));
-        Async.Schedule(ForceApplyPets, 0.3f);
+        Game.GetAllPlayers().ForEach(p => Async.Execute(PreGameSetup(p, pet)));
         Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.6f));
+
         Game.GetAllPlayers().Select(p => new FrozenPlayer(p)).ForEach(p => Game.MatchData.FrozenPlayers[p.GameID] = p);
 
         VentLogger.Trace("Intro Scene Ending", "IntroCutscene");
@@ -56,60 +53,42 @@ class IntroDestroyPatch
         Game.SyncAll();
     }
 
-    private static void FixFirstKillCooldown()
+    private static IEnumerator PreGameSetup(PlayerControl player, string pet)
     {
-        VentLogger.Trace("Fixing First Kill Cooldown", "FixFirstKillCooldown");
-        Game.GetAllPlayers().Where(p => p != null)
-            .Where(p => p.GetVanillaRole().IsImpostor())
-            .ForEach(p => p.SetKillCooldown(p.GetCustomRole().GetOverride(Override.KillCooldown)?.GetValue() as float? ?? AUSettings.KillCooldown()));
-    }
+        if (player == null) yield break;
 
-    // Used to circumvent anti-cheat
-    private static void SetShapeshifters()
-    {
-        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null).ForEach(p => p.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3));
-    }
+        if (GeneralOptions.MayhemOptions.RandomSpawn) Game.RandomSpawn.Spawn(player);
 
-    private static void ForceApplyPets()
-    {
-        Game.GetAllPlayers().ForEach(p => p.RpcSetName(p.name));
-        string pet = GeneralOptions.MiscellaneousOptions.AssignedPet;
-        pet = pet != "Random" ? pet : ModConstants.Pets.Values.ToList().GetRandom();
-        GameData.Instance.AllPlayers.ToArray().ForEach(pi =>
+        player.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3);
+        yield return new WaitForSeconds(0.15f);
+        if (player == null) yield break;
+
+        GameData.PlayerInfo playerData = player.Data;
+        if (playerData == null) yield break;
+
+        CustomRole role = player.GetCustomRole();
+        if (role is not ITaskHolderRole taskHolder || !taskHolder.TasksApplyToTotal())
         {
-            if (pi?.Object == null) return;
+            VentLogger.Trace($"Clearing Tasks For: {player.name}", "SyncTasks");
+            playerData.Tasks.Clear();
+        }
 
-            if (pi.Object.GetCustomRole() is not ITaskHolderRole taskHolder || !taskHolder.TasksApplyToTotal())
-            {
-                VentLogger.Trace($"Clearing Tasks For: {pi.Object.name}", "SyncTasks");
-                pi.Tasks.Clear();
-            }
+        bool hasPet = !(player.cosmetics?.CurrentPet?.Data?.ProductId == "pet_EmptyPet");
+        if (hasPet) VentLogger.Trace($"Player: {player.name} has pet: {player.cosmetics?.CurrentPet?.Data?.ProductId}. Skipping assigning pet: {pet}.", "PetAssignment");
+        else if (player.AmOwner) player.SetPet(pet);
+        else playerData.DefaultOutfit.PetId = pet;
 
-            if (pi.Object.AmOwner) pi.Object.SetPet(pet);
+        Players.SendPlayerData(playerData);
+        yield return new WaitForSeconds(NetUtils.DeriveDelay(0.05f));
+        if (player == null) yield break;
 
-            var outfit = pi.Outfits[PlayerOutfitType.Default];
-            outfit.PetId = pet;
-        });
-        GeneralRPC.SendGameData();
-        Game.GetAllPlayers().ForEach(p => p.CRpcShapeshift(p, false));
-    }
-
-    private static void DisperseAndPreventVenting()
-    {
-        if (GeneralOptions.MayhemOptions.RandomSpawn) Game.GetAllPlayers().Do(p => Game.RandomSpawn.Spawn(p));
-        if (GeneralOptions.GameplayOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
-
-        bool isRandomSpawn = GeneralOptions.MayhemOptions.RandomSpawn;
-        bool isForceVenting = GeneralOptions.GameplayOptions.ForceNoVenting;
-
-        if (!isRandomSpawn && !isForceVenting) return;
-
-        Game.GetAllPlayers().ForEach(p =>
+        if (player.GetVanillaRole().IsImpostor())
         {
-            
-            if (isRandomSpawn) Game.RandomSpawn.Spawn(p);
-            if (!isForceVenting || p.GetCustomRole().BaseCanVent) return;
-            Async.Schedule(() => VentApi.ForceNoVenting(p), NetUtils.DeriveDelay(0.1f));
-        });
+            float cooldown = GeneralOptions.GameplayOptions.GetFirstKillCooldown(player);
+            VentLogger.Trace($"Fixing First Kill Cooldown for {player.name} (Cooldown={cooldown}s)", "Fix First Kill Cooldown");
+            player.SetKillCooldown(cooldown);
+        }
+
+        if (!hasPet) player.CRpcShapeshift(player, false);
     }
 }

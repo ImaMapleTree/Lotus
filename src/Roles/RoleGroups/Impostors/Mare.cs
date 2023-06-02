@@ -1,20 +1,21 @@
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
-using Priority = TOHTOR.Roles.Internals.Attributes.Priority;
+using Priority = Lotus.Roles.Internals.Attributes.Priority;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Mare: Vanilla.Impostor
 {
@@ -35,7 +36,7 @@ public class Mare: Vanilla.Impostor
     }
 
     [RoleAction(RoleActionType.Attack)]
-    public new bool TryKill(PlayerControl target) => CanKill() && base.TryKill(target);
+    public new bool TryKill(PlayerControl target) => (canKillWithoutSabotage || abilityEnabled) && base.TryKill(target);
 
     [RoleAction(RoleActionType.SabotageStarted, priority: Priority.Last)]
     private void MareSabotageCheck(ISabotage sabotage, ActionHandle handle)
@@ -55,8 +56,6 @@ public class Mare: Vanilla.Impostor
         SyncOptions();
     }
 
-    public override bool CanKill() => canKillWithoutSabotage || abilityEnabled;
-
     // lol this was fun because of the bitwise operators
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
@@ -72,7 +71,7 @@ public class Mare: Vanilla.Impostor
                 .SubOption(sub2 => sub2
                     .Name("Normal Kill Cooldown")
                     .Bind(v => normalKillCooldown = (float)v)
-                    .AddFloatRange(0, 120, 2.5f, 10, "s")
+                    .AddFloatRange(0, 120, 2.5f, 10, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .Build())
             .SubOption(sub => sub
@@ -82,7 +81,7 @@ public class Mare: Vanilla.Impostor
             .SubOption(sub => sub
                 .Name("Kill Cooldown During Sabotage")
                 .Bind(v => reducedKillCooldown = (float)v)
-                .AddFloatRange(0, 60, 5, 3, "s").Build())
+                .AddFloatRange(0, 60, 5, 3, GeneralOptionTranslations.SecondsSuffix).Build())
             .SubOption(sub => sub
                 .Name("Specific Sabotage Settings")
                 .ShowSubOptionPredicate(v => (bool)v)

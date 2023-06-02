@@ -1,16 +1,18 @@
+using System.Collections.Generic;
 using AmongUs.Data;
 using HarmonyLib;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
+using Lotus.Managers.History.Events;
 using VentLib.Logging;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 static class ExileControllerWrapUpPatch
 {
@@ -56,43 +58,37 @@ static class ExileControllerWrapUpPatch
         Game.TriggerForAll(RoleActionType.AnyExiled, ref otherExiledHandle, exiled);
 
         Hooks.PlayerHooks.PlayerExiledHook.Propagate(new PlayerHookEvent(exiled.Object!));
-        Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerHookEvent(exiled.Object!));
-
+        Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerDeathHookEvent(exiled.Object!, new ExiledEvent(exiled.Object!, new List<PlayerControl>(), new List<PlayerControl>())));
     }
 
     static void WrapUpFinalizer()
     {
         if (!AmongUsClient.Instance.AmHost) return;
 
-        MeetingDelegate.Instance.BlackscreenResolver.ClearBlackscreen();
+        try
+        {
+            MeetingDelegate.Instance.BlackscreenResolver.ClearBlackscreen(BeginRoundStart);
+            SoundManager.Instance.ChangeMusicVolume(DataManager.Settings.Audio.MusicVolume);
+            VentLogger.Debug("Start Task Phase", "Phase");
+        }
+        catch
+        {
+            BeginRoundStart();
+        }
+    }
 
-        SoundManager.Instance.ChangeMusicVolume(DataManager.Settings.Audio.MusicVolume);
-        VentLogger.Debug("Start Task Phase", "Phase");
-
-        Game.State = GameState.Roaming;
+    /// <summary>
+    /// Called after Clear Blackscreen is done processing
+    /// </summary>
+    private static void BeginRoundStart()
+    {
         Game.RenderAllForAll(force: true);
-        //if (GeneralOptions.GameplayOptions.ForceNoVenting) Game.GetAlivePlayers().Where(p => !p.GetCustomRole().BaseCanVent).ForEach(VentApi.ForceNoVenting);
-        Async.Schedule(() =>
-        {
-            ActionHandle handle = ActionHandle.NoInit();
-            Game.TriggerForAll(RoleActionType.RoundStart, ref handle, false);
-            Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
-        }, 1f);
-
-
-
-        /*Async.Schedule(() =>
-        {
-            VentLogger.Fatal("TESTING!!!!!!!!!");
-
-            Game.GetAllPlayers().ForEach(p =>
-            {
-                p.RpcSetName("TEST TEST TEST!!");
-                NameUpdateProcess.Paused = true;
-            });
-
-            VentLogger.Fatal("Set All Player NaMES");
-        }, 8);*/
+        Game.State = GameState.Roaming;
+        ActionHandle handle = ActionHandle.NoInit();
+        VentLogger.Debug("Triggering RoundStart Action!!", "Exile::BeginRoundStart");
+        Game.TriggerForAll(RoleActionType.RoundStart, ref handle, false);
+        Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
+        Game.SyncAll();
     }
 }
 

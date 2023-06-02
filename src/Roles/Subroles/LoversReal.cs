@@ -1,7 +1,7 @@
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Attributes;
 using UnityEngine;
 
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 public class LoversReal: Subrole
 {

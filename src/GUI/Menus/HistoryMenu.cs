@@ -1,21 +1,14 @@
-using System;
+/*using System;
 using System.Collections.Generic;
-using System.Linq;
-using HarmonyLib;
-using TMPro;
-using TOHTOR.Extensions;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Events;
-using TOHTOR.Utilities;
+using Lotus.Managers.History.Events;
+using Lotus.Utilities;
 using UnityEngine;
 using UnityEngine.UI;
-using VentLib.Logging;
-using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.GUI.Menus;
+namespace Lotus.GUI.Menus;
 
 public class HistoryMenu
 {
@@ -54,12 +47,12 @@ public class HistoryMenu
         PassiveButton historyTabButton = Object.Instantiate(parentButton, parentButton.transform.parent);
         PassiveButton winnersTabButton = Object.Instantiate(parentButton, parentButton.transform.parent);
 
-        historyTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("TOHTOR.assets.HistoryTab.png"));
+        historyTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("Lotus.assets.HistoryTab.png"));
         historyTabButton.transform.localPosition += new Vector3(-6f, 4.1f);
         historyTab = UnityOptional<PassiveButton>.Of(historyTabButton);
 
 
-        winnersTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("TOHTOR.assets.Winners.png"));
+        winnersTabButton.GetComponentsInChildren<SpriteRenderer>().ForEach(sr => sr.sprite = Utils.LoadSprite("Lotus.assets.Winners.png"));
         winnersTabButton.transform.localPosition += new Vector3(-5.15f, 4.1f);
         winnersTab = UnityOptional<PassiveButton>.Of(winnersTabButton);
 
@@ -177,7 +170,7 @@ public class HistoryMenu
         playerTransform.localPosition += new Vector3(0.1f, 0f);
 
         /*bubble.MaskArea.material.SetInt(PlayerMaterial.MaskLayer, 0);
-        bubble.Background.material.SetInt(PlayerMaterial.MaskLayer, 0);*/
+        bubble.Background.material.SetInt(PlayerMaterial.MaskLayer, 0);#1#
         HistoryMenuIntermediate.GetOutfit(playerId).IfPresent(outfit => bubble.Player.UpdateFromPlayerOutfit(outfit, PlayerMaterial.MaskType.ScrollingUI, false, false));
 
         bubble.TextArea.overrideColorTags = false;
@@ -226,4 +219,4 @@ public class HistoryMenu
     }
 
     public bool Exists() => chatOptional.Exists();
-}
+}*/

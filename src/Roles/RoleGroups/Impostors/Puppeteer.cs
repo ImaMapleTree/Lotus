@@ -1,34 +1,32 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Puppeteer: Vanilla.Impostor
 {
-    private DateTime lastCheck = DateTime.Now;
-    private List<PlayerControl> cursedPlayers;
+    [NewOnSetup] private List<PlayerControl> cursedPlayers;
+    [NewOnSetup] private Dictionary<byte, Remote<IndicatorComponent>> playerRemotes = null!;
 
-    private Dictionary<byte, Remote<IndicatorComponent>> playerRemotes = null!;
-
-    protected override void Setup(PlayerControl player) => cursedPlayers = new List<PlayerControl>();
-    protected override void PostSetup() => playerRemotes = new Dictionary<byte, Remote<IndicatorComponent>>();
+    private FixedUpdateLock fixedUpdateLock = new();
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
@@ -42,18 +40,21 @@ public class Puppeteer: Vanilla.Impostor
         IndicatorComponent component = new(new LiveString("◆", new Color(0.36f, 0f, 0.58f)), GameStates.IgnStates, viewers: MyPlayer);
         playerRemotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
 
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         return true;
     }
 
     [RoleAction(RoleActionType.FixedUpdate)]
     private void PuppeteerKillCheck()
     {
-        double elapsed = (DateTime.Now - lastCheck).TotalSeconds;
-        if (elapsed < ModConstants.RoleFixedUpdateCooldown) return;
-        lastCheck = DateTime.Now;
+        if (!fixedUpdateLock.AcquireLock()) return;
         foreach (PlayerControl player in new List<PlayerControl>(cursedPlayers))
         {
+            if (player == null)
+            {
+                cursedPlayers.Remove(player!);
+                continue;
+            }
             if (player.Data.IsDead) {
                 RemovePuppet(player);
                 continue;
@@ -72,10 +73,22 @@ public class Puppeteer: Vanilla.Impostor
         cursedPlayers.Where(p => p.Data.IsDead).ToArray().Do(RemovePuppet);
     }
 
+    [RoleAction(RoleActionType.SelfExiled)]
+    [RoleAction(RoleActionType.MyDeath)]
+    [RoleAction(RoleActionType.RoundStart, triggerAfterDeath: true)]
+    private void ClearPuppets()
+    {
+        cursedPlayers.ToArray().ForEach(RemovePuppet);
+        cursedPlayers.Clear();
+    }
+    
+    [RoleAction(RoleActionType.AnyDeath)]
+    [RoleAction(RoleActionType.Disconnect)]
     private void RemovePuppet(PlayerControl puppet)
     {
+        if (cursedPlayers.All(p => p.PlayerId != puppet.PlayerId)) return;
         playerRemotes!.GetValueOrDefault(puppet.PlayerId, null)?.Delete();
-        cursedPlayers.Remove(puppet);
+        cursedPlayers.RemoveAll(p => p.PlayerId == puppet.PlayerId);
     }
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

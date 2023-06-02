@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace TOHTOR.Utilities;
+namespace Lotus.Utilities;
 
 public static class GameObjectUtils
 {

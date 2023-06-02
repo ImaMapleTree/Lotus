@@ -1,14 +1,14 @@
 using System;
 using System.Linq;
 using TMPro;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 using UnityEngine.UI;
 using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using Action = System.Action;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Components;
+namespace Lotus.GUI.Menus.OptionsMenu.Components;
 
 [RegisterInIl2Cpp]
 public class MonoToggleButton: MonoBehaviour

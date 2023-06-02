@@ -1,6 +1,6 @@
-using TOHTOR.Roles.Interactions.Interfaces;
+using Lotus.Roles.Interactions.Interfaces;
 
-namespace TOHTOR.Roles.Interactions;
+namespace Lotus.Roles.Interactions;
 
 public class ManipulatedInteraction : DirectInteraction, IManipulatedInteraction
 {
@@ -12,4 +12,6 @@ public class ManipulatedInteraction : DirectInteraction, IManipulatedInteraction
     }
 
     public PlayerControl Manipulator() => manipulator;
+
+    public override Interaction Modify(Intent intent) => new ManipulatedInteraction(intent, Emitter(), manipulator);
 }

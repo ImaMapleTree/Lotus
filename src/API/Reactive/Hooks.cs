@@ -1,10 +1,10 @@
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Reactive.HookEvents;
+using Lotus.API.Reactive.HookEvents;
 using VentLib.Networking.RPC;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Reactive;
+namespace Lotus.API.Reactive;
 
 public class Hooks
 {
@@ -18,9 +18,18 @@ public class Hooks
         public static readonly Hook<GameStateHookEvent> GameEndHook = new SimpleHook<GameStateHookEvent>();
     }
 
+    public static class ResultHooks
+    {
+        public static readonly Hook<WinnersHookEvent> WinnersHook = new SimpleHook<WinnersHookEvent>();
+        public static readonly Hook<LosersHookEvent> LosersHook = new SimpleHook<LosersHookEvent>();
+    }
+
     public static class NetworkHooks
     {
+        public static readonly Hook<GameJoinHookEvent> GameJoinHook = new SimpleHook<GameJoinHookEvent>();
         public static readonly Hook<RpcHookEvent> RpcHook = new SimpleHook<RpcHookEvent>();
+        public static readonly Hook<ClientConnectHookEvent> ClientConnectHook = new SimpleHook<ClientConnectHookEvent>();
+        public static readonly Hook<ReceiveVersionHookEvent> ReceiveVersionHook = new SimpleHook<ReceiveVersionHookEvent>();
 
         static NetworkHooks()
         {
@@ -31,19 +40,25 @@ public class Hooks
     public static class PlayerHooks
     {
         public static readonly Hook<PlayerHookEvent> PlayerJoinHook = new SimpleHook<PlayerHookEvent>();
-        public static readonly Hook<PlayerHookEvent> PlayerLeaveHook = new SimpleHook<PlayerHookEvent>();
+        public static readonly Hook<PlayerHookEvent> PlayerDisconnectHook = new SimpleHook<PlayerHookEvent>();
 
         public static readonly Hook<PlayerMessageHookEvent> PlayerMessageHook = new SimpleHook<PlayerMessageHookEvent>();
         public static readonly Hook<PlayerActionHookEvent> PlayerActionHook = new SimpleHook<PlayerActionHookEvent>();
+        public static readonly Hook<PlayerTaskHookEvent> PlayerTaskCompleteHook = new SimpleHook<PlayerTaskHookEvent>();
 
         public static readonly Hook<PlayerMurderHookEvent> PlayerMurderHook = new SimpleHook<PlayerMurderHookEvent>();
-        public static readonly Hook<PlayerHookEvent> PlayerDeathHook = new SimpleHook<PlayerHookEvent>();
+        public static readonly Hook<PlayerDeathHookEvent> PlayerDeathHook = new SimpleHook<PlayerDeathHookEvent>();
+        public static readonly Hook<PlayerShapeshiftHookEvent> PlayerShapeshiftHook = new SimpleHook<PlayerShapeshiftHookEvent>();
+
         public static readonly Hook<PlayerHookEvent> PlayerExiledHook = new SimpleHook<PlayerHookEvent>();
+        public static readonly Hook<PlayerTeleportedHookEvent> PlayerTeleportedHook = new SimpleHook<PlayerTeleportedHookEvent>();
     }
 
     public static class MeetingHooks
     {
         public static readonly Hook<MeetingHookEvent> MeetingCalledHook = new SimpleHook<MeetingHookEvent>();
+        public static readonly Hook<CastVoteHookEvent> CastVoteHook = new SimpleHook<CastVoteHookEvent>();
+        public static readonly Hook<ExiledHookEvent> ExiledHook = new SimpleHook<ExiledHookEvent>();
     }
 
     public static class SabotageHooks

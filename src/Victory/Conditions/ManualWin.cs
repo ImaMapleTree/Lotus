@@ -1,8 +1,8 @@
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
+using Lotus.API;
 
-namespace TOHTOR.Victory.Conditions;
+namespace Lotus.Victory.Conditions;
 
 /// <summary>
 /// Creates a ManualWin which upon calling Activate() causes a game win

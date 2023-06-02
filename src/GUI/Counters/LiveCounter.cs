@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.GUI.Counters;
+namespace Lotus.GUI.Counters;
 
 public class LiveCounter : ICounter
 {

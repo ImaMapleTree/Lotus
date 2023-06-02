@@ -1,19 +1,20 @@
 using System.Collections.Generic;
 using System.Linq;
 using Hazel;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
@@ -22,11 +23,10 @@ using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.Roles.RoleGroups.Undead.Roles;
+namespace Lotus.Roles.RoleGroups.Undead.Roles;
 
 public class Retributionist : NeutralKillingBase
 {
-    private int lastVentId;
     private PlayerControl? attacker;
     private Remote<NameComponent>? remote;
 
@@ -82,7 +82,7 @@ public class Retributionist : NeutralKillingBase
         handle.Cancel();
         attacker = actor;
         remote = attacker.NameModel().GetComponentHolder<NameHolder>().Add(new ColoredNameComponent(attacker, new Color(1f, 0.53f, 0f), GameState.Roaming, MyPlayer));
-        revengeDuration.StartThenRun(CheckRevenge); 
+        revengeDuration.StartThenRun(CheckRevenge);
         DoRevengeTeleport();
     }
 
@@ -93,8 +93,7 @@ public class Retributionist : NeutralKillingBase
         Vent randomVent = vents.GetRandom();
         Vector2 ventPosition = randomVent.transform.position;
         Utils.Teleport(MyPlayer.NetTransform, new Vector2(ventPosition.x, ventPosition.y + 0.3636f));
-        lastVentId = randomVent.Id;
-        
+
         if (!invisibleRevenge) return;
 
         // Important: SendOption.None is necessary to prevent kicks via anticheat. In the future if this role is kicking players this is probably why
@@ -114,7 +113,7 @@ public class Retributionist : NeutralKillingBase
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Revenge Time Limit")
-                .AddFloatRange(5, 60, 2.5f, 2, "s")
+                .AddFloatRange(5, 60, 2.5f, 2, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(revengeDuration.SetDuration)
                 .Build())
             .SubOption(sub => sub.Name("Invisible During Revenge")
@@ -128,5 +127,6 @@ public class Retributionist : NeutralKillingBase
                 .Build());
 
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.73f, 0.66f, 0.69f));
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
+        base.Modify(roleModifier).RoleColor(new Color(0.73f, 0.66f, 0.69f));
 }

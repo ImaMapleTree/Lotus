@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using HarmonyLib;
-using TOHTOR.Options;
-using TOHTOR.RPC;
+using Lotus.Options;
+using Lotus.RPC;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches
+namespace Lotus.Patches
 {
     public class FallFromLadder
     {

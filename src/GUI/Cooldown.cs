@@ -1,9 +1,10 @@
 using System;
 using System.Globalization;
-using TOHTOR.Roles.Internals;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Interfaces;
 using UnityEngine;
 
-namespace TOHTOR.GUI;
+namespace Lotus.GUI;
 
 public class Cooldown: ICloneOnSetup<Cooldown>
 {

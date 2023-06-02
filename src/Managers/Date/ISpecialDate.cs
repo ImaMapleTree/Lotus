@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 
-namespace TOHTOR.Managers.Date;
+namespace Lotus.Managers.Date;
 
 public interface ISpecialDate
 {

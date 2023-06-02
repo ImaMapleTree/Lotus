@@ -1,10 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
-using UnityEngine;
 using VentLib.Localization.Attributes;
 // ReSharper disable FieldCanBeMadeReadOnly.Global
 // ReSharper disable ConvertToConstant.Global
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Localized("Commands")]
 [SuppressMessage("Usage", "CA2211:Non-constant fields should not be visible")]

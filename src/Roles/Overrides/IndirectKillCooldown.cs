@@ -1,10 +1,10 @@
 using System;
 using System.Diagnostics;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.Logging;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.Logging;
 
-namespace TOHTOR.Roles.Overrides;
+namespace Lotus.Roles.Overrides;
 
 public class IndirectKillCooldown: GameOptionOverride
 {
@@ -32,12 +32,7 @@ public class IndirectKillCooldown: GameOptionOverride
     {
         hookKey = $"{nameof(IndirectKillCooldown)}~{Game.NextMatchID()}";
         cooldownSupplier = expectedCooldown;
-        DevLogger.Log($"Binding: {hookKey}");
-        Hooks.GameStateHooks.RoundStartHook.Bind(hookKey, _ =>
-        {
-            DevLogger.Log($"DOUBLED {hookKey}");
-            doubled = true;
-        }, true);
+        Hooks.GameStateHooks.RoundStartHook.Bind(hookKey, _ => doubled = true, true);
         Hooks.GameStateHooks.RoundEndHook.Bind(hookKey, _ => doubled = false, true);
     }
 

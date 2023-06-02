@@ -1,12 +1,12 @@
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.Roles;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Managers.History.Events;
+namespace Lotus.Managers.History.Events;
 
 public class TaskCompleteEvent : IHistoryEvent
 {

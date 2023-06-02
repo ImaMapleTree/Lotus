@@ -1,7 +1,7 @@
 
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.RoleGroups.Vanilla;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class EvilTracker : Shapeshifter
 {

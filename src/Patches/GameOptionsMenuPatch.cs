@@ -1,6 +1,6 @@
 using HarmonyLib;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 // This patch allows host to have bigger range when setting options
 [HarmonyPatch(typeof(GameOptionsMenu), nameof(GameOptionsMenu.Start))]
@@ -20,6 +20,10 @@ public class GameOptionsMenuPatch
                     break;
                 case StringNames.GameKillCooldown:
                     ob.Cast<NumberOption>().ValidRange = new FloatRange(0, 180);
+                    break;
+                case StringNames.GameCrewLight:
+                case StringNames.GameImpostorLight:
+                    ob.Cast<NumberOption>().Increment = 0.125f;
                     break;
             }
         }

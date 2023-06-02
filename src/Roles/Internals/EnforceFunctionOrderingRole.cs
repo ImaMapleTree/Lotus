@@ -1,6 +1,6 @@
 using System;
 
-namespace TOHTOR.Roles.Internals;
+namespace Lotus.Roles.Internals;
 
 /// <summary>
 /// This role is used internally to enforce the order of certain calls when statically loading in the vanilla roles.

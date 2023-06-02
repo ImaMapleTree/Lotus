@@ -1,6 +1,6 @@
 using VentLib.Utilities.Debug.Profiling;
 
-namespace TOHTOR.Managers.Reporting;
+namespace Lotus.Managers.Reporting;
 
 public class RProfiler : Profiler, IReportProducer
 {

@@ -1,11 +1,11 @@
 using System;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Utilities;
+using Lotus.API;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options;
@@ -13,7 +13,7 @@ using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 [Localized("OptionShower")]
 public class ShowerPages
@@ -61,7 +61,7 @@ public class ShowerPages
             var content = "";
             CustomRoleManager.MainRoles.Where(role => role.IsEnabled()).ForEach(role =>
             {
-                var opt = role.Options;
+                var opt = role.RoleOptions;
                 content += $"{opt.Name()}: {opt.GetValueText()}\n";
                 if (opt.Children.Matches(opt.GetValue()))
                     content = ShowChildren(opt, opt.Color, content);
@@ -80,7 +80,7 @@ public class ShowerPages
 
             optionManager.GetOptions().Where(opt => opt.GetType() == typeof(GameOption)).Cast<GameOption>().Do(opt =>
             {
-                CustomRole? matchingRole = CustomRoleManager.AllRoles.FirstOrDefault(r => r.Options == opt);
+                CustomRole? matchingRole = CustomRoleManager.AllRoles.FirstOrDefault(r => r.RoleOptions == opt);
 
                 if (matchingRole != null) return;
 

@@ -1,23 +1,20 @@
+using System;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Utilities;
-using VentLib.Localization;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Chat;
+using Lotus.Managers;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Utilities;
 using VentLib.Logging;
-using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Patches.Meetings;
+namespace Lotus.Patches.Meetings;
 
 [LoadStatic]
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]
@@ -25,8 +22,9 @@ public class MeetingStartPatch
 {
     static MeetingStartPatch()
     {
-        PluginDataManager.TemplateManager.RegisterTag("meeting-first", "Tag for the template to be shown during the first meeting.");
-        PluginDataManager.TemplateManager.RegisterTag("meeting-start", "Tag for the template to be shown during each meeting.");
+        PluginDataManager.TemplateManager.RegisterTag("meeting-first", "The template to show during the first meeting.");
+        PluginDataManager.TemplateManager.RegisterTag("meeting-subsequent", "The template to show during all meetings after the first.");
+        PluginDataManager.TemplateManager.RegisterTag("meeting-start", "The template to show during each meeting.");
     }
 
     public static void Prefix(MeetingHud __instance)
@@ -34,30 +32,39 @@ public class MeetingStartPatch
         if (!AmongUsClient.Instance.AmHost) return;
         VentLogger.Info("------------Meeting Start------------", "Phase");
 
-        MeetingDelegate meetingDelegate = MeetingPrep.PrepMeeting();
+        MeetingDelegate meetingDelegate = MeetingPrep.PrepMeeting()!;
         PlayerControl reporter = Utils.GetPlayerById(__instance.reporterId)!;
 
-        Game.GetAlivePlayers().Do(p =>
+        try
         {
-            if (Game.MatchData.MeetingsCalled == 0 && PluginDataManager.TemplateManager.TryFormat(p, "meeting-first", out string msg))
-                Utils.SendMessage(msg, p.PlayerId);
+            Game.GetAlivePlayers().Do(p =>
+            {
+                if (Game.MatchData.MeetingsCalled == 0)
+                {
+                    if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-first", out string firstMeetingMessage))
+                        ChatHandler.Of(firstMeetingMessage).LeftAlign().Send(p);
+                }
+                else if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-subsequent", out string subsequentMeeting))
+                    ChatHandler.Of(subsequentMeeting).LeftAlign().Send(p);
 
-            if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-start", out string message))
-                Utils.SendMessage(message, p.PlayerId);
-        });
-
+                if (PluginDataManager.TemplateManager.TryFormat(p, "meeting-start", out string message))
+                    ChatHandler.Of(message).LeftAlign().Send(p);
+            });
+        } catch (Exception ex) { VentLogger.Exception(ex, "Error Sending Template Information!"); }
 
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.RoundEnd, ref handle, meetingDelegate, false);
-        Game.RenderAllForAll(force: true);
+        Game.RenderAllForAll(GameState.InMeeting, true);
 
         Hooks.MeetingHooks.MeetingCalledHook.Propagate(new MeetingHookEvent(reporter, MeetingPrep.Reported, meetingDelegate));
+        Hooks.GameStateHooks.RoundEndHook.Propagate(new GameStateHookEvent(Game.MatchData));
         Game.MatchData.MeetingsCalled++;
+        Game.SyncAll(); // This syncs up all the cooldowns to fix doubling after meeting
     }
 
     public static void Postfix(MeetingHud __instance)
     {
-        SoundManager.Instance.ChangeMusicVolume(0f);
+        /*SoundManager.Instance.ChangeMusicVolume(0f);*/
         if (AmongUsClient.Instance.AmHost) __instance.playerStates.ToArray()
             .FirstOrOptional(ps => ps.TargetPlayerId == PlayerControl.LocalPlayer.PlayerId)
             .IfPresent(voteArea => voteArea.NameText.text = PlayerControl.LocalPlayer.NameModel().Render(sendToPlayer: false, force: true));

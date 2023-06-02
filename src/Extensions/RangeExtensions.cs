@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class RangeExtensions
 {

@@ -5,15 +5,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
-using TOHTOR.RPC;
+using Lotus.Managers;
+using Lotus.RPC;
+using Lotus.Extensions;
 using VentLib;
 using VentLib.Logging;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities;
 
-namespace TOHTOR.Addons;
+namespace Lotus.Addons;
 
 public class AddonManager
 {
@@ -35,7 +35,7 @@ public class AddonManager
             Assembly assembly = Assembly.LoadFile(file.FullName);
             Type tohType = assembly.GetTypes().FirstOrDefault(t => t.IsAssignableTo(typeof(TOHAddon)));
             if (tohType == null)
-                throw new ConstraintException("TOHTOR Addons requires ONE class file that extends TOHAddon");
+                throw new ConstraintException("Lotus Addons requires ONE class file that extends TOHAddon");
             TOHAddon addon = (TOHAddon)tohType.GetConstructor(new Type[] { })!.Invoke(null);
             VentLogger.Log(AddonLL,$"Loading Addon [{addon.AddonName()} {addon.AddonVersion()}]", "AddonManager");
             Vents.Register(assembly);
@@ -45,7 +45,7 @@ public class AddonManager
 
             //addon.Factions.Do(f => FactionConstraintValidator.ValidateAndAdd(f, file.Name));
             CustomRoleManager.AllRoles.AddRange(addon.CustomRoles);
-            TOHPlugin.GamemodeManager.GamemodeTypes.AddRange(addon.Gamemodes);
+            ProjectLotus.GamemodeManager.GamemodeTypes.AddRange(addon.Gamemodes);
         }
         catch (Exception e)
         {

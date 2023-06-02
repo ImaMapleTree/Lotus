@@ -2,18 +2,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Utilities;
+using Lotus.Extensions;
+using Lotus.Managers.History.Events;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
@@ -22,10 +24,10 @@ using VentLib.Options.IO;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Roles.Internals.InteractionResult;
-using static TOHTOR.Roles.RoleGroups.NeutralKilling.AgiTater.AgitaterTranslations;
+using static Lotus.Roles.Internals.InteractionResult;
+using static Lotus.Roles.RoleGroups.NeutralKilling.AgiTater.AgitaterTranslations;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 [Localized("Roles")]
 public class AgiTater: NeutralKillingBase
@@ -35,16 +37,14 @@ public class AgiTater: NeutralKillingBase
     private int bombsPerRound;
 
     [NewOnSetup] private RemoteList<AgiBomb> bombs = null!;
-    [NewOnSetup] private Dictionary<byte, int> BombCounts = null!;
+    [NewOnSetup] private Dictionary<byte, int> bombCounts = null!;
     [NewOnSetup] private FixedUpdateLock fixedUpdateLock = new(0.1f);
 
     private int currentBombs;
 
-    public override bool CanSabotage() => false;
-
     [UIComponent(UI.Counter, ViewMode.Additive, GameState.Roaming)]
     private string BombCounter() => bombsPerRound == -1 ? "" : RoleUtils.Counter(currentBombs, bombsPerRound, RoleColor);
-    
+
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
@@ -53,64 +53,63 @@ public class AgiTater: NeutralKillingBase
         if (!canBomb) return false;
         currentBombs--;
 
-        int count = BombCounts.Compose(target.PlayerId, i => i + 1, () => 1);
+        int count = bombCounts.Compose(target.PlayerId, i => i + 1, () => 1);
         if (count >= 2 && Condition.HasFlag(ExplodeCondition.DoubleBomb))
         {
-            bombs.FirstOrDefault(b => b.Owner == target.PlayerId)?.Explode();
+            AgiBomb? bomb = bombs.FirstOrDefault(b => b.Owner == target.PlayerId);
+            bomb?.Explode();
+            if (bomb != null) bombs.Remove(bomb);
             return false;
         }
 
         AgiBomb agiBomb = new(target.PlayerId, this, Condition.HasFlag(ExplodeCondition.Duration) ? bombDuration.Clone() : null);
         agiBomb.SetRemote(bombs.Add(agiBomb));
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         return false;
     }
 
     [RoleAction(RoleActionType.RoundStart)]
-    private void AgitaterBombReset() => currentBombs = bombsPerRound;
+    private void AgitaterBombReset()
+    {
+        VentLogger.Trace($"Resetting AgiTater's Bombs ({bombsPerRound})", "AgitaterBombReset");
+        currentBombs = bombsPerRound;
+    }
 
-    [RoleAction(RoleActionType.FixedUpdate)]
+    [RoleAction(RoleActionType.FixedUpdate, triggerAfterDeath: true)]
     private void AgitaterFixedUpdate()
     {
         if (!fixedUpdateLock.AcquireLock()) return;
-        bombs.ToArray().ForEach(b => b.DoUpdate());
+        bombs.RemoveAll(b => b.DoUpdate());
     }
 
-    [RoleAction(RoleActionType.MeetingCalled)]
+    [RoleAction(RoleActionType.MeetingCalled, triggerAfterDeath: true)]
     private void KillPlayersBeforeMeeting()
     {
-        if (Condition.HasFlag(ExplodeCondition.Meetings))
-            bombs.ToArray().ForEach(b => b.Explode());
-    }
-
-    [RoleAction(RoleActionType.Disconnect)]
-    [RoleAction(RoleActionType.AnyDeath)]
-    private void RemoveDeadPlayerBomb(PlayerControl player)
-    {
-        bombs.ToArray().Where(b => b.Owner == player.PlayerId).ForEach(b => b.DeleteBomb());
+        if (Condition.HasFlag(ExplodeCondition.Meetings)) bombs.RemoveAll(b => b.Explode());
+        bombs.Clear();
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        AddKillCooldownOptions(base.RegisterOptions(optionStream), AgiOptions.PlaceBombCooldown, "Place Bomb Cooldown")
-            .SubOption(sub => sub.KeyName("Explode On Meeting", AgiOptions.ExplodeOnMeetings)
+        AddKillCooldownOptions(base.RegisterOptions(optionStream), key: "Place Bomb Cooldown", name: AgitaterTranslations.AgiOptions.PlaceBombCooldown)
+            .SubOption(sub => sub.KeyName("Explode On Meeting", AgitaterTranslations.AgiOptions.ExplodeOnMeetings)
                 .AddOnOffValues()
                 .BindBool(FlagSetter(ExplodeCondition.Meetings))
                 .ShowSubOptionPredicate(o => (bool)o)
                 .Build())
-            .SubOption(sub => sub.KeyName("Explode After Duration", AgiOptions.ExplodeAfterDuration)
+            .SubOption(sub => sub.KeyName("Explode After Duration", AgitaterTranslations.AgiOptions.ExplodeAfterDuration)
                 .AddOnOffValues(false)
                 .BindBool(FlagSetter(ExplodeCondition.Duration))
                 .ShowSubOptionPredicate(b => (bool)b)
-                .SubOption(sub2 => sub2.KeyName("Bomb Duration", AgiOptions.BombDuration)
-                    .AddFloatRange(2.5f, 120f, 2.5f, 7, "s")
+                .SubOption(sub2 => sub2.KeyName("Bomb Duration", AgitaterTranslations.AgiOptions.BombDuration)
+                    .AddFloatRange(2.5f, 120f, 2.5f, 7, GeneralOptionTranslations.SecondsSuffix)
                     .BindFloat(bombDuration.SetDuration)
                     .Build())
                 .Build())
-            .SubOption(sub => sub.KeyName("Explode When Bombed Twice", AgiOptions.ExplodeDoubleBombed)
+            .SubOption(sub => sub.KeyName("Explode When Bombed Twice", AgitaterTranslations.AgiOptions.ExplodeDoubleBombed)
                 .AddOnOffValues(false)
                 .BindBool(FlagSetter(ExplodeCondition.DoubleBomb))
                 .Build())
-            .SubOption(sub2 => sub2.KeyName("Bombs per Round", AgiOptions.BombsPerRound)
+            .SubOption(sub2 => sub2.KeyName("Bombs per Round", AgitaterTranslations.AgiOptions.BombsPerRound)
                 .Value(v => v.Text(ModConstants.Infinity).Color(ModConstants.Palette.InfinityColor).Value(-1).Build())
                 .AddIntRange(1, 15, 1, 3)
                 .IOSettings(io => io.UnknownValueAction = ADEAnswer.UseDefault)
@@ -129,6 +128,7 @@ public class AgiTater: NeutralKillingBase
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
+            .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.CannotVent)
             .RoleColor(new Color(0.96f, 0.64f, 0.38f))
             .OptionOverride(new IndirectKillCooldown(() => KillCooldown));
 
@@ -137,12 +137,12 @@ public class AgiTater: NeutralKillingBase
     {
         public byte Owner;
         public Cooldown? Duration;
-        
+
         private AgiTater agitater;
         private Remote<AgiBomb>? remote;
         private Remote<TextComponent>? bombText;
         private FixedUpdateLock fixedUpdateLock = new(0.8f);
-        
+
         public AgiBomb(byte owner, AgiTater source, Cooldown? duration)
         {
             Owner = owner;
@@ -156,16 +156,18 @@ public class AgiTater: NeutralKillingBase
         {
             owner ??= Utils.GetPlayerById(Owner);
             if (owner == null || agitater.MyPlayer == null) return false;
-            
+            if (!owner.IsAlive()) return false;
+
             // ReSharper disable once Unity.NoNullPropagation
             VentLogger.Trace($"AgiTater Bomb Exploding (AgiTater={agitater.MyPlayer.name}, target={owner.name})", "AgiTater::Explode");
             BombedEvent bombedEvent = new(owner, agitater.MyPlayer);
             FatalIntent fatalIntent = new(true, () => bombedEvent);
-            
+
             bool success = agitater.MyPlayer.InteractWith(owner, new IndirectInteraction(fatalIntent, agitater)) is Proceed;
             if (success) Game.MatchData.GameHistory.AddEvent(new BombedEvent(owner, agitater.MyPlayer));
-            agitater.BombCounts[owner.PlayerId] = 0;
-            agitater.bombs.ToArray().Where(b => b.Owner == owner.PlayerId).ForEach(b => b.DeleteBomb());
+            agitater.bombCounts[owner.PlayerId] = 0;
+
+            Owner = byte.MaxValue;
             return true;
         }
 
@@ -173,19 +175,20 @@ public class AgiTater: NeutralKillingBase
         {
             if (!fixedUpdateLock.AcquireLock()) return false;
             PlayerControl? owner = Utils.GetPlayerById(Owner);
-            if (owner == null) return DeleteBomb();
+            if (owner == null || !owner.IsAlive()) return DeleteBomb();
 
             // The timer has run out thus the bomb has exploded
             if (Duration?.IsReady() ?? false) return Explode();
-            
+
             List<PlayerControl> inRangePlayers = owner.GetPlayersInAbilityRangeSorted();
             return !inRangePlayers.IsEmpty() && Transfer(inRangePlayers[0]);
         }
-        
+
         public bool DeleteBomb()
         {
             remote?.Delete();
             bombText?.Delete();
+            Owner = byte.MaxValue;
             return true;
         }
 
@@ -193,10 +196,10 @@ public class AgiTater: NeutralKillingBase
         {
             VentLogger.Trace($"Transferring AgiTater Bomb {Utils.GetPlayerById(Owner)?.name} => {newPlayer.name}", "AgiTater::Transfer");
             bombText?.Delete();
-            if (agitater.BombCounts.ContainsKey(Owner)) agitater.BombCounts[Owner]--;
+            if (agitater.bombCounts.ContainsKey(Owner)) agitater.bombCounts[Owner]--;
             Owner = newPlayer.PlayerId;
             bombText = SetBombText(newPlayer);
-            int count = agitater.BombCounts.Compose(Owner, v => v + 1, () => 1);
+            int count = agitater.bombCounts.Compose(Owner, v => v + 1, () => 1);
             if (count == 2 && agitater.Condition.HasFlag(ExplodeCondition.DoubleBomb)) return Explode();
             return false;
         }
@@ -207,7 +210,7 @@ public class AgiTater: NeutralKillingBase
             TextComponent text = new(indicator, GameState.Roaming, ViewMode.Additive, Game.GetDeadPlayers().AddItem(player).ToArray());
             return player.NameModel().GetComponentHolder<TextHolder>().Add(text);
         }
-        
+
         public void SetRemote(Remote<AgiBomb> bombRemote)
         {
             this.remote = bombRemote;
@@ -222,8 +225,8 @@ public class AgiTater: NeutralKillingBase
             return Color.red.Colorize(HoldingBombLevel3);
         }
     }
-    
-    
+
+
     [Flags]
     public enum ExplodeCondition
     {
@@ -231,34 +234,34 @@ public class AgiTater: NeutralKillingBase
         Duration = 2,
         DoubleBomb = 4
     }
-    
+
     [Localized(nameof(AgiTater))]
     internal static class AgitaterTranslations
     {
         [Localized(nameof(PassTheBombText))]
         public static string PassTheBombText = "Pass The Bomb";
-        
+
         [Localized(nameof(HoldingBombLevel1))]
         public static string HoldingBombLevel1 = "Holding Bomb!";
-        
+
         [Localized(nameof(HoldingBombLevel2))]
         public static string HoldingBombLevel2 = "Holding Bomb!!!";
-        
+
         [Localized(nameof(HoldingBombLevel3))]
         public static string HoldingBombLevel3 = "Holding Bomb!!!!!";
 
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         public static class AgiOptions
         {
             [Localized(nameof(PlaceBombCooldown))]
             public static string PlaceBombCooldown = "Place Bomb Cooldown";
-            
+
             [Localized(nameof(ExplodeOnMeetings))]
             public static string ExplodeOnMeetings = "Explode On Meetings";
 
             [Localized(nameof(ExplodeAfterDuration))]
             public static string ExplodeAfterDuration = "Explode After Duration";
-            
+
             [Localized(nameof(ExplodeDoubleBombed))]
             public static string ExplodeDoubleBombed = "Explode When Bombed Twice";
 

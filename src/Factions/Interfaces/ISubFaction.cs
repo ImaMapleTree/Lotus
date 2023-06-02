@@ -1,4 +1,4 @@
-namespace TOHTOR.Factions.Interfaces;
+namespace Lotus.Factions.Interfaces;
 
 public interface ISubFaction<T> where T: IFaction<T>
 {

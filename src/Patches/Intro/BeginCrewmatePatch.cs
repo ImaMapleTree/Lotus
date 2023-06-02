@@ -1,36 +1,26 @@
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Extra;
-using TOHTOR.Roles.Legacy;
-using TOHTOR.Roles.RoleGroups.Crew;
-using TOHTOR.Roles.RoleGroups.Impostors;
-using TOHTOR.Roles.RoleGroups.Neutral;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Utilities;
+using Lotus.Factions.Crew;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Roles.Extra;
+using Lotus.Roles.Legacy;
+using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Roles.RoleGroups.Impostors;
+using Lotus.Roles.RoleGroups.Neutral;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
 
-namespace TOHTOR.Patches.Intro;
+namespace Lotus.Patches.Intro;
 
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
 class BeginCrewmatePatch
 {
-    public static void Prefix(IntroCutscene __instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> teamToDisplay)
-    {
-        if (PlayerControl.LocalPlayer.GetCustomRole().Faction is Crewmates) return;
-
-        var soloTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
-        soloTeam.Add(PlayerControl.LocalPlayer);
-        teamToDisplay = soloTeam;
-    }
-
-
     public static void Postfix(IntroCutscene __instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> teamToDisplay)
     {
         //チーム表示変更
@@ -74,7 +64,7 @@ class BeginCrewmatePatch
                 PlayerControl.LocalPlayer.Data.Role.IntroSound = GetIntroSound(RoleTypes.Shapeshifter);
                 break;
 
-            case SabotageMaster:
+            case Repairman:
                 PlayerControl.LocalPlayer.Data.Role.IntroSound = ShipStatus.Instance.SabotageSound;
                 break;
 
@@ -102,38 +92,13 @@ class BeginCrewmatePatch
                 break;
 
         }
-
-        if (Input.GetKey(KeyCode.RightShift))
-        {
-            __instance.TeamTitle.text = "Town Of Host:\nThe Other Roles";
-            __instance.ImpostorText.gameObject.SetActive(true);
-            __instance.ImpostorText.text = "https://github.com/music-discussion/TOHTOR-TheOtherRoles--TOH-TOR" +
-                                           "\r\nv0.9.4 - Out Now on Github";
-            __instance.TeamTitle.color = Utils.ConvertHexToColor("#73fa73");
-            StartFadeIntro(__instance, Color.cyan, Color.yellow);
-        }
-        if (Input.GetKey(KeyCode.LeftShift))
-        {
-            __instance.TeamTitle.text = "Town Of Host:\nThe Other Roles";
-            __instance.ImpostorText.gameObject.SetActive(true);
-            __instance.ImpostorText.text = "https://github.com/music-discussion/TOHTOR-TheOtherRoles--TOH-TOR" +
-                                           "\r\nv0.9.4 - Coming Soon on Github";
-            __instance.TeamTitle.color = Utils.ConvertHexToColor("#73fa73");
-            StartFadeIntro(__instance, Color.cyan, Color.yellow);
-        }
-        if (Input.GetKey(KeyCode.RightControl))
-        {
-            __instance.TeamTitle.text = "Discord Server";
-            __instance.ImpostorText.gameObject.SetActive(true);
-            __instance.ImpostorText.text = "https://discord.gg/tohtor";
-            __instance.TeamTitle.color = Utils.ConvertHexToColor("#73fa73");
-            StartFadeIntro(__instance, Utils.ConvertHexToColor("#73fa73"), Utils.ConvertHexToColor("#73fa73"));
-        }
     }
+    
     private static AudioClip? GetIntroSound(RoleTypes roleType)
     {
         return RoleManager.Instance.AllRoles.FirstOrDefault(role => role.Role == roleType)?.IntroSound;
     }
+    
     private static async void StartFadeIntro(IntroCutscene __instance, Color start, Color end)
     {
         await System.Threading.Tasks.Task.Delay(1000);

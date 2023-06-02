@@ -1,6 +1,6 @@
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 [Localized("Options.General")]
 public static class GeneralOptionTranslations
@@ -23,6 +23,9 @@ public static class GeneralOptionTranslations
     [Localized(nameof(NeverText))]
     public static string NeverText = "Never";
 
+    [Localized(nameof(AlwaysText))]
+    public static string AlwaysText = "Always";
+
     [Localized(nameof(ShowText))]
     public static string ShowText = "Show";
 
@@ -35,9 +38,24 @@ public static class GeneralOptionTranslations
     [Localized(nameof(EveryoneText))]
     public static string EveryoneText = "Everyone";
 
+    [Localized(nameof(NoOneText))]
+    public static string NoOneText = "No One";
+
+    [Localized(nameof(NoneText))]
+    public static string NoneText = "None";
+
     [Localized(nameof(DurationText))]
     public static string DurationText = "Duration";
 
     [Localized(nameof(AllText))]
     public static string AllText = "All";
+
+    [Localized(nameof(GlobalText))]
+    public static string GlobalText = "Global";
+
+    [Localized(nameof(CustomText))]
+    public static string CustomText = "Custom";
+
+    [Localized(nameof(SecondsSuffix))]
+    public static string SecondsSuffix = "s";
 }

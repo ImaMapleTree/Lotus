@@ -1,41 +1,51 @@
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.Gamemodes;
-using TOHTOR.Patches.Meetings;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Gamemodes;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
+using Lotus.Utilities;
 using VentLib.Logging;
-using VentLib.Utilities;
 
-namespace TOHTOR.Patches.Actions;
+namespace Lotus.Patches.Actions;
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
 public class ReportDeadBodyPatch
 {
-    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo target)
+    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo? target)
     {
-        VentLogger.Old($"{__instance.GetNameWithRole()} => {target?.Object?.GetNameWithRole() ?? "null"}", "ReportDeadBody");
+        VentLogger.Trace($"{__instance.GetNameWithRole()} => {target?.GetNameWithRole() ?? "null"}", "ReportDeadBody");
+        if (!AmongUsClient.Instance.AmHost) return true;
+
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.ReportBody) && target != null) return false;
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.CallMeeting) && target == null) return false;
-        if (!AmongUsClient.Instance.AmHost) return true;
-        
+
+
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.MeetingCalled, ref handle, __instance);
 
-        if (handle.IsCanceled || target == null) return true;
-        if (Game.MatchData.UnreportableBodies.Contains(target.PlayerId)) return false;
+        if (target != null)
+        {
+            if (__instance.PlayerId == target.PlayerId) return false;
+            if (Game.MatchData.UnreportableBodies.Contains(target.PlayerId)) return false;
 
-        __instance.Trigger(RoleActionType.SelfReportBody, ref handle, target);
-        if (handle.IsCanceled) return false;
-        Game.TriggerForAll(RoleActionType.AnyReportedBody, ref handle, __instance, target);
-        if (handle.IsCanceled) return false;
+            Game.TriggerForAll(RoleActionType.AnyReportedBody, ref handle, __instance, target);
+            if (handle.IsCanceled)
+            {
+                VentLogger.Trace("Not Reporting Body - Cancelled by Any Report Action", "ReportDeadBody");
+                return false;
+            }
+
+            __instance.Trigger(RoleActionType.SelfReportBody, ref handle, target);
+            if (handle.IsCanceled)
+            {
+                VentLogger.Trace("Not Reporting Body - Cancelled by Self Report Action", "ReportDeadBody");
+                return false;
+            }
+        }
 
         MeetingPrep.Reported = target;
-        MeetingPrep.PrepMeeting(__instance);
+        MeetingPrep.PrepMeeting(__instance, target);
         return false;
     }
 }

@@ -1,13 +1,13 @@
 /*using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Managers;
-using TOHTOR.Roles;
-using TOHTOR.Victory;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Victory;
 using UnityEngine;
 using VentLib.Anticheat;
 using VentLib.Logging;
@@ -16,7 +16,7 @@ using VentLib.Options.Game;
 using VentLib.Options.Game.Tabs;
 using VentLib.Utilities;
 
-namespace TOHTOR.Gamemodes.CaptureTheFlag;
+namespace Lotus.Gamemodes.CaptureTheFlag;
 
 public class CTFGamemode: Gamemode
 {
@@ -27,7 +27,7 @@ public class CTFGamemode: Gamemode
     public static int[] TeamPoints = { 0, 0 };
     public static byte[] Carriers = { 255, 255 };
 
-    public static GameOptionTab CTFTab = new("Capture The Flag", () => Utils.LoadSprite("TOHTOR.assets.Tabs.TabIcon_CaptureTheFlag.png"));
+    public static GameOptionTab CTFTab = new("Capture The Flag", () => Utils.LoadSprite("Lotus.assets.Tabs.TabIcon_CaptureTheFlag.png"));
     public override string GetName() => "Capture The Flag";
     public override IEnumerable<GameOptionTab> EnabledTabs() => new[] { CTFTab };
     public override GameAction IgnoredActions() => GameAction.CallSabotage | GameAction.CallMeeting;
@@ -43,7 +43,7 @@ public class CTFGamemode: Gamemode
             .Tab(CTFTab)
             .IsHeader(true)
             .BindFloat(v => GameDuration = v)
-            .AddFloatRange(60, 600, 15f, 3, "s")
+            .AddFloatRange(60, 600, 15f, 3, GeneralOptionTranslations.SecondsSuffix)
             .Build());
     }
 

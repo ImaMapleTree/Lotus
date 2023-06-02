@@ -1,9 +1,9 @@
 using AmongUs.GameOptions;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
 using UnityEngine;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public class Shapeshifter : Impostor
 {

@@ -1,12 +1,12 @@
 using AmongUs.GameOptions;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.RoleGroups.Impostors;
-using TOHTOR.Roles.RoleGroups.Madmates.Roles;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.Managers;
+using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.Madmates.Roles;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
+using Lotus.Roles.RoleGroups.Impostors;
 
-namespace TOHTOR.Roles.Legacy;
+namespace Lotus.Roles.Legacy;
 
 public static class OldRoleSystemBridge
 {

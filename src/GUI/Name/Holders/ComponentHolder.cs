@@ -2,15 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.GUI.Name.Interfaces;
-using TOHTOR.Patches.Actions;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name.Impl;
+using Lotus.GUI.Name.Interfaces;
+using Lotus.API;
+using Lotus.Patches.Actions;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.GUI.Name.Holders;
+namespace Lotus.GUI.Name.Holders;
 
 public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: INameModelComponent
 {

@@ -6,17 +6,20 @@ using System.Text;
 using System.Text.RegularExpressions;
 using Hazel;
 using InnerNet;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Chat.Patches;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Extra;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Legacy;
+using Lotus.API.Odyssey;
+using Lotus.Chat.Patches;
+using Lotus.GUI.Name.Holders;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles.Extra;
+using Lotus.Roles.Interfaces;
+using Lotus.API;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Chat;
+using Lotus.Extensions;
+using Lotus.Roles;
+using Lotus.Roles.Legacy;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
@@ -26,7 +29,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Utilities;
+namespace Lotus.Utilities;
 
 public static class Utils
 {
@@ -35,9 +38,9 @@ public static class Utils
         return GetPlayerById(player.PlayerId)?.GetNameWithRole() ?? "";
     }
 
-    public static Color ConvertHexToColor(string hex)
+    public static Color? ConvertHexToColor(string hex)
     {
-        ColorUtility.TryParseHtmlString(hex, out Color c);
+        if (!ColorUtility.TryParseHtmlString(hex, out Color c)) return null;
         return c;
     }
 
@@ -45,41 +48,6 @@ public static class Utils
     {
         if (p.GetCustomRole().RealRole.IsImpostor()) return false;
         return p.GetCustomRole() is ITaskHolderRole taskHolderRole && taskHolderRole.HasTasks();
-    }
-
-    // GM.Ref<GM>()
-    public static void ShowActiveSettingsHelp(byte PlayerId = byte.MaxValue)
-    {
-        SendMessage(Localizer.Translate("StaticOptions.ActiveSettingsHelp") + ":", PlayerId);
-
-        if (GeneralOptions.GameplayOptions.SyncMeetings)
-        {
-            SendMessage(Localizer.Translate("StaticOptions.SyncButton.Info"), PlayerId);
-        }
-
-        /*if (StaticOptions.SabotageTimeControl)
-        {
-            SendMessage(Localizer.Translate("StaticOptions.SabotageTimeControl.Info"), PlayerId);
-        }*/
-
-        if (GeneralOptions.MayhemOptions.UseRandomMap)
-        {
-            SendMessage(Localizer.Translate("StaticOptions.RandomMap.Info"), PlayerId);
-        }
-
-        if (GeneralOptions.AdminOptions.HostGM)
-        {
-            SendMessage(CustomRoleManager.Special.GM.RoleName + Localizer.Translate("StaticOptions.EnableGMInfo"), PlayerId);
-        }
-
-        foreach (var role in CustomRoleManager.AllRoles)
-        {
-            if (role is Fox or Troll) continue;
-            if (role.IsEnable() && !role.IsVanilla())
-                SendMessage(role.RoleName + Localizer.Translate($"StaticOptions.{role.EnglishRoleName}.Description"), PlayerId);
-        }
-
-        if (GeneralOptions.DebugOptions.NoGameEnd) SendMessage(Localizer.Translate("StaticOptions.NoGameEndInfo"), PlayerId);
     }
 
     /*public static void ShowActiveSettings(byte PlayerId = byte.MaxValue)
@@ -140,7 +108,12 @@ public static class Utils
         SendMessage(text, PlayerId);
     }*/
 
-    public static void Teleport(CustomNetworkTransform nt, Vector2 location) => TeleportDeferred(nt, location).Send();
+    public static void Teleport(CustomNetworkTransform nt, Vector2 location)
+    {
+        Vector2 currentLocation = nt.prevPosSent;
+        Hooks.PlayerHooks.PlayerTeleportedHook.Propagate(new PlayerTeleportedHookEvent(nt.myPlayer, currentLocation, location));
+        TeleportDeferred(nt, location).Send();
+    }
 
     public static MonoRpc TeleportDeferred(PlayerControl player, Vector2 location) => TeleportDeferred(player.NetTransform, location);
 
@@ -201,14 +174,6 @@ public static class Utils
 
     }*/
 
-    public static void SendMessage(string text, byte sendTo = byte.MaxValue, string title = "", bool leftAlign = false)
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-        if (title == "") title = "<color=#aaaaff>" + Localizer.Translate("Announcements.SystemMessage") + "</color>";
-        text = text.Replace("\\n", "\n");
-        ChatUpdatePatch.MessagesToSend.Enqueue((text, sendTo, title, leftAlign && PlayerById(sendTo).Map(p => p.IsHost()).OrElse(false)));
-    }
-
     public static PlayerControl? GetPlayerById(int playerId) => PlayerControl.AllPlayerControls.ToArray().FirstOrDefault(pc => pc.PlayerId == playerId);
 
     public static Optional<PlayerControl> PlayerById(int playerId) => PlayerControl.AllPlayerControls.ToArray().FirstOrOptional(pc => pc.PlayerId == playerId);
@@ -237,27 +202,6 @@ public static class Utils
         return t?.PadRight(Mathf.Max(num - (bc - t.Length), 0));
     }
 
-    public static void DumpLog()
-    {
-        string t = DateTime.Now.ToString("yyyy-MM-dd_HH.mm.ss");
-        string filename =
-            $"{System.Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}/TOHTOR-v{TOHPlugin.PluginVersion}{(TOHPlugin.DevVersion ? TOHPlugin.DevVersionStr : "")}-{t}.log";
-        FileInfo file = new(@$"{System.Environment.CurrentDirectory}/BepInEx/LogOutput.log");
-        file.CopyTo(@filename);
-        System.Diagnostics.Process.Start(
-            @$"{System.Environment.GetFolderPath(Environment.SpecialFolder.DesktopDirectory)}");
-        if (PlayerControl.LocalPlayer != null)
-            HudManager.Instance?.Chat?.AddChat(PlayerControl.LocalPlayer,
-                "デスクトップにログを保存しました。バグ報告チケットを作成してこのファイルを添付してください。");
-    }
-
-    /*public static string SummaryTexts(byte id, bool disableColor = true)
-    {
-        var RolePos = TranslationController.Instance.currentLanguage.languageID == SupportedLangs.English ? 47 : 37;
-        string summary =
-            $"{ColorString(TOHPlugin.PlayerColors[id], TOHPlugin.AllPlayerNames[id])}<pos=22%> {GetProgressText(id)}</pos><pos=29%> {GetVitalText(id)}</pos><pos={RolePos}%> {GetDisplayRoleName(id)}{GetSubRolesText(id)}</pos>";
-        return disableColor ? summary.RemoveHtmlTags() : summary;
-    }*/
 
     public static string RemoveHtmlTags(this string str) => Regex.Replace(str, "<[^>]*?>", "");
 
@@ -280,18 +224,18 @@ public static class Utils
         })));
     }
 
-    public static Sprite LoadSprite(string path, float pixelsPerUnit = 100f)
+    public static Sprite LoadSprite(string path, float pixelsPerUnit = 100f, bool linear = false, int mipMapLevel = 0)
     {
         Sprite sprite = null;
         try
         {
             var stream = Assembly.GetCallingAssembly().GetManifestResourceStream(path);
-            var texture = new Texture2D(1, 1, TextureFormat.ARGB32, false);
+            var texture = new Texture2D(1, 1, TextureFormat.ARGB32, true, linear);
             using MemoryStream ms = new();
             stream.CopyTo(ms);
             ImageConversion.LoadImage(texture, ms.ToArray());
-            sprite = Sprite.Create(texture, new(0, 0, texture.width, texture.height), new(0.5f, 0.5f),
-                pixelsPerUnit);
+            sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit);
+            sprite.texture.requestedMipmapLevel = mipMapLevel;
         }
         catch (Exception e)
         {
@@ -333,7 +277,7 @@ public static class Utils
         return null;
 
         /* Usage example:
-        AudioClip exampleClip = Helpers.loadAudioClipFromResources("TOHTOR.assets.exampleClip.raw");
+        AudioClip exampleClip = Helpers.loadAudioClipFromResources("Lotus.assets.exampleClip.raw");
         if (Constants.ShouldPlaySfx()) SoundManager.Instance.PlaySound(exampleClip, false, 0.8f);
         */
     }

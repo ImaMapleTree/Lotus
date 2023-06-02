@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Il2CppSystem.ComponentModel;
-using TOHTOR.Logging;
+using Lotus.Logging;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using Component = UnityEngine.Component;
+using Object = UnityEngine.Object;
 
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class DebugExtensions
 {
@@ -20,6 +21,11 @@ public static class DebugExtensions
     }
 
     public static void Debug(this IEnumerable<Component> components)
+    {
+        DevLogger.Log(components.Select(c => (c.TypeName(), c.name)).Join());
+    }
+    
+    public static void Debug(this IEnumerable<Object> components)
     {
         DevLogger.Log(components.Select(c => (c.TypeName(), c.name)).Join());
     }

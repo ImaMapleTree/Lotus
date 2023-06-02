@@ -1,17 +1,18 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Roles.Internals;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Grenadier : Vanilla.Impostor
 {
@@ -61,12 +62,12 @@ public class Grenadier : Vanilla.Impostor
             .SubOption(sub => sub
                 .Name("Blind Cooldown")
                 .Bind(v => blindCooldown.Duration = (float)v)
-                .AddFloatRange(5f, 120f, 2.5f, 10, "s")
+                .AddFloatRange(5f, 120f, 2.5f, 10, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Blind Duration")
                 .Bind(v => blindDuration = (float)v)
-                .AddFloatRange(5f, 60f, 2.5f, 4, "s")
+                .AddFloatRange(5f, 60f, 2.5f, 4, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .Name("Blind Distance")

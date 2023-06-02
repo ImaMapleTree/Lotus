@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Components;
+namespace Lotus.GUI.Menus.OptionsMenu.Components;
 
 [RegisterInIl2Cpp]
 public class TiledToggleButton: MonoBehaviour

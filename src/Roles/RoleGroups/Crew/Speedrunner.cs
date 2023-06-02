@@ -1,13 +1,15 @@
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Speedrunner : Crewmate
 {
@@ -29,7 +31,7 @@ public class Speedrunner : Crewmate
         currentSpeedBoost = AUSettings.PlayerSpeedMod();
     }
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         if (slowlyAcquireSpeedBoost)
             currentSpeedBoost = Mathf.Clamp(currentSpeedBoost + speedBoostGain, 0, totalSpeedBoost);
@@ -63,7 +65,7 @@ public class Speedrunner : Crewmate
                 .SubOption(sub2 => sub2
                     .Name("Temporary Boost Duration")
                     .Bind(v => smalRewardDuration = (float)v)
-                    .AddFloatRange(2f, 12f, 0.5f, 2, "s")
+                    .AddFloatRange(2f, 12f, 0.5f, 2, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .Build())
             .SubOption(sub => sub

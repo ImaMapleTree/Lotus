@@ -1,12 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using TOHTOR.Chat;
+using Lotus.Chat;
+using Lotus.Logging;
+using VentLib.Logging;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers.Templates;
+namespace Lotus.Managers.Templates;
 
 public class TemplateCommandManager
 {
@@ -74,7 +77,7 @@ public class TemplateCommandManager
         input = input.TrimStart('/');
         string? tag = commandAliases.GetValueOrDefault(input);
         if (tag == null) return false;
-        if (!PluginDataManager.TemplateManager.TryFormat(source, tag, out string formatted)) return true;
+        if (!PluginDataManager.TemplateManager.TryFormat(source, tag, out string formatted, true)) return true;
         ChatHandler.Of(formatted).LeftAlign().Send(source);
         return true;
     }
@@ -96,10 +99,18 @@ public class TemplateCommandManager
         reader.Close();
         lines.Where(l => l.Contains('|')).ForEach(l =>
         {
-            string[] components = _tagRegex.Split(l);
-            string tag = components[0];
-            aliasDictionary[tag] = components.ToList();
-            _commaRegex.Split(components[1]).Where(r => r is not (" " or "")).ForEach(a => commandAliases[a] = tag);
+            try
+            {
+                string[] components = _tagRegex.Split(l);
+                string tag = components[0];
+                
+                aliasDictionary[tag] = _commaRegex.Split(components[2]).Where(r => r is not (" " or "") && !r.Contains(',')).ToList();
+                _commaRegex.Split(components[2]).Where(r => r is not (" " or "") && !r.Contains(',')).ForEach(a => commandAliases[a] = tag);
+            }
+            catch (Exception e)
+            {
+                VentLogger.Exception(e, "Could not parse template command!");
+            }
         });
     }
 }

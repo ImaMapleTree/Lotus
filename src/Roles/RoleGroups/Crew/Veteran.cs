@@ -1,21 +1,23 @@
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Options.Game;
+using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Veteran : Crewmate
 {
@@ -39,7 +41,7 @@ public class Veteran : Crewmate
     private string VeteranAlertCounter() => RoleUtils.Counter(remainingAlerts, totalAlerts);
 
     [UIComponent(UI.Indicator)]
-    private string GetAlertedString() => veteranDuration.IsReady() ? "" : Utils.ColorString(Color.red, "♣");
+    private string GetAlertedString() => veteranDuration.IsReady() ? "" : RoleColor.Colorize("♣");
 
     [RoleAction(RoleActionType.OnPet)]
     public void AssumeAlert()
@@ -78,11 +80,11 @@ public class Veteran : Crewmate
                 .AddIntRange(1, 10, 1, 9).Build())
             .SubOption(sub => sub.Name("Alert Cooldown")
                 .Bind(v => veteranCooldown.Duration = (float)v)
-                .AddFloatRange(2.5f, 120, 2.5f, 5, "s")
+                .AddFloatRange(2.5f, 120, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub.Name("Alert Duration")
                 .Bind(v => veteranDuration.Duration = (float)v)
-                .AddFloatRange(1, 20, 0.25f, 10, "s").Build())
+                .AddFloatRange(1, 20, 0.25f, 10, GeneralOptionTranslations.SecondsSuffix).Build())
             .SubOption(sub => sub.Name("Kill Crewmates")
                 .Bind(v => canKillCrewmates = (bool)v)
                 .AddOnOffValues().Build())

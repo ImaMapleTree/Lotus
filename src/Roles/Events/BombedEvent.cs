@@ -1,6 +1,6 @@
-using TOHTOR.Managers.History.Events;
+using Lotus.Managers.History.Events;
 
-namespace TOHTOR.Roles.Events;
+namespace Lotus.Roles.Events;
 
 public class BombedEvent : DeathEvent
 {

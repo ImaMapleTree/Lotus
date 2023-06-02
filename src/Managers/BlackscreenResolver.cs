@@ -1,18 +1,23 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Extensions;
-using TOHTOR.RPC;
-using TOHTOR.Utilities;
-using TOHTOR.Victory;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.API.Player;
+using Lotus.API.Reactive;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Chat;
+using Lotus.RPC;
+using Lotus.Utilities;
+using Lotus.Victory;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 internal class BlackscreenResolver
 {
@@ -22,11 +27,14 @@ internal class BlackscreenResolver
     private Dictionary<byte, (bool isDead, bool isDisconnected)> playerStates = null!;
     private HashSet<byte> unpatchable;
 
+    private bool patching;
+
 
     internal BlackscreenResolver(MeetingDelegate meetingDelegate)
     {
         this.meetingDelegate = meetingDelegate;
         resetCameraPlayer = Game.GetDeadPlayers().FirstOrOptional().Map(p => p.PlayerId).OrElse(byte.MaxValue);
+        Hooks.PlayerHooks.PlayerMessageHook.Bind(nameof(BlackscreenResolver), _ => BlockLavaChat(), true);
     }
 
     internal void BeginProcess()
@@ -38,11 +46,11 @@ internal class BlackscreenResolver
         if (deadPlayer != null) Async.Schedule(() => StoreAndTeleport(deadPlayer), 1.5f);
     }
 
-    internal void ClearBlackscreen()
+    internal void ClearBlackscreen(Action callback)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         float deferredTime = 0; // Used if needing to teleport the player
-        Async.Schedule(ProcessPatched, NetUtils.DeriveDelay(0.7f));
+        Async.Schedule(() => ProcessPatched(callback), NetUtils.DeriveDelay(0.7f));
         if (unpatchable.Count == 0) return;
 
         bool updated = !TryGetDeadPlayer(out PlayerControl? deadPlayer);
@@ -75,6 +83,7 @@ internal class BlackscreenResolver
 
     private HashSet<byte> StoreAndSendFallbackData()
     {
+        patching = true;
         byte exiledPlayer = meetingDelegate.ExiledPlayer?.PlayerId ?? byte.MaxValue;
         GameData.PlayerInfo[] playerInfos = GameData.Instance.AllPlayers.ToArray().Where(p => p != null).ToArray();
         playerInfos.FirstOrOptional(p => p.PlayerId == exiledPlayer).IfPresent(info => info.IsDead = true);
@@ -85,7 +94,7 @@ internal class BlackscreenResolver
         return unpatchablePlayers;
     }
 
-    private void ProcessPatched()
+    private void ProcessPatched(Action callback)
     {
         GameData.Instance.AllPlayers.ToArray().Where(i => i != null).ForEach(info =>
         {
@@ -94,8 +103,10 @@ internal class BlackscreenResolver
             info.Disconnected = val.isDisconnected;
             if (info.Object != null) info.PlayerName = info.Object.name;
         });
+        patching = false;
         GeneralRPC.SendGameData();
         CheckEndGamePatch.Deferred = false;
+        callback();
     }
 
     private bool TryGetDeadPlayer(out PlayerControl? deadPlayer)
@@ -135,6 +146,16 @@ internal class BlackscreenResolver
 
     private static HashSet<byte> SendPatchedData(byte exiledPlayer)
     {
+        Players.PlayerById(exiledPlayer).IfPresent(p =>
+        {
+            string name = AUSettings.ConfirmImpostor() ? $"<b>{p.GetCustomRole().RoleName}</b>\n{p.name}" : p.name;
+            p.Data.PlayerName = p.Data.DefaultOutfit.PlayerName = name;
+            p.SetName(name);
+            Players.SendPlayerData(p.Data, autoSetName: false);
+        });
+
+
+
         HostRpc.RpcDebug("Game Data BEFORE Patch");
         HashSet<byte> unpatchable = AntiBlackoutLogic.PatchedData(exiledPlayer);
         HostRpc.RpcDebug("Game Data AFTER Patch");
@@ -148,7 +169,16 @@ internal class BlackscreenResolver
                               "Unfortunately there's nothing further we can do at this point other than killing (you) the host." +
                               "The reasons for this are very complicated, but a lot of code went into preventing this from happening, but it's never guarantees this scenario won't occur.");
         PlayerControl.LocalPlayer.MurderPlayer(PlayerControl.LocalPlayer);
+        Game.MatchData.UnreportableBodies.Add(PlayerControl.LocalPlayer.PlayerId);
+        playerStates[0] = (true, false);
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcExileV2(), 6f);
         return PlayerControl.LocalPlayer;
     }
 
+    private void BlockLavaChat()
+    {
+        if (!patching) return;
+        ChatHandler chatHandler = ChatHandler.Of("", "-");
+        for (int i = 0; i < 20; i++) chatHandler.Send();
+    }
 }

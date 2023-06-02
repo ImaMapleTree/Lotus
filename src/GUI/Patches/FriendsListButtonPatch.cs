@@ -1,7 +1,8 @@
 using HarmonyLib;
 using UnityEngine;
+using VentLib.Logging;
 
-namespace TOHTOR.GUI.Patches;
+namespace Lotus.GUI.Patches;
 
 [HarmonyPatch(typeof(FriendsListButton), nameof(FriendsListButton.OnSceneLoaded))]
 public class FriendsListButtonPatch
@@ -14,6 +15,7 @@ public class FriendsListButtonPatch
 
     public static void FixFriendListPosition()
     {
+        VentLogger.Fatal("Hello!");
         FriendsListButton friendsListButton = Object.FindObjectOfType<FriendsListButton>();
         var transform = friendsListButton.transform;
         transform.localScale = new Vector3(1f, 1f, 1f);

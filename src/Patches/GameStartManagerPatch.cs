@@ -3,16 +3,16 @@ using AmongUs.Data;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using InnerNet;
-using TOHTOR.API;
-using TOHTOR.Options;
-using TOHTOR.Options.General;
+using Lotus.API;
+using Lotus.Options;
+using Lotus.Options.General;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
-using GameStates = TOHTOR.API.GameStates;
+using GameStates = Lotus.API.GameStates;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 [HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.Update))]
 public static class GameStartManagerUpdatePatch
@@ -141,7 +141,7 @@ class UnrestrictedNumImpostorsPatch
 {
     public static bool Prefix(ref int __result)
     {
-        __result = TOHPlugin.NormalOptions.NumImpostors;
+        __result = ProjectLotus.NormalOptions.NumImpostors;
         return false;
     }
 }

@@ -3,13 +3,13 @@ using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
+using Lotus.Roles.Internals;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 public static class DesyncOptions
 {

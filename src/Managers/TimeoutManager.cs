@@ -1,4 +1,4 @@
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 public class TimeoutManager
 {

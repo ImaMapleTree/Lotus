@@ -6,27 +6,27 @@ using System.Linq;
 using System.Reflection;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Undead;
-using TOHTOR.GUI;
-using TOHTOR.Logging;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles.Extra;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Roles.Subroles;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Factions;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Impostors;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Undead;
+using Lotus.GUI;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles.Extra;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Subroles;
+using Lotus.API.Stats;
+using Lotus.Extensions;
+using Lotus.Roles.Internals.Interfaces;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
@@ -38,7 +38,7 @@ using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 // Some people hate using "Base" and "Abstract" in class names but I used both so now I'm a war-criminal :)
 public abstract class AbstractBaseRole
@@ -64,10 +64,12 @@ public abstract class AbstractBaseRole
 
     public string RoleName {
         get {
-            string name = Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.RoleName", useCache: false);
-            return name == "N/A" ? EnglishRoleName : name;
+            string name = Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.RoleName");
+            return OverridenRoleName ?? (name == "N/A" ? EnglishRoleName : name);
         }
     }
+
+    public string? OverridenRoleName;
 
     public RoleTypes RealRole => DesyncRole ?? VirtualRole;
     public RoleTypes? DesyncRole;
@@ -75,17 +77,20 @@ public abstract class AbstractBaseRole
     public IFaction Faction { get; set; } = FactionInstances.Solo;
     public SpecialType SpecialType = SpecialType.None;
     public Color RoleColor = Color.white;
-    public bool IsSubrole { get; private set; }
     public int Chance { get; private set;  }
     public int Count { get; private set; }
     public int AdditionalChance { get; private set; }
-    public bool BaseCanVent;
+    public bool BaseCanVent = true;
 
+    public RoleAbilityFlag RoleAbilityFlags;
     public RoleFlag RoleFlags;
     public readonly List<CustomRole> LinkedRoles = new();
 
-    internal GameOption Options;
+    internal GameOption RoleOptions;
     internal Assembly DeclaringAssembly = Assembly.GetCallingAssembly();
+
+    public virtual List<Statistic> Statistics() => new();
+    public virtual HashSet<Type> BannedModifiers() => new();
 
     public string EnglishRoleName { get; private set; }
     private readonly Dictionary<RoleActionType, List<RoleAction>> roleActions = new();
@@ -115,17 +120,17 @@ public abstract class AbstractBaseRole
             CustomRoleManager.AddRole(r);
         });
 
-        Options = optionBuilder.Build();
+        RoleOptions = optionBuilder.Build();
 
-        if (!RoleFlags.HasFlag(RoleFlag.DontRegisterOptions) && Options.GetValueText() != "N/A")
+        if (!RoleFlags.HasFlag(RoleFlag.DontRegisterOptions) && RoleOptions.GetValueText() != "N/A")
         {
-            if (!RoleFlags.HasFlag(RoleFlag.Hidden) && Options.Tab == null)
+            if (!RoleFlags.HasFlag(RoleFlag.Hidden) && RoleOptions.Tab == null)
             {
-                if (GetType() == typeof(Impostor)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(Engineer)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(Scientist)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(Crewmate)) Options.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(GuardianAngel)) Options.Tab = DefaultTabs.HiddenTab;
+                if (GetType() == typeof(Impostor)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(Engineer)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(Scientist)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(Crewmate)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+                else if (GetType() == typeof(GuardianAngel)) RoleOptions.Tab = DefaultTabs.HiddenTab;
                 else
                 {
 
@@ -135,20 +140,20 @@ public abstract class AbstractBaseRole
                     }
 
                     else if (this is Subrole)
-                        Options.Tab = DefaultTabs.MiscTab;
+                        RoleOptions.Tab = DefaultTabs.MiscTab;
                     else if (this.Faction is ImpostorFaction)
-                        Options.Tab = DefaultTabs.ImpostorsTab;
+                        RoleOptions.Tab = DefaultTabs.ImpostorsTab;
                     else if (this.Faction is Crewmates)
-                        Options.Tab = DefaultTabs.CrewmateTab;
+                        RoleOptions.Tab = DefaultTabs.CrewmateTab;
                     else if (this.Faction is TheUndead)
-                        Options.Tab = DefaultTabs.NeutralTab;
+                        RoleOptions.Tab = DefaultTabs.NeutralTab;
                     else if (this.SpecialType is SpecialType.NeutralKilling or SpecialType.Neutral)
-                        Options.Tab = DefaultTabs.NeutralTab;
+                        RoleOptions.Tab = DefaultTabs.NeutralTab;
                     else
-                        Options.Tab = DefaultTabs.MiscTab;
+                        RoleOptions.Tab = DefaultTabs.MiscTab;
                 }
             }
-            Options.Register(CustomRoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
+            RoleOptions.Register(CustomRoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
         }
 
         SetupRoleActions();
@@ -172,18 +177,18 @@ public abstract class AbstractBaseRole
         List<RoleAction> currentActions = this.roleActions.GetValueOrDefault(action.ActionType, new List<RoleAction>());
 
         if (action.Attribute.Override != null) {
-            int overrideIndex = currentActions.FindIndex(m => m.method.Name == action.Attribute.Override);
+            int overrideIndex = currentActions.FindIndex(m => m.Method.Name == action.Attribute.Override);
             if (overrideIndex != -1) currentActions[overrideIndex] = action;
             this.roleActions[action.ActionType] = currentActions;
             return;
         }
 
-        VentLogger.Log(LogLevel.All, $"Registering Action {action.ActionType} => {action.method.Name} (from: \"{action.method.DeclaringType}\")", "RegisterAction");
+        VentLogger.Log(LogLevel.All, $"Registering Action {action.ActionType} => {action.Method.Name} (from: \"{action.Method.DeclaringType}\")", "RegisterAction");
         if (action.ActionType is RoleActionType.FixedUpdate &&
             currentActions.Count > 0)
             throw new ConstraintException("RoleActionType.FixedUpdate is limited to one per class. If you're inheriting a class that uses FixedUpdate you can add Override=METHOD_NAME to your annotation to override its Update method.");
 
-        if (action.Attribute.Subclassing || action.method.DeclaringType == this.GetType())
+        if (action.Attribute.Subclassing || action.Method.DeclaringType == this.GetType())
             currentActions.Add(action);
 
         this.roleActions[action.ActionType] = currentActions;
@@ -215,16 +220,25 @@ public abstract class AbstractBaseRole
         {
             if (handle.IsCanceled) continue;
             if (MyPlayer == null || !MyPlayer.IsAlive() && !action.TriggerWhenDead) continue;
-            
-            if (actionType.IsPlayerAction())
+
+            try
             {
-                Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(MyPlayer, action, parameters));
-                Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer, action, parameters);
+                if (actionType.IsPlayerAction())
+                {
+                    Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(MyPlayer, action, parameters));
+                    Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer, action, parameters);
+                }
+
+                handle.ActionType = actionType;
+
+                if (handle.IsCanceled) continue;
+
+                action.Execute(this, parameters);
             }
-
-            if (handle.IsCanceled) continue;
-
-            action.Execute(this, parameters);
+            catch (Exception e)
+            {
+                VentLogger.Exception(e, $"Failed to execute RoleAction {action}.");
+            }
         }
         Profilers.Global.Sampler.Stop(id);
     }
@@ -242,7 +256,8 @@ public abstract class AbstractBaseRole
             .Where(f => f.FieldType == typeof(Cooldown) || (f.FieldType.IsGenericType && typeof(Optional<>).IsAssignableFrom(f.FieldType.GetGenericTypeDefinition())))
             .Do(f =>
             {
-                if (f.FieldType == typeof(Cooldown)) CreateCooldown(f);
+                if (f.FieldType.GetCustomAttribute<NewOnSetupAttribute>() != null) CreateAnnotatedFields(new NewOnSetup(f, f.FieldType.GetCustomAttribute<NewOnSetupAttribute>()!.UseCloneIfPresent));
+                else if (f.FieldType == typeof(Cooldown)) CreateCooldown(f);
                 else CreateOptional(f);
             });
     }
@@ -259,7 +274,7 @@ public abstract class AbstractBaseRole
             field.SetValue(this, cos.CloneIndiscriminate());
             return;
         }
-        
+
         MethodInfo? cloneMethod = field.FieldType.GetMethod("Clone", AccessFlags.InstanceAccessFlags, Array.Empty<Type>());
         if (currentValue == null || cloneMethod == null || !setupRules.UseCloneIfPresent)
             try {
@@ -430,12 +445,6 @@ public abstract class AbstractBaseRole
         }
 
 
-        public RoleModifier Subrole(bool isSubrole)
-        {
-            myRole.IsSubrole = isSubrole;
-            return this;
-        }
-
         public RoleModifier OptionOverride(Override option, object? value, Func<bool>? condition = null)
         {
             myRole.roleSpecificGameOptionOverrides.Add(new GameOptionOverride(option, value, condition));
@@ -489,9 +498,17 @@ public abstract class AbstractBaseRole
             return this;
         }
 
-        public RoleModifier RoleFlags(RoleFlag roleFlags)
+        public RoleModifier RoleFlags(RoleFlag roleFlags, bool replace = false)
         {
-            myRole.RoleFlags = roleFlags;
+            if (replace) myRole.RoleFlags = roleFlags;
+            else myRole.RoleFlags |= roleFlags;
+            return this;
+        }
+
+        public RoleModifier RoleAbilityFlags(RoleAbilityFlag roleAbilityFlags, bool replace = false)
+        {
+            if (replace) myRole.RoleAbilityFlags = roleAbilityFlags;
+            else myRole.RoleAbilityFlags |= roleAbilityFlags;
             return this;
         }
     }
@@ -536,7 +553,7 @@ public abstract class AbstractBaseRole
         public virtual GameOptionBuilder HookOptions(GameOptionBuilder optionStream) {
             return optionStream;
         }
-        
+
         public virtual void AddAction(RoleAction action)
         {
             FrozenRole.roleActions[action.ActionType].Add(action);
@@ -548,17 +565,17 @@ public abstract class AbstractBaseRole
         {
             if (action.Behaviour is ModifiedBehaviour.PatchBefore)
             {
-                object? result = action.method.InvokeAligned(args);
-                if (action.method.ReturnType == typeof(bool) && (result == null || (bool)result))
+                object? result = action.Method.InvokeAligned(args);
+                if (action.Method.ReturnType == typeof(bool) && (result == null || (bool)result))
                     baseMethod.InvokeAligned(args);
                 return;
             }
 
             baseMethod.InvokeAligned(args);
-            action.method.InvokeAligned(args);
+            action.Method.InvokeAligned(args);
         }
 
-        
+
 
         private void SetupActions()
         {

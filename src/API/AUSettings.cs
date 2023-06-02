@@ -1,7 +1,7 @@
 using AmongUs.GameOptions;
-using TOHTOR.API.Reactive;
+using Lotus.API.Reactive;
 
-namespace TOHTOR.API;
+namespace Lotus.API;
 
 public static class AUSettings
 {

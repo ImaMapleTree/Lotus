@@ -1,15 +1,21 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.Managers;
-using TOHTOR.Managers.Friends;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Utilities;
+using BepInEx.Bootstrap;
+using Lotus.API.Odyssey;
+using Lotus.Factions.Neutrals;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Roles.Internals;
+using Lotus.Utilities;
+using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Managers.Friends;
+using Lotus.Managers.Templates;
+using Lotus.Roles.Subroles;
+using TMPro;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -18,15 +24,17 @@ using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
+using Object = UnityEngine.Object;
+using Type = Il2CppSystem.Type;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Localized("Commands")]
 public class BasicCommands: CommandTranslations
 {
     [Localized("Color.NotInRange")] public static string ColorNotInRangeMessage = "{0} is not in range of valid colors.";
     [Localized(nameof(Winners))] public static string Winners = "Winners";
-    [Localized("Dump.Success")] public static string DumpSuccess = "Successfully dumped log to: {0}";
+    [Localized("Dump.Success")] public static string DumpSuccess = "Successfully dumped log. Check your logs folder for a \"dump.log!\"";
     [Localized("Ids.PlayerIdMessage")] public static string PlayerIdMessage = "{0}'s player ID is {1}";
 
     [Command("perc", "percentage", "percentages")]
@@ -39,6 +47,7 @@ public class BasicCommands: CommandTranslations
 
         string FactionName(CustomRole role)
         {
+            if (role is Subrole) return "Modifiers";
             if (role.Faction is not Solo) return role.Faction.Name();
             return role.SpecialType is SpecialType.NeutralKilling ? "Neutral Killers" : "Neutral";
         }
@@ -53,7 +62,8 @@ public class BasicCommands: CommandTranslations
             string fName = FactionName(r);
             if (factionName != fName)
             {
-                text += $"\n{HostOptionTranslations.RoleCategory.Formatted(fName)}\n";
+                if (factionName == "Modifiers") text += $"\n★ {factionName}\n";
+                else text += $"\n{HostOptionTranslations.RoleCategory.Formatted(fName)}\n";
                 factionName = fName;
             }
 
@@ -63,13 +73,14 @@ public class BasicCommands: CommandTranslations
             else text += "\n";
         });
 
-        Utils.SendMessage(text, source.PlayerId, HostOptionTranslations.RoleInfo, true);
+        ChatHandler.Of(text, HostOptionTranslations.RoleInfo).LeftAlign().Send(source);
     }
 
     [Command(CommandFlag.HostOnly, "dump")]
-    public static void Dump(PlayerControl source)
+    public static void Dump(PlayerControl _)
     {
-        Utils.SendMessage(DumpSuccess.Formatted(VentLogger.Dump()), source.PlayerId);
+        VentLogger.SendInGame("Successfully dumped log. Check your logs folder for a \"dump.log!\"");
+        VentLogger.Dump();
     }
 
     [Command(CommandFlag.LobbyOnly, "name")]
@@ -86,7 +97,7 @@ public class BasicCommands: CommandTranslations
 
         if (!permitted)
         {
-            Utils.SendMessage(NotPermittedText, source.PlayerId, ModConstants.Palette.InvalidUsage.Colorize(NotPermittedTitle), true);
+            ChatHandlers.NotPermitted().Send(source);
             return;
         }
 
@@ -97,7 +108,17 @@ public class BasicCommands: CommandTranslations
     [Command(CommandFlag.LobbyOnly, "winner", "w")]
     public static void ListWinners(PlayerControl source)
     {
-        Utils.SendMessage($"{Winners}: {Game.MatchData.GameHistory.LastWinners.Select(w => w.Name + $"({w.Role.RoleName})").Fuse()}", source.PlayerId);
+        if (Game.MatchData.GameHistory.LastWinners == null!) new ChatHandler()
+            .Title(t => t.Text(CommandError).Color(ModConstants.Palette.KillingColor).Build())
+            .LeftAlign()
+            .Message(LastResultCommand.LRTranslations.NoPreviousGameText)
+            .Send(source);
+        else
+        {
+            string winnerText = Game.MatchData.GameHistory.LastWinners.Select(w => $"• {w.Name} ({w.Role.RoleName})").Fuse("\n");
+            ChatHandler.Of(winnerText, ModConstants.Palette.WinnerColor.Colorize(Winners)).LeftAlign().Send(source);
+        }
+
     }
 
     [Command(CommandFlag.LobbyOnly, "color", "colour")]
@@ -114,13 +135,13 @@ public class BasicCommands: CommandTranslations
 
         if (!permitted)
         {
-            Utils.SendMessage(NotPermittedText, source.PlayerId, ModConstants.Palette.InvalidUsage.Colorize(NotPermittedTitle), true);
+            ChatHandlers.NotPermitted().Send(source);
             return;
         }
 
         if (color > Palette.PlayerColors.Length)
         {
-            Utils.SendMessage($"{ColorNotInRangeMessage.Formatted(color)} (0-{Palette.PlayerColors.Length})", source.PlayerId, ModConstants.Palette.InvalidUsage.Colorize(InvalidUsage), true);
+            ChatHandler.Of($"{ColorNotInRangeMessage.Formatted(color)} (0-{Palette.PlayerColors.Length})", ModConstants.Palette.InvalidUsage.Colorize(InvalidUsage)).LeftAlign().Send(source);
             return;
         }
 
@@ -142,15 +163,28 @@ public class BasicCommands: CommandTranslations
         {
             string playerIds = "★ Player IDs ★\n-=-=-=-=-=-=-=-=-\n";
             playerIds += PlayerControl.AllPlayerControls.ToArray().Select(p => $"{p.PlayerId} - {p.name} ({ModConstants.ColorNames[p.cosmetics.ColorId]})").Fuse("\n");
-            Utils.SendMessage(playerIds, source.PlayerId, leftAlign: true);
+            ChatHandler.Of(playerIds).LeftAlign().Send(source);
             return;
         }
 
         string name = context.Join();
         PlayerControl? player = PlayerControl.AllPlayerControls.ToArray().FirstOrDefault(p => p.name == name);
-        Utils.SendMessage(player == null ? PlayerNotFoundText.Formatted(name) : PlayerIdMessage.Formatted(name, player.PlayerId), source.PlayerId, leftAlign: true);
+        ChatHandler.Of(player == null ? PlayerNotFoundText.Formatted(name) : PlayerIdMessage.Formatted(name, player.PlayerId)).LeftAlign().Send(source);
     }
 
     [Command("view", "v")]
     public static void View(PlayerControl source, int id) => TemplateCommands.Preview(source, id);
+
+    [Command(CommandFlag.HostOnly, "tload")]
+    public static void ReloadTitles(PlayerControl source)
+    {
+        PluginDataManager.TitleManager.Reload();
+        ChatHandler.Of("Successfully reloaded titles.").Send(source);
+    }
+
+    [Command("mods", "modifiers", "subroles", "mod")]
+    public static void Modifiers(PlayerControl source)
+    {
+        ChatHandler.Of(new Template("@ModsDescriptive").Format(source), "Modifiers").LeftAlign().Send(source);
+    }
 }
