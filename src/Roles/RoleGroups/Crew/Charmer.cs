@@ -53,6 +53,7 @@ public class Charmer: Crewmate
     [UIComponent(UI.Cooldown)]
     public Cooldown charmingCooldown;
 
+
     [NewOnSetup] private Dictionary<byte, (Remote<NameComponent>, IFaction)> charmedPlayers = new();
 
     protected override void PostSetup()
