@@ -2,12 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Lotus.GUI.Menus.OptionsMenu.Components;
+using Lotus.GUI.Menus.OptionsMenu.Submenus;
 using TMPro;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Menus.OptionsMenu.Components;
-using TOHTOR.GUI.Menus.OptionsMenu.Submenus;
-using TOHTOR.Logging;
-using TOHTOR.Utilities;
+using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
@@ -18,7 +18,7 @@ using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 // ReSharper disable InconsistentNaming
 
-namespace TOHTOR.GUI.Menus.OptionsMenu;
+namespace Lotus.GUI.Menus.OptionsMenu;
 
 [Localized("GUI")]
 [RegisterInIl2Cpp]
@@ -31,8 +31,8 @@ public class CustomOptionContainer: MonoBehaviour
     [Localized(nameof(AddonsButton))] private static string AddonsButton = "Addons";
     [Localized(nameof(ReturnButton))] private static string ReturnButton = "Return";
     [Localized(nameof(LeaveGameButton))] private static string LeaveGameButton = "Leave Game";
-    
-    
+
+
     public static UnityOptional<TMP_FontAsset> CustomOptionFont = UnityOptional<TMP_FontAsset>.Null();
 
     public SpriteRenderer background;
@@ -60,10 +60,9 @@ public class CustomOptionContainer: MonoBehaviour
 
     public CustomOptionContainer(IntPtr intPtr): base(intPtr)
     {
-        VentLogger.Fatal("Ctor");
         transform.localPosition += new Vector3(1f, 0f);
         background = gameObject.AddComponent<SpriteRenderer>();
-        background.sprite = OptionMenuResources.BackgroundSprite;
+        background.sprite = OptionMenuResources.OptionsBackgroundSprite;
 
 
         generalMenu = gameObject.AddComponent<GeneralMenu>();
@@ -117,7 +116,7 @@ public class CustomOptionContainer: MonoBehaviour
         menuBehaviour.Tabs.ForEach(t => t.gameObject.SetActive(false));
         menuBehaviour.Tabs[0].Content.SetActive(false);
         menuBehaviour.Tabs[0].Content.transform.localPosition += new Vector3(0f, 1000f);
-        
+
 
         menuBehaviour.BackButton.transform.localPosition += new Vector3(-1.2f, 0.17f);
         CreateButtonBehaviour();
@@ -167,7 +166,7 @@ public class CustomOptionContainer: MonoBehaviour
             var buttonTransform = button.transform;
             buttonTransform.localScale -= new Vector3(0.33f, 0f, 0f);
             buttonTransform.localPosition += new Vector3(-4.6f, 2.5f, 0f);
-            
+
             /*GameObject generalText = button.gameObject.CreateChild($"{text}_TextTMP", new Vector3(9.6f, -2.34f));
             tmp = generalText.AddComponent<TextMeshPro>();*/
             tmp.font = GetGeneralFont();
@@ -184,14 +183,14 @@ public class CustomOptionContainer: MonoBehaviour
     {
         return CustomOptionFont.OrElseSet(() =>
         {
-            string path = Font.GetPathsToOSFonts()
+            string? path = Font.GetPathsToOSFonts()
                 .FirstOrOptional(f => f.Contains("ARLRDBD"))
                 .OrElseGet(() =>
                     Font.GetPathsToOSFonts().FirstOrOptional(f => f.Contains("ARIAL"))
-                        .OrElseGet(() => Font.GetPathsToOSFonts()[0])
+                        .OrElseGet(() => Font.GetPathsToOSFonts().Count > 0 ? Font.GetPathsToOSFonts()[0] : null)
                 );
 
-            return TMP_FontAsset.CreateFontAsset(new Font(path));
+            return path == null ? Resources.LoadAll("Fonts & Materials").ToArray().Select(t => t.TryCast<TMP_FontAsset>()).Last(t => t != null) : TMP_FontAsset.CreateFontAsset(new Font(path));
         });
     }
 }

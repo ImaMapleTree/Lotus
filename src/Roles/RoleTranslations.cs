@@ -1,6 +1,6 @@
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 [Localized("Options.Roles")]
 public class RoleTranslations

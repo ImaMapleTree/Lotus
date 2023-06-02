@@ -1,14 +1,22 @@
 using HarmonyLib;
 using InnerNet;
+using VentLib.Logging;
 
-namespace TOHTOR.Managers.Reporting;
+namespace Lotus.Managers.Reporting;
 
 [HarmonyPatch(typeof(InnerNetClient), nameof(InnerNetClient.HandleDisconnect))]
 public class AnticheatReporter
 {
-    private static void Postfix([HarmonyArgument(0)] DisconnectReasons reason)
+    private static void Postfix(DisconnectReasons reason, string stringReason)
     {
-        if (reason is not DisconnectReasons.Hacking) return;
-        ReportManager.GenerateReport(ReportTag.KickByAnticheat);
+        switch (reason)
+        {
+            case DisconnectReasons.Hacking:
+                ReportManager.GenerateReport(ReportTag.KickByAnticheat);
+                break;
+            case DisconnectReasons.Custom:
+                if (stringReason.Contains("Reliable packet")) ReportManager.GenerateReport(ReportTag.KickByPacket);
+                break;
+        }
     }
 }

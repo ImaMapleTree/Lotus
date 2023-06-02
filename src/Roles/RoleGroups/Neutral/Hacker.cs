@@ -1,29 +1,39 @@
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Options;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Victory.Conditions;
+using AmongUs.GameOptions;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Options;
+using Lotus.Roles.Events;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
+using Lotus.Factions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
 using UnityEngine;
-using VentLib.Logging;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using static Lotus.Roles.RoleGroups.Crew.Repairman.RepairmanTranslations.RepairmanOptionTranslations;
+using static Lotus.Roles.RoleGroups.Neutral.Hacker.HackerTranslations.HackerOptionTranslations;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
-public class Hacker: CustomRole
+public class Hacker: Engineer
 {
     private List<SabotageType> sabotages = new();
     private int sabotageTotal;
     private int sabotageCount;
     private bool fixingDoorsGivesPoint;
+    private bool hackerCanVent;
 
-    [UIComponent(UI.Counter)]
+    public override bool HasTasks() => false;
+
+    [UIComponent(UI.Counter, ViewMode.Additive, GameState.Roaming, GameState.InMeeting)]
     private string HackerCounter() => RoleUtils.Counter(sabotageCount, sabotageTotal, RoleColor);
 
     [RoleAction(RoleActionType.SabotagePartialFix)]
@@ -50,40 +60,67 @@ public class Hacker: CustomRole
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .Tab(DefaultTabs.NeutralTab)
-            .SubOption(sub => sub.Name("Hacker Sabotage Amount")
+            .SubOption(sub => AddVentingOptions(sub.KeyName("Hacker Can Vent", GColor(HackerCanVent))
+                .AddOnOffValues()
+                .BindBool(b => hackerCanVent = b)
+                .ShowSubOptionPredicate(b => (bool)b))
+                .Build())
+            .SubOption(sub => sub.KeyName("Hacker Sabotage Amount", GColor(HackerSabotagePointAmount))
                 .BindInt(i => sabotageTotal = i)
                 .AddIntRange(1, 60, 1, 7)
                 .Build())
-            .SubOption(sub => sub.Name("Fast Fixes Lights")
+            .SubOption(sub => sub.KeyName("Fast Fixes Lights", FastFixLights)
                 .AddOnOffValues()
                 .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Lights))
                 .Build())
-            .SubOption(sub => sub.Name("Fast Fixes Reactor")
+            .SubOption(sub => sub.KeyName("Fast Fixes Reactor", FastFixReactor)
                 .AddOnOffValues()
                 .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Reactor))
                 .Build())
-            .SubOption(sub => sub.Name("Fast Fixes Oxygen")
+            .SubOption(sub => sub.KeyName("Fast Fixes Oxygen", FastFixOxygen)
                 .AddOnOffValues()
                 .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Oxygen))
                 .Build())
-            .SubOption(sub => sub.Name("Fast Fixes Comms")
+            .SubOption(sub => sub.KeyName("Fast Fixes Comms", FastFixComms)
                 .AddOnOffValues()
                 .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Communications))
                 .Build())
-            .SubOption(sub => sub.Name("Fast Fixes Doors")
+            .SubOption(sub => sub.KeyName("Fast Fixes Doors", FastFixDoors)
                 .AddOnOffValues()
                 .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Door))
                 .Build())
-            .SubOption(sub => sub.Name("Fast Fixes Helicopter")
+            .SubOption(sub => sub.KeyName("Fast Fixes Helicopter", FastFixHelicopter)
                 .AddOnOffValues()
                 .BindBool(RoleUtils.BindOnOffListSetting(sabotages, SabotageType.Helicopter))
                 .Build())
-            .SubOption(sub => sub.Name("Fixing Doors Gives Point")
+            .SubOption(sub => sub.KeyName("Fixing Doors Gives Point", FixingDoorsGivesPoints)
                 .AddOnOffValues(false)
                 .BindBool(b => fixingDoorsGivesPoint = b)
                 .Build());
 
+    private string GColor(string input) => TranslationUtil.Colorize(input, RoleColor);
+
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor(new Color(0.21f, 0.5f, 0.07f));
+        roleModifier.RoleColor(new Color(0.21f, 0.5f, 0.07f))
+            .VanillaRole(hackerCanVent ? RoleTypes.Engineer : RoleTypes.Crewmate)
+            .Faction(FactionInstances.Solo)
+            .SpecialType(SpecialType.Neutral);
+
+    [Localized(nameof(Hacker))]
+    internal static class HackerTranslations
+    {
+        [Localized(ModConstants.Options)]
+        internal static class HackerOptionTranslations
+        {
+            [Localized(nameof(HackerSabotagePointAmount))]
+            public static string HackerSabotagePointAmount = "Hacker::0 Sabotage Amount";
+
+            [Localized(nameof(HackerCanVent))]
+            public static string HackerCanVent = "Hacker::0 Can Vent";
+
+            [Localized(nameof(FixingDoorsGivesPoints))]
+            public static string FixingDoorsGivesPoints = "Fixing Doors Gives Points";
+        }
+    }
 
 }

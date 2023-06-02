@@ -1,6 +1,6 @@
 using System;
 
-namespace TOHTOR.Roles;
+namespace Lotus.Roles;
 
 [Flags]
 public enum RoleFlag
@@ -12,6 +12,7 @@ public enum RoleFlag
     RemoveRolePercent = 16,
     RemoveRoleMaximum = 32,
     CannotWinAlone = 64,
+    IsSubrole = 128,
 
     VariationRole = Hidden | Unassignable | IncrementChanceByFives | RemoveRoleMaximum | DontRegisterOptions,
     TransformationRole = Hidden | Unassignable | RemoveRolePercent | RemoveRoleMaximum | DontRegisterOptions,

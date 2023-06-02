@@ -1,13 +1,13 @@
 using System;
 using System.Collections.Generic;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.GUI;
+namespace Lotus.GUI;
 
 [RegisterInIl2Cpp]
 internal class PersistentAssetLoader: MonoBehaviour

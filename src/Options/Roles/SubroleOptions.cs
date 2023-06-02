@@ -1,12 +1,12 @@
-using TOHTOR.Extensions;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Options.Roles;
+namespace Lotus.Options.Roles;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class SubroleOptions
 {
     public static Color ModifierColor = new(0.43f, 0.89f, 0.61f);

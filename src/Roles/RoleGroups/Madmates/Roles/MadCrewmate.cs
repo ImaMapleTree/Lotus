@@ -1,15 +1,15 @@
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Factions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Madmates.Roles;
+namespace Lotus.Roles.RoleGroups.Madmates.Roles;
 
 public abstract class MadCrewmate : Engineer
 {
@@ -28,12 +28,12 @@ public abstract class MadCrewmate : Engineer
                 .BindBool(b => canVent = b)
                 .SubOption(sub2 => sub2.Name("Vent Cooldown")
                     .BindFloat(f => this.VentCooldown = f)
-                    .AddFloatRange(0, 60, 2.5f, 8, "s")
+                    .AddFloatRange(0, 60, 2.5f, 8, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .SubOption(sub2 => sub2.Name("Vent Duration")
                     .BindFloat(f => this.VentDuration = f)
                     .Value(1f)
-                    .AddFloatRange(2, 120, 2.5f, 4, "s")
+                    .AddFloatRange(2, 120, 2.5f, 4, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .Build()));
 

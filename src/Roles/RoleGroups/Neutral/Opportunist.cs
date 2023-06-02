@@ -1,13 +1,14 @@
-using TOHTOR.API.Odyssey;
-using TOHTOR.Factions;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Victory;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
+using Lotus.Factions;
+using Lotus.Options;
+using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Victory;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Opportunist : Crewmate
 {
@@ -15,8 +16,11 @@ public class Opportunist : Crewmate
     
     protected override void PostSetup() => Game.GetWinDelegate().AddSubscriber(WinSubscriber);
 
-    private void WinSubscriber(WinDelegate winDelegate) => winDelegate.GetWinners().Add(MyPlayer);
-    
+    private void WinSubscriber(WinDelegate winDelegate)
+    {
+        if (MyPlayer != null && MyPlayer.IsAlive()) winDelegate.GetWinners().Add(MyPlayer);
+    }
+
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream).Tab(DefaultTabs.NeutralTab);
 

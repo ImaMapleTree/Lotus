@@ -1,11 +1,11 @@
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.API.Vanilla.Sabotages;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.API.Vanilla.Sabotages;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public partial class Alchemist
 {
@@ -29,7 +29,7 @@ public partial class Alchemist
     private void IncreasedVoting(Optional<PlayerControl> votedFor, MeetingDelegate meetingDelegate)
     {
         if (!votedFor.Exists()) return;
-        for (int i = 0; i < ExtraVotes; i++) meetingDelegate.AddVote(MyPlayer, votedFor);
+        for (int i = 0; i < ExtraVotes; i++) meetingDelegate.CastVote(MyPlayer, votedFor);
     }
 
     [RoleAction(RoleActionType.SabotagePartialFix)]

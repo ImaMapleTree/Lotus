@@ -1,14 +1,16 @@
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
+// TOOD: Miner
 public class Miner : Impostor
 {
     [UIComponent(UI.Cooldown)]
@@ -40,6 +42,6 @@ public class Miner : Impostor
         base.RegisterOptions(optionStream).SubOption(sub =>
             sub.Name("Miner Ability Cooldown")
                 .BindFloat(minerAbilityCooldown.SetDuration)
-                .AddFloatRange(5, 50, 2.5f, 5, "s")
+                .AddFloatRange(5, 50, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 }

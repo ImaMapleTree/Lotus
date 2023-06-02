@@ -3,7 +3,7 @@ using System.Text.RegularExpressions;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.GUI.Name;
+namespace Lotus.GUI.Name;
 
 public class TextUtils
 {

@@ -1,6 +1,7 @@
+using Lotus.Roles;
 using UnityEngine;
 
-namespace TOHTOR.Factions.Interfaces;
+namespace Lotus.Factions.Interfaces;
 
 public interface IFaction
 {
@@ -8,7 +9,9 @@ public interface IFaction
 
     public Relation Relationship(IFaction other);
 
-    public bool AlliesSeeRole();
+    public Relation Relationship(CustomRole otherRole);
+
+    public bool CanSeeRole(PlayerControl player);
 
     public Color FactionColor();
 }

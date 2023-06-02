@@ -1,12 +1,12 @@
 using AmongUs.GameOptions;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.Factions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Madmates.Roles;
+namespace Lotus.Roles.RoleGroups.Madmates.Roles;
 
 public class Madmate : Impostor
 {
@@ -21,6 +21,6 @@ public class Madmate : Impostor
         base.Modify(roleModifier)
             .VanillaRole(canSabotage ? RoleTypes.Impostor : RoleTypes.Engineer)
             .SpecialType(SpecialType.Madmate)
-            .RoleColor(new Color(0.73f, 0.18f, 0.02f))
+            .RoleColor(ModConstants.Palette.MadmateColor)
             .Faction(FactionInstances.Madmates);
 }

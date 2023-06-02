@@ -1,17 +1,17 @@
 using System.Linq;
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Options;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Options;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -19,7 +19,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using Convert = System.Convert;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 // TODO: Redo Sniper
 public class Sniper: Shapeshifter
@@ -69,7 +69,7 @@ public class Sniper: Shapeshifter
         loadBulletCooldown.Start();
         GameOptionOverride[] killCooldown = { new(Override.KillCooldown, loadBulletCooldown.Duration * 2) };
         DesyncOptions.SendModifiedOptions(killCooldown, MyPlayer);
-        MyPlayer.RpcGuardAndKill();
+        MyPlayer.RpcMark();
     }
 
     [RoleAction(RoleActionType.FixedUpdate)]
@@ -108,7 +108,7 @@ public class Sniper: Shapeshifter
             float distance = Vector2.Distance(MyPlayer.transform.position, target.transform.position);
             InteractionResult result = MyPlayer.InteractWith(target, new RangedInteraction(new FatalIntent(true), distance, this));
             if (result == InteractionResult.Halt) continue;
-            MyPlayer.RpcGuardAndKill();
+            MyPlayer.RpcMark();
             killed = true;
         }
 
@@ -150,7 +150,7 @@ public class Sniper: Shapeshifter
                 .SubOption(sub2 => sub2
                     .Name("Load Bullet Cooldown")
                     .Bind(v => loadBulletCooldown.Duration = Convert.ToSingle(v))
-                    .AddFloatRange(5, 120, 2.5f, 5, "s")
+                    .AddFloatRange(5, 120, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
                     .Build())
                 .SubOption(sub2 => sub2
                     .Name("Max Loaded Bullets")

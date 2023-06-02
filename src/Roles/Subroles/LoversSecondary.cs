@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 public class LoversSecondary
 {

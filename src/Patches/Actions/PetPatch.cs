@@ -2,15 +2,16 @@ using System;
 using System.Collections.Generic;
 using HarmonyLib;
 using Hazel;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.Patches.Actions;
+namespace Lotus.Patches.Actions;
 
 public class PetPatch
 {
@@ -48,6 +49,7 @@ public class PetPatch
 
         VentLogger.Trace($"{player.name} => Pet", "PetPatch");
         ActionHandle handle = ActionHandle.NoInit();
+        Game.TriggerForAll(RoleActionType.AnyPet, ref handle, player);
         player.Trigger(RoleActionType.OnPet, ref handle, __instance);
 
         handle = ActionHandle.NoInit();

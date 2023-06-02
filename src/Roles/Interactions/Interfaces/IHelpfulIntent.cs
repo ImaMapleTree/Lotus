@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.Interactions.Interfaces;
+namespace Lotus.Roles.Interactions.Interfaces;
 
 public interface IHelpfulIntent : Intent
 {

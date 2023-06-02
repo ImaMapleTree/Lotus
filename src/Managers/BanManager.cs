@@ -4,7 +4,7 @@ using System.Text.RegularExpressions;
 using VentLib.Localization;
 using VentLib.Logging;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 public static class BanManager
 {

@@ -1,9 +1,9 @@
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 public class OptionValue
 {

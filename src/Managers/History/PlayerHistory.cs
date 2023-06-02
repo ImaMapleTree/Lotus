@@ -1,13 +1,13 @@
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Player;
-using TOHTOR.Roles;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.API.Player;
+using Lotus.Managers.History.Events;
+using Lotus.Roles;
+using Lotus.Extensions;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers.History;
+namespace Lotus.Managers.History;
 
 public class PlayerHistory
 {
@@ -16,10 +16,11 @@ public class PlayerHistory
     public string Name;
     public CustomRole Role;
     public List<CustomRole> Subroles;
-    public PlayerStatus Status;
     public uint Level;
     public GameData.PlayerOutfit Outfit;
     public ulong GameID;
+    public IDeathEvent? CauseOfDeath;
+    public PlayerStatus Status;
 
     public PlayerHistory(FrozenPlayer frozenPlayer)
     {
@@ -31,6 +32,7 @@ public class PlayerHistory
         Level = frozenPlayer.Level;
         Outfit = frozenPlayer.Outfit;
         GameID = frozenPlayer.GameID;
+        CauseOfDeath = frozenPlayer.CauseOfDeath;
         if (frozenPlayer.NullablePlayer != null && frozenPlayer.NullablePlayer.IsAlive()) Status = PlayerStatus.Alive;
         else if (frozenPlayer.NullablePlayer == null || frozenPlayer.NullablePlayer.Data.Disconnected) Status = PlayerStatus.Disconnected;
         else Status = Game.MatchData.GameHistory.Events

@@ -1,7 +1,7 @@
 #nullable enable
 using System;
 
-namespace TOHTOR.Addons;
+namespace Lotus.Addons;
 
 public class AddonException : Exception
 {

@@ -1,7 +1,7 @@
 using System;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.API.Vanilla.Sabotages;
+namespace Lotus.API.Vanilla.Sabotages;
 
 public interface ISabotage
 {
@@ -21,6 +21,7 @@ public interface ISabotage
             Sabotages.SabotageType.Communications => new CommsSabotage(caller),
             Sabotages.SabotageType.Oxygen => new OxygenSabotage(caller),
             Sabotages.SabotageType.Reactor => new ReactorSabotage(caller),
+            Sabotages.SabotageType.Helicopter => new HelicopterSabotage(caller),
             _ => throw new ArgumentOutOfRangeException(nameof(type), type, null)
         };
     }

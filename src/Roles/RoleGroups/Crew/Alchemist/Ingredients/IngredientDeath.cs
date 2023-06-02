@@ -1,11 +1,11 @@
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Factions;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.API;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
 
 public class IngredientDeath: Ingredient, IWorldIngredient
 {

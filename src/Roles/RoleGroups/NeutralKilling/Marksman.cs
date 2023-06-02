@@ -1,17 +1,17 @@
-using TOHTOR.API;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Logging;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Options;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 public class Marksman : NeutralKillingBase
 {

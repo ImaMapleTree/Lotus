@@ -1,25 +1,26 @@
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.API.Odyssey;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Options;
+using Lotus.Roles.Interfaces;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public partial class SerialKiller : Impostor, IModdable
 {
     private bool paused = true;
     public Cooldown DeathTimer = null!;
-    private float killCooldown;
     private bool beginsAfterFirstKill;
 
     private bool hasKilled;
@@ -50,9 +51,9 @@ public partial class SerialKiller : Impostor, IModdable
             paused = true;
             return;
         }
-        
+
         VentLogger.Trace($"Serial Killer ({MyPlayer.name}) Commiting Suicide", "SerialKiller::CheckForSuicide");
-        
+
         MyPlayer.RpcMurderPlayer(MyPlayer);
         Game.MatchData.GameHistory.AddEvent(new SuicideEvent(MyPlayer));
     }
@@ -61,7 +62,11 @@ public partial class SerialKiller : Impostor, IModdable
     private void SetupSuicideTimer()
     {
         paused = beginsAfterFirstKill && !hasKilled;
-        if (!paused) DeathTimer.Start();
+        if (!paused)
+        {
+            DevLogger.Log("Restarting Timer");
+            DeathTimer.Start();
+        }
     }
 
     [RoleAction(RoleActionType.RoundEnd)]
@@ -72,7 +77,7 @@ public partial class SerialKiller : Impostor, IModdable
             .SubOption(sub => sub
                 .KeyName("Time Until Suicide", SerialKillerTranslations.SerialKillerOptionTranslations.TimeUntilSuicide)
                 .Bind(v => DeathTimer.Duration = (float)v)
-                .AddFloatRange(5, 120, 2.5f, 30, "s")
+                .AddFloatRange(5, 120, 2.5f, 30, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .KeyName("Timer Begins After First Kill", SerialKillerTranslations.SerialKillerOptionTranslations.TimerAfterFirstKill)
@@ -81,18 +86,18 @@ public partial class SerialKiller : Impostor, IModdable
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier).OptionOverride(Override.KillCooldown, () => killCooldown);
+        base.Modify(roleModifier).OptionOverride(Override.KillCooldown, () => KillCooldown);
 
 
     [Localized(nameof(SerialKiller))]
     private static class SerialKillerTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         public static class SerialKillerOptionTranslations
         {
             [Localized(nameof(TimeUntilSuicide))]
             public static string TimeUntilSuicide = "Time Until Suicide";
-            
+
             [Localized(nameof(TimerAfterFirstKill))]
             public static string TimerAfterFirstKill = "Timer Begins After First Kill";
         }

@@ -1,29 +1,30 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using HarmonyLib;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Impostors;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Roles.RoleGroups.Crew.Snitch.SnitchTranslations.SnitchOptionTranslations;
-using static TOHTOR.Utilities.TranslationUtil;
+using VentLib.Utilities.Optionals;
+using static Lotus.Roles.RoleGroups.Crew.Snitch.SnitchTranslations.SnitchOptionTranslations;
+using static Lotus.Utilities.TranslationUtil;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Snitch : Crewmate
 {
+    
     public bool SnitchCanTrackNk;
 
     public bool EvilHaveArrow;
@@ -37,14 +38,16 @@ public class Snitch : Crewmate
     [RoleAction(RoleActionType.MyDeath)]
     private void ClearComponents() => indicatorComponents.ForEach(c => c.Delete());
 
-    protected override void OnTaskComplete()
+    
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         int remainingTasks = TotalTasks - TasksComplete;
         if (remainingTasks == SnitchWarningTasks)
         {
-            MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("★", RoleColor), GameStates.IgnStates));
+            PlayerControl[] trackablePlayers = Game.GetAllPlayers().Where(IsTrackable).ToArray();
+            MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), GameStates.IgnStates, viewers: trackablePlayers.AddItem(MyPlayer).ToArray()));
             if (EvilHaveArrow)
-                Game.GetAlivePlayers().Where(IsTrackable).ForEach(p =>
+                trackablePlayers.ForEach(p =>
                 {
                     LiveString liveString = new(() => RoleUtils.CalculateArrow(p, MyPlayer, RoleColor));
                     var remote = p.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: p));
@@ -53,7 +56,7 @@ public class Snitch : Crewmate
         }
 
         if (remainingTasks != 0) return;
-        Game.GetAlivePlayers().Where(IsTrackable).ForEach(p =>
+        Game.GetAllPlayers().Where(IsTrackable).ForEach(p =>
         {
             p.NameModel().GetComponentHolder<RoleHolder>().Components().ForEach(rc => rc.AddViewer(MyPlayer));
 
@@ -104,7 +107,7 @@ public class Snitch : Crewmate
     [Localized(nameof(Snitch))]
     internal static class SnitchTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         internal static class SnitchOptionTranslations
         {
             [Localized(nameof(RemainingTaskWarning))]

@@ -1,6 +1,6 @@
 using System.Reflection;
 
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class AssemblyExtensions
 {

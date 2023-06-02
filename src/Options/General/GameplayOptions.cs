@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
-using TOHTOR.Extensions;
+using Lotus.API;
+using Lotus.Extensions;
+using Lotus.Roles.Overrides;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Options.General;
+namespace Lotus.Options.General;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class GameplayOptions
 {
     private static Color _optionColor = new(0.81f, 1f, 0.75f);
@@ -15,17 +17,25 @@ public class GameplayOptions
 
     public bool OptimizeRoleAssignment;
 
-    public bool FixFirstKillCooldown;
+    public FirstKillCooldown FirstKillCooldownMode;
+    private float setCooldown;
+
     public bool DisableTasks;
     public DisabledTask DisabledTaskFlag;
     public bool DisableTaskWin;
-    public bool GhostsSeeRoles;
     public bool GhostsSeeInfo;
-    public bool GhostsIgnoreTasks;
-    public bool ForceNoVenting;
     public int SyncMeetingCount;
 
-    public bool SyncMeetings => SyncMeetingCount != -1;
+    public float GetFirstKillCooldown(PlayerControl player)
+    {
+        return FirstKillCooldownMode switch
+        {
+            FirstKillCooldown.SetCooldown => setCooldown,
+            FirstKillCooldown.GlobalCooldown => AUSettings.KillCooldown(),
+            FirstKillCooldown.RoleCooldown => player.GetCustomRole().GetOverride(Override.KillCooldown)?.GetValue() as float? ?? AUSettings.KillCooldown(),
+            _ => throw new ArgumentOutOfRangeException()
+        };
+    }
 
     public List<GameOption> AllOptions = new();
 
@@ -44,10 +54,17 @@ public class GameplayOptions
             .IsHeader(true)
             .BuildAndRegister());
 
-        AllOptions.Add(Builder("Fix First Kill Cooldown")
-            .Name(GameplayOptionTranslations.FixFirstKillCooldownText)
-            .AddOnOffValues()
-            .BindBool(b => FixFirstKillCooldown = b)
+        AllOptions.Add(Builder("First Kill Cooldown")
+            .Name(GameplayOptionTranslations.FirstKillCooldown)
+            .Value(v => v.Text(GameplayOptionTranslations.GlobalCooldown).Color(ModConstants.Palette.GlobalColor).Value(0).Build())
+            .Value(v => v.Text(GameplayOptionTranslations.SetCooldown).Color(Color.green).Value(1).Build())
+            .Value(v => v.Text(GameplayOptionTranslations.RoleCooldown).Color(ModConstants.Palette.InfinityColor).Value(2).Build())
+            .BindInt(b => FirstKillCooldownMode = (FirstKillCooldown)b)
+            .ShowSubOptionPredicate(i => (int)i == 1)
+            .SubOption(sub => sub.Key("Set Cooldown Value").Name(GameplayOptionTranslations.SetCooldownValue)
+                .AddFloatRange(0, 120, 2.5f, 4, GeneralOptionTranslations.SecondsSuffix)
+                .BindFloat(f => setCooldown = f)
+                .Build())
             .BuildAndRegister());
 
         AllOptions.Add(Builder("Disable Tasks")
@@ -90,6 +107,12 @@ public class GameplayOptions
                 .BindBool(FlagSetter(DisabledTask.ResetBreaker))
                 .AddOnOffValues()
                 .Build())
+            .SubOption(sub => sub
+                .Key("Disable Fix Wiring")
+                .Name(GameplayOptionTranslations.DisableFixWiring)
+                .BindBool(FlagSetter(DisabledTask.FixWiring))
+                .AddOnOffValues()
+                .Build())
             .BindBool(b => DisableTasks = b)
             .BuildAndRegister());
 
@@ -99,35 +122,10 @@ public class GameplayOptions
             .BindBool(b => DisableTaskWin = b)
             .BuildAndRegister());
 
-        AllOptions.Add(Builder("Ghosts See Roles")
-            .Name(GameplayOptionTranslations.GhostSeeRoles)
-            .AddOnOffValues()
-            .BindBool(b => GhostsSeeRoles = b)
-            .BuildAndRegister());
-
-        AllOptions.Add(Builder("Ghosts See Indicators")
+        AllOptions.Add(Builder("Ghosts See Info")
             .Name(GameplayOptionTranslations.GhostSeeInfo)
             .AddOnOffValues()
             .BindBool(b => GhostsSeeInfo = b)
-            .BuildAndRegister());
-
-        AllOptions.Add(Builder("Ghosts Ignore Tasks")
-            .Name(GameplayOptionTranslations.GhostIgnoreTask)
-            .AddOnOffValues(false)
-            .BindBool(b => GhostsIgnoreTasks = b)
-            .BuildAndRegister());
-
-        AllOptions.Add(Builder("Sync Meetings")
-            .Name(GameplayOptionTranslations.SyncMeetingText)
-            .Value(v => v.Text(GameplayOptionTranslations.SyncMeetingNever).Value(-1).Color(Color.red).Build())
-            .AddIntRange(1, 15, 1)
-            .BindInt(i => SyncMeetingCount = i)
-            .BuildAndRegister());
-
-        AllOptions.Add(Builder("Force No Venting")
-            .Name(GameplayOptionTranslations.ForceNoVentingText)
-            .AddOnOffValues()
-            .BindBool(b => ForceNoVenting = b)
             .BuildAndRegister());
 
         additionalOptions.ForEach(o =>
@@ -168,8 +166,20 @@ public class GameplayOptions
         [Localized(nameof(OptimizeRoleAmounts))]
         public static string OptimizeRoleAmounts = "Optimize Role Counts for Playability";
 
-        [Localized("FixFirstKillCooldown")]
-        public static string FixFirstKillCooldownText = "Fix First Kill Cooldown";
+        [Localized(nameof(FirstKillCooldown))]
+        public static string FirstKillCooldown = "First Kill Cooldown";
+
+        [Localized(nameof(SetCooldown))]
+        public static string SetCooldown = "Set CD";
+
+        [Localized(nameof(SetCooldownValue))]
+        public static string SetCooldownValue = "Set Cooldown Value";
+
+        [Localized(nameof(GlobalCooldown))]
+        public static string GlobalCooldown = "Global CD";
+
+        [Localized(nameof(RoleCooldown))]
+        public static string RoleCooldown = "Role CD";
 
         [Localized("DisableTasks")]
         public static string DisableTaskText = "Disable Tasks";
@@ -192,26 +202,14 @@ public class GameplayOptions
         [Localized(nameof(DisableResetBreaker))]
         public static string DisableResetBreaker = "Disable Reset Breaker";
 
+        [Localized(nameof(DisableFixWiring))]
+        public static string DisableFixWiring = "Disable Fix Wiring";
+
         [Localized("DisableTaskWin")]
         public static string DisableTaskWinText = "Disable Task Win";
 
-        [Localized(nameof(GhostSeeRoles))]
-        public static string GhostSeeRoles = "Ghosts See Roles";
-
         [Localized(nameof(GhostSeeInfo))]
-        public static string GhostSeeInfo = "Ghosts See Indicators";
-
-        [Localized(nameof(GhostIgnoreTask))]
-        public static string GhostIgnoreTask = "Ghosts Ignore Tasks";
-
-        [Localized("SyncMeetingText")]
-        public static string SyncMeetingText = "Sync Meetings";
-
-        [Localized("SyncMeetingNever")]
-        public static string SyncMeetingNever = "Never";
-
-        [Localized("ForceNoVenting")]
-        public static string ForceNoVentingText = "Force No Venting";
+        public static string GhostSeeInfo = "Ghosts See Info";
     }
 }
 
@@ -223,5 +221,13 @@ public enum DisabledTask
     UnlockSafe = 4,
     UploadData = 8,
     StartReactor = 16,
-    ResetBreaker = 32
+    ResetBreaker = 32,
+    FixWiring = 64
+}
+
+public enum FirstKillCooldown
+{
+    GlobalCooldown,
+    SetCooldown,
+    RoleCooldown
 }

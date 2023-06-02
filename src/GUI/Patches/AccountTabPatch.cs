@@ -2,7 +2,7 @@ using HarmonyLib;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.GUI.Patches;
+namespace Lotus.GUI.Patches;
 
 /// <summary>
 /// This patch re-adjusts the account tab when opened to account for the changes made to the main menu UI

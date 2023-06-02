@@ -1,9 +1,9 @@
-using TOHTOR.Extensions;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
-namespace TOHTOR.API;
+namespace Lotus.API;
 
 public class ProtectedRpc
 {
@@ -13,7 +13,7 @@ public class ProtectedRpc
         if (AmongUsClient.Instance.IsGameOver || !AmongUsClient.Instance.AmHost) return;
         if (target == null) return;
         GameData.PlayerInfo data = target.Data;
-        if (data == null || data.IsDead) return;
+        if (data == null) return;
 
         if (MeetingHud.Instance != null)
         {

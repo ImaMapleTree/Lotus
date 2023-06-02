@@ -1,14 +1,14 @@
 using System.Collections.Generic;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
+using Lotus.Extensions;
+using Lotus.Roles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
 
-namespace TOHTOR.Options.General;
+namespace Lotus.Options.General;
 
-[Localized("Options")]
+[Localized(ModConstants.Options)]
 public class MiscellaneousOptions
 {
     private static Color _optionColor = new(1f, 0.75f, 0.81f);

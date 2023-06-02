@@ -2,7 +2,7 @@ using System.IO;
 using System.Text.Json;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Utilities;
+namespace Lotus.Utilities;
 
 public class JsonUtils
 {

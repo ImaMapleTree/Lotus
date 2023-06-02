@@ -1,22 +1,16 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Gamemodes;
-using TOHTOR.GUI.Menus;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Gamemodes;
+using Lotus.Managers;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Patches
+namespace Lotus.Patches
 {
     [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoStartGame))]
     class ChangeRoleSettings
@@ -30,11 +24,7 @@ namespace TOHTOR.Patches
 
         public static void Postfix(AmongUsClient __instance)
         {
-            HistoryMenuIntermediate.HistoryMenuButton.IfPresent(button => button.SetActive(false));
-
-            TOHPlugin.ResetCamPlayerList = new List<byte>();
-            /*StaticOptions.UsedButtonCount = 0;*/
-            TOHPlugin.VisibleTasksCount = true;
+            ProjectLotus.ResetCamPlayerList = new List<byte>();
             FallFromLadder.Reset();
 
             Game.State = GameState.InIntro;
@@ -58,15 +48,15 @@ namespace TOHTOR.Patches
 
             Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
 
-            TextTable textTable = new TextTable("Player", "Role", "SubRoles");
+            TextTable textTable = new("ID", "Color", "Player", "Role", "SubRoles");
             Game.GetAllPlayers().Where(p => p != null).ForEach(p =>
             {
-                textTable.AddEntry(p.name, p.GetCustomRole().RoleName, p.GetSubroles().Fuse());
+                textTable.AddEntry((object)p.PlayerId, ModConstants.ColorNames[p.cosmetics.ColorId], p.name, p.GetCustomRole().RoleName, p.GetSubroles().Fuse());
             });
             VentLogger.Debug($"Role Assignments\n{textTable}", "RoleManager::SelectRoles~Postfix");
             
 
-            TOHPlugin.ResetCamPlayerList.AddRange(Game.GetAllPlayers().Where(p => p.GetCustomRole() is Arsonist).Select(p => p.PlayerId));
+            ProjectLotus.ResetCamPlayerList.AddRange(Game.GetAllPlayers().Where(p => p.GetCustomRole() is Arsonist).Select(p => p.PlayerId));
             Game.RenderAllForAll(state: GameState.InIntro);
             Game.CurrentGamemode.Trigger(GameAction.GameStart);
         }

@@ -1,10 +1,10 @@
 using System;
-using TOHTOR.API.Reactive;
+using Lotus.API.Reactive;
 using VentLib.Utilities.Optionals;
 
 // ReSharper disable InconsistentNaming
 
-namespace TOHTOR.API.Vanilla.Meetings;
+namespace Lotus.API.Vanilla.Meetings;
 
 public class MeetingApi
 {

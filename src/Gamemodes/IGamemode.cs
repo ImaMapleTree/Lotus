@@ -1,10 +1,10 @@
 using System.Collections.Generic;
-using TOHTOR.Victory;
+using Lotus.Victory;
 using VentLib.Options.Game;
 using VentLib.Options.Game.Tabs;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Gamemodes;
+namespace Lotus.Gamemodes;
 
 public interface IGamemode
 {

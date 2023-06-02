@@ -1,10 +1,10 @@
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Neutrals;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Impostors;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Neutrals;
 using UnityEngine;
 
-namespace TOHTOR.Factions.Undead;
+namespace Lotus.Factions.Undead;
 
 public abstract partial class TheUndead : Faction<TheUndead>
 {

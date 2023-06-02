@@ -2,13 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.GUI.Name.Interfaces;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name.Impl;
+using Lotus.GUI.Name.Interfaces;
+using Lotus.Options;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.GUI.Name.Components;
+namespace Lotus.GUI.Name.Components;
 
 public class SimpleComponent : INameModelComponent
 {
@@ -17,7 +17,7 @@ public class SimpleComponent : INameModelComponent
 
     private LiveString mainText;
     private Func<List<PlayerControl>> viewers;
-    private readonly List<PlayerControl> additionalViewers = new();
+    private readonly List<PlayerControl> additionalViewers = GeneralOptions.GameplayOptions.GhostsSeeInfo ? Game.GetDeadPlayers().ToList() : new List<PlayerControl>();
     private ViewMode viewMode;
     private GameState[] gameStates;
 
@@ -25,7 +25,7 @@ public class SimpleComponent : INameModelComponent
 
     private SimpleComponent() {}
 
-    protected SimpleComponent(LiveString mainText, GameState[] gameStates, ViewMode viewMode = Impl.ViewMode.Additive,
+    protected SimpleComponent(LiveString mainText, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive,
         Func<List<PlayerControl>>? viewers = null)
     {
         this.viewers = viewers;
@@ -36,7 +36,7 @@ public class SimpleComponent : INameModelComponent
         this.viewMode = viewMode;
     }
 
-    protected SimpleComponent(LiveString mainText, GameState[] gameStates, ViewMode viewMode = Impl.ViewMode.Additive,
+    protected SimpleComponent(LiveString mainText, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive,
         params PlayerControl[] viewers)
     {
         List<PlayerControl> allViewers = new();
@@ -47,12 +47,12 @@ public class SimpleComponent : INameModelComponent
         additionalViewers = (viewers.Length > 0 ? viewers : PlayerControl.AllPlayerControls.ToArray()).ToList();
     }
 
-    protected SimpleComponent(LiveString mainText, GameState gameState, ViewMode viewMode = Impl.ViewMode.Additive,
+    protected SimpleComponent(LiveString mainText, GameState gameState, ViewMode viewMode = Name.ViewMode.Additive,
         params PlayerControl[] viewers) : this(mainText, new[] { gameState }, viewMode, viewers)
     {
     }
 
-    protected SimpleComponent(string mainText, GameState[] gameStates, ViewMode viewMode = Impl.ViewMode.Additive,
+    protected SimpleComponent(string mainText, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive,
         params PlayerControl[] viewers)
         : this(new LiveString(mainText), gameStates, viewMode, viewers)
     {

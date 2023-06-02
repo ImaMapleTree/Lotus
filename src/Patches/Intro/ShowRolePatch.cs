@@ -1,11 +1,11 @@
 using HarmonyLib;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Legacy;
-using TOHTOR.Utilities;
+using Lotus.Roles;
+using Lotus.Utilities;
+using Lotus.Extensions;
+using Lotus.Roles.Legacy;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches.Intro;
+namespace Lotus.Patches.Intro;
 
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.ShowRole))]
 class ShowRolePatch

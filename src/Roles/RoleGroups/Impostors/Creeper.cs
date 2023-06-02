@@ -1,35 +1,104 @@
-using System.Collections.Generic;
-using System.Linq;
-using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Extensions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Options;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using static Lotus.Roles.RoleGroups.Impostors.Creeper.CreeperTranslations.CreeperOptionTranslations;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
-public class Creeper : Vanilla.Impostor // hidden role. 5% chance to replace Bomber. so no options for this role.
+public class Creeper : Shapeshifter
 {
-    private bool exploded;
-    [RoleAction(RoleActionType.OnPet)]
-    private void Explode()
+    private bool canKillNormally;
+    private bool creeperProtectedByShields;
+    private float explosionRadius;
+    private Cooldown gracePeriod;
+
+    [UIComponent(UI.Text)]
+    public string GracePeriodText() => gracePeriod.IsReady() ? "" : Color.red.Colorize(CreeperTranslations.ExplosionGracePeriod).Formatted(gracePeriod + "s");
+
+    [RoleAction(RoleActionType.RoundStart)]
+    private void BeginGracePeriod()
     {
-        if (exploded || MyPlayer.Data.IsDead) return;
-        exploded = true;
-        List<PlayerControl> allPlayersInDistance = RoleUtils.GetPlayersWithinDistance(MyPlayer.GetTruePosition(), 3f).Distinct().ToList();
-        // we can add an explode time if you want. . .
-        allPlayersInDistance.Add(MyPlayer); // they will explode along with everyone else.
-        allPlayersInDistance.Distinct().Do(explodedPlayer => {
-            explodedPlayer.RpcMurderPlayer(explodedPlayer);
-        });
+        gracePeriod.Start();
     }
-    protected override RoleModifier Modify(RoleModifier roleModifier)
+
+    [RoleAction(RoleActionType.Attack)]
+    public override bool TryKill(PlayerControl target) => canKillNormally && base.TryKill(target);
+
+    [RoleAction(RoleActionType.OnPet)]
+    [RoleAction(RoleActionType.Shapeshift)]
+    private void CreeperExplode()
     {
-        base.Modify(roleModifier);
-        //VentLogger.Warn($"{this.RoleName} Not Implemented Yet", "RoleImplementation");
-        return roleModifier;
+        RoleUtils.GetPlayersWithinDistance(MyPlayer, explosionRadius).ForEach(p =>
+        {
+            FatalIntent intent = new(true, () => new BombedEvent(p, MyPlayer));
+            MyPlayer.InteractWith(p, new DirectInteraction(intent, this));
+        });
+
+        FatalIntent suicideIntent = new(false, () => new BombedEvent(MyPlayer, MyPlayer));
+        MyPlayer.InteractWith(MyPlayer, creeperProtectedByShields
+            ? new DirectInteraction(suicideIntent, this)
+            : new UnblockedInteraction(suicideIntent, this)
+        );
+    }
+
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
+        base.RegisterOptions(optionStream)
+            .SubOption(sub => sub.KeyName("Can Kill Normally", CanKillNormal)
+                .AddOnOffValues()
+                .BindBool(b => canKillNormally = b)
+                .Build())
+            .SubOption(sub => sub.KeyName("Creeper Protected By Shielding", CreeperProtection)
+                .AddOnOffValues()
+                .BindBool(b => creeperProtectedByShields = b)
+                .Build())
+            .SubOption(sub => sub.KeyName("Explosion Radius", ExplosionRadius)
+                .Value(v => v.Value(2f).Text(SmallDistance).Build())
+                .Value(v => v.Value(3f).Text(MediumDistance).Build())
+                .Value(v => v.Value(4f).Text(LargeDistance).Build())
+                .BindFloat(f => explosionRadius = f)
+                .Build())
+            .SubOption(sub => sub.KeyName("Creeper Grace Period", CreeperGracePeriod)
+                .AddFloatRange(0, 60, 2.5f, 4, GeneralOptionTranslations.SecondsSuffix)
+                .BindFloat(gracePeriod.SetDuration)
+                .Build());
+
+    [Localized(nameof(Creeper))]
+    internal static class CreeperTranslations
+    {
+        [Localized(nameof(ExplosionGracePeriod))]
+        public static string ExplosionGracePeriod = "Explosion Grace Period: {0}";
+
+        [Localized(ModConstants.Options)]
+        internal static class CreeperOptionTranslations
+        {
+            public static string SmallDistance = "Small";
+
+            public static string MediumDistance = "Medium";
+
+            public static string LargeDistance = "Large";
+
+            [Localized(nameof(CanKillNormal))]
+            public static string CanKillNormal = "Can Kill Normally";
+
+            [Localized(nameof(CreeperGracePeriod))]
+            public static string CreeperGracePeriod = "Grace Period";
+
+            [Localized(nameof(CreeperProtection))]
+            public static string CreeperProtection = "Protected by Shielding";
+
+            [Localized(nameof(ExplosionRadius))]
+            public static string ExplosionRadius = "Explosion Radius";
+
+        }
     }
 }

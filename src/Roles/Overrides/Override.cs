@@ -2,7 +2,7 @@ using System;
 using AmongUs.GameOptions;
 using UnityEngine;
 
-namespace TOHTOR.Roles.Overrides;
+namespace Lotus.Roles.Overrides;
 
 public enum Override
 {
@@ -19,6 +19,8 @@ public enum Override
     ImpostorLightMod,
     KillCooldown,
     KillDistance,
+    VitalsCooldown,
+    VitalsBatteryCharge,
 
     // Role specific overrides
     ShapeshiftDuration,
@@ -52,6 +54,8 @@ public static class OverrideExtensions
             Override.GuardianAngelCooldown => gameOptions.GetFloat(FloatOptionNames.GuardianAngelCooldown),
             Override.EngVentCooldown => gameOptions.GetFloat(FloatOptionNames.EngineerCooldown),
             Override.EngVentDuration => gameOptions.GetFloat(FloatOptionNames.EngineerInVentMaxTime),
+            Override.VitalsCooldown => gameOptions.GetFloat(FloatOptionNames.ScientistCooldown),
+            Override.VitalsBatteryCharge => gameOptions.GetFloat(FloatOptionNames.ScientistBatteryCharge),
             _ => throw new ArgumentOutOfRangeException(nameof(__override), __override, null)
         };
     }
@@ -90,11 +94,13 @@ public static class OverrideExtensions
             Override.KillCooldown => SetFloatOption(FloatOptionNames.KillCooldown, 0.1f),
             Override.KillDistance => SetIntOption(Int32OptionNames.KillDistance, 0, 3),
             Override.ShapeshiftDuration => SetFloatOption(FloatOptionNames.ShapeshifterDuration),
-            Override.ShapeshiftCooldown => SetFloatOption(FloatOptionNames.ShapeshifterCooldown),
+            Override.ShapeshiftCooldown => SetFloatOption(FloatOptionNames.ShapeshifterCooldown, 0.01f),
             Override.GuardianAngelDuration => SetFloatOption(FloatOptionNames.ProtectionDurationSeconds),
             Override.GuardianAngelCooldown => SetFloatOption(FloatOptionNames.GuardianAngelCooldown),
             Override.EngVentCooldown => SetFloatOption(FloatOptionNames.EngineerCooldown),
             Override.EngVentDuration => SetFloatOption(FloatOptionNames.EngineerInVentMaxTime),
+            Override.VitalsCooldown => SetFloatOption(FloatOptionNames.ScientistCooldown),
+            Override.VitalsBatteryCharge => SetFloatOption(FloatOptionNames.ScientistBatteryCharge),
             _ => throw new ArgumentOutOfRangeException(nameof(__override), __override, null)
         };
     }

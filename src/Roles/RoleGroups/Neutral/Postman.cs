@@ -1,29 +1,32 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Options;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
-using TOHTOR.Victory.Conditions;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Options;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.Victory.Conditions;
+using Lotus.API;
+using Lotus.Chat;
+using Lotus.Extensions;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 [Localized("Roles.Postman")]
 public class Postman: Crewmate
@@ -44,7 +47,7 @@ public class Postman: Crewmate
 
     public override bool TasksApplyToTotal() => false;
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         if (completedDelivery) AssignNewTarget();
         else MyPlayer.InteractWith(MyPlayer, new UnblockedInteraction(new FatalIntent(), this));
@@ -90,7 +93,7 @@ public class Postman: Crewmate
     private void AnnounceGameWin()
     {
         if (!completedDelivery || TasksComplete != TotalTasks) return;
-        Async.Schedule(() => Utils.SendMessage(_postmanAnnouncement), 1f); 
+        Async.Schedule(() => ChatHandler.Of(_postmanAnnouncement).Send(), 1f); 
     }
 
     [RoleAction(RoleActionType.RoundStart)]
@@ -132,5 +135,8 @@ public class Postman: Crewmate
                 .BindInt(i => targetDiesMode = i)
                 .Build()));
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.6f, 0.6f, 0.6f)).Faction(FactionInstances.Solo);
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier)
+        .RoleColor(new Color(0.6f, 0.6f, 0.6f))
+        .SpecialType(SpecialType.Neutral)
+        .Faction(FactionInstances.Solo);
 }

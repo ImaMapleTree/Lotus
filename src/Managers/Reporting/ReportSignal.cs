@@ -1,4 +1,4 @@
-namespace TOHTOR.Managers.Reporting;
+namespace Lotus.Managers.Reporting;
 
 public enum ReportSignal
 {

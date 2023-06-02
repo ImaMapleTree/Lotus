@@ -2,7 +2,7 @@ using AmongUs.GameOptions;
 using VentLib.Logging;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public class CrewmateGhost : GuardianAngel
 {

@@ -1,26 +1,26 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Interfaces;
-using VentLib.Logging;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Interfaces;
+using Lotus.Roles;
+using Lotus.Roles.Interfaces;
+using Lotus.Extensions;
 
-namespace TOHTOR.Victory.Conditions;
+namespace Lotus.Victory.Conditions;
 
 public class VanillaCrewmateWin: IFactionWinCondition
 {
     private static readonly List<IFaction> CrewmateFaction = new() { FactionInstances.Crewmates };
     private WinReason winReason = WinReason.TasksComplete;
 
+    public List<IFaction> Factions() => CrewmateFaction;
+
     public bool IsConditionMet(out List<IFaction> factions)
     {
         factions = CrewmateFaction;
 
-        if (Game.State is not GameState.Roaming) return false;
+        if (Game.State is not (GameState.Roaming or GameState.InMeeting)) return false;
 
         winReason = WinReason.TasksComplete;
 
@@ -45,8 +45,8 @@ public class VanillaCrewmateWin: IFactionWinCondition
     {
         PlayerControl player = role.MyPlayer;
         if (!player.IsAlive()) return false;
-        if (role.Faction is Crewmates) return false;
-        return player.GetVanillaRole().IsImpostor() && !role.RoleFlags.HasFlag(RoleFlag.CannotWinAlone);
+        if (role.Faction.Relationship(FactionInstances.Crewmates) is not Relation.None) return false;
+        return (player.GetVanillaRole().IsImpostor() || role.RoleAbilityFlags.HasFlag(RoleAbilityFlag.IsAbleToKill)) && !role.RoleFlags.HasFlag(RoleFlag.CannotWinAlone);
     }
 
     private static bool CheckTaskCompletion()

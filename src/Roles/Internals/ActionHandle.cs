@@ -1,13 +1,14 @@
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Attributes;
 
-namespace TOHTOR.Roles.Internals;
+namespace Lotus.Roles.Internals;
 
 public class ActionHandle
 {
     public static ActionHandle NoInit() => new();
 
     public RoleActionType ActionType;
-    public bool IsCanceled;
+    public bool IsCanceled => Cancellation is not CancelType.None;
+    public CancelType Cancellation;
 
     public ActionHandle(RoleActionType type)
     {
@@ -16,10 +17,20 @@ public class ActionHandle
 
     private ActionHandle() { }
 
-    public void Cancel() => this.IsCanceled = true;
+    public void Cancel(CancelType cancelType = CancelType.Normal)
+    {
+        this.Cancellation = cancelType;
+    }
 
     public override string ToString()
     {
         return $"ActionHandle(type={ActionType}, cancelled={IsCanceled})";
+    }
+
+    public enum CancelType
+    {
+        None,
+        Normal,
+        Complete
     }
 }

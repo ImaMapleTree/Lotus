@@ -1,4 +1,4 @@
-namespace TOHTOR.Managers.Hacking;
+namespace Lotus.Managers.Hacking;
 
 public class MonitoredRpcs
 {

@@ -1,4 +1,4 @@
-namespace TOHTOR.API.Vanilla;
+namespace Lotus.API.Vanilla;
 
 public static class MatchState
 {

@@ -1,4 +1,4 @@
-namespace TOHTOR.GUI.Name;
+namespace Lotus.GUI.Name;
 
 public enum UI
 {

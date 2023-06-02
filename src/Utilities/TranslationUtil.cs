@@ -1,9 +1,11 @@
+using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
+using VentLib.Logging;
 using VentLib.Utilities;
 
-namespace TOHTOR.Utilities;
+namespace Lotus.Utilities;
 
 public class TranslationUtil
 {
@@ -13,14 +15,23 @@ public class TranslationUtil
     public static string Colorize(string input, params Color[] colors)
     {
 
-        string[] tagStrings = taggedStringRegex.Matches(input).Select(m => m.Value).ToArray();
-
-        string[] replacements = tagStrings.Select(v => v.Split("::")).Select(va => colors[int.Parse(va[1])].Colorize(va[0])).ToArray();
-
-        for (int index = 0; index < tagStrings.Length; index++)
+        try
         {
-            string tagString = tagStrings[index];
-            input = input.Replace(tagString, replacements[index]);
+            string[] tagStrings = taggedStringRegex.Matches(input).Select(m => m.Value).ToArray();
+
+            string[] replacements = tagStrings.Select(v => v.Split("::"))
+                .Select(va => colors[int.Parse(va[1])].Colorize(va[0])).ToArray();
+
+            for (int index = 0; index < tagStrings.Length; index++)
+            {
+                string tagString = tagStrings[index];
+                input = input.Replace(tagString, replacements[index]);
+            }
+
+        }
+        catch (Exception exception)
+        {
+            VentLogger.Exception(exception, "Error colorizing message!");
         }
 
         return input;

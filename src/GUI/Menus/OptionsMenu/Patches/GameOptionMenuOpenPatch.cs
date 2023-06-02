@@ -1,7 +1,7 @@
 using HarmonyLib;
 using VentLib.Utilities.Harmony.Attributes;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Patches;
+namespace Lotus.GUI.Menus.OptionsMenu.Patches;
 
 [HarmonyPatch(typeof(OptionsMenuBehaviour), nameof(OptionsMenuBehaviour.Start))]
 public class GameOptionMenuOpenPatch

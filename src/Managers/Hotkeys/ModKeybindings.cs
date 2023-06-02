@@ -1,10 +1,11 @@
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Vanilla;
-using TOHTOR.API.Vanilla.Meetings;
-using TOHTOR.Chat.Commands;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Interactions;
+using System.IO;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Chat.Commands;
+using Lotus.Roles.Interactions;
+using Lotus.Extensions;
+using Lotus.Roles;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
@@ -12,41 +13,43 @@ using VentLib.Options;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
-using static TOHTOR.Managers.Hotkeys.HotkeyManager;
+using static Lotus.Managers.Hotkeys.HotkeyManager;
 
-namespace TOHTOR.Managers.Hotkeys;
+namespace Lotus.Managers.Hotkeys;
 
 [LoadStatic]
 public class ModKeybindings
 {
+    private static bool hudActive = true;
+
     static ModKeybindings()
     {
         // Dump Log
         Bind(KeyCode.F1, KeyCode.LeftControl).Do(DumpLog);
-        
+
         // Profile All
         Bind(KeyCode.F2).Do(ProfileAll);
-        
+
         // Kill Player (Suicide)
         Bind(KeyCode.LeftShift, KeyCode.D, KeyCode.Return)
             .If(p => p.HostOnly().State(Game.IgnStates))
             .Do(Suicide);
-        
+
         // Close Meeting
         Bind(KeyCode.LeftShift, KeyCode.M, KeyCode.Return)
             .If(p => p.HostOnly().State(GameState.InMeeting))
             .Do(() => MeetingHud.Instance.RpcClose());
-        
+
         // Instant begin game
         Bind(KeyCode.LeftShift)
             .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown))
             .Do(() => GameStartManager.Instance.countDownTimer = 0);
-        
+
         // Restart countdown timer
         Bind(KeyCode.C)
             .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown))
             .Do(() => GameStartManager.Instance.ResetStartState());
-        
+
         // Reset Game Options
         Bind(KeyCode.LeftControl, KeyCode.Delete)
             .If(p => p.Predicate(() => Object.FindObjectOfType<GameOptionsMenu>()))
@@ -65,11 +68,13 @@ public class ModKeybindings
         Bind(KeyCode.LeftControl, KeyCode.T)
             .If(p => p.State(GameState.InLobby))
             .Do(ReloadTranslations);
+
+        Bind(KeyCode.F7).Do(() => HudManager.Instance.gameObject.SetActive(hudActive = !hudActive));
     }
 
     private static void DumpLog()
     {
-        VentLogger.SendInGame(BasicCommands.DumpSuccess.Formatted(VentLogger.Dump()));
+        BasicCommands.Dump(PlayerControl.LocalPlayer);
     }
 
     private static void ProfileAll()
@@ -89,11 +94,15 @@ public class ModKeybindings
     private static void ResetGameOptions()
     {
         VentLogger.High("Resetting Game Options", "ResetOptions");
-        OptionManager.GetAllManagers().ForEach(m => m.GetOptions().ForEach(o =>
+        OptionManager.GetAllManagers().ForEach(m =>
         {
-            o.SetValue(o.DefaultIndex);
-            OptionHelpers.GetChildren(o).ForEach(o => o.SetValue(o.DefaultIndex));
-        }));
+            m.GetOptions().ForEach(o =>
+            {
+                o.SetValue(o.DefaultIndex);
+                OptionHelpers.GetChildren(o).ForEach(o2 => o2.SetValue(o.DefaultIndex));
+            });
+            m.DelaySave(0);
+        });
     }
 
     private static void InstantReduceTimer()

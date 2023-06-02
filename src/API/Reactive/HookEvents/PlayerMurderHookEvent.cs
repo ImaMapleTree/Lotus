@@ -1,11 +1,13 @@
-namespace TOHTOR.API.Reactive.HookEvents;
+using Lotus.Managers.History.Events;
 
-public class PlayerMurderHookEvent: IHookEvent
+namespace Lotus.API.Reactive.HookEvents;
+
+public class PlayerMurderHookEvent: PlayerDeathHookEvent
 {
     public PlayerControl Killer;
     public PlayerControl Victim;
 
-    public PlayerMurderHookEvent(PlayerControl killer, PlayerControl victim)
+    public PlayerMurderHookEvent(PlayerControl killer, PlayerControl victim, IDeathEvent causeOfDeath) : base(victim, causeOfDeath)
     {
         Killer = killer;
         Victim = victim;

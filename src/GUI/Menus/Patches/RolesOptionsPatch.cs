@@ -2,7 +2,7 @@ using AmongUs.GameOptions;
 using HarmonyLib;
 using UnityEngine;
 
-namespace TOHTOR.GUI.Menus.Patches;
+namespace Lotus.GUI.Menus.Patches;
 
 [HarmonyPatch(typeof(RolesSettingsMenu), nameof(RolesSettingsMenu.Start))]
 public static class RolesSettingsMenuPatch
@@ -18,8 +18,6 @@ public static class RolesSettingsMenuPatch
                     break;
                 case StringNames.ShapeshifterCooldown:
                     ob.Cast<NumberOption>().ValidRange = new FloatRange(0, 180);
-                    break;
-                default:
                     break;
             }
         }

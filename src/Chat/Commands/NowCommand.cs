@@ -1,26 +1,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Crew;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Factions.Interfaces;
-using TOHTOR.Factions.Neutrals;
-using TOHTOR.Managers;
-using TOHTOR.Options;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Utilities;
+using Lotus.Factions;
+using Lotus.Factions.Crew;
+using Lotus.Factions.Impostors;
+using Lotus.Managers;
+using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Roles.Internals;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
 using VentLib.Options.Game;
-using VentLib.Options.IO;
 using VentLib.Utilities;
-using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Command("n", "now")]
 public class NowCommand: ICommandReceiver
@@ -34,6 +29,7 @@ public class NowCommand: ICommandReceiver
         ListImpostorOptions(source);
         ListNeutralKillers(source);
         ListNeutralPassive(source);
+        ListModifiers(source);
     }
 
     [Command("crewmates", "crewmate", "crew", "cr")]
@@ -63,6 +59,13 @@ public class NowCommand: ICommandReceiver
         ListRoleGroup(source, title, CustomRoleManager.AllRoles.Where(r => r.SpecialType is SpecialType.Neutral));
     }
 
+    [Command("mods", "mod", "subroles", "modifiers", "modifier")]
+    public void ListModifiers(PlayerControl source)
+    {
+        string title = ModConstants.Palette.ModifierColor.Colorize("★ Modifiers ★");
+        ListRoleGroup(source, title, CustomRoleManager.ModifierRoles);
+    } 
+
     public void ListNormalOptions(PlayerControl source)
     {
         string title = "";
@@ -76,21 +79,18 @@ public class NowCommand: ICommandReceiver
                 continue;
             }
 
-            if (title != "")
-            {
-                Utils.SendMessage(content[..^1], source.PlayerId, title, leftAlign: true);
-            }
-            
+            if (title != "") ChatHandler.Of(content[..^1], title).LeftAlign().Send(source);
+
             title = $"★ {option.Name()} ★";
             content = "";
         }
         
-        Utils.SendMessage(content[..^1], source.PlayerId, title, leftAlign: true);
+        ChatHandler.Of(content[..^1], title).LeftAlign().Send(source);
     }
 
     private void ListRoleGroup(PlayerControl source, string title, IEnumerable<CustomRole> roles)
     {
-        string text = roles.Where(r => r.IsEnabled()).Select(r => OptionUtils.OptionText(r.Options)).Fuse("\n");
+        string text = roles.Where(r => r.IsEnabled()).Select(r => OptionUtils.OptionText(r.RoleOptions)).Fuse("\n");
         ChatHandler.Of(text, title).LeftAlign().Send(source);
     }
 

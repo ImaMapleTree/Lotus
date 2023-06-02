@@ -2,7 +2,7 @@
 using HarmonyLib;
 using UnityEngine;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 [HarmonyPatch]
 public class MainMenuManagerPatch
@@ -59,7 +59,7 @@ public class MainMenuManagerPatch
             if (freeplayButton != null)
             {
                 freeplayButton.GetComponent<PassiveButton>().OnClick = new();
-                freeplayButton.GetComponent<PassiveButton>().OnClick.AddListener((Action)(() => Application.OpenURL("https://github.com/tukasa0001/TOHTOR")));
+                freeplayButton.GetComponent<PassiveButton>().OnClick.AddListener((Action)(() => Application.OpenURL("https://github.com/tukasa0001/Lotus")));
                 __instance.StartCoroutine(Effects.Lerp(0.01f, new Action<float>((p) => freeplayButton.transform.GetChild(0).GetComponent<TMPro.TMP_Text>().SetText("GitHub"))));
             }
 #endif

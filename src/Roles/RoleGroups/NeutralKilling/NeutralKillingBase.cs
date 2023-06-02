@@ -1,9 +1,9 @@
-using TOHTOR.Factions;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
+using Lotus.Factions;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
 using UnityEngine;
 
-namespace TOHTOR.Roles.RoleGroups.NeutralKilling;
+namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 public partial class NeutralKillingBase: Vanilla.Impostor, IModdable
 {

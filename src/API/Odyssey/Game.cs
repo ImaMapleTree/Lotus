@@ -1,29 +1,38 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Extensions;
-using TOHTOR.Factions.Impostors;
-using TOHTOR.Gamemodes;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.GUI.Name.Interfaces;
-using TOHTOR.Managers;
-using TOHTOR.Player;
-using TOHTOR.Roles;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Victory;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Factions.Impostors;
+using Lotus.Gamemodes;
+using Lotus.GUI.Name.Impl;
+using Lotus.GUI.Name.Interfaces;
+using Lotus.Roles;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Victory;
+using Lotus.Extensions;
+using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Odyssey;
+namespace Lotus.API.Odyssey;
 
 public static class Game
 {
+    static Game()
+    {
+        Hooks.NetworkHooks.GameJoinHook.Bind("GameHook", ev =>
+        {
+            if (!ev.IsNewLobby) return;
+            VentLogger.Trace("Joined new lobby. Cleaning up old game states.", "GameCleanupCheck");
+            Cleanup(true);
+        });
+    }
+
     private static readonly Dictionary<byte, ulong> GameIDs = new();
     private static ulong _gameID;
-    
+
     public static MatchData? LastMatch;
     public static MatchData MatchData = new();
     public static Dictionary<byte, INameModel> NameModels = new();
@@ -57,7 +66,11 @@ public static class Game
         GetAllPlayers()
             .Where(p => roles.Any(r => r.GetType() == p.GetCustomRole().GetType()) || p.GetSubroles().Any(s => s.GetType() == roles.GetType()));
 
-    public static void SyncAll() => GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
+    public static void SyncAll() => GetAllPlayers().Do(p =>
+    {
+        p.GetCustomRole().SyncOptions();
+        p.GetSubroles().ForEach(r => r.SyncOptions());
+    });
 
     public static void TriggerForAll(RoleActionType action, ref ActionHandle handle, params object[] parameters) => GetAllPlayers().Trigger(action, ref handle, parameters);
 
@@ -79,7 +92,6 @@ public static class Game
                 if (role.MyPlayer == null || !role.MyPlayer.IsAlive() && !roleAction.TriggerWhenDead) return;
                 roleAction.Execute(role, parameters);
             }
-
         }
     }
 
@@ -93,7 +105,7 @@ public static class Game
 
     public static ulong NextMatchID() => MatchData.MatchID++;
 
-    public static IGamemode CurrentGamemode => TOHPlugin.GamemodeManager.CurrentGamemode;
+    public static IGamemode CurrentGamemode => ProjectLotus.GamemodeManager.CurrentGamemode;
 
     //public static void ResetNames() => players.Values.Select(p => p.DynamicName).Do(name => name.ClearComponents());
     public static GameState State = GameState.InLobby;

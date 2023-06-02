@@ -1,12 +1,12 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers.Hotkeys;
+namespace Lotus.Managers.Hotkeys;
 
 public class Hotkey
 {

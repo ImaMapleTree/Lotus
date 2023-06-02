@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.Events;
+namespace Lotus.Roles.Events;
 
 public class GenericTargetedEvent : TargetedAbilityEvent
 {

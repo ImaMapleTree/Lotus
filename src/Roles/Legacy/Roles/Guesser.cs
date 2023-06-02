@@ -5,13 +5,13 @@ using Hazel;
 using UnityEngine;
 using System;
 using AmongUs.GameOptions;
-using TOHTOR.Extensions;
-using TOHTOR.ReduxOptions;
-using TOHTOR.Roles;
-using TOHTOR.RPC;
-using static TOHTOR.Translator;
+using Lotus.Extensions;
+using Lotus.ReduxOptions;
+using Lotus.Roles;
+using Lotus.RPC;
+using static Lotus.Translator;
 
-namespace TOHTOR
+namespace Lotus
 {
     public static class Guesser
     {

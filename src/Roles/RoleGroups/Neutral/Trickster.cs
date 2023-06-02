@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Trickster
 {

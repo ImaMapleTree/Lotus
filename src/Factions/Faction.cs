@@ -1,8 +1,9 @@
-using TOHTOR.Factions.Interfaces;
+using Lotus.Factions.Interfaces;
+using Lotus.Roles;
 using UnityEngine;
 using VentLib.Logging;
 
-namespace TOHTOR.Factions;
+namespace Lotus.Factions;
 
 public abstract class Faction<T> : IFaction<T> where T: IFaction<T>
 {
@@ -38,7 +39,9 @@ public abstract class Faction<T> : IFaction<T> where T: IFaction<T>
         return subFaction2.MainFactionRelationship();
     }
 
-    public abstract bool AlliesSeeRole();
+    public virtual Relation Relationship(CustomRole otherRole) => Relationship(otherRole.Faction);
+
+    public abstract bool CanSeeRole(PlayerControl player);
 
     public abstract Color FactionColor();
 

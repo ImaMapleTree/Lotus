@@ -1,4 +1,4 @@
-namespace TOHTOR.GUI.Menus.OptionsMenu.Submenus;
+namespace Lotus.GUI.Menus.OptionsMenu.Submenus;
 
 public interface IBaseOptionMenuComponent
 {

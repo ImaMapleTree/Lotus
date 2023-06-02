@@ -2,18 +2,18 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Il2CppSystem.Threading;
+using Lotus.API.Odyssey;
+using Lotus.API.Stats;
+using Lotus.Managers.History;
+using Lotus.Roles;
 using TMPro;
-using TOHTOR.API.Odyssey;
-using TOHTOR.API.Stats;
-using TOHTOR.Managers.History;
-using TOHTOR.Roles;
 using UnityEngine;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using Object = UnityEngine.Object;
 
-namespace TOHTOR.GUI.Menus;
+namespace Lotus.GUI.Menus;
 
 public class WinnersMenu
 {
@@ -96,9 +96,8 @@ public class WinnersMenu
         {
             PlayerHistory playerHistory = allPlayers[index];
             CustomRole role = playerHistory.Role;
-            PoolablePlayer newPlayer = Object.Instantiate(prefabPlayer, prefabPlayer.transform.parent);
+            PoolablePlayer newPlayer = prefabPlayer;//Object.Instantiate(prefabPlayer, prefabPlayer.transform.parent);
             newPlayer.gameObject.SetActive(true);
-            newPlayer.cosmetics.initialized = false;
             newPlayer.UpdateFromPlayerOutfit(playerHistory.Outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
 
             int row = Mathf.FloorToInt(index / 5f);
@@ -131,7 +130,7 @@ public class WinnersMenu
 
     private Color StatusColor(PlayerStatus status)
     {
-        return (status) switch
+        return status switch
         {
             PlayerStatus.Alive => Color.green,
             PlayerStatus.Exiled => new Color(0.73f, 0.54f, 0.45f),

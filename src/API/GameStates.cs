@@ -1,8 +1,8 @@
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
 
-namespace TOHTOR.API;
+namespace Lotus.API;
 
 public static class GameStates
 {

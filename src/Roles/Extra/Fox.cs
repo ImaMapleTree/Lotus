@@ -1,7 +1,7 @@
-using TOHTOR.Gamemodes;
+using Lotus.Gamemodes;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.Extra;
+namespace Lotus.Roles.Extra;
 
 public class Fox : NotImplemented
 {

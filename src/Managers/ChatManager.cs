@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 public class ChatManager
 {

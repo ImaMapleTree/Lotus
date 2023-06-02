@@ -1,4 +1,4 @@
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
@@ -7,7 +7,7 @@ using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 [Localized("Commands.Admin")]
 [Command(CommandFlag.HostOnly, "kick", "ban")]
@@ -21,11 +21,7 @@ public class KickBanCommand : ICommandReceiver
         bool ban = context.Alias == "ban";
         string message = ban ? _banMessage : _kickedMessage;
 
-        if (context.Args.Length == 0)
-        {
-            BasicCommands.PlayerIds(source, context);
-            return;
-        }
+        if (context.Args.Length == 0) BasicCommands.PlayerIds(source, context);
 
         Optional<PlayerControl> targetPlayer = Optional<PlayerControl>.Null();
         string text = context.Join();
@@ -36,7 +32,7 @@ public class KickBanCommand : ICommandReceiver
         targetPlayer.Handle(player =>
         {
             AmongUsClient.Instance.KickPlayer(player.GetClientId(), ban);
-            Utils.SendMessage(string.Format(message, player.name), title: "Announcement");
-        }, () => Utils.SendMessage($"Unable to find player: {text}", source.PlayerId, "Announcement"));
+            ChatHandler.Of(message.Formatted(player.name), "Announcement").Send();
+        }, () => ChatHandler.Of($"Unable to find player: {text}", "Announcement").Send(source));
     }
 }

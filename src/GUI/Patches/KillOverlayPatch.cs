@@ -1,17 +1,20 @@
-using System;
 using HarmonyLib;
+using Lotus.Logging;
+using Lotus.Utilities;
 
-namespace TOHTOR.GUI.Patches;
+namespace Lotus.GUI.Patches;
 
 [HarmonyPatch(typeof(KillOverlay), nameof(KillOverlay.ShowKillAnimation))]
 public class KillOverlayPatch
 {
-    private static DateTime _lastOverlay = DateTime.Now;
+    private static readonly FixedUpdateLock FixedUpdateLock = new(0.5f);
 
     public static bool Prefix(KillOverlay __instance)
     {
-        bool show = ((DateTime.Now - _lastOverlay).TotalSeconds > 0.5f);
-        _lastOverlay = DateTime.Now;
-        return show;
+        if (!FixedUpdateLock.AcquireLock()) return false;
+        
+        DevLogger.Log("Showing Kill Animation");
+
+        return true;
     }
 }

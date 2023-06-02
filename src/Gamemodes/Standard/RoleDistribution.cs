@@ -1,4 +1,4 @@
-namespace TOHTOR.Gamemodes.Standard;
+namespace Lotus.Gamemodes.Standard;
 
 public class RoleDistribution
 {

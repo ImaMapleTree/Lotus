@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.Internals;
+namespace Lotus.Roles.Internals;
 
 public enum InteractionResult
 {

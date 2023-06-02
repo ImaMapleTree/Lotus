@@ -1,26 +1,28 @@
+using System.Collections.Generic;
 using AmongUs.GameOptions;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Factions;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.API.Stats;
+using Lotus.Factions;
+using Lotus.Managers.History.Events;
+using Lotus.Options;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public partial class Impostor : CustomRole, IModdable, ISabotagerRole
 {
     private const float DefaultFloatValue = -1;
 
-    public virtual bool CanSabotage() => canSabotage;
-    public virtual bool CanKill() => canKill;
+    public virtual bool CanSabotage() => canSabotage && !RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotSabotage);
     protected bool canSabotage = true;
-    protected bool canKill = true;
+
     public float KillCooldown
     {
         set => killCooldown = value;
@@ -52,12 +54,12 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
         return result is InteractionResult.Proceed;
     }
 
-    protected GameOptionBuilder AddKillCooldownOptions(GameOptionBuilder optionBuilder, string name = "Kill Cooldown", string key = "Kill Cooldown", int defaultIndex = 0)
+    protected GameOptionBuilder AddKillCooldownOptions(GameOptionBuilder optionBuilder, string key = "Kill Cooldown", string name = "Kill Cooldown", int defaultIndex = 0)
     {
         return optionBuilder.SubOption(sub => sub.Name(name)
             .Key(key)
-            .Value(v => v.Text("Common").Color(new Color(1f, 0.61f, 0.33f)).Value(DefaultFloatValue).Build())
-            .AddFloatRange(0, 120, 2.5f, defaultIndex, "s")
+            .Value(v => v.Text(GeneralOptionTranslations.GlobalText).Color(new Color(1f, 0.61f, 0.33f)).Value(DefaultFloatValue).Build())
+            .AddFloatRange(0, 120, 2.5f, defaultIndex, GeneralOptionTranslations.SecondsSuffix)
             .BindFloat(f => KillCooldown = f)
             .Build());
     }
@@ -68,6 +70,8 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
             .Faction(FactionInstances.Impostors)
             .CanVent(true)
             .OptionOverride(Override.KillCooldown, () => KillCooldown)
-            .RoleColor(Color.red);
+            .RoleColor(Color.red)
+            .RoleAbilityFlags(RoleAbilityFlag.IsAbleToKill);
 
+    public override List<Statistic> Statistics() => new() { VanillaStatistics.Kills };
 }

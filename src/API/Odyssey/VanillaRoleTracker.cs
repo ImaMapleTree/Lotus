@@ -1,11 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
-using TOHTOR.Managers;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
+using Lotus.Managers;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.API.Odyssey;
+namespace Lotus.API.Odyssey;
 
 public class VanillaRoleTracker
 {

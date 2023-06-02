@@ -1,11 +1,11 @@
 using System;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Name.Impl;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name.Impl;
+using Lotus.API;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace TOHTOR.GUI.Name.Components;
+namespace Lotus.GUI.Name.Components;
 
 public class CooldownComponent : SimpleComponent
 {
@@ -15,7 +15,7 @@ public class CooldownComponent : SimpleComponent
     private Color textColor = new(0.93f, 0.57f, 0.28f);
     private Ubifix prefix;
 
-    public CooldownComponent(Cooldown cooldown, GameState[] gameStates, ViewMode viewMode = Impl.ViewMode.Additive, params PlayerControl[] viewers) : base("", gameStates, viewMode, viewers)
+    public CooldownComponent(Cooldown cooldown, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive, params PlayerControl[] viewers) : base("", gameStates, viewMode, viewers)
     {
         this.cooldown = cooldown;
         prefix = new Ubifix(new LiveString(() => this.cooldown.NotReady() ? textColor.Colorize("CD: ") : ""));
@@ -23,7 +23,7 @@ public class CooldownComponent : SimpleComponent
         this.SetMainText(new LiveString(TextSupplier));
     }
 
-    public CooldownComponent(Func<Cooldown> cooldownSupplier, GameState[] gameStates, ViewMode viewMode = Impl.ViewMode.Additive, params PlayerControl[] viewers) : base("", gameStates, viewMode, viewers)
+    public CooldownComponent(Func<Cooldown> cooldownSupplier, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive, params PlayerControl[] viewers) : base("", gameStates, viewMode, viewers)
     {
         this.cooldownSupplier = cooldownSupplier;
         prefix = new Ubifix(new LiveString(() => Cooldown.NotReady() ? textColor.Colorize("CD: ") : ""));
@@ -31,11 +31,11 @@ public class CooldownComponent : SimpleComponent
         this.SetMainText(new LiveString(TextSupplier));
     }
 
-    public CooldownComponent(Func<Cooldown> cooldownSupplier, GameState gameState, ViewMode viewMode = Impl.ViewMode.Additive, params PlayerControl[] viewers) : this(cooldownSupplier, new []{gameState}, viewMode, viewers)
+    public CooldownComponent(Func<Cooldown> cooldownSupplier, GameState gameState, ViewMode viewMode = Name.ViewMode.Additive, params PlayerControl[] viewers) : this(cooldownSupplier, new []{gameState}, viewMode, viewers)
     {
     }
 
-    public CooldownComponent(Cooldown cooldown, GameState gameState, ViewMode viewMode = Impl.ViewMode.Additive, params PlayerControl[] viewers) : this(cooldown, new []{gameState}, viewMode, viewers)
+    public CooldownComponent(Cooldown cooldown, GameState gameState, ViewMode viewMode = Name.ViewMode.Additive, params PlayerControl[] viewers) : this(cooldown, new []{gameState}, viewMode, viewers)
     {
     }
 

@@ -1,23 +1,22 @@
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles;
-using TOHTOR.Utilities;
+using Lotus.Roles;
+using Lotus.Utilities;
+using Lotus.Extensions;
+using Lotus.Managers;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
-using VentLib.Commands.Interfaces;
 using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
 public class RoleInfoCommand
 {
-    private static int _previousLevel = 0;
-    
+    private static int _previousLevel;
+
     [Command(CommandFlag.InGameOnly, "m", "myrole")]
     public static void MyRole(PlayerControl source, CommandContext context)
     {
@@ -30,14 +29,20 @@ public class RoleInfoCommand
         else ShowRoleOptions(source);
     }
 
-    
-    [Command(CommandFlag.InGameOnly, "desc", "description")]
     private static void ShowRoleDescription(PlayerControl source)
     {
         CustomRole role = source.GetCustomRole();
         string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.FactionColor().Colorize(role.Faction.Name())}):";
         output += $"\n{role.Description}";
-        Utils.SendMessage(output, source.PlayerId, leftAlign: true);
+        ChatHandler.Of(output).LeftAlign().Send(source);
+        if (!source.GetSubroles().IsEmpty()) BasicCommands.Modifiers(source);
+    }
+
+    [Command(CommandFlag.InGameOnly, "desc", "description")]
+    private static void ShowFirstMeetingText(PlayerControl source)
+    {
+        if (PluginDataManager.TemplateManager.TryFormat(source, "meeting-first", out string message))
+            ChatHandler.Of(message).Send(source);
     }
 
     [Command(CommandFlag.InGameOnly, "o", "option", "options")]

@@ -2,7 +2,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 
-namespace TOHTOR.Managers.Friends;
+namespace Lotus.Managers.Friends;
 
 public class FriendManager
 {
@@ -25,7 +25,7 @@ public class FriendManager
     public bool IsFriend(PlayerControl player)
     {
         if (player == null) return false;
-        return player.FriendCode != "" && IsFriend(player.FriendCode);
+        return AmongUsClient.Instance.NetworkMode is NetworkModes.LocalGame || player.FriendCode != "" && IsFriend(player.FriendCode);
     }
 
     public void AddFriend(string friendcode)

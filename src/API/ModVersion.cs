@@ -1,11 +1,11 @@
 using System.Linq;
-using TOHTOR.API.Reactive;
-using TOHTOR.Extensions;
+using Lotus.API.Reactive;
+using Lotus.Extensions;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using VentLib.Version;
 
-namespace TOHTOR.API;
+namespace Lotus.API;
 
 [LoadStatic]
 public static class ModVersion

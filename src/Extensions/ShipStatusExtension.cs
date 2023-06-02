@@ -1,5 +1,5 @@
 #nullable enable
-namespace TOHTOR.Extensions;
+namespace Lotus.Extensions;
 
 public static class ShipStatusExtension
 {

@@ -1,7 +1,7 @@
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Interactions.Interfaces;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Extensions;
 
-namespace TOHTOR.Roles.Interactions;
+namespace Lotus.Roles.Interactions;
 
 public class HostileIntent : IHostileIntent
 {
@@ -11,6 +11,6 @@ public class HostileIntent : IHostileIntent
 
     public void Halted(PlayerControl actor, PlayerControl target)
     {
-        actor.RpcGuardAndKill(actor);
+        actor.RpcMark(actor);
     }
 }

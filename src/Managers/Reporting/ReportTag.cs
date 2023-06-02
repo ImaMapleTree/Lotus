@@ -1,11 +1,12 @@
 using System;
 using System.Linq;
 
-namespace TOHTOR.Managers.Reporting;
+namespace Lotus.Managers.Reporting;
 
 public enum ReportTag
 {
     KickByAnticheat,
+    KickByPacket,
     Performance
 }
 

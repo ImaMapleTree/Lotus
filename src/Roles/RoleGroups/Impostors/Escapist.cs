@@ -1,17 +1,18 @@
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Escapist: Impostor
 {
@@ -68,11 +69,11 @@ public class Escapist: Impostor
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Cooldown After Mark")
-                .AddFloatRange(0, 60, 2.5f, 2, "s")
+                .AddFloatRange(0, 60, 2.5f, 2, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(canEscapeCooldown.SetDuration)
                 .Build())
             .SubOption(sub => sub.Name("Cooldown After Escape")
-                .AddFloatRange(0, 180, 2.5f, 16, "s")
+                .AddFloatRange(0, 180, 2.5f, 16, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(canMarkCooldown.SetDuration)
                 .Build())
             .SubOption(sub => sub.Name("Clear Mark After Meeting")

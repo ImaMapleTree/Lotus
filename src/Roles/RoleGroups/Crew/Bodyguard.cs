@@ -1,25 +1,26 @@
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.API;
+using Lotus.Chat;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
-using static TOHTOR.ModConstants;
-using static TOHTOR.Roles.RoleGroups.Crew.Bodyguard.BodyguardTranslations;
-using static TOHTOR.Roles.RoleGroups.Crew.Bodyguard.BodyguardTranslations.BodyguardOptions;
-using static TOHTOR.Utilities.TranslationUtil;
+using static Lotus.ModConstants;
+using static Lotus.Roles.RoleGroups.Crew.Bodyguard.BodyguardTranslations;
+using static Lotus.Roles.RoleGroups.Crew.Bodyguard.BodyguardTranslations.BodyguardOptions;
+using static Lotus.Utilities.TranslationUtil;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Bodyguard: Crewmate
 {
@@ -49,7 +50,7 @@ public class Bodyguard: Crewmate
             if (Game.GetAlivePlayers().All(p => p.PlayerId != b)) guardedPlayer = Optional<byte>.Null();
         });
 
-        Utils.SendMessage($"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}\n{VotePlayerMessage}", MyPlayer.PlayerId);
+        ChatHandler.Send(MyPlayer, $"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}\n{VotePlayerMessage}");
     }
 
     [RoleAction(RoleActionType.MyVote)]
@@ -68,7 +69,7 @@ public class Bodyguard: Crewmate
         else if (!guardedPlayer.Exists()) guardedPlayer = votedPlayer.Map(p => p.PlayerId);
         else guardedPlayer = guardedPlayer.Exists() ? new Optional<byte>() : new Optional<byte>(guardedPlayer.Get());
 
-        Utils.SendMessage($"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}", MyPlayer.PlayerId);
+        ChatHandler.Send(MyPlayer, $"{ProtectingMessage} {guardedPlayer.FlatMap(GetPlayerName).OrElse("No One")}");
     }
 
     [RoleAction(RoleActionType.AnyInteraction)]
@@ -76,13 +77,13 @@ public class Bodyguard: Crewmate
     {
         Intent intent = interaction.Intent();
         if (Game.State is not GameState.Roaming) return;
+        if (actor.PlayerId == MyPlayer.PlayerId) return;
         if (!guardedPlayer.Exists() || target.PlayerId != guardedPlayer.Get()) return;
 
         switch (intent)
         {
             case IHelpfulIntent when !protectAgainstHelpfulInteraction:
             case INeutralIntent when !protectAgainstNeutralInteraction:
-            case IFatalIntent fatalIntent when fatalIntent.IsRanged():
                 return;
         }
 
@@ -94,8 +95,8 @@ public class Bodyguard: Crewmate
         InteractionResult result = MyPlayer.InteractWith(actor, DirectInteraction.FatalInteraction.Create(this));
 
         if (result is InteractionResult.Proceed) Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, actor));
-        
-        
+
+
         actor.GetCustomRole().GetActions(RoleActionType.Attack)
             .FirstOrOptional()
             .Handle(t => t.Item1.Execute(t.Item2, new object[] { MyPlayer} ),
@@ -105,7 +106,7 @@ public class Bodyguard: Crewmate
                     Game.MatchData.GameHistory.AddEvent(new KillEvent(actor, MyPlayer));
             });
     }
-    
+
     [RoleAction(RoleActionType.Disconnect)]
     private void HandleDisconnect(PlayerControl player)
     {
@@ -153,13 +154,13 @@ public class Bodyguard: Crewmate
 
         [Localized("VotePlayerInfo")]
         public static string VotePlayerMessage = "Vote to select a player to guard.";
-        
-        [Localized("Options")]
+
+        [Localized(ModConstants.Options)]
         public static class BodyguardOptions
         {
             [Localized(nameof(BeneficialInteractionProtection))]
             public static string BeneficialInteractionProtection = "Protect against Beneficial::0 Interactions";
-            
+
             [Localized(nameof(NeutralInteractionProtection))]
             public static string NeutralInteractionProtection = "Protect against Neutral::0 Interactions";
         }

@@ -1,15 +1,15 @@
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Potions;
 
 public class PotionRevealing: Potion
 {

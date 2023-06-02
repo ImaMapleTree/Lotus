@@ -1,7 +1,7 @@
-using TOHTOR.Roles;
+using Lotus.Roles;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Managers.History.Events;
+namespace Lotus.Managers.History.Events;
 
 public interface ITargetedEvent : IHistoryEvent
 {

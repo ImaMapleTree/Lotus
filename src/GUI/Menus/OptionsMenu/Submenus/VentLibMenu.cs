@@ -1,13 +1,15 @@
 using System;
+using Lotus.GUI.Menus.OptionsMenu.Components;
 using TMPro;
-using TOHTOR.GUI.Menus.OptionsMenu.Components;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
+using UnityEngine.Events;
+using VentLib.Logging;
 using VentLib.Networking;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Submenus;
+namespace Lotus.GUI.Menus.OptionsMenu.Submenus;
 
 [RegisterInIl2Cpp]
 public class VentLibMenu: MonoBehaviour, IBaseOptionMenuComponent
@@ -42,6 +44,7 @@ public class VentLibMenu: MonoBehaviour, IBaseOptionMenuComponent
         maxPacketSizeValue = Instantiate(maxPacketSizeLabel, maxPacketSizeSlider.transform);
 
         maxPacketSizeValue.transform.localPosition += new Vector3(4f, 0.25f);
+        maxPacketSizeSlider.OnValueChange = new UnityEvent();
         maxPacketSizeSlider.OnValueChange.AddListener((Action)(() =>
         {
             int packetSize = NetworkRules.MaxPacketSize = Mathf.FloorToInt((maxPacketSizeSlider.Value * (NetworkRules.AbsoluteMaxPacketSize - NetworkRules.AbsoluteMinPacketSize))) + NetworkRules.AbsoluteMinPacketSize;

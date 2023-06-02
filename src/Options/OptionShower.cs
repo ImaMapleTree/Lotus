@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers.Hotkeys;
+using Lotus.API.Odyssey;
+using Lotus.Managers.Hotkeys;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options;
@@ -11,7 +11,7 @@ using VentLib.Options.Interfaces;
 using VentLib.Utilities.Harmony.Attributes;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Options;
+namespace Lotus.Options;
 
 [Localized("OptionShower")]
 public class OptionShower

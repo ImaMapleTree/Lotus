@@ -1,24 +1,25 @@
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals.Attributes;
+using Lotus.Factions;
+using Lotus.Options;
+using Lotus.Extensions;
+using Lotus.Roles.Interfaces;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.Extra;
+namespace Lotus.Roles.Extra;
 
-public class GM : CustomRole
+public class GM : CustomRole, IPhantomRole
 {
     public static Color GMColor = new(1f, 0.4f, 0.4f);
 
-    [RoleAction(RoleActionType.RoundStart)]
-    public void ExileGM(bool isGameStart)
-    {
-        if (isGameStart) MyPlayer.RpcExileV2();
-    }
+    protected override void PostSetup() => MyPlayer.RpcExileV2();
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream).Tab(DefaultTabs.HiddenTab);
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier.RoleColor(GMColor).Faction(FactionInstances.Solo);
+    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier
+        .RoleColor(GMColor)
+        .Faction(FactionInstances.Solo)
+        .RoleFlags(RoleFlag.Hidden | RoleFlag.Unassignable | RoleFlag.CannotWinAlone);
+
+    public bool IsCountedAsPlayer() => false;
 }

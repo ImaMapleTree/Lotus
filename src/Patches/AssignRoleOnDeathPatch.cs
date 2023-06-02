@@ -1,11 +1,11 @@
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.API.Reactive;
-using TOHTOR.API.Reactive.HookEvents;
-using TOHTOR.Extensions;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.Extensions;
 using VentLib.Logging;
 
-namespace TOHTOR.Patches;
+namespace Lotus.Patches;
 
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.AssignRoleOnDeath))]
 public class AssignRoleOnDeathPatch

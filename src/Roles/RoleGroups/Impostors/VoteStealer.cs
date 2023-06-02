@@ -1,4 +1,4 @@
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class VoteStealer: NotImplemented
 {

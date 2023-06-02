@@ -1,46 +1,74 @@
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Options;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Vanilla;
+using Lotus.Factions;
+using Lotus.Options;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Extensions;
+using Lotus.Roles.Internals;
+using Lotus.Victory.Conditions;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 // Inherits from crewmate because crewmate has task setup
-public class Terrorist : Crewmate
+public class Terrorist : Engineer
 {
     private bool canWinBySuicide;
+    private bool canWinByExiled;
+
+    public override bool TasksApplyToTotal() => false;
 
     [RoleAction(RoleActionType.MyDeath)]
-    private void OnTerroristDeath() => TerroristWinCheck();
+    private void OnTerroristDeath(PlayerControl killer)
+    {
+        if (killer.PlayerId == MyPlayer.PlayerId && !canWinBySuicide) return;
+        TerroristWinCheck();
+    }
 
-
-    //   [RoleAction(RoleActionType.SelfExiled)]
-    //  private void OnTerroristExiled() => TerroristWinCheck();
+    [RoleAction(RoleActionType.SelfExiled)]
+    private void OnExiled()
+    {
+        if (canWinByExiled) TerroristWinCheck();
+    }
 
     private void TerroristWinCheck()
     {
-        if (this.HasAllTasksDone)
-        {
-            // I know we are going to redo death reasons but I will still like it here for reasons.
-            /*if (canWinBySuicide || TOHPlugin.PlayerStates[MyPlayer.PlayerId].deathReason != (PlayerStateOLD.DeathReason.Suicide | PlayerStateOLD.DeathReason.FollowingSuicide))
-            {
-                // TERRORIST WIN
-            }*/
-        }
-        //OldRPC.TerroristWin(MyPlayer.PlayerId);
+        if (!HasAllTasksComplete) return;
+        ManualWin.Activate(MyPlayer, WinReason.TasksComplete, 900);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddTaskOverrideOptions(base.RegisterOptions(optionStream)
             .Tab(DefaultTabs.NeutralTab)
             .SubOption(sub => sub
-                .Name("Can Win By Suicide")
-                .Bind(v => canWinBySuicide = (bool)v)
-                .AddOnOffValues(false).Build()));
+                .KeyName("Can Win By Suicide", TerroristTranslations.TerroristOptionTranslations.CanWinBySuicide)
+                .BindBool(v => canWinBySuicide = v)
+                .AddOnOffValues(false)
+                .Build()))
+            .SubOption(sub => sub
+                .KeyName("Can Win By Being Exiled", TerroristTranslations.TerroristOptionTranslations.CanWinByExiled)
+                .BindBool(v => canWinByExiled = v)
+                .AddOnOffValues()
+                .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier).RoleColor(Color.green).Faction(FactionInstances.Solo);
+        base.Modify(roleModifier)
+            .RoleColor(new Color(0.52f, 0.84f, 0.28f))
+            .Faction(FactionInstances.Solo)
+            .SpecialType(SpecialType.Neutral);
+
+    [Localized(nameof(Terrorist))]
+    internal static class TerroristTranslations
+    {
+        [Localized(ModConstants.Options)]
+        internal static class TerroristOptionTranslations
+        {
+            [Localized(nameof(CanWinBySuicide))]
+            public static string CanWinBySuicide = "Can Win By Suicide";
+
+            [Localized(nameof(CanWinByExiled))]
+            public static string CanWinByExiled = "Can Win By Being Exiled";
+        }
+    }
 }

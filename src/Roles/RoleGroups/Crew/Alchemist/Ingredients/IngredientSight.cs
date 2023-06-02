@@ -1,7 +1,7 @@
 using UnityEngine;
 using VentLib.Localization.Attributes;
 
-namespace TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
 
 public class IngredientSight: Ingredient
 {
@@ -12,7 +12,7 @@ public class IngredientSight: Ingredient
     {
     }
 
-    public override string Name() => "Sightly Essence";
+    public override string Name() => IngredientName;
 
     public override Color Color() => new(0.55f, 0.16f, 0.74f);
 

@@ -1,6 +1,6 @@
-using TOHTOR.Roles;
+using Lotus.Roles;
 
-namespace TOHTOR.Managers.History.Events;
+namespace Lotus.Managers.History.Events;
 
 public interface IRoleChangeEvent : IHistoryEvent
 {

@@ -3,25 +3,24 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Player;
-using TOHTOR.Roles;
-using TOHTOR.RPC;
+using Lotus.API.Odyssey;
+using Lotus.API.Player;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
+using Lotus.RPC;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 // ReSharper disable ConvertIfStatementToSwitchStatement
 
-namespace TOHTOR.Victory;
+namespace Lotus.Victory;
 
 public static class VictoryScreen
 {
     public static void ShowWinners(List<PlayerControl> winners, GameOverReason reason)
     {
-        List<FrozenPlayer> winnerRoles = Game.MatchData.GameHistory.LastWinners = winners.Select(w => Game.MatchData.FrozenPlayers[w.GetGameID()]).ToList();
-        VentLogger.Info($"Setting Up Win Screen | Winners: {winnerRoles.StrJoin()}");
+        List<FrozenPlayer> winnerRoles = Game.MatchData.GameHistory.LastWinners = winners.Select(w => Game.MatchData.FrozenPlayers[w.GetGameID()]).Distinct().ToList();
+        VentLogger.Info($"Setting Up Win Screen | Winners: {winnerRoles.Select(fp => $"{fp.Name} ({fp.Role.EnglishRoleName})")}");
 
         bool impostorsWin = IsImpostorsWin(reason);
 
@@ -43,6 +42,8 @@ public static class VictoryScreen
         });
 
         if (winners.Any(p => p.IsHost())) losers.Do(p => p.SetRole(impostorsWin ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost));
+        Hooks.ResultHooks.WinnersHook.Propagate(new WinnersHookEvent(winnerRoles));
+        Hooks.ResultHooks.LosersHook.Propagate(new LosersHookEvent(losers.Select(l => Game.MatchData.FrozenPlayers[l.GetGameID()]).ToList()));
     }
 
     private static bool IsImpostorsWin(GameOverReason reason)

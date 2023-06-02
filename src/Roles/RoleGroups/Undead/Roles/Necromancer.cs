@@ -1,30 +1,31 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.Factions.Undead;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Components;
-using TOHTOR.GUI.Name.Holders;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Managers;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interactions.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Victory;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.Factions;
+using Lotus.Factions.Undead;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.GUI.Name.Impl;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Victory;
+using Lotus.Extensions;
+using Lotus.Managers;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Undead.Roles;
+namespace Lotus.Roles.RoleGroups.Undead.Roles;
 
 public class Necromancer : UndeadRole
 {
@@ -50,7 +51,7 @@ public class Necromancer : UndeadRole
     {
         if (target == null) return false;
         if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         if (isFirstConvert) return ConvertToDeathknight(target);
         ConvertToUndead(target);
         return false;
@@ -83,7 +84,7 @@ public class Necromancer : UndeadRole
         player.NameModel().GetComponentHolder<CooldownHolder>().Clear();
         player.NameModel().GetComponentHolder<CooldownHolder>().Add(new CooldownComponent(convertCooldown, GameState.Roaming, ViewMode.Additive, player));
 
-        Api.Roles.AssignRole(player, this);
+        MatchData.AssignRole(player, this);
         Necromancer necromancer = player.GetCustomRole<Necromancer>();
         necromancer.isFirstConvert = false;
         Game.MatchData.GameHistory.AddEvent(new RoleChangeEvent(player, necromancer));
@@ -99,7 +100,7 @@ public class Necromancer : UndeadRole
 
         deathknightOriginal = target.GetCustomRole();
         Game.MatchData.Roles.AddSubrole(target.PlayerId, deathknightOriginal);
-        Api.Roles.AssignRole(target, _deathknight);
+        MatchData.AssignRole(target, _deathknight);
         myDeathknight = target.GetCustomRole<Deathknight>();
         target.NameModel().GetComponentHolder<RoleHolder>()[^1]
             .SetViewerSupplier(() => Game.GetAllPlayers().Where(p => p.PlayerId == target.PlayerId || p.Relationship(target) is Relation.FullAllies).ToList());
@@ -124,7 +125,7 @@ public class Necromancer : UndeadRole
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Convert Cooldown")
-                .AddFloatRange(15f, 120f, 5f, 9, "s")
+                .AddFloatRange(15f, 120f, 5f, 9, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(convertCooldown.SetDuration)
                 .Build())
             .SubOption(sub => sub.Name("Immune to Partially Converted")

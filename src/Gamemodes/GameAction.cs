@@ -1,6 +1,6 @@
 using System;
 
-namespace TOHTOR.Gamemodes;
+namespace Lotus.Gamemodes;
 
 [Flags]
 public enum GameAction

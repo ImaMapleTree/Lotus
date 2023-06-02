@@ -1,12 +1,14 @@
-using TOHTOR.Roles.Overrides;
+using Lotus.Roles.Overrides;
 using UnityEngine;
 
-namespace TOHTOR.Roles.Subroles;
+namespace Lotus.Roles.Subroles;
 
 public class Watcher: Subrole
 {
-    public override string Identifier() => "☯";
+    public override string Identifier() => "▲";
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => 
-        base.Modify(roleModifier).OptionOverride(Override.AnonymousVoting, false).RoleColor(new Color(0.48f, 0.53f, 0.61f));
+        base.Modify(roleModifier)
+            .OptionOverride(Override.AnonymousVoting, false)
+            .RoleColor(new Color(0.38f, 0.51f, 0.61f));
 }

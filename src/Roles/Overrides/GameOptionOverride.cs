@@ -1,11 +1,11 @@
 #nullable enable
 using System;
 using AmongUs.GameOptions;
-using TOHTOR.API;
+using Lotus.API;
 using UnityEngine;
 using VentLib.Logging;
 
-namespace TOHTOR.Roles.Overrides;
+namespace Lotus.Roles.Overrides;
 
 public class GameOptionOverride
 {
@@ -79,6 +79,12 @@ public class GameOptionOverride
                 break;
             case Override.EngVentDuration:
                 options.SetFloat(FloatOptionNames.EngineerInVentMaxTime, (float)(GetValue() ?? AUSettings.EngineerInVentMaxTime()));
+                break;
+            case Override.VitalsCooldown:
+                options.SetFloat(FloatOptionNames.ScientistCooldown, (float)(GetValue() ?? AUSettings.ScientistCooldown()));
+                break;
+            case Override.VitalsBatteryCharge:
+                options.SetFloat(FloatOptionNames.ScientistBatteryCharge, (float)(GetValue() ?? AUSettings.ScientistBatteryCharge()));
                 break;
             case Override.CanUseVent:
             default:

@@ -1,18 +1,21 @@
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.NeutralKilling;
-using TOHTOR.Victory;
-using TOHTOR.Victory.Conditions;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Victory;
+using Lotus.Victory.Conditions;
+using Lotus.Extensions;
+using Lotus.Factions;
+using Lotus.Factions.Interfaces;
+using Lotus.Factions.Neutrals;
 using UnityEngine;
 using VentLib.Options.Game;
 
-namespace TOHTOR.Roles.RoleGroups.Neutral;
+namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Hitman: NeutralKillingBase
 {
+    private static HitmanFaction _hitmanFaction = new HitmanFaction();
     public List<string> AdditionalWinRoles = new();
 
     protected override void Setup(PlayerControl player)
@@ -27,7 +30,7 @@ public class Hitman: NeutralKillingBase
     private void GameEnd(WinDelegate winDelegate)
     {
         if (!MyPlayer.IsAlive()) return;
-        if (winDelegate.GetWinReason() is WinReason.SoloWinner && !AdditionalWinRoles.Contains(winDelegate.GetWinners()[0].GetCustomRole().EnglishRoleName)) return;
+        if (winDelegate.GetWinReason() is WinReason.SoloWinner && !AdditionalWinRoles.Contains(winDelegate.GetWinners()[0].GetCustomRole().EnglishRoleName)) return; 
         winDelegate.GetWinners().Add(MyPlayer);
     }
 
@@ -37,7 +40,7 @@ public class Hitman: NeutralKillingBase
                 .Name("Wins with Absolute Winners")
                 .Value(v => v.Text("None").Color(Color.red).Value(0).Build())
                 .Value(v => v.Text("All").Color(Color.cyan).Value(1).Build())
-                .Value(v => v.Text("Individual").Color(new(0.45f, 0.31f, 0.72f)).Value(2).Build())
+                .Value(v => v.Text("Individual").Color(new Color(0.45f, 0.31f, 0.72f)).Value(2).Build())
                 .ShowSubOptionPredicate(o => (int)o == 2)
                 .SubOption(sub2 => sub2
                     .Name("Executioner")
@@ -52,16 +55,26 @@ public class Hitman: NeutralKillingBase
                     .BindBool(RoleUtils.BindOnOffListSetting(AdditionalWinRoles, "Jester"))
                     .Build())
                 .SubOption(sub2 => sub2
-                    .Name("Swapper")
-                    .Color(new Color(0.4f, 0.9f, 0.4f))
-                    .AddOnOffValues()
-                    .BindBool(RoleUtils.BindOnOffListSetting(AdditionalWinRoles, "Swapper"))
-                    .Build())
-                .SubOption(sub2 => sub2
                     .Name("Lovers")
                     .Color(new Color(1f, 0.4f, 0.8f))
                     .AddOnOffValues()
                     .BindBool(RoleUtils.BindOnOffListSetting(AdditionalWinRoles, "Lovers"))
                     .Build())
                 .Build());
+
+    protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).Faction(_hitmanFaction);
+
+
+    private class HitmanFaction : Solo
+    {
+        public override Relation Relationship(Solo sameFaction)
+        {
+            return Relation.SharedWinners;
+        }
+
+        public override Relation RelationshipOther(IFaction other)
+        {
+            return Relation.SharedWinners;
+        }
+    }
 }

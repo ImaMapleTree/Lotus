@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace TOHTOR.Utilities;
+namespace Lotus.Utilities;
 
 public class FriendUtils
 {

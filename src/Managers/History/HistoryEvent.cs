@@ -1,8 +1,8 @@
 using System;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
+using Lotus.API;
 
-namespace TOHTOR.Managers.History;
+namespace Lotus.Managers.History;
 
 //[Localization(Group = "Hello")]
 public abstract class HistoryEvent

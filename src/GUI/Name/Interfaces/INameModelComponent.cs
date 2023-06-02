@@ -1,11 +1,11 @@
 using System;
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.GUI.Name.Impl;
+using Lotus.API.Odyssey;
+using Lotus.GUI.Name.Impl;
+using Lotus.API;
 using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.GUI.Name.Interfaces;
+namespace Lotus.GUI.Name.Interfaces;
 
 public interface INameModelComponent
 {

@@ -1,32 +1,37 @@
 using System;
+using System.Collections.Generic;
 using AmongUs.GameOptions;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Factions;
-using TOHTOR.GUI;
-using TOHTOR.GUI.Name;
-using TOHTOR.GUI.Name.Impl;
-using TOHTOR.Managers.History.Events;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals.Attributes;
+using Il2CppInterop.Runtime.InteropTypes.Arrays;
+using Lotus.API;
+using Lotus.API.Odyssey;
+using Lotus.API.Stats;
+using Lotus.Factions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
+using Lotus.Managers.History.Events;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Extensions;
+using Lotus.Patches.Systems;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Vanilla;
+namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public class Crewmate : CustomRole, IOverridenTaskHolderRole
 {
     public int TotalTasks => initialized ? tasks : taskSupplier?.Invoke() ?? 0;
     public int TasksComplete;
-    public bool HasAllTasksDone => TasksComplete >= TotalTasks;
+    public bool HasAllTasksComplete => TasksComplete >= TotalTasks;
 
     public bool HasOverridenTasks;
     public bool HasCommonTasks;
-    public int ShortTasks;
-    public int LongTasks;
+    public int ShortTasks = -1;
+    public int LongTasks = -1;
 
     private int tasks;
     private Func<int>? taskSupplier;
@@ -44,11 +49,11 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
     }
 
     [RoleAction(RoleActionType.TaskComplete, triggerAfterDeath: true, blockable: false)]
-    protected void InternalTaskComplete(PlayerControl player)
+    protected void InternalTaskComplete(PlayerControl player, Optional<NormalPlayerTask> task)
     {
         if (player.PlayerId != MyPlayer.PlayerId) return;
         TasksComplete++;
-        if (player.IsAlive()) this.OnTaskComplete();
+        if (player.IsAlive()) this.OnTaskComplete(task);
         Game.MatchData.GameHistory.AddEvent(new TaskCompleteEvent(player));
     }
 
@@ -64,6 +69,17 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
 
     public virtual bool TasksApplyToTotal() => true;
 
+    protected void AssignAdditionalTasks()
+    {
+        Tasks.AssignAdditionalTasks(this, callback: RecomputeTaskTotal);
+    }
+
+    private void RecomputeTaskTotal(RpcSetTasksPatch.TasksOverride tasksOverride)
+    {
+        tasks += tasksOverride.ShortTasks + tasksOverride.LongTasks;
+    }
+
+
     /// <summary>
     /// Sets up the task counter for crewmate roles. If you extend this class and want this done automatically please call base.Setup()
     /// </summary>
@@ -73,7 +89,7 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
     /// <summary>
     /// Called automatically when this player completes a task
     /// </summary>
-    protected virtual void OnTaskComplete() { }
+    protected virtual void OnTaskComplete(Optional<NormalPlayerTask> playerTask) { }
 
     protected GameOptionBuilder AddTaskOverrideOptions(GameOptionBuilder builder)
     {
@@ -104,10 +120,12 @@ public class Crewmate : CustomRole, IOverridenTaskHolderRole
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.VanillaRole(RoleTypes.Crewmate).Faction(FactionInstances.Crewmates).RoleColor("#b6f0ff");
 
+    public override List<Statistic> Statistics() => new() { VanillaStatistics.TasksComplete };
+
     [Localized(nameof(Crewmate))]
     private static class CrewmateTranslations
     {
-        [Localized("Options")]
+        [Localized(ModConstants.Options)]
         internal static class CrewmateOptionTranslations
         {
             [Localized(nameof(OverrideRoleTasks))]

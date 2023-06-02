@@ -4,14 +4,17 @@ using System.Linq;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers.Templates;
+namespace Lotus.Managers.Templates;
 
 public class TemplateManager
 {
     private FileInfo templateFile;
     private List<Template> templates;
     private Dictionary<string, Template> taggedTemplates;
-    private Dictionary<string, string> registeredTags = new();
+    private Dictionary<string, string> registeredTags = new()
+    {
+        {"modifier-info", "The template is used by the @ModsDescriptive tag when displaying modifiers. This template uses ^Role_XXX variables to display its information."}
+    };
 
     internal TemplateManager(FileInfo templateFile)
     {
@@ -44,7 +47,7 @@ public class TemplateManager
         SaveTemplates();
         return true;
     }
-    
+
     public bool TagTemplate(int id, string tag)
     {
         if (templates.Count <= id || id < 0) return false;
@@ -67,10 +70,12 @@ public class TemplateManager
         return true;
     }
 
-    public bool TryFormat(object obj, string tag, out string formatted)
+    public bool HasTemplate(string tag) => taggedTemplates.ContainsKey(tag);
+    
+    public bool TryFormat(object obj, string tag, out string formatted, bool ignoreWarning = false)
     {
         formatted = "";
-        if (!registeredTags.ContainsKey(tag)) VentLogger.Warn($"Tag \"{tag}\" is not registered. Please ensure all template tags have been registered through TemplateManager.RegisterTag().", "TemplateManager");
+        if (!ignoreWarning && !registeredTags.ContainsKey(tag)) VentLogger.Warn($"Tag \"{tag}\" is not registered. Please ensure all template tags have been registered through TemplateManager.RegisterTag().", "TemplateManager");
         if (!taggedTemplates.ContainsKey(tag)) return false;
         formatted = taggedTemplates[tag].Format(obj).Replace("\\n", "\n");
         return true;

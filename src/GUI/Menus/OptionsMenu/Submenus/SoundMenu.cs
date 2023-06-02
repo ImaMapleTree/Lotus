@@ -1,12 +1,12 @@
 using System;
 using System.Globalization;
 using TMPro;
-using TOHTOR.Utilities;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 
-namespace TOHTOR.GUI.Menus.OptionsMenu.Submenus;
+namespace Lotus.GUI.Menus.OptionsMenu.Submenus;
 
 [RegisterInIl2Cpp]
 public class SoundMenu: MonoBehaviour, IBaseOptionMenuComponent

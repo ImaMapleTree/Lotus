@@ -1,21 +1,22 @@
 using System.Collections.Generic;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Events;
-using TOHTOR.Roles.Interactions;
-using TOHTOR.Roles.Interfaces;
-using TOHTOR.Roles.Internals;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.Overrides;
-using TOHTOR.Roles.RoleGroups.Vanilla;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Events;
+using Lotus.Roles.Interactions;
+using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Overrides;
+using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Utilities;
+using Lotus.Extensions;
+using Lotus.Factions;
+using Lotus.Options;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Roles.RoleGroups.Impostors;
+namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Vampire : Impostor, IVariableRole
 {
@@ -30,7 +31,7 @@ public class Vampire : Impostor, IVariableRole
         InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this));
         if (result is InteractionResult.Halt) return false;
 
-        MyPlayer.RpcGuardAndKill(target);
+        MyPlayer.RpcMark(target);
         bitten.Add(target.PlayerId);
         Game.MatchData.GameHistory.AddEvent(new BittenEvent(MyPlayer, target));
 
@@ -57,14 +58,14 @@ public class Vampire : Impostor, IVariableRole
 
     public CustomRole Variation() => _vampiress;
 
-    public bool AssignVariation() => Random.RandomRange(0, 100) <= _vampiress.Chance;
+    public bool AssignVariation() => Random.RandomRange(0, 100) < _vampiress.Chance;
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub
                 .Name("Kill Delay")
                 .Bind(v => killDelay = (float)v)
-                .AddFloatRange(2.5f, 60f, 2.5f, 2, "s")
+                .AddFloatRange(2.5f, 60f, 2.5f, 2, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

@@ -1,19 +1,22 @@
 using System;
 using System.IO;
-using TOHTOR.Managers.Friends;
-using TOHTOR.Managers.Templates;
+using Lotus.Managers.Friends;
+using Lotus.Managers.Templates;
+using Lotus.Managers.Titles;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 // TODO: Create copy of local storage in cache folder and have file checking if cached, if file DNE then copy files from cache into main game
 [LoadStatic]
 public static class PluginDataManager
 {
-    private const string ModifiableDataDirectoryPath = "./TOHTOR_DATA";
+    private const string ModifiableDataDirectoryPath = "./LOTUS_DATA";
+    private const string ModifiableDataDirectoryPathOld = "./TOHTOR_DATA";
     private static readonly string HiddenDataDirectoryPath = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "/TownOfHostTheOtherRoles");
-    
+
+    private const string TitleDirectory = "Titles";
     private const string TemplateFile = "Templates.txt";
     private const string WordListFile = "BannedWords.txt";
     private const string FriendListFile = "Friends.txt";
@@ -29,8 +32,14 @@ public static class PluginDataManager
     public static LastKnownAs LastKnownAs;
     public static FriendManager FriendManager;
 
+    public static TitleManager TitleManager;
+    
+    
+
     static PluginDataManager()
     {
+        MigrateOldDirectory();
+        
         ModifiableDataDirectory = new DirectoryInfo(ModifiableDataDirectoryPath);
         HiddenDataDirectory = new DirectoryInfo(HiddenDataDirectoryPath);
         if (!ModifiableDataDirectory.Exists) ModifiableDataDirectory.Create();
@@ -41,7 +50,23 @@ public static class PluginDataManager
         ChatManager = new ChatManager(ModifiableDataDirectory.GetFile(WordListFile));
         FriendManager = new FriendManager(ModifiableDataDirectory.GetFile(FriendListFile));
         TemplateCommandManager = new TemplateCommandManager(ModifiableDataDirectory.GetFile(TemplateCommandFile));
-
+        TitleManager = new TitleManager(ModifiableDataDirectory.GetDirectory(TitleDirectory));
+        
         LastKnownAs = new LastKnownAs(HiddenDataDirectory.GetFile(LastKnownAsFile));
+        
+    }
+
+    private static void MigrateOldDirectory()
+    {
+        DirectoryInfo oldDirectory = new(ModifiableDataDirectoryPathOld);
+        if (!oldDirectory.Exists) return;
+        try
+        {
+            oldDirectory.MoveTo(ModifiableDataDirectoryPath);
+        }
+        catch
+        {
+            // ignored
+        }
     }
 }

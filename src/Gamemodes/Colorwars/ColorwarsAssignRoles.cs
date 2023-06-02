@@ -3,16 +3,16 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Managers;
+using Lotus.API;
+using Lotus.Managers;
+using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using VentLib.Networking.RPC;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities;
-using SerialKiller = TOHTOR.Roles.RoleGroups.Impostors.SerialKiller;
+using SerialKiller = Lotus.Roles.RoleGroups.Impostors.SerialKiller;
 
-namespace TOHTOR.Gamemodes.Colorwars;
+namespace Lotus.Gamemodes.Colorwars;
 
 public static class ColorwarsAssignRoles
 {
@@ -24,7 +24,7 @@ public static class ColorwarsAssignRoles
         if (ColorwarsGamemode.ConvertColorMode)
         {
             FFAAssignRoles.AssignRoles(players);
-            players.Do(p => p.GetCustomRole<SerialKiller>().KillCooldown *= 2);
+            players.Do(p => p.GetCustomRole<Roles.RoleGroups.Impostors.SerialKiller>().KillCooldown *= 2);
             return;
         }
 
@@ -42,7 +42,7 @@ public static class ColorwarsAssignRoles
                 if (player.PlayerId == localPlayer.PlayerId) player.SetRole(RoleTypes.Impostor);
                 RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Impostor).SendInclusive(teamClientIds);
                 RpcV3.Immediate(player.NetId, (byte)RpcCalls.SetRole).Write((ushort)RoleTypes.Crewmate).SendExcluding(teamClientIds);
-                Api.Roles.AssignRole(player, CustomRoleManager.Static.SerialKiller);
+                MatchData.AssignRole(player, CustomRoleManager.Static.SerialKiller);
             }
         }
 

@@ -1,7 +1,7 @@
 using System.IO;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Managers;
+namespace Lotus.Managers;
 
 public class DataFileAccessor
 {

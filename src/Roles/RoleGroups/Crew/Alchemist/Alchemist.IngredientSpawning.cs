@@ -1,21 +1,22 @@
 using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Extensions;
-using TOHTOR.Roles.Internals.Attributes;
-using TOHTOR.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.API.Odyssey;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.API;
+using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
-namespace TOHTOR.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew;
 
 public partial class Alchemist
 {
     private bool helpedFixLights;
 
-    protected override void OnTaskComplete()
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         LocalIngredients.Add(new IngredientCatalyst());
     }

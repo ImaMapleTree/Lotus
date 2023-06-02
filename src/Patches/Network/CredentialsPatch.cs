@@ -1,14 +1,13 @@
 using HarmonyLib;
+using Lotus.Addons;
+using Lotus.GUI.Patches;
+using Lotus.Managers.Date;
 using TMPro;
-using TOHTOR.Addons;
-using TOHTOR.GUI.Patches;
-using TOHTOR.Managers.Date;
-using TOHTOR.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 
-namespace TOHTOR.Patches.Network;
+namespace Lotus.Patches.Network;
 
 [Localized("PingDisplay")]
 [HarmonyPatch(typeof(VersionShower), nameof(VersionShower.Start))]
@@ -27,26 +26,26 @@ public class VersionShowerStartPatch
     public static TextMeshPro? SpecialEventText;
     static void Postfix(VersionShower __instance)
     {
-        TOHPlugin.CredentialsText = "\r\n";
+        ProjectLotus.CredentialsText = "\r\n";
     #if DEBUG
-        TOHPlugin.CredentialsText += $"v{TOHPlugin.PluginVersion}";
-        TOHPlugin.CredentialsText += $" ({TOHPlugin.DevVersionStr})\n";
+        ProjectLotus.CredentialsText += $"v{ProjectLotus.PluginVersion}";
+        ProjectLotus.CredentialsText += $" ({ProjectLotus.DevVersionStr})\n";
     #endif
-        TOHPlugin.CredentialsText += $"{_startColor.Colorize(TOHPlugin.ModName)}";
+        ProjectLotus.CredentialsText += $"{_startColor.Colorize(ProjectLotus.ModName)}";
     #if !DEBUG
-        TOHPlugin.CredentialsText += $" v{TOHPlugin.PluginVersion}";
+        ProjectLotus.CredentialsText += $" v{ProjectLotus.PluginVersion}";
     #endif
     #if DEBUG
-        TOHPlugin.CredentialsText += $": {_endColor.Colorize($"{TOHPlugin.Instance.Version().Branch}({TOHPlugin.Instance.Version().CommitNumber})")}";
+        ProjectLotus.CredentialsText += $": {_endColor.Colorize($"{ProjectLotus.Instance.Version().Branch}({ProjectLotus.Instance.Version().CommitNumber})")}";
     #endif
 
         int addonCount = AddonManager.Addons.Count;
         if (addonCount > 0)
-            TOHPlugin.CredentialsText += $"\r\n{new Color(1f, 0.67f, 0.37f).Colorize($"{addonCount} {addonsLoaded}")}";
+            ProjectLotus.CredentialsText += $"\r\n{new Color(1f, 0.67f, 0.37f).Colorize($"{addonCount} {addonsLoaded}")}";
 
 
         var credentials = Object.Instantiate(__instance.text);
-        credentials.text = TOHPlugin.CredentialsText;
+        credentials.text = ProjectLotus.CredentialsText;
         credentials.alignment = TextAlignmentOptions.TopRight;
         credentials.transform.position = new Vector3(4.6f, 3.2f, 0);
 

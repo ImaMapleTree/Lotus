@@ -2,11 +2,14 @@ extern alias JBAnnotations;
 using System;
 using System.Collections.Generic;
 using JBAnnotations::JetBrains.Annotations;
-using TOHTOR.API.Odyssey;
+using Lotus.API.Odyssey;
+using Lotus.API.Vanilla.Meetings;
+using Lotus.Patches.Meetings;
+using VentLib.Utilities.Optionals;
 
 // ReSharper disable InvalidXmlDocComment
 
-namespace TOHTOR.Roles.Internals.Attributes;
+namespace Lotus.Roles.Internals.Attributes;
 
 [MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)] // Inherited = false because inheritance is managed through Subclassing, DO NOT WORRY!
@@ -25,7 +28,7 @@ public class RoleActionAttribute: Attribute
     /// </summary>
     public bool Subclassing = true;
 
-    public RoleActionAttribute(RoleActionType actionType, bool triggerAfterDeath = false, bool blockable = true, Priority priority = Priority.NoPriority)
+    public RoleActionAttribute(RoleActionType actionType, bool triggerAfterDeath = false, bool blockable = true, Priority priority = Priority.Normal)
     {
         this.ActionType = actionType;
         this.WorksAfterDeath = triggerAfterDeath || actionType is RoleActionType.MyDeath or RoleActionType.SelfExiled;
@@ -38,9 +41,13 @@ public class RoleActionAttribute: Attribute
 
 public enum Priority
 {
-    First,
-    NoPriority,
-    Last
+    First = 0,
+    VeryHigh = 200,
+    High = 400,
+    Normal = 600,
+    Low = 800,
+    VeryLow = 1000,
+    Last = int.MaxValue
 }
 
 public enum RoleActionType
@@ -54,6 +61,10 @@ public enum RoleActionType
     /// Parameters: (PlayerControl source, RoleAction action, object[] parameters)
     /// </summary>
     AnyPlayerAction,
+    /// <summary>
+    /// Triggers when any player pets
+    /// </summary>
+    AnyPet,
     OnPet,
     /// <summary>
     /// Triggers when the pet button is held down. This gets sent every 0.4 seconds if the button is held down. The
@@ -101,7 +112,7 @@ public enum RoleActionType
     /// Triggered when my player dies. This action <b>CANNOT</b> be canceled. <br/>
     /// </summary>
     /// <param name="killer"><see cref="PlayerControl"/> the killer</param>
-    /// <param name="realKiller"><see cref="VentLib.Utilities.Optionals.Optional"/> the OPTIONAl real killer (exists if killed indirectly)</param>
+    /// <param name="realKiller"><see cref="Optional{T}"/> the OPTIONAl real killer (exists if killed indirectly)</param>
     MyDeath,
     SelfExiled,
     /// <summary>
@@ -124,7 +135,8 @@ public enum RoleActionType
     /// Triggers when any player completes a task. This cannot be canceled (Currently)
     /// </summary>
     /// <param name="player"><see cref="PlayerControl"/> the player completing the task</param>
-    /// <param name="taskId"><see cref="uint"/> the id of the completed task</param>
+    /// <param name="task"><see cref="Optional"/> an optional of <see cref="PlayerTask"/>, containing the task that was done</param>
+    /// <param name="taskLength"><see cref="NormalPlayerTask.TaskLength"/> the length of the completed task</param>
     TaskComplete,
     FixedUpdate,
     /// <summary>
@@ -132,6 +144,7 @@ public enum RoleActionType
     /// </summary>
     /// <param name="victim"><see cref="PlayerControl"/> the dead player</param>
     /// <param name="killer"><see cref="PlayerControl"/> the killing player</param>
+    /// <param name="deathEvent"><see cref="Lotus.Managers.History.Events.IDeathEvent"/> the related death event </param>
     AnyDeath,
     /// <summary>
     /// Triggers when my player votes for someone (or skips)
@@ -177,14 +190,23 @@ public enum RoleActionType
     /// <b>IMPORTANT</b><br/>
     /// You CAN modify the meeting delegate at this time to change the results of the meeting. HOWEVER,
     /// modifying the votes will only change what is displayed during the meeting. You MUST also update the exiled player to change
-    /// the exiled player, as the votes WILL NOT be recalculated automatically at this point. <see cref="TOHTOR.Patches.Meetings.CheckForEndVotingPatch.CalculateExiledPlayer"/>
+    /// the exiled player, as the votes WILL NOT be recalculated automatically at this point. <see cref="MeetingDelegate.CalculateExiledPlayer"/>
     /// </summary>
-    /// <param name="meetingDelegate"><see cref="TOHTOR.API.Vanilla.Meetings.MeetingDelegate"/> the meeting delegate for the current meeting</param>
+    /// <param name="meetingDelegate"><see cref="MeetingDelegate"/> the meeting delegate for the current meeting</param>
     VotingComplete,
+    /// <summary>
+    /// Triggers when the meeting ends, this does not pass the meeting delegate as at this point everything has been finalized.
+    /// <param name="Exiled Player">><see cref="Optional{T}"/> the optional exiled player</param>
+    /// <param name="isTie"><see cref="bool"/> a boolean representing if the meeting tied</param>
+    /// <param name="player vote counts"<see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, int) representing the amount of votes a player got</param>
+    /// <param name="playerVoteStatus"><see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, List[Optional[byte]] containing the voting statuses of all players)
+    /// </summary>
+    MeetingEnd,
     /// <summary>
     /// Triggers when a meeting is called
     /// </summary>
     /// <param name="player"><see cref="PlayerControl"/> the player who called the meeting</param>
+    /// <param name="deadBody"><see cref="Optional{T}"/> optional <see cref="GameData.PlayerInfo"/> which exists if the meeting was called byt reporting a body</param>
     MeetingCalled
 }
 
@@ -224,6 +246,14 @@ public static class RoleActionTypeMethods
             RoleActionType.AnyVote => false,
             RoleActionType.Interaction => false,
             RoleActionType.AnyInteraction => false,
+            RoleActionType.OnHoldPet => false,
+            RoleActionType.OnPetRelease => false,
+            RoleActionType.AnyShapeshift => false,
+            RoleActionType.AnyUnshapeshift => false,
+            RoleActionType.Chat => false,
+            RoleActionType.Disconnect => false,
+            RoleActionType.VotingComplete => false,
+            RoleActionType.MeetingCalled => true,
             _ => PlayerActions.Contains(actionType)
         };
     }

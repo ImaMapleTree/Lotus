@@ -2,7 +2,7 @@ using System.Linq;
 using VentLib.Options;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat;
+namespace Lotus.Chat;
 
 public class OptionUtils
 {

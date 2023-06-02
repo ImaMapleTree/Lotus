@@ -1,108 +1,111 @@
+using System.Collections.Generic;
 using System.Linq;
-using TOHTOR.API.Odyssey;
-using TOHTOR.Managers;
-using TOHTOR.Managers.Templates;
-using TOHTOR.Utilities;
+using Lotus.API.Odyssey;
+using Lotus.Chat.Patches;
+using Lotus.Managers;
+using Lotus.Managers.Hotkeys;
+using Lotus.Managers.Templates;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
+using VentLib.Commands.Interfaces;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace TOHTOR.Chat.Commands;
+namespace Lotus.Chat.Commands;
 
-[Command(CommandFlag.HostOnly, "template", "t", "templates")]
-public class TemplateCommands: CommandTranslations
+[Command("template", "t", "templates")]
+public class TemplateCommands: CommandTranslations, ICommandReceiver
 {
     public static string TemplateTitle = ModConstants.Palette.GeneralColor4.Colorize("Templates");
 
-    [Command("create", "c")]
+    [Command(CommandFlag.HostOnly, "create", "c")]
     public static void CreateTemplate(PlayerControl source, string text)
     {
         int id = Templates.CreateTemplate(text);
-        Utils.SendMessage(TemplateCommandTranslations.CreatedTemplateText.Formatted(id + 1), source.PlayerId, TemplateTitle, true);
+        SuccessMsg(TemplateCommandTranslations.CreatedTemplateText.Formatted(id + 1)).Send();
     }
 
-    [Command("edit", "e")]
+    [Command(CommandFlag.HostOnly, "edit", "e")]
     public static void EditTemplate(PlayerControl source, int id, string text)
     {
-        if (!Templates.EditTemplate(id - 1, text)) Utils.SendMessage(TemplateCommandTranslations.ErrorEditingTemplateText.Formatted(id), source.PlayerId, CommandError, true);
-        else Utils.SendMessage(TemplateCommandTranslations.SuccessEditingTemplateText.Formatted(id), source.PlayerId, TemplateTitle, true);
+        if (!Templates.EditTemplate(id - 1, text)) ErrorMsg(TemplateCommandTranslations.ErrorEditingTemplateText.Formatted(id)).Send(source);
+        else SuccessMsg(TemplateCommandTranslations.SuccessEditingTemplateText.Formatted(id)).Send(source);
     }
     
-    [Command("remove", "r")]
+    [Command(CommandFlag.HostOnly, "remove", "r")]
     public static void RemoveTemplate(PlayerControl source, int id)
     {
-        if (!Templates.DeleteTemplate(id - 1)) Utils.SendMessage(TemplateCommandTranslations.ErrorRemovingTemplateText, source.PlayerId, CommandError, true);
-        else Utils.SendMessage(TemplateCommandTranslations.SuccessRemovingTemplateText.Formatted(id), source.PlayerId, TemplateTitle, true);
+        if (!Templates.DeleteTemplate(id - 1)) ErrorMsg(TemplateCommandTranslations.ErrorRemovingTemplateText).Send(source);
+        else SuccessMsg(TemplateCommandTranslations.SuccessRemovingTemplateText.Formatted(id)).Send(source);
     }
 
-    [Command("list", "l")]
+    [Command(CommandFlag.HostOnly, "list", "l")]
     public static void ListTemplates(PlayerControl source)
     {
-        string templates = Templates.ListTemplates.Select((t, i) => TemplateText(i + 1, t)).Fuse("\n");
-        Utils.SendMessage(templates, source.PlayerId, TemplateTitle, true);
+        string templates = Templates.ListTemplates.Select((t, i) => TemplateText(i + 1, t)).Fuse("\n\n");
+        SuccessMsg(templates).Send(source);
     }
 
-    [Command("tag", "t")]
+    [Command(CommandFlag.HostOnly, "tag", "t")]
     public static void TagTemplate(PlayerControl source, int id, string tag)
     {
-        if (!Templates.TagTemplate(id - 1, tag)) Utils.SendMessage(TemplateCommandTranslations.ErrorTaggingTemplateText.Formatted(tag, id), source.PlayerId, CommandError, true);
-        else Utils.SendMessage(TemplateCommandTranslations.SuccessTaggingTemplateText.Formatted(tag, id), source.PlayerId, TemplateTitle, true);
+        if (!Templates.TagTemplate(id - 1, tag)) ErrorMsg(TemplateCommandTranslations.ErrorTaggingTemplateText.Formatted(tag, id)).Send(source);
+        else SuccessMsg(TemplateCommandTranslations.SuccessTaggingTemplateText.Formatted(tag, id)).Send(source);
     }
 
-    [Command("untag", "ut")]
+    [Command(CommandFlag.HostOnly, "untag", "ut")]
     public static void UntagTemplate(PlayerControl source, int id)
     {
-        if (!Templates.UntagTemplate(id - 1)) Utils.SendMessage(TemplateCommandTranslations.ErrorRemovingTagText.Formatted(id), source.PlayerId, CommandError, true);
-        else Utils.SendMessage(TemplateCommandTranslations.SuccessRemovingTagText.Formatted(id), source.PlayerId, TemplateTitle, true);
+        if (!Templates.UntagTemplate(id - 1)) ErrorMsg(TemplateCommandTranslations.ErrorRemovingTagText.Formatted(id)).Send(source);
+        else SuccessMsg(TemplateCommandTranslations.SuccessRemovingTagText.Formatted(id)).Send(source);
     }
 
-    [Command("preview", "p")]
+    [Command(CommandFlag.HostOnly, "preview", "p")]
     public static void Preview(PlayerControl source, int id)
     {
-        if (!Templates.TryFormat(source, id - 1, out string text)) Utils.SendMessage(TemplateCommandTranslations.ErrorPreviewingTemplateText.Formatted(id), source.PlayerId, CommandError, true);
-        else Utils.SendMessage(text, source.PlayerId, leftAlign: true);
+        if (!Templates.TryFormat(source, id - 1, out string text)) ErrorMsg(TemplateCommandTranslations.ErrorPreviewingTemplateText.Formatted(id)).Send(source);
+        else SuccessMsg(text).Send(source);
     }
 
-    [Command("show", "s")]
-    public static void Show(PlayerControl source, CommandContext ctx)
+    private static void InternalShow(PlayerControl source, CommandContext ctx, bool showToAll = true)
     {
-        if (ctx.Args.Length == 0) Utils.SendMessage(InvalidUsage, source.PlayerId, InvalidUsage, true);
+        if (ctx.Args.Length == 0) ChatHandlers.InvalidCmdUsage().Send(source);
         bool success;
-        Game.GetAllPlayers().ForEach(p =>
+        IEnumerable<PlayerControl> players = showToAll ? Game.GetAllPlayers() : new [] {source };
+        players.ForEach(p =>
         {
             string text = "";
             if (int.TryParse(ctx.Args[0], out int result)) success = Templates.TryFormat(p, result - 1, out text);
-            else success = Templates.TryFormat(p, ctx.Join(), out text);
+            else success = Templates.TryFormat(p, ctx.Join(), out text, true);
             if (!success)
             {
-                Utils.SendMessage(TemplateCommandTranslations.ErrorShowingTemplateText.Formatted(p.name), source.PlayerId, CommandError, true);
+                ErrorMsg(TemplateCommandTranslations.ErrorShowingTemplateText.Formatted(p.name)).Send(source);
                 return;
             }
-            Utils.SendMessage(text, p.PlayerId, leftAlign: true);
+            SuccessMsg(text).Send(p);
         });
     }
 
-    [Command("tags")]
+    [Command(CommandFlag.HostOnly, "tags")]
     public static void ListTags(PlayerControl source)
     {
-        string tags = Templates.AllTags().Select((t, i) => $"{i + 1}. {t.tag}: {t.description}").Fuse("\n");
-        Utils.SendMessage(tags, source.PlayerId, TemplateTitle, true);
+        string tags = Templates.AllTags().Select((t, i) => $"{i + 1}. {t.tag}: {t.description}").Fuse("\n\n");
+        SuccessMsg(tags).Send(source);
     }
 
-    [Command("variables", "v")]
+    [Command(CommandFlag.HostOnly, "variables", "v")]
     public static void ListVariables(PlayerControl source)
     {
         string variables = Template.TemplateVariables.Select(t => $"<b>{t.Key}</b>: {t.Value}").Fuse("\n");
-        Utils.SendMessage(variables, source.PlayerId, TemplateTitle, true);
+        SuccessMsg(variables).Send(source);
     }
 
-    [Command("reload")]
+    [Command(CommandFlag.HostOnly, "reload")]
     public static void Reload(PlayerControl source)
     {
         Templates.Reload();
-        Utils.SendMessage(TemplateCommandTranslations.ReloadTemplatesText, source.PlayerId, TemplateTitle, true);
+        SuccessMsg(TemplateCommandTranslations.ReloadTemplatesText).Send(source);
     }
 
     private static string TemplateText(int i, Template t)
@@ -110,6 +113,9 @@ public class TemplateCommands: CommandTranslations
         string tagText = t.Tag != null ? $"({t.Tag}) " : "";
         return $"{i}. {tagText}{t.Text}";
     }
+
+    private static ChatHandler SuccessMsg(string message) => ChatHandler.Of(message, title: TemplateTitle).LeftAlign();
+    private static ChatHandler ErrorMsg(string message) => ChatHandler.Of(message, title: CommandError).LeftAlign();
     
     private static TemplateManager Templates => PluginDataManager.TemplateManager;
 
@@ -151,5 +157,14 @@ public class TemplateCommands: CommandTranslations
 
         [Localized(nameof(ReloadTemplatesText))]
         public static string ReloadTemplatesText = "Successfully reloaded templates.";
+    }
+
+    public void Receive(PlayerControl source, CommandContext context)
+    {
+        if (context.Args.Length == 0) return;
+        if (source.IsHost()) RpcSendChatPatch.EatCommand = true;
+        
+        if (source.IsHost() && HotkeyManager.HoldingRightShift) Game.GetDeadPlayers().ForEach(p => InternalShow(p, context));
+        else InternalShow(source, context, source.IsHost());
     }
 }
