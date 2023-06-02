@@ -74,6 +74,7 @@ public class Crusader: Crewmate, ISabotagerRole
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .DesyncRole(RoleTypes.Impostor)
+            .RoleFlags(RoleFlag.CannotWinAlone)
             .RoleColor(new Color(0.78f, 0.36f, 0.22f))
             .OptionOverride(new IndirectKillCooldown(() => AUSettings.KillCooldown()));
 

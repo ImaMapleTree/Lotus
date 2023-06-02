@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Lotus.API;
@@ -11,19 +13,23 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
+using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using static Lotus.Roles.RoleGroups.Neutral.Vulture.Translations.Options;
+using Object = UnityEngine.Object;
 
 namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Vulture : CustomRole
 {
+    public static HashSet<Type> VultureBannedModifiers = new() { typeof(Oblivious), typeof(Sleuth) };
+    public override HashSet<Type> BannedModifiers() => canSwitchMode ? new HashSet<Type>() : VultureBannedModifiers;
     private static Color _modeColor = new(0.73f, 0.18f, 0.02f);
-    
+
     private int bodyCount;
     private int bodyAmount;
     private bool canUseVents;
@@ -32,19 +38,19 @@ public class Vulture : CustomRole
     private bool hasArrowsToBodies;
     private bool isEatMode = true;
 
-    
-    
+
+
     [UIComponent(UI.Counter)]
     private string BodyCounter() => RoleUtils.Counter(bodyCount, bodyAmount, RoleColor);
-    
+
     [UIComponent(UI.Text)]
     private string DisplayModeText() => canSwitchMode ? _modeColor.Colorize(isEatMode ? Translations.EatingModeText : Translations.ReportingModeText) : "";
-    
+
     [UIComponent(UI.Indicator)]
     private string Arrows() => hasArrowsToBodies ? Object.FindObjectsOfType<DeadBody>()
         .Where(b => !Game.MatchData.UnreportableBodies.Contains(b.ParentId))
-        .Select(b => RoleUtils.CalculateArrow(MyPlayer, b.TruePosition, RoleColor)).Fuse("") : ""; 
-    
+        .Select(b => RoleUtils.CalculateArrow(MyPlayer, b.TruePosition, RoleColor)).Fuse("") : "";
+
     [RoleAction(RoleActionType.SelfReportBody)]
     private void EatBody(GameData.PlayerInfo body, ActionHandle handle)
     {
@@ -89,6 +95,7 @@ public class Vulture : CustomRole
                 .AddOnOffValues()
                 .Build());
 
+
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.RoleColor(new Color(0.64f, 0.46f, 0.13f))
             .Faction(FactionInstances.Solo)
@@ -105,7 +112,7 @@ public class Vulture : CustomRole
 
         [Localized(nameof(ReportingModeText))]
         public static string ReportingModeText = "Reporting";
-        
+
         [Localized(ModConstants.Options)]
         public static class Options
         {

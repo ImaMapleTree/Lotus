@@ -4,7 +4,9 @@ using System.Linq;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
+using Lotus.API.Reactive;
 using Lotus.API.Vanilla.Meetings;
+using Lotus.Chat;
 using Lotus.RPC;
 using Lotus.Utilities;
 using Lotus.Victory;
@@ -25,11 +27,14 @@ internal class BlackscreenResolver
     private Dictionary<byte, (bool isDead, bool isDisconnected)> playerStates = null!;
     private HashSet<byte> unpatchable;
 
+    private bool patching;
+
 
     internal BlackscreenResolver(MeetingDelegate meetingDelegate)
     {
         this.meetingDelegate = meetingDelegate;
         resetCameraPlayer = Game.GetDeadPlayers().FirstOrOptional().Map(p => p.PlayerId).OrElse(byte.MaxValue);
+        Hooks.PlayerHooks.PlayerMessageHook.Bind(nameof(BlackscreenResolver), _ => BlockLavaChat(), true);
     }
 
     internal void BeginProcess()
@@ -78,6 +83,7 @@ internal class BlackscreenResolver
 
     private HashSet<byte> StoreAndSendFallbackData()
     {
+        patching = true;
         byte exiledPlayer = meetingDelegate.ExiledPlayer?.PlayerId ?? byte.MaxValue;
         GameData.PlayerInfo[] playerInfos = GameData.Instance.AllPlayers.ToArray().Where(p => p != null).ToArray();
         playerInfos.FirstOrOptional(p => p.PlayerId == exiledPlayer).IfPresent(info => info.IsDead = true);
@@ -97,6 +103,7 @@ internal class BlackscreenResolver
             info.Disconnected = val.isDisconnected;
             if (info.Object != null) info.PlayerName = info.Object.name;
         });
+        patching = false;
         GeneralRPC.SendGameData();
         CheckEndGamePatch.Deferred = false;
         callback();
@@ -168,4 +175,10 @@ internal class BlackscreenResolver
         return PlayerControl.LocalPlayer;
     }
 
+    private void BlockLavaChat()
+    {
+        if (!patching) return;
+        ChatHandler chatHandler = ChatHandler.Of("", "-");
+        for (int i = 0; i < 20; i++) chatHandler.Send();
+    }
 }

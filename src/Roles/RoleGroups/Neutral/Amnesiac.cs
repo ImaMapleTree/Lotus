@@ -12,7 +12,6 @@ using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Legacy;
-using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -25,7 +24,6 @@ namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Amnesiac : CustomRole
 {
-    public static HashSet<Type> AmnesiacBannedModifiers = new() { typeof(Oblivious) };
     private bool stealExactRole;
     private bool hasArrowsToBodies;
 
@@ -62,8 +60,6 @@ public class Amnesiac : CustomRole
         role.DesyncRole = RoleTypes.Impostor;
         handle.Cancel();
     }
-
-    public override HashSet<Type> BannedModifiers() => AmnesiacBannedModifiers;
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)

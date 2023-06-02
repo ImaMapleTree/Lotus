@@ -74,8 +74,7 @@ public class ModKeybindings
 
     private static void DumpLog()
     {
-        VentLogger.Dump();
-        VentLogger.SendInGame(BasicCommands.DumpSuccess);
+        BasicCommands.Dump(PlayerControl.LocalPlayer);
     }
 
     private static void ProfileAll()
@@ -95,11 +94,15 @@ public class ModKeybindings
     private static void ResetGameOptions()
     {
         VentLogger.High("Resetting Game Options", "ResetOptions");
-        OptionManager.GetAllManagers().ForEach(m => m.GetOptions().ForEach(o =>
+        OptionManager.GetAllManagers().ForEach(m =>
         {
-            o.SetValue(o.DefaultIndex);
-            OptionHelpers.GetChildren(o).ForEach(o => o.SetValue(o.DefaultIndex));
-        }));
+            m.GetOptions().ForEach(o =>
+            {
+                o.SetValue(o.DefaultIndex);
+                OptionHelpers.GetChildren(o).ForEach(o2 => o2.SetValue(o.DefaultIndex));
+            });
+            m.DelaySave(0);
+        });
     }
 
     private static void InstantReduceTimer()

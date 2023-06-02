@@ -79,7 +79,7 @@ public class Oracle: Crewmate
     {
         if (!selectedPlayer.Exists()) return;
         PlayerControl target = Utils.GetPlayerById(selectedPlayer.Get())!;
-        target.NameModel().GetComponentHolder<RoleHolder>().Last(c => c.ViewMode() is ViewMode.Replace).SetViewerSupplier(() => Game.GetAllPlayers().ToList());
+        target.NameModel().GetComponentHolder<RoleHolder>().LastOrDefault(c => c.ViewMode() is ViewMode.Replace)?.SetViewerSupplier(() => Game.GetAllPlayers().ToList());
 
         string roleName = _oracleGradient.Apply(target.GetCustomRole().RoleName);
 

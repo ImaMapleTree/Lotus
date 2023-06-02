@@ -27,7 +27,6 @@ namespace Lotus.Roles.RoleGroups.Undead.Roles;
 
 public class Retributionist : NeutralKillingBase
 {
-    private int lastVentId;
     private PlayerControl? attacker;
     private Remote<NameComponent>? remote;
 
@@ -94,7 +93,6 @@ public class Retributionist : NeutralKillingBase
         Vent randomVent = vents.GetRandom();
         Vector2 ventPosition = randomVent.transform.position;
         Utils.Teleport(MyPlayer.NetTransform, new Vector2(ventPosition.x, ventPosition.y + 0.3636f));
-        lastVentId = randomVent.Id;
 
         if (!invisibleRevenge) return;
 
@@ -130,6 +128,5 @@ public class Retributionist : NeutralKillingBase
 
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier)
-            .RoleColor(new Color(0.73f, 0.66f, 0.69f));
+        base.Modify(roleModifier).RoleColor(new Color(0.73f, 0.66f, 0.69f));
 }

@@ -23,6 +23,9 @@ public static class GeneralOptionTranslations
     [Localized(nameof(NeverText))]
     public static string NeverText = "Never";
 
+    [Localized(nameof(AlwaysText))]
+    public static string AlwaysText = "Always";
+
     [Localized(nameof(ShowText))]
     public static string ShowText = "Show";
 

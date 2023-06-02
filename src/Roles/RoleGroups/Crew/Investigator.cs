@@ -118,7 +118,7 @@ public class Investigator : Crewmate
             rtb.builder.BindInt(i => rtb.allColored = i == 1);
             Option option = rtb.builder.Build();
             RoleOptions.AddChild(option);
-            option.Register(loadMode: OptionLoadMode.LoadOrCreate);
+            CustomRoleManager.RoleOptionManager.Register(option, OptionLoadMode.LoadOrCreate);
         });
     }
 

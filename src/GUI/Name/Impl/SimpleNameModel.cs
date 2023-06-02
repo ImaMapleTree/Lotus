@@ -52,7 +52,7 @@ public class SimpleNameModel : INameModel
         this.player = player;
         SetHolders();
         this.unalteredName = player.name;
-        NameHolder.Add(new NameComponent(new LiveString(unalteredName, Color.white), new[] { GameState.Roaming, GameState.InMeeting}, ViewMode.Replace));
+        NameHolder.Add(new NameComponent(new LiveString(unalteredName, Color.white), new[] { GameState.Roaming, GameState.InMeeting}));
     }
 
     public string Unaltered() => unalteredName;
@@ -90,7 +90,7 @@ public class SimpleNameModel : INameModel
             {
                 int clientId = rPlayer.GetClientId();
                 if (clientId != -1) RpcV3.Immediate(player.NetId, RpcCalls.SetName).Write(cacheString).Send(clientId);
-                if (player.PlayerId == rPlayer.PlayerId && !player.IsAlive())
+                if (!player.IsAlive())
                 {
                     player.Data.PlayerName = player.name;
                     Players.SendPlayerData(player.Data, clientId, autoSetName: false);

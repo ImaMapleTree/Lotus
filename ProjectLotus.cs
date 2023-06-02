@@ -18,16 +18,11 @@ using Lotus.Managers;
 using Lotus.Managers.Reporting;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.RPC;
-using Lotus.Utilities;
 using VentLib;
 using VentLib.Logging;
 using VentLib.Networking.Handshake;
 using VentLib.Networking.RPC;
-using VentLib.Options;
 using VentLib.Options.Game;
-using VentLib.Utilities;
-using VentLib.Utilities.Collections;
 using VentLib.Version;
 using VentLib.Version.Git;
 using VentLib.Version.Updater;
@@ -54,18 +49,16 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
     public static readonly string ModName = "Project Lotus";
     public static readonly string ModColor = "#4FF918";
 
-    public static readonly bool ShowDiscordButton = true;
-    
 
     public static readonly bool DevVersion = true;
-    public static readonly string DevVersionStr = "Alpha 24.05.2023";
+    public static readonly string DevVersionStr = "Alpha 31.05.2023";
 
     public Harmony Harmony { get; } = new(PluginGuid);
     public static string CredentialsText = null!;
 
     public static RProfiler Profiler = new("General");
     public static ModUpdater ModUpdater = null!;
-    
+
 
 
     public ProjectLotus()
@@ -75,7 +68,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         VersionControl versionControl = ModVersion.VersionControl = VersionControl.For(this);
         versionControl.AddVersionReceiver(ReceiveVersion);
         PluginDataManager.TemplateManager.RegisterTag("lobby-join", "Tag for the template shown to players joining the lobby.");
-        
+
         ModUpdater = ModUpdater.Default();
         ModUpdater.EstablishConnection();
         ModUpdater.RegisterReleaseCallback(BeginUpdate, true);

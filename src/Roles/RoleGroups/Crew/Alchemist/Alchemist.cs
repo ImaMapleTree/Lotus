@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API;
+using Lotus.API.Odyssey;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Impl;
@@ -48,7 +49,7 @@ public partial class Alchemist: Crewmate
             .ToList();
     }
 
-    [UIComponent(UI.Counter, ViewMode.Replace)]
+    [UIComponent(UI.Counter, ViewMode.Replace, GameState.Roaming, GameState.InMeeting)]
     private string RemoveCounter() => "";
 
     [UIComponent(UI.Role, ViewMode.Absolute)]

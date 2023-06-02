@@ -1,6 +1,5 @@
 ﻿using Lotus.API.Odyssey;
 using Lotus.Extensions;
-using Lotus.Logging;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using UnityEngine;
@@ -37,7 +36,6 @@ public class Deadly: Subrole
                 .BindInt(i => cooldownReduction = i)
                 .Build());
 
-
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(0.45f, 0.64f, 0.4f));
 
@@ -47,6 +45,7 @@ public class Deadly: Subrole
         [Localized(ModConstants.Options)]
         public static class Options
         {
+            [Localized(nameof(CooldownReduction))]
             public static string CooldownReduction = "Cooldown Reduction";
         }
     }

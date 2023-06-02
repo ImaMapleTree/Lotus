@@ -107,6 +107,12 @@ public class GameplayOptions
                 .BindBool(FlagSetter(DisabledTask.ResetBreaker))
                 .AddOnOffValues()
                 .Build())
+            .SubOption(sub => sub
+                .Key("Disable Fix Wiring")
+                .Name(GameplayOptionTranslations.DisableFixWiring)
+                .BindBool(FlagSetter(DisabledTask.FixWiring))
+                .AddOnOffValues()
+                .Build())
             .BindBool(b => DisableTasks = b)
             .BuildAndRegister());
 
@@ -196,6 +202,9 @@ public class GameplayOptions
         [Localized(nameof(DisableResetBreaker))]
         public static string DisableResetBreaker = "Disable Reset Breaker";
 
+        [Localized(nameof(DisableFixWiring))]
+        public static string DisableFixWiring = "Disable Fix Wiring";
+
         [Localized("DisableTaskWin")]
         public static string DisableTaskWinText = "Disable Task Win";
 
@@ -212,7 +221,8 @@ public enum DisabledTask
     UnlockSafe = 4,
     UploadData = 8,
     StartReactor = 16,
-    ResetBreaker = 32
+    ResetBreaker = 32,
+    FixWiring = 64
 }
 
 public enum FirstKillCooldown

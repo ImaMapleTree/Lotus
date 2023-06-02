@@ -77,7 +77,7 @@ public class BasicCommands: CommandTranslations
     }
 
     [Command(CommandFlag.HostOnly, "dump")]
-    public static void Dump(PlayerControl source)
+    public static void Dump(PlayerControl _)
     {
         VentLogger.SendInGame("Successfully dumped log. Check your logs folder for a \"dump.log!\"");
         VentLogger.Dump();
@@ -108,7 +108,17 @@ public class BasicCommands: CommandTranslations
     [Command(CommandFlag.LobbyOnly, "winner", "w")]
     public static void ListWinners(PlayerControl source)
     {
-        ChatHandler.Send(source, $"{Winners}: {Game.MatchData.GameHistory.LastWinners.Select(w => w.Name + $"({w.Role.RoleName})").Fuse()}");
+        if (Game.MatchData.GameHistory.LastWinners == null!) new ChatHandler()
+            .Title(t => t.Text(CommandError).Color(ModConstants.Palette.KillingColor).Build())
+            .LeftAlign()
+            .Message(LastResultCommand.LRTranslations.NoPreviousGameText)
+            .Send(source);
+        else
+        {
+            string winnerText = Game.MatchData.GameHistory.LastWinners.Select(w => $"• {w.Name} ({w.Role.RoleName})").Fuse("\n");
+            ChatHandler.Of(winnerText, ModConstants.Palette.WinnerColor.Colorize(Winners)).LeftAlign().Send(source);
+        }
+
     }
 
     [Command(CommandFlag.LobbyOnly, "color", "colour")]

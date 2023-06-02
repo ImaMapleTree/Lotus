@@ -13,6 +13,7 @@ using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Options.Roles;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Neutral;
 using UnityEngine;
@@ -65,6 +66,12 @@ public class Bloodlust: Subrole
             MyPlayer.GetTeamInfo().MyRole = role.DesyncRole.Value;
         }
         requiresBaseKillMethod = !role.GetActions(RoleActionType.Attack).Any();
+    }
+
+    public override bool IsAssignableTo(PlayerControl player)
+    {
+        return (Options.RoleOptions.NeutralOptions.NeutralTeamingMode is not NeutralTeaming.Disabled ||
+                player.GetCustomRole().SpecialType is not SpecialType.NeutralKilling) && base.IsAssignableTo(player);
     }
 
     public override HashSet<Type>? RestrictedRoles()

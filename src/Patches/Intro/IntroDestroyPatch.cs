@@ -40,7 +40,7 @@ class IntroDestroyPatch
         string pet = GeneralOptions.MiscellaneousOptions.AssignedPet;
         pet = pet != "Random" ? pet : ModConstants.Pets.Values.ToList().GetRandom();
 
-        Async.Schedule(() => Game.GetAllPlayers().ForEach(p => Async.Execute(PreGameSetup(p, pet))), NetUtils.DeriveDelay(0.05f));
+        Game.GetAllPlayers().ForEach(p => Async.Execute(PreGameSetup(p, pet)));
         Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.6f));
 
         Game.GetAllPlayers().Select(p => new FrozenPlayer(p)).ForEach(p => Game.MatchData.FrozenPlayers[p.GameID] = p);
@@ -57,7 +57,6 @@ class IntroDestroyPatch
     {
         if (player == null) yield break;
 
-        if (player.GetVanillaRole() is not RoleTypes.Crewmate) player.RpcResetAbilityCooldown();
         if (GeneralOptions.MayhemOptions.RandomSpawn) Game.RandomSpawn.Spawn(player);
 
         player.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3);
@@ -74,8 +73,8 @@ class IntroDestroyPatch
             playerData.Tasks.Clear();
         }
 
-        bool hasPet = !player.cosmetics.CurrentPet.Data.ProductId.Equals("pet_EmptyPet");
-        if (hasPet) VentLogger.Trace($"Player: {player.name} has pet: {player.cosmetics.CurrentPet.Data.ProductId}. Skipping assigning pet: {pet}.", "PetAssignment");
+        bool hasPet = !(player.cosmetics?.CurrentPet?.Data?.ProductId == "pet_EmptyPet");
+        if (hasPet) VentLogger.Trace($"Player: {player.name} has pet: {player.cosmetics?.CurrentPet?.Data?.ProductId}. Skipping assigning pet: {pet}.", "PetAssignment");
         else if (player.AmOwner) player.SetPet(pet);
         else playerData.DefaultOutfit.PetId = pet;
 

@@ -206,6 +206,7 @@ public enum RoleActionType
     /// Triggers when a meeting is called
     /// </summary>
     /// <param name="player"><see cref="PlayerControl"/> the player who called the meeting</param>
+    /// <param name="deadBody"><see cref="Optional{T}"/> optional <see cref="GameData.PlayerInfo"/> which exists if the meeting was called byt reporting a body</param>
     MeetingCalled
 }
 

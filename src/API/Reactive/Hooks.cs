@@ -51,6 +51,7 @@ public class Hooks
         public static readonly Hook<PlayerShapeshiftHookEvent> PlayerShapeshiftHook = new SimpleHook<PlayerShapeshiftHookEvent>();
 
         public static readonly Hook<PlayerHookEvent> PlayerExiledHook = new SimpleHook<PlayerHookEvent>();
+        public static readonly Hook<PlayerTeleportedHookEvent> PlayerTeleportedHook = new SimpleHook<PlayerTeleportedHookEvent>();
     }
 
     public static class MeetingHooks

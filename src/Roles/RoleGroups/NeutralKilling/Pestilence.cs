@@ -79,13 +79,14 @@ public class Pestilence: NeutralKillingBase
                 TryKill(actor);
                 break;
         }
-        
+
         if (ImmuneRoles.Contains(actor.GetCustomRole().GetType())) canceled = true;
         if (canceled) handle.Cancel();
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream).Tab(DefaultTabs.HiddenTab)
+        AddKillCooldownOptions(base.RegisterOptions(optionStream))
+            .Tab(DefaultTabs.HiddenTab)
             .SubOption(sub2 => sub2
                 .KeyName("Unblockable Kill", UnblockableKill)
                 .AddOnOffValues(false)
@@ -118,7 +119,7 @@ public class Pestilence: NeutralKillingBase
                     .Build())
                 .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => 
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .RoleColor(new Color(0.22f, 0.22f, 0.22f))
             .RoleFlags(RoleFlag.TransformationRole);
@@ -131,19 +132,19 @@ public class Pestilence: NeutralKillingBase
         {
             [Localized(nameof(UnblockableKill))]
             public static string UnblockableKill = "Unblockable Kill";
-            
+
             [Localized(nameof(InvincibilitySettings))]
             public static string InvincibilitySettings = "Invincibility Settings";
-            
+
             [Localized(nameof(ImmuneManipulatorAttackers))]
             public static string ImmuneManipulatorAttackers = "Immune to Manipulated Attackers";
-            
+
             [Localized(nameof(ImmuneRangedAttacks))]
             public static string ImmuneRangedAttacks = "Immune to Ranged Attacks";
-            
+
             [Localized(nameof(ImmuneDelayedAttacks))]
             public static string ImmuneDelayedAttacks = "Immune to Delayed Attacks";
-            
+
             [Localized(nameof(ImmuneArsonistIgnite))]
             public static string ImmuneArsonistIgnite = "Immune to Arsonist Ignite";
         }

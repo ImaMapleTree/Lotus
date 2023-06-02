@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using AmongUs.GameOptions;
 using Lotus.API.Odyssey;
@@ -16,6 +17,7 @@ using Lotus.Options;
 using Lotus.Patches.Systems;
 using Lotus.Roles.Events;
 using Lotus.Roles.Overrides;
+using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -24,6 +26,9 @@ namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Sheriff : Crewmate
 {
+    public static HashSet<Type> SheriffBannedModifiers = new() { typeof(Workhorse) };
+    public override HashSet<Type> BannedModifiers() => !isSheriffDesync ? new HashSet<Type>() : SheriffBannedModifiers;
+
     private int totalShots;
     private bool oneShotPerRound;
     private bool canKillCrewmates;

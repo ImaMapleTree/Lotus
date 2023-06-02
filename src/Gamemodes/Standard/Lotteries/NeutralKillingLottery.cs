@@ -11,6 +11,6 @@ public class NeutralKillingLottery: RoleLottery
     // TODO: maybe change this default role
     public NeutralKillingLottery() : base(CustomRoleManager.Special.IllegalRole)
     {
-        CustomRoleManager.AllRoles.Where(r => r.SpecialType is SpecialType.NeutralKilling).ForEach(r => AddRole(r));
+        CustomRoleManager.AllRoles.Where(r => r.SpecialType is SpecialType.NeutralKilling or SpecialType.Undead).ForEach(r => AddRole(r));
     }
 }

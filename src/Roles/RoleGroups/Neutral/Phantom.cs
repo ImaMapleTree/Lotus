@@ -17,6 +17,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -27,18 +28,18 @@ namespace Lotus.Roles.RoleGroups.Neutral;
 public class Phantom : Crewmate, IPhantomRole
 {
     private bool immuneToRangedInteractions;
-    private int phantomClickAmt;
-    private int phantomAlertAmt;
+    private int phantomInteractionThreshold;
+    private int phantomWarningThreshold;
     private bool isRevealed;
-    
+
     [NewOnSetup]
     private List<Remote<IndicatorComponent>> indicatorComponents = null!;
-    
+
     [RoleAction(RoleActionType.Interaction)]
     private void PhantomInteraction(Interaction interaction, ActionHandle handle)
     {
         if (!immuneToRangedInteractions && interaction is IRangedInteraction) return;
-        if (TasksComplete < phantomClickAmt) handle.Cancel();
+        if ((TotalTasks - TasksComplete) < phantomInteractionThreshold) handle.Cancel();
     }
 
     [RoleAction(RoleActionType.MyDeath)]
@@ -51,7 +52,7 @@ public class Phantom : Crewmate, IPhantomRole
         if (!player.Exists() || player.Get().PlayerId != MyPlayer.PlayerId) return;
         handle.Cancel();
     }
-    
+
     [RoleAction(RoleActionType.VotingComplete, priority: Priority.Last)]
     private void ClearVotedOut(MeetingDelegate meetingDelegate)
     {
@@ -62,14 +63,14 @@ public class Phantom : Crewmate, IPhantomRole
     }
 
     public override bool TasksApplyToTotal() => false;
-    
+
     public bool IsCountedAsPlayer() => false;
 
     protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         if (!MyPlayer.IsAlive()) return;
         if (TotalTasks == TasksComplete) ManualWin.Activate(MyPlayer, WinReason.SoloWinner, 999);
-        if (TasksComplete != phantomAlertAmt) return;
+        if ((TotalTasks - TasksComplete) > phantomWarningThreshold) return;
         PhantomReveal();
     }
 
@@ -89,18 +90,18 @@ public class Phantom : Crewmate, IPhantomRole
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
          AddTaskOverrideOptions(base.RegisterOptions(optionStream)
              .Tab(DefaultTabs.NeutralTab)
-             .SubOption(sub => sub.Name("Immune to Ranged Interactions")
+             .SubOption(sub => sub.KeyName("Immune to Ranged Interactions", Translations.Options.ImmuneToRangedInteractions)
                  .AddOnOffValues()
                  .BindBool(b => immuneToRangedInteractions = b)
                  .Build())
              .SubOption(opt =>
-                opt.Name("Tasks until Phantom Targetable")
-                .BindInt(v => phantomClickAmt = v)
+                opt.KeyName("Remaining Task Warning", Translations.Options.RemainingTaskWarning)
+                .BindInt(v => phantomInteractionThreshold = v)
                 .AddIntRange(1, 40, 1)
                 .Build())
             .SubOption(opt =>
-                opt.Name("Tasks until Phantom Alert")
-                .BindInt(v => phantomAlertAmt = v)
+                opt.KeyName("Remaining Tasks for Targetability", Translations.Options.RemainingTaskTargetable)
+                .BindInt(v => phantomWarningThreshold = v)
                 .AddIntRange(1, 40, 1)
                 .Build()));
 
@@ -109,4 +110,21 @@ public class Phantom : Crewmate, IPhantomRole
         .SpecialType(SpecialType.Neutral)
         .Faction(FactionInstances.Solo)
         .RoleFlags(RoleFlag.CannotWinAlone);
+
+    [Localized(nameof(Phantom))]
+    private static class Translations
+    {
+        [Localized(ModConstants.Options)]
+        public static class Options
+        {
+            [Localized(nameof(ImmuneToRangedInteractions))]
+            public static string ImmuneToRangedInteractions = "Immune to Ranged Interactions";
+
+            [Localized(nameof(RemainingTaskWarning))]
+            public static string RemainingTaskWarning = "Remaining Task Warning";
+
+            [Localized(nameof(RemainingTaskTargetable))]
+            public static string RemainingTaskTargetable = "Remaining Tasks for Targetability";
+        }
+    }
 }

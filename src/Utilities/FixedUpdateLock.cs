@@ -1,6 +1,7 @@
 using System;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Interfaces;
 using VentLib.Utilities.Debug.Profiling;
 
 namespace Lotus.Utilities;

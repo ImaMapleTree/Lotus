@@ -15,7 +15,7 @@ namespace Lotus.Chat.Commands;
 
 public class RoleInfoCommand
 {
-    private static int _previousLevel = 0;
+    private static int _previousLevel;
 
     [Command(CommandFlag.InGameOnly, "m", "myrole")]
     public static void MyRole(PlayerControl source, CommandContext context)
@@ -29,9 +29,17 @@ public class RoleInfoCommand
         else ShowRoleOptions(source);
     }
 
+    private static void ShowRoleDescription(PlayerControl source)
+    {
+        CustomRole role = source.GetCustomRole();
+        string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.FactionColor().Colorize(role.Faction.Name())}):";
+        output += $"\n{role.Description}";
+        ChatHandler.Of(output).LeftAlign().Send(source);
+        if (!source.GetSubroles().IsEmpty()) BasicCommands.Modifiers(source);
+    }
 
     [Command(CommandFlag.InGameOnly, "desc", "description")]
-    private static void ShowRoleDescription(PlayerControl source)
+    private static void ShowFirstMeetingText(PlayerControl source)
     {
         if (PluginDataManager.TemplateManager.TryFormat(source, "meeting-first", out string message))
             ChatHandler.Of(message).Send(source);

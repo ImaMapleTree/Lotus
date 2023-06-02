@@ -54,7 +54,12 @@ public class CheckForEndVotingPatch
             // Finally we transform the exiled player votes into the player's playerID
             .SelectMany(kv => kv.Value.Filter().Where(i => i == exiledPlayer).Select(i => kv.Key)).ToList();
 
-        if (meetingDelegate.ExiledPlayer != null) Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(meetingDelegate.ExiledPlayer, playerVotes));
+        if (meetingDelegate.ExiledPlayer != null)
+        {
+            PlayerControl p;
+            if ((p = meetingDelegate.ExiledPlayer.Object) != null) p.SetName(AUSettings.ConfirmImpostor() ? $"<b>{p.GetCustomRole().RoleName}</b>\n{p.name}" : p.name);
+            Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(meetingDelegate.ExiledPlayer, playerVotes));
+        }
         __instance.RpcVotingComplete(votingStates.ToArray(), meetingDelegate.ExiledPlayer, meetingDelegate.IsTie);
         return false;
     }

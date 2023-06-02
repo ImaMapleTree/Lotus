@@ -1,4 +1,4 @@
-namespace Lotus.Roles.Internals;
+namespace Lotus.Roles.Internals.Interfaces;
 
 public interface ICloneOnSetup
 {

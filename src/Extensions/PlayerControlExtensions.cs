@@ -257,14 +257,6 @@ public static class PlayerControlExtensions
         RpcV3.Immediate(player.NetId, RpcCalls.Exiled, SendOption.None);
     }
 
-    public static void NoCheckStartMeeting(this PlayerControl reporter, GameData.PlayerInfo target)
-    { /*サボタージュ中でも関係なしに会議を起こせるメソッド
-            targetがnullの場合はボタンとなる*/
-        MeetingRoomManager.Instance.AssignSelf(reporter, target);
-        DestroyableSingleton<HudManager>.Instance.OpenMeetingRoom(reporter);
-        reporter.RpcStartMeeting(target);
-    }
-
     ///<summary>
     ///プレイヤーのRoleBehaviourのGetPlayersInAbilityRangeSortedを実行し、戻り値を返します。
     ///</summary>

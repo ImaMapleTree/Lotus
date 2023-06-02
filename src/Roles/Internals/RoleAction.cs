@@ -1,5 +1,6 @@
 using System.Reflection;
 using Lotus.Roles.Internals.Attributes;
+using VentLib.Logging;
 
 namespace Lotus.Roles.Internals;
 
@@ -26,6 +27,7 @@ public class RoleAction
 
     public virtual void Execute(AbstractBaseRole role, object[] args)
     {
+        VentLogger.Log(LogLevel.Trace, $"RoleAction(type={ActionType}, priority={Priority}, method={Method}, executer={Executer ?? role}))", "RoleAction::Execute");
         Method.InvokeAligned(Executer ?? role, args);
     }
 

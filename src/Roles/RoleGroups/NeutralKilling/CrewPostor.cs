@@ -17,7 +17,7 @@ using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
-public class CrewPostor : Crewmate
+public class CrewPostor : Engineer
 {
     private bool refreshTasks;
     private bool warpToTarget;

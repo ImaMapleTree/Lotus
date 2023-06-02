@@ -108,6 +108,13 @@ public class Medic: Crewmate
         guardedPlayer = byte.MaxValue;
     }
 
+    [RoleAction(RoleActionType.MyDeath)]
+    private void HandleMyDeath()
+    {
+        protectedIndicator?.Delete();
+        guardedPlayer = byte.MaxValue;
+    }
+
     public ChatHandler CHandler(string message) => new ChatHandler()
         .Title(t => t.PrefixSuffix(CrossText).Color(RoleColor).Text(RoleName).Build())
         .LeftAlign().Message(message);

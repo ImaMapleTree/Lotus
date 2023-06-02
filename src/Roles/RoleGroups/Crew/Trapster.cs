@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals.Attributes;
@@ -6,6 +8,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Options;
 using Lotus.Roles.Internals;
+using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -17,6 +20,9 @@ namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Trapster : Crewmate
 {
+    public static HashSet<Type> TrapsterBannedModifiers = new() { typeof(Trapster) };
+    public override HashSet<Type> BannedModifiers() => TrapsterBannedModifiers;
+
     private float trappedDuration;
     private bool trapOnIndirectKill;
 

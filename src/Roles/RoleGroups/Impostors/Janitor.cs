@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API;
@@ -12,6 +14,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
+using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -20,11 +23,15 @@ using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
+using Object = UnityEngine.Object;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Janitor: Vanilla.Impostor
 {
+    public static HashSet<Type> JanitorBannedModifiers = new() { typeof(Oblivious), typeof(Sleuth) };
+    public override HashSet<Type> BannedModifiers() => cleanOnKill ? new HashSet<Type>() : JanitorBannedModifiers;
+
     private bool cleanOnKill;
 
     [UIComponent(UI.Cooldown)]

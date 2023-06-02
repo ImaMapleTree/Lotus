@@ -14,6 +14,8 @@ using Lotus.Options;
 using Lotus.Roles.Extra;
 using Lotus.Roles.Interfaces;
 using Lotus.API;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.Chat;
 using Lotus.Extensions;
 using Lotus.Roles;
@@ -106,7 +108,12 @@ public static class Utils
         SendMessage(text, PlayerId);
     }*/
 
-    public static void Teleport(CustomNetworkTransform nt, Vector2 location) => TeleportDeferred(nt, location).Send();
+    public static void Teleport(CustomNetworkTransform nt, Vector2 location)
+    {
+        Vector2 currentLocation = nt.prevPosSent;
+        Hooks.PlayerHooks.PlayerTeleportedHook.Propagate(new PlayerTeleportedHookEvent(nt.myPlayer, currentLocation, location));
+        TeleportDeferred(nt, location).Send();
+    }
 
     public static MonoRpc TeleportDeferred(PlayerControl player, Vector2 location) => TeleportDeferred(player.NetTransform, location);
 

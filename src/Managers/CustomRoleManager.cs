@@ -189,8 +189,10 @@ public static class CustomRoleManager
         //Crewmates
 
         public Alchemist Alchemist = new Alchemist();
+        public Charmer Charmer = new Charmer();
         public Bastion Bastion = new Bastion();
         public Bodyguard Bodyguard = new Bodyguard();
+        public Chameleon Chameleon = new Chameleon();
         public Crewmate Crewmate = new Crewmate();
         public Crusader Crusader = new Crusader();
         public Demolitionist Demolitionist = new Demolitionist();
@@ -199,6 +201,7 @@ public static class CustomRoleManager
 
         public Escort Escort = new Escort();
         public ExConvict ExConvict = new ExConvict();
+        public Herbalist Herbalist = new Herbalist();
         public Investigator Investigator = new Investigator();
         public Mayor Mayor = new Mayor();
         public Mechanic Mechanic = new Mechanic();
@@ -214,6 +217,7 @@ public static class CustomRoleManager
         public Snitch Snitch = new Snitch();
         public Speedrunner Speedrunner = new Speedrunner();
         public Swapper Swapper = new Swapper();
+        public Tracker Tracker = new Tracker();
         public Transporter Transporter = new Transporter();
         public Trapster Trapster = new Trapster();
         public Veteran Veteran = new Veteran();
@@ -238,6 +242,7 @@ public static class CustomRoleManager
         public Necromancer Necromancer = new Necromancer();
         public Occultist Occultist = new Occultist();
         public PlagueBearer PlagueBearer = new PlagueBearer();
+        public Pelican Pelican = new Pelican();
         public Retributionist Retributionist = new Retributionist();
         public Glitch Glitch = new Glitch();
         public Werewolf Werewolf = new Werewolf();
@@ -269,6 +274,7 @@ public static class CustomRoleManager
         public Deadly Deadly = new Deadly();
         public Diseased Diseased = new Diseased();
         public Flash Flash = new Flash();
+        public Nimble Nimble = new Nimble();
         public Oblivious Oblivious = new Oblivious();
         public Romantic Romantic = new Romantic();
         public Sleuth Sleuth = new Sleuth();
@@ -282,14 +288,11 @@ public static class CustomRoleManager
     public class ExtraRoles
     {
         public IllegalRole IllegalRole = new IllegalRole();
-
         public GM GM = new GM();
         public Debugger Debugger = new Debugger();
 
         //double shot
         //flash
-        public Fox Fox = new();
-        public LoversReal LoversReal = new LoversReal();
         //oblivious
         //obvious
         //sleuth

@@ -6,5 +6,6 @@ public class NameHolder : ComponentHolder<NameComponent>
 {
     public NameHolder(int line = 0) : base(line)
     {
+        Spacing = 1;
     }
 }

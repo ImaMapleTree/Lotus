@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
@@ -74,9 +75,9 @@ public class PlagueBearer: NeutralKillingBase
     [RoleAction(RoleActionType.AnyDeath)]
     public void CheckPestilenceTransform(ActionHandle handle)
     {
-        List<PlayerControl> unalliedPlayers = GetAlivePlayers().ToList();
-        if (handle.ActionType is RoleActionType.RoundStart or RoleActionType.RoundEnd) alivePlayers = unalliedPlayers.Count;
-        if (unalliedPlayers.Count(r => infectedPlayers.Contains(r.PlayerId)) != alivePlayers) return;
+        PlayerControl[] allCountedPlayers = GetAlivePlayers().ToArray();
+        if (handle.ActionType is RoleActionType.RoundStart or RoleActionType.RoundEnd) alivePlayers = allCountedPlayers.Length;
+        if (allCountedPlayers.Count(r => infectedPlayers.Contains(r.PlayerId)) != alivePlayers) return;
 
         indicatorRemotes.ForEach(remote => remote.Delete());
         MyPlayer.NameModel().GetComponentHolder<CounterHolder>().RemoveAt(0);
@@ -87,7 +88,8 @@ public class PlagueBearer: NeutralKillingBase
 
     private IEnumerable<PlayerControl> GetAlivePlayers()
     {
-        return Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && Relationship(p) is not Relation.FullAllies);
+        return Players.GetAllPlayers(PlayerFilter.Alive | PlayerFilter.NonPhantom)
+            .Where(p => p.PlayerId != MyPlayer.PlayerId && Relationship(p) is not Relation.FullAllies);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

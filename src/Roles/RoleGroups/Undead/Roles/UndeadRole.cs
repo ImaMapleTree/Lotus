@@ -95,6 +95,6 @@ public class UndeadRole : Impostor
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .SpecialType(Internals.SpecialType.Undead)
+            .SpecialType(SpecialType.Undead)
             .Faction(FactionInstances.TheUndead);
 }

@@ -56,6 +56,7 @@ public class Executioner : CustomRole
         win.Activate();
     }
 
+    [RoleAction(RoleActionType.Disconnect)]
     [RoleAction(RoleActionType.AnyDeath)]
     private void CheckChangeRole(PlayerControl dead)
     {

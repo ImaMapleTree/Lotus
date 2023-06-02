@@ -21,6 +21,10 @@ public class GameOptionsMenuPatch
                 case StringNames.GameKillCooldown:
                     ob.Cast<NumberOption>().ValidRange = new FloatRange(0, 180);
                     break;
+                case StringNames.GameCrewLight:
+                case StringNames.GameImpostorLight:
+                    ob.Cast<NumberOption>().Increment = 0.125f;
+                    break;
             }
         }
     }

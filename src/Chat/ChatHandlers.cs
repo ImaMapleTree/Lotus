@@ -10,8 +10,8 @@ public class ChatHandlers: CommandTranslations
         return ChatHandler.Of(NotPermittedText, ModConstants.Palette.KillingColor.Colorize(NotPermittedTitle)).LeftAlign();
     }
 
-    public static ChatHandler InvalidCmdUsage()
+    public static ChatHandler InvalidCmdUsage(string? message = null)
     {
-        return ChatHandler.Of(InvalidUsage, ModConstants.Palette.InvalidUsage.Colorize(InvalidUsage)).LeftAlign();
+        return ChatHandler.Of(message ?? InvalidUsage, ModConstants.Palette.InvalidUsage.Colorize(InvalidUsage)).LeftAlign();
     }
 }

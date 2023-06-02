@@ -12,6 +12,7 @@ using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.API.Vanilla.Meetings;
 
@@ -35,13 +36,14 @@ internal class MeetingPrep
     /// This API is a little bit strange, but basically if you provide the report the meeting will actually be called. Otherwise this guarantees meeting prep has been done and returns the most recent meeting delegate.
     /// </summary>
     /// <param name="reporter">Optional player, if provided, uses rpc to call meeting</param>
+    /// <param name="deadBody">Optional reported body</param>
     /// <returns>the current meeting delegate</returns>
-    public static MeetingDelegate? PrepMeeting(PlayerControl? reporter = null)
+    public static MeetingDelegate? PrepMeeting(PlayerControl? reporter = null, GameData.PlayerInfo? deadBody = null)
     {
         if (!Prepped) _meetingDelegate = new MeetingDelegate();
         if (Prepped || !AmongUsClient.Instance.AmHost) return _meetingDelegate;
         ActionHandle handle = ActionHandle.NoInit();
-        if (reporter != null) Game.TriggerForAll(RoleActionType.MeetingCalled, ref handle, reporter);
+        if (reporter != null) Game.TriggerForAll(RoleActionType.MeetingCalled, ref handle, reporter, Optional<GameData.PlayerInfo>.Of(deadBody));
         if (handle.IsCanceled) return null;
 
         Game.State = GameState.InMeeting;
@@ -49,7 +51,7 @@ internal class MeetingPrep
         NameUpdateProcess.Paused = true;
 
         if (reporter != null)
-            Async.Schedule(() => QuickStartMeeting(reporter), NetUtils.DeriveDelay(0.1f));
+            Async.Schedule(() => QuickStartMeeting(reporter), 0.1f);
 
         Game.RenderAllForAll(GameState.InMeeting, true);
         Async.Schedule(FixChatNames, NetUtils.DeriveDelay(4f));

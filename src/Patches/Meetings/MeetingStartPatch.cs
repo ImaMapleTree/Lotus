@@ -54,7 +54,7 @@ public class MeetingStartPatch
 
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.RoundEnd, ref handle, meetingDelegate, false);
-        Game.RenderAllForAll(GameState.InMeeting, force: true);
+        Game.RenderAllForAll(GameState.InMeeting, true);
 
         Hooks.MeetingHooks.MeetingCalledHook.Propagate(new MeetingHookEvent(reporter, MeetingPrep.Reported, meetingDelegate));
         Hooks.GameStateHooks.RoundEndHook.Propagate(new GameStateHookEvent(Game.MatchData));

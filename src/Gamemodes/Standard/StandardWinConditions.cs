@@ -29,19 +29,20 @@ public static class StandardWinConditions
         public WinReason GetWinReason() => WinReason.FactionLastStanding;
     }
 
-    
+
 
     public class LoversWin : IWinCondition
     {
         public bool IsConditionMet(out List<PlayerControl> winners)
         {
             winners = null;
-            if (Game.GetAlivePlayers().Count() > 3) return false;
+            return false;
+            /*if (Game.GetAlivePlayers().Count() > 3) return false;
             List<PlayerControl> lovers = Game.FindAlivePlayersWithRole(CustomRoleManager.Special.LoversReal).ToList();
             if (lovers.Count != 2) return false;
             LoversReal loversRealRole = lovers[0].GetSubrole<LoversReal>()!;
             winners = lovers;
-            return loversRealRole.Partner != null && loversRealRole.Partner.PlayerId == lovers[1].PlayerId;
+            return loversRealRole.Partner != null && loversRealRole.Partner.PlayerId == lovers[1].PlayerId;*/
         }
 
         public WinReason GetWinReason() => WinReason.RoleSpecificWin;

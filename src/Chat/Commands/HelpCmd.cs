@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
@@ -26,7 +27,7 @@ public class HelpCmd: ICommandReceiver
         PluginDataManager.TemplateManager.RegisterTag("help-role",
             "This tag is for the message shown when players use /h r. By default there is no template set for this tag, and the game uses a built-in formatting. But you may utilize this tag if you'd like to customize how this help is shown to the player.\n(<i>This tag utilizes ^Role_XXX variables.</i>)");
     }
-    
+
     [Command("a", "addons")]
     public static void Addons(PlayerControl source, CommandContext _)
     {
@@ -47,28 +48,28 @@ public class HelpCmd: ICommandReceiver
     public static void Roles(PlayerControl source, CommandContext context)
     {
         Localizer localizer = Localizer.Get();
-        if (context.Args.Length == 0) ChatHandlers.InvalidCmdUsage().Send(source);
+        if (context.Args.Length == 0) ChatHandlers.InvalidCmdUsage("Correct usage: /h r [role]").Send(source);
         else
         {
             string roleName = context.Args.Join(delimiter: " ");
             CustomRole? matchingRole = CustomRoleManager.AllRoles.FirstOrDefault(r => localizer.GetAllTranslations($"Roles.{r.EnglishRoleName}.RoleName").Select(s => s.ToLowerInvariant()).Contains(roleName.ToLowerInvariant()));
             if (matchingRole == null) {
-                ChatHandler.Of(Localizer.Translate("Commands.Help.Roles.RoleNotFound").Formatted(roleName)).Send(source);
+                List<CustomRole> matchingRoles = CustomRoleManager.AllRoles.Where(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(roleName)).ToList();
+                if (matchingRoles.Count == 0) ChatHandler.Of(Localizer.Translate("Commands.Help.Roles.RoleNotFound").Formatted(roleName)).Send(source);
+                else matchingRoles.ForEach(r => ShowRole(source, r));
                 return;
             }
 
-            Language? language = localizer.FindLanguageFromTranslation(roleName, $"Roles.{matchingRole.EnglishRoleName}.RoleName");
-
-
-            string description = language == null
-                ? Localizer.Translate($"Roles.{matchingRole.EnglishRoleName}.Description")
-                : language.Translate($"Roles.{matchingRole.EnglishRoleName}.Description");
-            
-            if (!PluginDataManager.TemplateManager.TryFormat(matchingRole, "help-role", out string formatted))
-                formatted = $"{matchingRole.RoleName} ({matchingRole.Faction.Name()})\n{matchingRole.Blurb}\n{matchingRole.Description}\n\nOptions:\n{OptionUtils.OptionText(matchingRole.RoleOptions)}";
-            
-            SendSpecial(source, formatted);
+            ShowRole(source, matchingRole);
         }
+    }
+
+    private static void ShowRole(PlayerControl source, CustomRole role)
+    {
+        if (!PluginDataManager.TemplateManager.TryFormat(role, "help-role", out string formatted))
+            formatted = $"{role.RoleName} ({role.Faction.Name()})\n{role.Blurb}\n{role.Description}\n\nOptions:\n{OptionUtils.OptionText(role.RoleOptions)}";
+
+        SendSpecial(source, formatted);
     }
 
     [Command("mod", "modifier", "mods")]
@@ -79,7 +80,7 @@ public class HelpCmd: ICommandReceiver
             string identifierText = m is Subrole subrole ? m.RoleColor.Colorize(subrole.Identifier()!) + " " : "";
             return $"{identifierText}{m.RoleColor.Colorize(m.RoleName)}\n{m.Description}";
         }).Fuse("\n\n");
-        
+
         SendSpecial(source, message);
     }
 
@@ -99,7 +100,7 @@ public class HelpCmd: ICommandReceiver
     {
         if (context.Args.Length > 0) return;
         string help = Localizer.Translate("Commands.Help.Alias");
-        ChatHandler.Send( source, 
+        ChatHandler.Send( source,
                 Localizer.Translate("Commands.Help.CommandList")
                 + $"\n/{help} {Localizer.Translate("Commands.Help.Roles.Alias")} - {Localizer.Translate("Commands.Help.Roles.Info")}"
                 + $"\n/{help} {Localizer.Translate("Commands.Help.Addons.Alias")} - {Localizer.Translate("Commands.Help.Addons.Info")}"

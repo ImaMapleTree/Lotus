@@ -35,7 +35,7 @@ public class ReportDeadBodyPatch
                 VentLogger.Trace("Not Reporting Body - Cancelled by Any Report Action", "ReportDeadBody");
                 return false;
             }
-            
+
             __instance.Trigger(RoleActionType.SelfReportBody, ref handle, target);
             if (handle.IsCanceled)
             {
@@ -45,7 +45,7 @@ public class ReportDeadBodyPatch
         }
 
         MeetingPrep.Reported = target;
-        MeetingPrep.PrepMeeting(__instance);
+        MeetingPrep.PrepMeeting(__instance, target);
         return false;
     }
 }

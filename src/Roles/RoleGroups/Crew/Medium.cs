@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
@@ -9,18 +10,22 @@ using Lotus.Chat;
 using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
-using UnityEngine;
+using Lotus.Roles.Subroles;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using static Lotus.Roles.RoleGroups.Crew.Medium.Translations;
+using Object = UnityEngine.Object;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
 public partial class Medium: Crewmate, IModdable
 {
+    public static HashSet<Type> MediumBannedModifiers = new() { typeof(Oblivious) };
+    public override HashSet<Type> BannedModifiers() => MediumBannedModifiers;
+
     [NewOnSetup] private Dictionary<byte, Optional<CustomRole>> killerDictionary = new();
     private bool hasArrowsToBodies;
 

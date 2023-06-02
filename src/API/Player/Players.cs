@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Hazel;
 using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using Lotus.GUI.Name.Interfaces;
+using Lotus.Roles.Interfaces;
 using Lotus.Utilities;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -14,13 +17,11 @@ public static class Players
 {
     public static IEnumerable<PlayerControl> GetAllPlayers(PlayerFilter filter = PlayerFilter.None)
     {
-        return filter switch
-        {
-            PlayerFilter.None => Game.GetAllPlayers(),
-            PlayerFilter.Alive => Game.GetAlivePlayers(),
-            PlayerFilter.Dead => Game.GetDeadPlayers(),
-            _ => throw new ArgumentOutOfRangeException(nameof(filter), filter, null)
-        };
+        IEnumerable<PlayerControl> players = Game.GetAllPlayers();
+        if (filter.HasFlag(PlayerFilter.NonPhantom)) players = players.Where(p => p.GetCustomRole() is not IPhantomRole pr || pr.IsCountedAsPlayer());
+        if (filter.HasFlag(PlayerFilter.Alive)) players = players.Where(p => p.IsAlive());
+        if (filter.HasFlag(PlayerFilter.Dead)) players = players.Where(p => !p.IsAlive());
+        return players;
     }
 
     public static void SendPlayerData(GameData.PlayerInfo playerInfo, int clientId = -1, bool autoSetName = true)
@@ -58,9 +59,11 @@ public static class Players
     public static Optional<PlayerControl> PlayerById(byte playerId) => Utils.PlayerById(playerId);
 }
 
+[Flags]
 public enum PlayerFilter
 {
-    None,
-    Alive,
-    Dead
+    None = 1,
+    NonPhantom = 2,
+    Alive = 4,
+    Dead = 8
 }

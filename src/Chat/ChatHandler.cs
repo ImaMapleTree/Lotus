@@ -1,12 +1,15 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
+using Hazel;
 using Lotus.API.Odyssey;
 using Lotus.Chat.Patches;
+using Lotus.Logging;
 using Lotus.Managers;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
+using VentLib.Networking;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -20,7 +23,7 @@ public class ChatHandler
     [Localized("SystemMessage")]
     private static string _defaultTitle = "System Announcement";
     private static Color _defaultColor = new(0.67f, 0.67f, 1f);
-    
+
     private PlayerControl? target;
     private string title = _defaultColor.Colorize(_defaultTitle);
     private string? message;
@@ -84,7 +87,7 @@ public class ChatHandler
     }
 
     public static void Send(string message) => Send(null!, message, null);
-    
+
     public static void Send(string message, string title) => Send(null, message, title);
 
     public static void Send(PlayerControl? player, string message, string? title = null, bool leftAligned = false)
@@ -99,23 +102,11 @@ public class ChatHandler
             string name = sender.name;
 
             title ??= _defaultTitle;
-        
+
             if (player == null) MassSend(sender, message, title, leftAligned);
             else if (player.IsHost()) SendToHost(sender, message, title, leftAligned);
-            else
-            {
-                RpcV3.Mass()
-                    .Start(sender.NetId, RpcCalls.SetName)
-                    .Write(title)
-                    .End()
-                    .Start(sender.NetId, RpcCalls.SendChat)
-                    .Write(player.IsModded() ? message : message.RemoveHtmlTags())
-                    .End()
-                    .Start(sender.NetId, RpcCalls.SetName)
-                    .Write(name)
-                    .End()
-                    .Send(player.GetClientId());
-            }
+            else InternalSend(sender, player, message, title, name);
+
             if (PluginDataManager.TitleManager.HasTitle(sender)) PluginDataManager.TitleManager.ApplyTitleWithChatFix(sender);
         }, 0.125f);
     }
@@ -136,23 +127,62 @@ public class ChatHandler
         PlayerControl.AllPlayerControls.ToArray().ForEach(p =>
         {
             if (p.IsHost()) SendToHost(sender, message, title, leftAligned);
-            else
-            {
-                RpcV3.Mass()
-                    .Start(sender.NetId, RpcCalls.SetName)
-                    .Write(title)
-                    .End()
-                    .Start(sender.NetId, RpcCalls.SendChat)
-                    .Write(p.IsModded() ? message : message.RemoveHtmlTags())
-                    .End()
-                    .Start(sender.NetId, RpcCalls.SetName)
-                    .Write(name)
-                    .End()
-                    .Send(p.GetClientId());
-            }
+            else InternalSend(sender, p, message, title, name);
         });
-        
     }
+
+    private static void InternalSend(PlayerControl sender, PlayerControl recipient, string message, string title, string originalName)
+    {
+        int maxPacketSize = NetworkRules.MaxPacketSize + 200;
+        int leftIndex = 0;
+        int rightIndex = Math.Min(message.Length, maxPacketSize);
+
+        while (rightIndex < message.Length)
+        {
+            string subMessage = message[leftIndex..rightIndex];
+            leftIndex = FindGoodSplitPoint(ref subMessage, leftIndex);
+            rightIndex = Mathf.Min(message.Length, leftIndex + maxPacketSize);
+
+            subMessage = subMessage.Trim('\n');
+
+            RpcV3.Mass()
+                .Start(sender.NetId, RpcCalls.SetName)
+                .Write(title)
+                .End()
+                .Start(sender.NetId, RpcCalls.SendChat)
+                .Write(recipient.IsModded() ? subMessage : subMessage.RemoveHtmlTags())
+                .End()
+                .Start(sender.NetId, RpcCalls.SetName)
+                .Write(originalName)
+                .End()
+                .Send(recipient.GetClientId());
+        }
+
+        message = message[leftIndex..rightIndex].Trim('\n');
+
+        RpcV3.Mass()
+            .Start(sender.NetId, RpcCalls.SetName)
+            .Write(title)
+            .End()
+            .Start(sender.NetId, RpcCalls.SendChat)
+            .Write(recipient.IsModded() ? message : message.RemoveHtmlTags())
+            .End()
+            .Start(sender.NetId, RpcCalls.SetName)
+            .Write(originalName)
+            .End()
+            .Send(recipient.GetClientId());
+    }
+
+    private static int FindGoodSplitPoint(ref string message, int index)
+    {
+        int lastIndex = message.LastIndexOf("\n\n", StringComparison.Ordinal);
+        if (lastIndex == -1) lastIndex = message.LastIndexOf("\n", StringComparison.Ordinal);
+        if (lastIndex < (message.Length / 2)) return message.Length + index;
+        message = message[..lastIndex];
+        return lastIndex + index;
+    }
+
+
 
     public class TitleBuilder
     {
@@ -200,6 +230,6 @@ public class ChatHandler
             string wholeText = $"{prefix1}{text}{suffix1}";
             return color == null ? wholeText : color.Value.Colorize(wholeText);
         }
-        
+
     }
 }

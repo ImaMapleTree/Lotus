@@ -1,5 +1,6 @@
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.RPC;
 using VentLib.Options.Game;
 
 namespace Lotus.Roles.RoleGroups.Vanilla;
@@ -8,6 +9,9 @@ public class Morphling : Shapeshifter
 {
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target) => base.TryKill(target);
+
+    [RoleAction(RoleActionType.Shapeshift, Subclassing = false)]
+    public void Shapeshift(PlayerControl target) => MyPlayer.CRpcShapeshift(target, true);
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)

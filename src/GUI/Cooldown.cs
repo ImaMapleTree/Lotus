@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Interfaces;
 using UnityEngine;
 
 namespace Lotus.GUI;
