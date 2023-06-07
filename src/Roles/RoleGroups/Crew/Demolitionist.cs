@@ -1,5 +1,3 @@
-using System.Collections.Generic;
-using Il2CppSystem;
 using Lotus.API.Odyssey;
 using Lotus.Options;
 using Lotus.Roles.Events;
@@ -11,29 +9,27 @@ using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.Roles.Subroles;
+using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
-using Type = System.Type;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Demolitionist : Crewmate
 {
     private Cooldown demoTime;
+    private byte killerId;
 
     [RoleAction(RoleActionType.MyDeath)]
-    private void DemoDeath(PlayerControl killer)
+    private void DemoDeath(PlayerControl killer, Optional<PlayerControl> realKiller)
     {
-        if (MyPlayer.GetSubrole<Bait>() != null)
-        {
-            ExplodePlayer(killer);
-            return;
-        }
+        killer = realKiller.OrElse(killer);
+        killerId = killer.PlayerId;
 
         string formatted = Translations.YouKilledDemoMessage.Formatted(RoleName);
         Cooldown textCooldown = demoTime.Clone();
@@ -45,8 +41,18 @@ public class Demolitionist : Crewmate
         Async.Schedule(() => DelayedDeath(killer, remote), demoTime.Duration);
     }
 
+    [RoleAction(RoleActionType.AnyReportedBody)]
+    public void DieOnBodyReport(PlayerControl reporter, GameData.PlayerInfo body, ActionHandle handle)
+    {
+        if (reporter.PlayerId != killerId) return;
+        if (body.PlayerId != MyPlayer.PlayerId) return;
+        ExplodePlayer(reporter);
+        handle.Cancel();
+    }
+
     private void DelayedDeath(PlayerControl killer, Remote<TextComponent> textRemote)
     {
+        killerId = byte.MaxValue;
         RoleUtils.EndReactorsForPlayer(killer);
         textRemote.Delete();
         if (Game.State is not GameState.Roaming) return;

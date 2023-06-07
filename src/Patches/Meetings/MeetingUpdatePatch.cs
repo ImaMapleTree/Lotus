@@ -1,4 +1,5 @@
 using HarmonyLib;
+using Lotus.API;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using UnityEngine;
@@ -16,7 +17,8 @@ class MeetingUpdatePatch
             __instance.playerStates.DoIf(x => x.HighlightedFX.enabled, x =>
             {
                 var player = Utils.GetPlayerById(x.TargetPlayerId);
-                player.RpcExileV2();
+                ProtectedRpc.CheckMurder(PlayerControl.LocalPlayer, PlayerControl.LocalPlayer);
+
                 VentLogger.High($"Execute: {player.GetNameWithRole()}", "Execution");
             });
     }

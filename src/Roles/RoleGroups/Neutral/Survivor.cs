@@ -80,7 +80,7 @@ public class Survivor : CustomRole
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier
-            .Faction(FactionInstances.Solo)
+            .Faction(FactionInstances.Neutral)
             .SpecialType(SpecialType.Neutral)
             .RoleColor(new Color(1f, 0.9f, 0.3f));
 }

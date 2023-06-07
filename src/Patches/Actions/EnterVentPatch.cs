@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
 using Lotus.API.Odyssey;
@@ -9,10 +10,12 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.API;
 using Lotus.API.Stats;
 using Lotus.Extensions;
+using Lotus.Logging;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
+using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Patches.Actions;
 
@@ -30,13 +33,15 @@ class EnterVentPatch
         ActionHandle vented = ActionHandle.NoInit();
         pc.Trigger(RoleActionType.MyEnterVent, ref vented, __instance);
 
+        DevLogger.Log($"Vent Cooldown: {AUSettings.EngineerCooldown()}");
+        DevLogger.Log($"Vent Cooldown 2: {pc.Data.Role.TryCast<EngineerRole>()?.GetCooldown()}");
         if (!role.CanVent())
         {
             VentLogger.Trace($"{pc.GetNameWithRole()} cannot enter vent. Booting.");
             Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.01f);
             return;
         }
-        
+
         if (vented.IsCanceled) {
             VentLogger.Trace($"{pc.GetNameWithRole()} vent action got canceled. Booting.");
             Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.4f);

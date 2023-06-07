@@ -10,6 +10,7 @@ using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
+using Lotus.Logging;
 using Lotus.Managers;
 using Lotus.Roles;
 using Lotus.Roles.Internals;
@@ -52,6 +53,7 @@ public static class PlayerControlExtensions
 
         foreach ((RoleAction? roleAction, AbstractBaseRole? abstractBaseRole) in role.GetActions(action).Concat(subroles.SelectMany(sr => sr.GetActions(action))).OrderBy(a => a.Item1.Priority))
         {
+            DevLogger.Log(roleAction);
             PlayerControl myPlayer = abstractBaseRole.MyPlayer;
             if (handle.IsCanceled) continue;
             if (myPlayer == null || !myPlayer.IsAlive() && !roleAction.TriggerWhenDead) continue;
@@ -185,17 +187,6 @@ public static class PlayerControlExtensions
         }
     }
 
-    public static void RpcResetAbilityCooldown(this PlayerControl target)
-    {
-        if (!AmongUsClient.Instance.AmHost) return; //ホスト以外が実行しても何も起こさない
-        VentLogger.Trace($"Resetting Ability Cooldown for {target.name}", "ResetAbilityCooldown");
-
-        if (target.AmOwner) PlayerControl.LocalPlayer.Data.Role.SetCooldown();
-        else RpcV3.Mass(SendOption.Reliable)
-                .Start(target.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).End()
-                .Start(target.NetId, RpcCalls.MurderPlayer).Write(target).End()
-                .Send(target.GetClientId());
-    }
     public static void RpcDesyncRepairSystem(this PlayerControl target, SystemTypes systemType, int amount)
     {
         MessageWriter messageWriter = AmongUsClient.Instance.StartRpcImmediately(ShipStatus.Instance.NetId, (byte)RpcCalls.RepairSystem, SendOption.Reliable, target.GetClientId());

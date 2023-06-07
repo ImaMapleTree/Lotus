@@ -51,7 +51,7 @@ public class HelpCmd: ICommandReceiver
         if (context.Args.Length == 0) ChatHandlers.InvalidCmdUsage("Correct usage: /h r [role]").Send(source);
         else
         {
-            string roleName = context.Args.Join(delimiter: " ");
+            string roleName = context.Args.Join(delimiter: " ").ToLower().Trim().Replace("[", "").Replace("]", "");
             CustomRole? matchingRole = CustomRoleManager.AllRoles.FirstOrDefault(r => localizer.GetAllTranslations($"Roles.{r.EnglishRoleName}.RoleName").Select(s => s.ToLowerInvariant()).Contains(roleName.ToLowerInvariant()));
             if (matchingRole == null) {
                 List<CustomRole> matchingRoles = CustomRoleManager.AllRoles.Where(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(roleName)).ToList();
@@ -66,7 +66,7 @@ public class HelpCmd: ICommandReceiver
 
     private static void ShowRole(PlayerControl source, CustomRole role)
     {
-        if (!PluginDataManager.TemplateManager.TryFormat(role, "help-role", out string formatted))
+        if (!PluginDataManager.TemplateManager.TryFormat(source, role, "help-role", out string formatted))
             formatted = $"{role.RoleName} ({role.Faction.Name()})\n{role.Blurb}\n{role.Description}\n\nOptions:\n{OptionUtils.OptionText(role.RoleOptions)}";
 
         SendSpecial(source, formatted);

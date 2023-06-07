@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
@@ -7,7 +8,8 @@ using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
-using Lotus.Roles.Internals;
+using VentLib.Logging;
+using VentLib.Utilities;
 
 namespace Lotus.Options;
 
@@ -21,7 +23,12 @@ public static class DesyncOptions
         if (player == null) return;
         if (!player.AmOwner)
         {
-            SyncToClient(options, AmongUsClient.Instance.GetClientFromCharacter(player).Id);
+            try {
+                SyncToClient(options, player.GetClientId());
+            }
+            catch (Exception exception) {
+                VentLogger.Exception(exception, "Error syncing game options to client.");
+            }
             return;
         }
 
@@ -73,7 +80,7 @@ public static class DesyncOptions
     public static IGameOptions GetModifiedOptions(IEnumerable<GameOptionOverride> overrides)
     {
         IGameOptions clonedOptions = AUSettings.StaticOptions.DeepCopy();
-        overrides.Where(o => o != null).Do(optionOverride => optionOverride.ApplyTo(clonedOptions));
+        overrides.Where(o => o != null!).Do(optionOverride => optionOverride.ApplyTo(clonedOptions));
         return clonedOptions;
     }
 

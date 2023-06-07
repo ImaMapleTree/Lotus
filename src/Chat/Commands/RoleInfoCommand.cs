@@ -41,7 +41,7 @@ public class RoleInfoCommand
     [Command(CommandFlag.InGameOnly, "desc", "description")]
     private static void ShowFirstMeetingText(PlayerControl source)
     {
-        if (PluginDataManager.TemplateManager.TryFormat(source, "meeting-first", out string message))
+        if (PluginDataManager.TemplateManager.TryFormat(source, source, "meeting-first", out string message))
             ChatHandler.Of(message).Send(source);
     }
 
@@ -49,17 +49,14 @@ public class RoleInfoCommand
     private static void ShowRoleOptions(PlayerControl source)
     {
         CustomRole role = source.GetCustomRole();
-        string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.FactionColor().Colorize(role.Faction.Name())}):";
+        string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.FactionColor().Colorize(role.Faction.Name())}):\n";
 
-        Option? optionMatch = OptionManager.GetManager(file: "role_options.txt").GetOptions().FirstOrDefault(h => h.Name().RemoveHtmlTags() == role.RoleName);
-        if (optionMatch == null) { ShowRoleDescription(source); return; }
-
-        foreach (var child in optionMatch.Children) UpdateOutput(ref output, child);
+        output += OptionUtils.OptionText(role.RoleOptions);
 
         ChatHandler.Of(output).LeftAlign().Send(source);
     }
 
-    private static void UpdateOutput(ref string output, Option options)
+    /*private static void UpdateOutput(ref string output, Option options)
     {
         if (options is not GameOption gameOption) return;
         if (gameOption.Level < _previousLevel)
@@ -68,5 +65,5 @@ public class RoleInfoCommand
         string valueText = gameOption.Color == Color.white ? gameOption.GetValueText() : gameOption.Color.Colorize(gameOption.GetValueText());
         output += $"\n{gameOption.Name()} => {valueText}";
 
-    }
+    }*/
 }

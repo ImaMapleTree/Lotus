@@ -25,11 +25,13 @@ public class SoloKillingWinCondition : IWinCondition
             alivePlayers++;
             if (r.RoleFlags.HasFlag(RoleFlag.CannotWinAlone)) return;
             if (r.RoleAbilityFlags.HasFlag(RoleAbilityFlag.IsAbleToKill)) aliveThatCanKill++;
-            if (r.Faction is not Solo) return;
+            if (r.Faction is not Neutral) return;
             if (!r.MyPlayer.GetVanillaRole().IsImpostor()) return;
            aliveKillers.Add(r);
         });
 
+        /*DevLogger.Log($"{alivePlayers - aliveKillers.Count > 1} || {aliveThatCanKill - aliveKillers.Count >= 1} || {aliveKillers.Count}");
+        DevLogger.Log($"{alivePlayers} && {aliveThatCanKill} && {aliveKillers.Count}");*/
         if (alivePlayers - aliveKillers.Count > 1 || aliveThatCanKill - aliveKillers.Count >= 1 || aliveKillers.Count == 0) return false;
 
         foreach (CustomRole killer in aliveKillers)

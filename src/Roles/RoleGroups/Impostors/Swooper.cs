@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
@@ -8,7 +7,6 @@ using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.GUI.Name.Impl;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
@@ -16,8 +14,6 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Utilities;
-using Lotus.API;
 using Lotus.Extensions;
 using Lotus.Options;
 using UnityEngine;
@@ -42,14 +38,12 @@ public class Swooper: Impostor
     [UIComponent(UI.Cooldown)]
     private Cooldown swooperCooldown = null!;
 
-    private DateTime lastEntered = DateTime.Now;
-
     [RoleAction(RoleActionType.Attack)]
     public new bool TryKill(PlayerControl target)
     {
         if (!remainInvisibleOnKill || swoopingDuration.IsReady()) return base.TryKill(target);
-        InteractionResult result = MyPlayer.InteractWith(target, new DirectInteraction(new FatalIntent(true), this));
-        MyPlayer.RpcMark(MyPlayer);
+        MyPlayer.RpcMark(target);
+        InteractionResult result = MyPlayer.InteractWith(target, new DirectInteraction(new FatalIntent(true, () => new DeathEvent(MyPlayer, target)), this));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }
@@ -77,7 +71,6 @@ public class Swooper: Impostor
 
         swoopingDuration.Start();
         Game.MatchData.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{MyPlayer.name} began swooping."));
-        lastEntered = DateTime.Now;
         Async.Schedule(() => KickFromVent(vent, unaffected), 0.4f);
         Async.Schedule(EndSwooping, swoopingDuration.Duration);
     }
@@ -86,16 +79,6 @@ public class Swooper: Impostor
     {
         if (MyPlayer.AmOwner) MyPlayer.MyPhysics.BootFromVent(vent.Id);
         RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive(unaffected.Select(p => p.GetClientId()).ToArray());
-    }
-
-    [RoleAction(RoleActionType.VentExit)]
-    private void SwooperExitHandle(Vent vent, ActionHandle handle)
-    {
-        if (swoopingDuration.IsReady() || DateTime.Now.Subtract(lastEntered).TotalSeconds < 0.5) return;
-        VentLogger.Trace("Handling Swooping Exit");
-        lastEntered = DateTime.Now;
-        handle.Cancel();
-        Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(vent.Id).SendInclusive( GetUnaffected().Select(p => p.GetClientId()).ToArray()), 0.4f);
     }
 
     private void EndSwooping()

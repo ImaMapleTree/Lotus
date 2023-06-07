@@ -1,10 +1,11 @@
 using Lotus.Factions.Interfaces;
 using Lotus.Roles;
 using UnityEngine;
-using VentLib.Logging;
+using VentLib.Localization.Attributes;
 
 namespace Lotus.Factions;
 
+[Localized("Factions")]
 public abstract class Faction<T> : IFaction<T> where T: IFaction<T>
 {
     public virtual string Name() => GetType().Name;

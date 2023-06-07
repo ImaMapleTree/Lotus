@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
-using Lotus.GUI.Name.Impl;
 using Lotus.GUI.Name.Interfaces;
-using Lotus.API;
 using Lotus.Patches.Actions;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -18,8 +16,8 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
     protected int DisplayLine;
     protected int Spacing = 0;
 
-    private readonly Dictionary<byte, bool> updated = new();
-    private readonly Dictionary<byte, string> cacheStates = new();
+    protected readonly Dictionary<byte, bool> updated = new();
+    protected readonly Dictionary<byte, string> CacheStates = new();
     private readonly List<Action<INameModelComponent>> eventConsumers = new();
 
     public ComponentHolder()
@@ -41,7 +39,7 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
 
     public void SetSpacing(int spacing) => this.Spacing = spacing;
 
-    public string Render(PlayerControl player, GameState state)
+    public virtual string Render(PlayerControl player, GameState state)
     {
         if (player.IsShapeshifted() && this is not NameHolder) return "";
         List<string> endString = new();
@@ -60,8 +58,8 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
 
         string newString = endString.Join(delimiter: " ".Repeat(Spacing - 1));
 
-        updated[player.PlayerId] = cacheStates.GetValueOrDefault(player.PlayerId, "") != newString;
-        return cacheStates[player.PlayerId] = newString;
+        updated[player.PlayerId] = CacheStates.GetValueOrDefault(player.PlayerId, "") != newString;
+        return CacheStates[player.PlayerId] = newString;
     }
 
     public bool Updated(byte playerId) => updated.GetValueOrDefault(playerId, false);

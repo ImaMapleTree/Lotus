@@ -108,7 +108,7 @@ public class Phantom : Crewmate, IPhantomRole
     protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier
         .RoleColor(new Color(0.4f, 0.16f, 0.38f))
         .SpecialType(SpecialType.Neutral)
-        .Faction(FactionInstances.Solo)
+        .Faction(FactionInstances.Neutral)
         .RoleFlags(RoleFlag.CannotWinAlone);
 
     [Localized(nameof(Phantom))]

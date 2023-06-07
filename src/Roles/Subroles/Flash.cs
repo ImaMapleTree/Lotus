@@ -21,7 +21,7 @@ public class Flash : Subrole, IVariableSubrole
 
     public Subrole Variation() => _escalation;
 
-    public bool AssignVariation() => Random.RandomRange(0, 100) <= _escalation.Chance;
+    public bool AssignVariation() => RoleUtils.RandomSpawn(_escalation);
 
     [RoleAction(RoleActionType.RoundStart)]
     private void GameStart(bool isStart)

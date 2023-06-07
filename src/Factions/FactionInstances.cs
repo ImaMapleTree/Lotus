@@ -11,5 +11,5 @@ public class FactionInstances
     public static ImpostorFaction Impostors { get; } = new();
     public static Madmates Madmates { get; } = new();
     public static TheUndead TheUndead { get; } = new TheUndead.Origin();
-    public static Solo Solo { get; } = new();
+    public static Neutral Neutral { get; } = new();
 }

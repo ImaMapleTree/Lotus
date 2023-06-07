@@ -55,7 +55,8 @@ public class Terrorist : Engineer
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .RoleColor(new Color(0.52f, 0.84f, 0.28f))
-            .Faction(FactionInstances.Solo)
+            .RoleFlags(RoleFlag.CannotWinAlone)
+            .Faction(FactionInstances.Neutral)
             .SpecialType(SpecialType.Neutral);
 
     [Localized(nameof(Terrorist))]

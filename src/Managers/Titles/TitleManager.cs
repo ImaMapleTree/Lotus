@@ -127,10 +127,7 @@ public class TitleManager
     private static CustomTitle LoadFromStream(Stream stream)
     {
         string result;
-        using (StreamReader reader = new(stream))
-        {
-            result = reader.ReadToEnd();
-        }
+        using (StreamReader reader = new(stream)) result = reader.ReadToEnd();
 
         return TitleDeserializer.Deserialize<CustomTitle>(result);
     }

@@ -27,6 +27,6 @@ public class Opportunist : Crewmate
     protected override RoleModifier Modify(RoleModifier roleModifier) => 
         base.Modify(roleModifier).RoleColor(Color.green)
             .SpecialType(SpecialType.Neutral)
-            .Faction(FactionInstances.Solo)
+            .Faction(FactionInstances.Neutral)
             .RoleFlags(RoleFlag.CannotWinAlone);
 }

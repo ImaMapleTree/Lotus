@@ -3,7 +3,7 @@ using Lotus.Factions.Neutrals;
 
 namespace Lotus.Roles.Subroles.Romantics;
 
-public class RomanticFaction: Solo
+public class RomanticFaction: Neutral
 {
     public byte Partner = byte.MaxValue;
 

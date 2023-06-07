@@ -76,7 +76,7 @@ public class Jester : CustomRole
     protected override RoleModifier Modify(RoleModifier roleModifier)
     {
         return roleModifier
-            .Faction(FactionInstances.Solo)
+            .Faction(FactionInstances.Neutral)
             .VanillaRole(canUseVents ? RoleTypes.Engineer : RoleTypes.Crewmate)
             .SpecialType(SpecialType.Neutral)
             .RoleFlags(RoleFlag.CannotWinAlone)

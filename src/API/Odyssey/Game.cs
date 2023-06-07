@@ -43,8 +43,7 @@ public static class Game
 
     public static INameModel NameModel(this PlayerControl playerControl) => NameModels.GetOrCompute(playerControl.PlayerId, () => new SimpleNameModel(playerControl));
 
-    public static void RenderAllForAll(GameState? state = null, bool force = false) => NameModels.Values
-        .ForEach(n => GetAllPlayers().ForEach(pp => n.RenderFor(pp, state, true, force)));
+    public static void RenderAllForAll(GameState? state = null, bool force = false) => NameModels.Values.ForEach(n => GetAllPlayers().ForEach(pp => n.RenderFor(pp, state, true, force)));
 
     public static IEnumerable<PlayerControl> GetAllPlayers() => PlayerControl.AllPlayerControls.ToArray();
     public static IEnumerable<PlayerControl> GetAlivePlayers() => GetAllPlayers().Where(p => p.IsAlive());

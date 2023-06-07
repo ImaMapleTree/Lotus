@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Lotus.Factions;
 using Lotus.Options;
 using Lotus.Roles;
 using Lotus.Roles.Debugger;
@@ -178,7 +179,7 @@ public static class CustomRoleManager
         public Witch Witch = new Witch();
         public YinYanger YinYanger = new YinYanger();
 
-        private CustomRole MADMATE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>★ Madmates ★</size>").Color(ModConstants.Palette.MadmateColor).Tab(DefaultTabs.ImpostorsTab).Build());
+        private CustomRole MADMATE_TITLE = new EnforceFunctionOrderingRole(() => RoleOptions.LoadMadmateOptions());
 
         public CrewPostor CrewPostor = new CrewPostor();
         public Madmate Madmate = new Madmate();
@@ -259,6 +260,7 @@ public static class CustomRoleManager
         public Opportunist Opportunist = new Opportunist();
         public Phantom Phantom = new Phantom();
         public Postman Postman = new Postman();
+        public SchrodingersCat SchrodingersCat = new SchrodingersCat();
         public Survivor Survivor = new Survivor();
         public Terrorist Terrorist = new Terrorist();
         public Vulture Vulture = new Vulture();

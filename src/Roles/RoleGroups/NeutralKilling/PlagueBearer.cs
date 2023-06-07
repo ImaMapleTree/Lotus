@@ -76,7 +76,11 @@ public class PlagueBearer: NeutralKillingBase
     public void CheckPestilenceTransform(ActionHandle handle)
     {
         PlayerControl[] allCountedPlayers = GetAlivePlayers().ToArray();
-        if (handle.ActionType is RoleActionType.RoundStart or RoleActionType.RoundEnd) alivePlayers = allCountedPlayers.Length;
+        if (handle.ActionType is RoleActionType.RoundStart or RoleActionType.RoundEnd)
+        {
+            alivePlayers = allCountedPlayers.Length;
+            infectedPlayers = infectedPlayers.Where(p => Players.PlayerById(p).Compare(o => o.IsAlive())).ToHashSet();
+        }
         if (allCountedPlayers.Count(r => infectedPlayers.Contains(r.PlayerId)) != alivePlayers) return;
 
         indicatorRemotes.ForEach(remote => remote.Delete());

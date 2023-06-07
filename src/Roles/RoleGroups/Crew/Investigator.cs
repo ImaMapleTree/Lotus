@@ -12,6 +12,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
+using Lotus.Factions.Impostors;
 using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Utilities;
@@ -27,6 +28,7 @@ namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Investigator : Crewmate
 {
+
     public static List<(Func<CustomRole, bool> predicate, GameOptionBuilder builder, bool allColored)> RoleTypeBuilders = new()
     {
         (r => r.SpecialType is SpecialType.NeutralKilling, new GameOptionBuilder()
@@ -75,8 +77,12 @@ public class Investigator : Crewmate
         investigated.Add(player.PlayerId);
         CustomRole role = player.GetCustomRole();
 
-        int setting = RoleTypeBuilders.FirstOrOptional(rtb => rtb.predicate(role)).Map(rtb => rtb.allColored ? 2 : 1).OrElse(0);
-        if (setting == 0) setting = RoleColoringDictionary.GetValueOrDefault(role.GetType(), 1);
+        int setting = RoleTypeBuilders.FirstOrOptional(rtb => rtb.predicate(role)).Map(rtb => rtb.allColored ? 1 : 0).OrElse(0);
+        if (setting == 0)
+        {
+            setting = RoleColoringDictionary.GetValueOrDefault(role.GetType(), 0);
+            if (setting == 0) setting = role.Faction.GetType() == typeof(ImpostorFaction) ? 1 : 2;
+        }
 
         Color color = setting == 2 ? Color.green : Color.red;
 
@@ -98,7 +104,7 @@ public class Investigator : Crewmate
 
     private void PopulateInvestigatorOptions()
     {
-        CustomRoleManager.AllRoles.ForEach(r =>
+        CustomRoleManager.AllRoles.OrderBy(r => r.EnglishRoleName).ForEach(r =>
         {
             RoleTypeBuilders.FirstOrOptional(b => b.predicate(r)).Map(i => i.builder)
                 .IfPresent(builder =>
@@ -107,8 +113,8 @@ public class Investigator : Crewmate
                         .AddEnableDisabledValues()
                         .BindBool(b =>
                         {
-                            if (b) RoleColoringDictionary[r.GetType()] = 2;
-                            else RoleColoringDictionary[r.GetType()] = 1;
+                            if (b) RoleColoringDictionary[r.GetType()] = 1;
+                            else RoleColoringDictionary[r.GetType()] = 2;
                         })
                         .Build());
                 });

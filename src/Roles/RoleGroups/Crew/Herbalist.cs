@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Hazel;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Stats;
@@ -56,7 +57,7 @@ public class Herbalist: Crewmate
             return;
         }
 
-        RpcV3.Immediate(closestPlayer.NetId, RpcCalls.SetScanner).Write(true).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId());
+        RpcV3.Immediate(closestPlayer.NetId, RpcCalls.SetScanner, SendOption.None).Write(true).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId());
         Async.Schedule(() => FinishBloom(closestPlayer.PlayerId), bloomTime);
     }
 
@@ -78,7 +79,7 @@ public class Herbalist: Crewmate
         blooming.Remove(playerId);
         PlayerControl? player = Players.FindPlayerById(playerId);
         if (player == null) return;
-        RpcV3.Immediate(player.NetId, RpcCalls.SetScanner).Write(false).Write((byte)0).Send(MyPlayer.GetClientId());
+        RpcV3.Immediate(player.NetId, RpcCalls.SetScanner, SendOption.None).Write(false).Write((byte)0).Send(MyPlayer.GetClientId());
         _bloomsGrown.Update(MyPlayer.UniquePlayerId(), i => i + 1);
         bloomCounts.Compose(playerId, i => i + 1, () =>
         {

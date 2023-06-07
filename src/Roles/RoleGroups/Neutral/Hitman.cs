@@ -65,9 +65,9 @@ public class Hitman: NeutralKillingBase
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).Faction(_hitmanFaction);
 
 
-    private class HitmanFaction : Solo
+    private class HitmanFaction : Factions.Neutrals.Neutral
     {
-        public override Relation Relationship(Solo sameFaction)
+        public override Relation Relationship(Factions.Neutrals.Neutral sameFaction)
         {
             return Relation.SharedWinners;
         }

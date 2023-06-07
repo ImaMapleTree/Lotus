@@ -9,6 +9,7 @@ using Lotus.API.Odyssey;
 using Lotus.Chat;
 using Lotus.Roles;
 using Lotus.Extensions;
+using Lotus.Managers.Templates.Models;
 using Lotus.Roles.Subroles;
 using VentLib.Options;
 using VentLib.Utilities;
@@ -16,23 +17,39 @@ using VentLib.Utilities.Extensions;
 
 namespace Lotus.Managers.Templates;
 
-public class Template
+public class TemplateLegacy
 {
     private static readonly Regex Regex = new("(?:\\$|@|%|\\^)((?:[A-Za-z0-9_]|\\.\\S)*)");
 
     public string Text;
     public string? Tag;
 
+    private TemplateLegacy()
+    {
+    }
 
-    public Template(string text)
+    public TemplateLegacy(string text)
     {
         Text = text.Replace("\\n", "\n");
         text = text.Replace("\\|", "\\?");
         if (!text.Contains(" | ")) return;
-        
+
         string[] split = text.Split(" | ");
         Tag = split[0];
         Text = split[1].Replace("\\?", "|");
+    }
+
+    public static TemplateLegacy FromTOH(string text)
+    {
+        string[] split = text.Split(":");
+        string tag = split[0];
+        string t = split[1..].Fuse(":");
+        return new TemplateLegacy { Text = t, Tag = tag };
+    }
+
+    public Template ConvertToTemplate()
+    {
+        return new Template { Text = Text, Tag = Tag };
     }
 
     public string Format(object obj)
@@ -128,7 +145,7 @@ public class Template
     {
         if (PluginDataManager.TemplateManager.HasTemplate("modifier-info"))
         {
-            return player.GetSubroles().Select(sr => !PluginDataManager.TemplateManager.TryFormat(sr, "modifier-info", out string text) ? "" : text).Fuse("\n\n");
+            return player.GetSubroles().Select(sr => !PluginDataManager.TemplateManager.TryFormat(player, sr, "modifier-info", out string text) ? "" : text).Fuse("\n\n");
         }
 
         return player.GetSubroles().Select(sr =>

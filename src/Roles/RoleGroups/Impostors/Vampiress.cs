@@ -32,10 +32,10 @@ public class Vampiress : Impostor
     {
         SyncOptions();
         if (mode is VampireMode.Killing) return base.TryKill(target);
+        MyPlayer.RpcMark(target);
         InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this));
         if (result is InteractionResult.Halt) return false;
 
-        MyPlayer.RpcMark(target);
         bitten.Add(target.PlayerId);
         Async.Schedule(() =>
         {

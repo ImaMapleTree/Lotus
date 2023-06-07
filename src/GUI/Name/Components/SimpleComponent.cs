@@ -12,16 +12,16 @@ namespace Lotus.GUI.Name.Components;
 
 public class SimpleComponent : INameModelComponent
 {
-    private List<Ubifix> prefixes = new();
-    private List<Ubifix> suffixes = new();
+    protected List<Ubifix> Prefixes = new();
+    protected List<Ubifix> Suffixes = new();
 
-    private LiveString mainText;
+    protected LiveString MainText;
     private Func<List<PlayerControl>> viewers;
     private readonly List<PlayerControl> additionalViewers = GeneralOptions.GameplayOptions.GhostsSeeInfo ? Game.GetDeadPlayers().ToList() : new List<PlayerControl>();
     private ViewMode viewMode;
     private GameState[] gameStates;
 
-    private Optional<float> size = Optional<float>.Null();
+    protected Optional<float> size = Optional<float>.Null();
 
     private SimpleComponent() {}
 
@@ -31,7 +31,7 @@ public class SimpleComponent : INameModelComponent
         this.viewers = viewers;
         List<PlayerControl> allViewers = PlayerControl.AllPlayerControls.ToArray().ToList();
         this.viewers ??= () => allViewers;
-        this.mainText = mainText;
+        this.MainText = mainText;
         this.gameStates = gameStates;
         this.viewMode = viewMode;
     }
@@ -41,7 +41,7 @@ public class SimpleComponent : INameModelComponent
     {
         List<PlayerControl> allViewers = new();
         this.viewers = () => allViewers;
-        this.mainText = mainText;
+        this.MainText = mainText;
         this.gameStates = gameStates;
         this.viewMode = viewMode;
         additionalViewers = (viewers.Length > 0 ? viewers : PlayerControl.AllPlayerControls.ToArray()).ToList();
@@ -60,19 +60,19 @@ public class SimpleComponent : INameModelComponent
 
     public void AddPrefix(Ubifix prefix)
     {
-        prefixes.Add(prefix);
+        Prefixes.Add(prefix);
         prefix.AddComponent(this, 0);
     }
 
     public void AddSuffix(Ubifix suffix)
     {
-        prefixes.Add(suffix);
+        Prefixes.Add(suffix);
         suffix.AddComponent(this, 1);
     }
 
-    public void RemovePrefix(Ubifix prefix) => prefixes.Remove(prefix);
+    public void RemovePrefix(Ubifix prefix) => Prefixes.Remove(prefix);
 
-    public void RemoveSuffix(Ubifix suffix) => suffixes.Remove(suffix);
+    public void RemoveSuffix(Ubifix suffix) => Suffixes.Remove(suffix);
 
     public GameState[] GameStates() => gameStates;
 
@@ -80,7 +80,7 @@ public class SimpleComponent : INameModelComponent
 
     public List<PlayerControl> Viewers() => viewers().Concat(additionalViewers).ToList();
 
-    public void SetMainText(LiveString liveString) => mainText = liveString;
+    public void SetMainText(LiveString liveString) => MainText = liveString;
 
     public void SetViewerSupplier(Func<List<PlayerControl>> viewers) => this.viewers = viewers;
 
@@ -88,9 +88,9 @@ public class SimpleComponent : INameModelComponent
 
     public void RemoveViewer(byte playerId) => additionalViewers.RemoveAll(v => v.PlayerId == playerId);
 
-    public string GenerateText()
+    public virtual string GenerateText()
     {
-        string newString = prefixes.Join(delimiter: "") + mainText + suffixes.Join(delimiter: "");
+        string newString = Prefixes.Join(delimiter: "") + MainText + Suffixes.Join(delimiter: "");
         size.IfPresent(s => newString = TextUtils.ApplySize(s, newString));
         return newString;
     }
@@ -102,16 +102,16 @@ public class SimpleComponent : INameModelComponent
         List<PlayerControl> newViewerList = new(viewers());
         SimpleComponent component = new()
         {
-            prefixes = new List<Ubifix>(prefixes),
-            suffixes = new List<Ubifix>(suffixes),
-            mainText = mainText,
+            Prefixes = new List<Ubifix>(Prefixes),
+            Suffixes = new List<Ubifix>(Suffixes),
+            MainText = MainText,
             viewers = () => newViewerList,
             viewMode = viewMode,
             gameStates = gameStates,
             size = Optional<float>.From(size)
         };
-        component.prefixes.ForEach(p => p.AddComponent(component, 0));
-        component.suffixes.ForEach(p => p.AddComponent(component, 1));
+        component.Prefixes.ForEach(p => p.AddComponent(component, 0));
+        component.Suffixes.ForEach(p => p.AddComponent(component, 1));
         return component;
     }
 }

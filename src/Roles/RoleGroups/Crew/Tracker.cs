@@ -56,7 +56,7 @@ public class Tracker: Crewmate
             .Fuse();
     }
 
-    [UIComponent(UI.Cooldown)]
+    [UIComponent(UI.Text)]
     public string TrackBodyCooldown() => trackBodyDuration.Duration > 0 ? trackBodyCooldown.Format("{0}", true) : "";
 
     protected override void PostSetup()

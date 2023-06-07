@@ -38,8 +38,7 @@ public class Escalation : Subrole
 
     public override bool IsAssignableTo(PlayerControl player)
     {
-        if (!(player.GetVanillaRole().IsImpostor() || player.GetCustomRole().RoleAbilityFlags.HasFlag(RoleAbilityFlag.IsAbleToKill))) return false;
-        return base.IsAssignableTo(player);
+        return player.GetCustomRole().RoleAbilityFlags.HasFlag(RoleAbilityFlag.IsAbleToKill) && base.IsAssignableTo(player);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

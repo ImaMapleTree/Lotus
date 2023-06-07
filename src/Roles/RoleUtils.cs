@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using AmongUs.GameOptions;
 using Lotus.API.Odyssey;
 using Lotus.API.Vanilla.Sabotages;
 using Lotus.GUI;
@@ -16,6 +17,7 @@ using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using Random = UnityEngine.Random;
 
 namespace Lotus.Roles;
 
@@ -168,5 +170,10 @@ public static class RoleUtils
             if (!b) list.Remove(obj);
             else if (!list.Contains(obj)) list.Add(obj);
         };
+    }
+
+    public static bool RandomSpawn(CustomRole role)
+    {
+        return Random.RandomRange(0, 100) < role.Chance;
     }
 }

@@ -56,7 +56,7 @@ public class Blackmailer: Shapeshifter
         blackmailingText?.Delete();
     }
 
-    [RoleAction(RoleActionType.RoundEnd)]
+    [RoleAction(RoleActionType.MeetingCalled)]
     public void NotifyBlackmailed()
     {
         List<PlayerControl> allPlayers = showBlackmailedToAll
@@ -112,19 +112,19 @@ public class Blackmailer: Shapeshifter
     {
         [Localized(nameof(BlackmailedMessage))]
         public static string BlackmailedMessage = "You have been blackmailed! Sending a chat message will kill you.";
-        
+
         [Localized(nameof(WarningMessage))]
         public static string WarningMessage = "You are not allowed to speak! If you speak again you may be killed.";
 
         [Localized(nameof(BlackmailedText))]
         public static string BlackmailedText = "BLACKMAILED";
-        
+
         [Localized(ModConstants.Options)]
         internal static class Options
         {
             [Localized(nameof(WarningsUntilDeath))]
             public static string WarningsUntilDeath = "Warnings Until Death";
-            
+
             [Localized(nameof(ShowBlackmailedToAll))]
             public static string ShowBlackmailedToAll = "SHow Blackmailed to All";
         }

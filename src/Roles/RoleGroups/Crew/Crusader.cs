@@ -76,7 +76,8 @@ public class Crusader: Crewmate, ISabotagerRole
             .DesyncRole(RoleTypes.Impostor)
             .RoleFlags(RoleFlag.CannotWinAlone)
             .RoleColor(new Color(0.78f, 0.36f, 0.22f))
-            .OptionOverride(new IndirectKillCooldown(() => AUSettings.KillCooldown()));
+            .OptionOverride(new IndirectKillCooldown(() => AUSettings.KillCooldown()))
+            .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod());
 
     public bool CanSabotage() => false;
 

@@ -22,7 +22,7 @@ public class ImpostorFaction : Faction<ImpostorFaction>
         {
             TheUndead => Relation.None,
             Crewmates => Relation.None,
-            Solo => Relation.None,
+            Neutral => Relation.None,
             _ => other.Relationship(this)
         };
     }

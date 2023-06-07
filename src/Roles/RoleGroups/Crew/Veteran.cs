@@ -70,7 +70,8 @@ public class Veteran : Crewmate
         if (actor.GetCustomRole().Faction.Relationship(this.Faction) is Relation.FullAllies && !canKillCrewmates) return;
         handle.Cancel();
         Game.MatchData.GameHistory.AddEvent(new VettedEvent(MyPlayer, actor));
-        MyPlayer.InteractWith(actor, new DirectInteraction(new FatalIntent(interaction is not DirectInteraction), this));
+        IDeathEvent deathEvent = new CustomDeathEvent(MyPlayer, actor, ModConstants.DeathNames.Parried);
+        MyPlayer.InteractWith(actor, new DirectInteraction(new FatalIntent(interaction is not DirectInteraction, () => deathEvent), this));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

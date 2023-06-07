@@ -20,6 +20,8 @@ namespace Lotus.Chat;
 [SuppressMessage("ReSharper", "ParameterHidesMember")]
 public class ChatHandler
 {
+    private static int _maxMessagePacketSize = NetworkRules.MaxPacketSize + 200;
+
     [Localized("SystemMessage")]
     private static string _defaultTitle = "System Announcement";
     private static Color _defaultColor = new(0.67f, 0.67f, 1f);
@@ -105,7 +107,8 @@ public class ChatHandler
 
             if (player == null) MassSend(sender, message, title, leftAligned);
             else if (player.IsHost()) SendToHost(sender, message, title, leftAligned);
-            else InternalSend(sender, player, message, title, name);
+            else if (title.Length < _maxMessagePacketSize) InternalSendLM(sender, player, message, title, name);
+            else InternalSendLT(sender, player, message, title, name);
 
             if (PluginDataManager.TitleManager.HasTitle(sender)) PluginDataManager.TitleManager.ApplyTitleWithChatFix(sender);
         }, 0.125f);
@@ -127,21 +130,21 @@ public class ChatHandler
         PlayerControl.AllPlayerControls.ToArray().ForEach(p =>
         {
             if (p.IsHost()) SendToHost(sender, message, title, leftAligned);
-            else InternalSend(sender, p, message, title, name);
+            else if (title.Length < _maxMessagePacketSize) InternalSendLM(sender, p, message, title, name);
+            else InternalSendLT(sender, p, message, title, name);
         });
     }
 
-    private static void InternalSend(PlayerControl sender, PlayerControl recipient, string message, string title, string originalName)
+    private static void InternalSendLM(PlayerControl sender, PlayerControl recipient, string message, string title, string originalName)
     {
-        int maxPacketSize = NetworkRules.MaxPacketSize + 200;
         int leftIndex = 0;
-        int rightIndex = Math.Min(message.Length, maxPacketSize);
+        int rightIndex = Math.Min(message.Length, _maxMessagePacketSize);
 
         while (rightIndex < message.Length)
         {
             string subMessage = message[leftIndex..rightIndex];
             leftIndex = FindGoodSplitPoint(ref subMessage, leftIndex);
-            rightIndex = Mathf.Min(message.Length, leftIndex + maxPacketSize);
+            rightIndex = Mathf.Min(message.Length, leftIndex + _maxMessagePacketSize);
 
             subMessage = subMessage.Trim('\n');
 
@@ -159,6 +162,48 @@ public class ChatHandler
         }
 
         message = message[leftIndex..rightIndex].Trim('\n');
+
+        RpcV3.Mass()
+            .Start(sender.NetId, RpcCalls.SetName)
+            .Write(title)
+            .End()
+            .Start(sender.NetId, RpcCalls.SendChat)
+            .Write(recipient.IsModded() ? message : message.RemoveHtmlTags())
+            .End()
+            .Start(sender.NetId, RpcCalls.SetName)
+            .Write(originalName)
+            .End()
+            .Send(recipient.GetClientId());
+    }
+
+    // Large Title
+    private static void InternalSendLT(PlayerControl sender, PlayerControl recipient, string message, string title, string originalName)
+    {
+        int leftIndex = 0;
+        int rightIndex = Math.Min(title.Length, _maxMessagePacketSize);
+
+        while (rightIndex < title.Length)
+        {
+            string subTitle = title[leftIndex..rightIndex];
+            leftIndex = FindGoodSplitPoint(ref subTitle, leftIndex);
+            rightIndex = Mathf.Min(title.Length, leftIndex + _maxMessagePacketSize);
+
+            subTitle = subTitle.Trim('\n');
+
+            RpcV3.Mass()
+                .Start(sender.NetId, RpcCalls.SetName)
+                .Write(subTitle)
+                .End()
+                .Start(sender.NetId, RpcCalls.SendChat)
+                .Write(recipient.IsModded() ? message : message.RemoveHtmlTags())
+                .End()
+                .Start(sender.NetId, RpcCalls.SetName)
+                .Write(originalName)
+                .End()
+                .Send(recipient.GetClientId());
+        }
+
+        title = title[leftIndex..rightIndex].Trim('\n');
 
         RpcV3.Mass()
             .Start(sender.NetId, RpcCalls.SetName)

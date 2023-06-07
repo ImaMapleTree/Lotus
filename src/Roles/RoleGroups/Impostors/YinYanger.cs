@@ -26,10 +26,9 @@ public class YinYanger : Vanilla.Impostor
     private PlayerControl? yinPlayer;
     private PlayerControl? yangPlayer;
 
-    private bool resetToYingYang;
-
+    private bool lazyDefer;
     private FixedUpdateLock fixedUpdateLock = new();
-    
+
     private bool InYinMode => yinPlayer == null || yangPlayer == null;
 
     [UIComponent(UI.Text)]
@@ -44,18 +43,18 @@ public class YinYanger : Vanilla.Impostor
 
         Color indicatorColor = yinPlayer == null ? Color.white : Color.black;
         IndicatorComponent component = new(new LiveString("☯", indicatorColor), GameState.Roaming, viewers: MyPlayer);
-        
+
         remotes.GetValueOrDefault(target.PlayerId)?.Delete();
         remotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
 
         if (yinPlayer == null) yinPlayer = target;
         else yangPlayer = target;
-        
+
         SyncOptions();
         MyPlayer.RpcMark(target);
         return true;
     }
-    
+
 
     [RoleAction(RoleActionType.RoundEnd)]
     private void RoundEnd()
@@ -73,8 +72,10 @@ public class YinYanger : Vanilla.Impostor
         if (yinPlayer == null || yangPlayer == null) return;
 
         if (yinPlayer.GetPlayersInAbilityRangeSorted().All(p => p.PlayerId != yangPlayer.PlayerId)) return;
+        lazyDefer = true;
         yinPlayer.InteractWith(yangPlayer, new ManipulatedInteraction(new FatalIntent(), yinPlayer.GetCustomRole(), MyPlayer));
         yangPlayer.InteractWith(yinPlayer, new ManipulatedInteraction(new FatalIntent(), yangPlayer.GetCustomRole(), MyPlayer));
+        lazyDefer = false;
 
         remotes.GetValueOrDefault(yinPlayer.PlayerId)?.Delete();
         remotes.GetValueOrDefault(yangPlayer.PlayerId)?.Delete();
@@ -82,11 +83,12 @@ public class YinYanger : Vanilla.Impostor
         yinPlayer = null;
         yangPlayer = null;
     }
-    
+
     [RoleAction(RoleActionType.Disconnect)]
     [RoleAction(RoleActionType.AnyDeath)]
     private void CheckPlayerDeaths(PlayerControl player)
     {
+        if (lazyDefer == false) return;
         if (yinPlayer != null && yinPlayer.PlayerId == player.PlayerId)
         {
             remotes.GetValueOrDefault(yinPlayer.PlayerId)?.Delete();

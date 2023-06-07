@@ -88,7 +88,7 @@ public class Romantic: Subrole
         else
         {
             MatchData.AssignSubrole(MyPlayer, _vengefulRomantic);
-            MyPlayer.GetCustomRole().Faction = FactionInstances.Solo;
+            MyPlayer.GetCustomRole().Faction = FactionInstances.Neutral;
             MyPlayer.GetSubrole<VengefulRomantic>()?.SetupVengeful(killer, originalFaction);
         }
     }

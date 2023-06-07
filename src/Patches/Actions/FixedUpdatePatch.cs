@@ -32,7 +32,7 @@ static class FixedUpdatePatch
         ActionHandle handle = null;
         __instance.Trigger(RoleActionType.FixedUpdate, ref handle);
 
-        if (player.IsAlive() && GeneralOptions.MiscellaneousOptions.EnableLadderDeath) FallFromLadder.FixedUpdate(player);
+        if (player.IsAlive() && GeneralOptions.GameplayOptions.EnableLadderDeath) FallFromLadder.FixedUpdate(player);
         Profilers.Global.Sampler.Stop(id);
         /*if (player.PlayerId == PlayerControl.LocalPlayer.PlayerId) DisableDevice.FixedUpdate();*/
         /*EnterVentPatch.CheckVentSwap(__instance);*/

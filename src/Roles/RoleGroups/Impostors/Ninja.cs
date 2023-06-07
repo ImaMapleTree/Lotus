@@ -74,11 +74,11 @@ public class Ninja : Vanilla.Impostor
         foreach (var target in playerList.Where(target => target.IsAlive()))
         {
             if (!playerTeleportsToNinja)
-                MyPlayer.RpcMurderPlayer(target);
+                MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this));
             else
             {
                 Utils.Teleport(target.NetTransform, MyPlayer.transform.position);
-                Async.Schedule(() => MyPlayer.RpcMurderPlayer(target), 0.25f);
+                Async.Schedule(() => MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this)), 0.25f);
             }
         }
 

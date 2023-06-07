@@ -18,7 +18,7 @@ public abstract partial class TheUndead : Faction<TheUndead>
         {
             ImpostorFaction => Relation.None,
             Crewmates => Relation.None,
-            Solo => Relation.None,
+            Neutral => Relation.None,
             _ => other.Relationship(this)
         };
     }

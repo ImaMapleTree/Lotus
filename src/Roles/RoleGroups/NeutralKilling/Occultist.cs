@@ -9,6 +9,7 @@ using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
+using Lotus.Managers.History.Events;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
@@ -29,12 +30,12 @@ public class Occultist: NeutralKillingBase
 {
     private bool freelySwitchModes;
     private bool switchModesAfterAttack;
-    
+
     [NewOnSetup] private Dictionary<byte, Remote<IndicatorComponent>> indicators;
     [NewOnSetup] private HashSet<byte> cursedPlayers;
 
     private bool isCursingMode = true;
-    
+
     [UIComponent(UI.Text)]
     private string ModeDisplay() => freelySwitchModes ? isCursingMode ? RoleColor.Colorize(Translations.CursingModeText) : Color.red.Colorize(Translations.KillingModeText) : "";
 
@@ -46,12 +47,12 @@ public class Occultist: NeutralKillingBase
             if (switchModesAfterAttack) isCursingMode = !isCursingMode;
             return base.TryKill(target);
         }
-        
+
         MyPlayer.RpcMark(target);
         if (switchModesAfterAttack) isCursingMode = !isCursingMode;
         if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         if (cursedPlayers.Contains(target.PlayerId)) return false;
-        
+
         cursedPlayers.Add(target.PlayerId);
         indicators.GetValueOrDefault(target.PlayerId)?.Delete();
         indicators[target.PlayerId] = target.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent("†", Color.red, GameState.InMeeting));
@@ -71,14 +72,18 @@ public class Occultist: NeutralKillingBase
     public void KillCursedPlayers(Optional<GameData.PlayerInfo> exiledPlayer)
     {
         if (exiledPlayer.Compare(p => p.PlayerId == MyPlayer.PlayerId)) return;
-        cursedPlayers.Filter(Players.PlayerById).ForEach(p => ProtectedRpc.CheckMurder(MyPlayer, p));
+        cursedPlayers.Filter(Players.PlayerById).ForEach(p =>
+        {
+            IDeathEvent cod = new CustomDeathEvent(MyPlayer, p, Translations.HexedCauseOfDeath);
+            MyPlayer.InteractWith(p, new UnblockedInteraction(new FatalIntent(false, () => cod), this));
+        });
         cursedPlayers.Clear();
         indicators.ForEach(i => i.Value.Delete());
         indicators.Clear();
     }
 
 
-    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => 
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.KeyName("Freely Switch Modes", Translations.Options.FreelySwitchModes)
                 .AddOnOffValues()
@@ -89,11 +94,11 @@ public class Occultist: NeutralKillingBase
                 .BindBool(b => switchModesAfterAttack = b)
                 .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => 
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .RoleColor(new Color(0.39f, 0.47f, 0.87f))
             .OptionOverride(new IndirectKillCooldown(KillCooldown, () => isCursingMode));
-    
+
 
     [Localized(nameof(Occultist))]
     private static class Translations
@@ -106,7 +111,10 @@ public class Occultist: NeutralKillingBase
 
         [Localized(nameof(KillingModeText))]
         public static string KillingModeText = "Killing";
-        
+
+        [Localized(nameof(HexedCauseOfDeath))]
+        public static string HexedCauseOfDeath = "Hexed";
+
         [Localized(ModConstants.Options)]
         public static class Options
         {
@@ -117,5 +125,5 @@ public class Occultist: NeutralKillingBase
             public static string SwitchModesAfterAttack = "Switch Modes After Attack";
         }
     }
-    
+
 }

@@ -77,6 +77,11 @@ public class Mastermind : Impostor
     public void InterceptTargetAction(PlayerControl emitter, RoleAction action, ActionHandle handle, object[] parameters)
     {
         if (!manipulatedPlayers.Contains(emitter.PlayerId)) return;
+        if (action.ActionType is RoleActionType.SelfReportBody)
+        {
+            handle.Cancel();
+            return;
+        }
         if (action.ActionType is not RoleActionType.Attack) return;
 
         PlayerControl? target = (PlayerControl?)(handle.ActionType is RoleActionType.Attack ? parameters[0] : emitter.GetPlayersInAbilityRangeSorted().FirstOrDefault());

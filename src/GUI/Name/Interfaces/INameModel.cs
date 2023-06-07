@@ -1,14 +1,11 @@
 using System.Collections.Generic;
 using Lotus.API.Odyssey;
-using Lotus.API;
 
 namespace Lotus.GUI.Name.Interfaces;
 
 public interface INameModel
 {
-    public string Unaltered();
-
-    public PlayerControl MyPlayer();
+    public bool Updated();
 
     public void Render(List<PlayerControl> players) => players.ForEach(p => this.RenderFor(p));
 

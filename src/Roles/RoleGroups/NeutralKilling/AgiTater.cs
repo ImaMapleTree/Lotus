@@ -155,6 +155,7 @@ public class AgiTater: NeutralKillingBase
         public bool Explode(PlayerControl? owner = null)
         {
             owner ??= Utils.GetPlayerById(Owner);
+            bombText?.Delete();
             if (owner == null || agitater.MyPlayer == null) return false;
             if (!owner.IsAlive()) return false;
 
@@ -207,7 +208,7 @@ public class AgiTater: NeutralKillingBase
         private Remote<TextComponent> SetBombText(PlayerControl player)
         {
             LiveString indicator = new(IndicatorString);
-            TextComponent text = new(indicator, GameState.Roaming, ViewMode.Additive, Game.GetDeadPlayers().AddItem(player).ToArray());
+            TextComponent text = new(indicator, GameState.Roaming, ViewMode.Additive, player);
             return player.NameModel().GetComponentHolder<TextHolder>().Add(text);
         }
 

@@ -14,6 +14,7 @@ using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Managers.Friends;
 using Lotus.Managers.Templates;
+using Lotus.Managers.Templates.Models;
 using Lotus.Roles.Subroles;
 using TMPro;
 using UnityEngine;
@@ -48,7 +49,7 @@ public class BasicCommands: CommandTranslations
         string FactionName(CustomRole role)
         {
             if (role is Subrole) return "Modifiers";
-            if (role.Faction is not Solo) return role.Faction.Name();
+            if (role.Faction is not Neutral) return role.Faction.Name();
             return role.SpecialType is SpecialType.NeutralKilling ? "Neutral Killers" : "Neutral";
         }
 
@@ -86,6 +87,7 @@ public class BasicCommands: CommandTranslations
     [Command(CommandFlag.LobbyOnly, "name")]
     public static void Name(PlayerControl source, string name)
     {
+        if (name.IsNullOrWhiteSpace()) return;
         int allowedUsers = GeneralOptions.MiscellaneousOptions.ChangeNameUsers;
         bool permitted = allowedUsers switch
         {
@@ -98,6 +100,12 @@ public class BasicCommands: CommandTranslations
         if (!permitted)
         {
             ChatHandlers.NotPermitted().Send(source);
+            return;
+        }
+
+        if (name.Length > 25)
+        {
+            ChatHandler.Of($"Name too long ({name.Length} > 25).", CommandError).LeftAlign().Send(source);
             return;
         }
 

@@ -88,7 +88,7 @@ public class StandardGamemode: Gamemode
         if (winDelegate.GetWinners().Count != 1) return;
         List<PlayerControl> winners = winDelegate.GetWinners();
         PlayerControl winner = winners[0];
-        if (winner.GetCustomRole().Faction is not Solo) return;
+        if (winner.GetCustomRole().Faction is not Neutral) return;
 
         winners.AddRange(Game.GetAllPlayers()
             .Where(p => p.PlayerId != winner.PlayerId)

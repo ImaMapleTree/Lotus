@@ -31,7 +31,7 @@ public class UndeadRole : Impostor
 
         INameModel nameModel = target.NameModel();
 
-        string unalteredName = nameModel.Unaltered();
+        string unalteredName = target.name;
         string fullName = UndeadColor.Colorize(unalteredName[..(unalteredName.Length / 2)] + Color.white.Colorize(unalteredName[(unalteredName.Length / 2)..]));
         NameComponent nameComponent = new(new LiveString(fullName), new[] { GameState.Roaming, GameState.InMeeting }, ViewMode.Replace, () => viewers);
 
@@ -49,7 +49,7 @@ public class UndeadRole : Impostor
         List<PlayerControl> undead = Game.GetAlivePlayers().Where(IsConvertedUndead).ToList();
         List<PlayerControl> viewers = new() { target };
 
-        LiveString undeadPlayerName = new(target.NameModel().Unaltered(), UndeadColor);
+        LiveString undeadPlayerName = new(target.name, UndeadColor);
 
         if (target.GetCustomRole().Faction is TheUndead.Unconverted unconverted)
         {
@@ -77,7 +77,7 @@ public class UndeadRole : Impostor
                     nameModel.GetComponentHolder<NameHolder>()[0].AddViewer(target);
                     break;
                 default:
-                    nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(new LiveString(nameModel.Unaltered, UndeadColor), new [] { GameState.Roaming, GameState.InMeeting}, ViewMode.Replace, viewers: () => viewers));
+                    nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(new LiveString(p.name, UndeadColor), new [] { GameState.Roaming, GameState.InMeeting}, ViewMode.Replace, viewers: () => viewers));
                     break;
             }
         });

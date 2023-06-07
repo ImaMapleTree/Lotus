@@ -12,6 +12,8 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Options.General;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
@@ -44,6 +46,9 @@ public class CheckForEndVotingPatch
         // WE DO NOT RECALCULATE THE EXILED PLAYER!
         // This means its up to roles that modify the meeting delegate to properly update the exiled player
 
+        if (GeneralOptions.MeetingOptions.ResolveTieMode is ResolveTieMode.Random)
+            if (meetingDelegate.TiedPlayers.Count >= 2)
+                meetingDelegate.ExiledPlayer = Players.PlayerById(meetingDelegate.TiedPlayers.ToList().GetRandom()).Map(p => p.Data).OrElse(null!);
 
         // Generate voter states to reflect voting
         List<VoterState> votingStates = GenerateVoterStates(meetingDelegate);

@@ -74,9 +74,11 @@ public abstract class AbstractBaseRole
     public RoleTypes RealRole => DesyncRole ?? VirtualRole;
     public RoleTypes? DesyncRole;
     public RoleTypes VirtualRole;
-    public IFaction Faction { get; set; } = FactionInstances.Solo;
+    public IFaction Faction { get; set; } = FactionInstances.Neutral;
     public SpecialType SpecialType = SpecialType.None;
     public Color RoleColor = Color.white;
+    public ColorGradient? RoleColorGradient = null;
+
     public int Chance { get; private set;  }
     public int Count { get; private set; }
     public int AdditionalChance { get; private set; }
@@ -444,7 +446,6 @@ public abstract class AbstractBaseRole
             return this;
         }
 
-
         public RoleModifier OptionOverride(Override option, object? value, Func<bool>? condition = null)
         {
             myRole.roleSpecificGameOptionOverrides.Add(new GameOptionOverride(option, value, condition));
@@ -473,6 +474,12 @@ public abstract class AbstractBaseRole
         {
             if (ColorUtility.TryParseHtmlString(htmlColor, out Color color))
                 myRole.RoleColor = color;
+            return this;
+        }
+
+        public RoleModifier Gradient(params Color[] colors)
+        {
+            myRole.RoleColorGradient = new ColorGradient(colors);
             return this;
         }
 

@@ -1,8 +1,10 @@
 using System;
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Processes;
 using Lotus.API.Reactive;
+using Lotus.Logging;
 using Lotus.Victory;
 using Lotus.Patches.Actions;
 using Lotus.Roles.Internals;
@@ -51,7 +53,11 @@ internal class MeetingPrep
         NameUpdateProcess.Paused = true;
 
         if (reporter != null)
-            Async.Schedule(() => QuickStartMeeting(reporter), 0.1f);
+            Async.Schedule(() =>
+            {
+                /*Game.GetAllPlayers().ForEach(p => p.CRpcRevertShapeshift(false));*/
+                QuickStartMeeting(reporter);
+            }, 0.1f);
 
         Game.RenderAllForAll(GameState.InMeeting, true);
         Async.Schedule(FixChatNames, NetUtils.DeriveDelay(4f));
@@ -72,6 +78,7 @@ internal class MeetingPrep
         MeetingRoomManager.Instance.AssignSelf(reporter, Reported);
         DestroyableSingleton<HudManager>.Instance.OpenMeetingRoom(reporter);
         reporter.RpcStartMeeting(Reported);
+        GameManager.Instance.LogicFlow.CheckEndCriteria();
     }
 
     private static void FixChatNames() => Game.GetAllPlayers().ForEach(p => p.RpcSetName(Color.white.Colorize(p.name)));

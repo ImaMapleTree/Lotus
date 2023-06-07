@@ -8,5 +8,7 @@ public class MisfiredEvent: DeathEvent
     {
     }
 
+    public override string SimpleName() => ModConstants.DeathNames.Misfired;
+
     public override string Message() => $"{Player().name} misfired.";
 }

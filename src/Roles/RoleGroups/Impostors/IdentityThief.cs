@@ -39,46 +39,50 @@ public class IdentityThief : Impostor
 
         if (result is InteractionResult.Halt) return false;
         if (!unshiftOnCooldown && totallySwapIdentity) return HandlePermanentShift(target);
-        
+
         MyPlayer.RpcShapeshift(target, true);
-        if (unshiftOnCooldown) Async.Schedule(() => MyPlayer.RpcRevertShapeshift(true), KillCooldown);
+        if (unshiftOnCooldown) Async.Schedule(() =>
+        {
+            if (Game.State is GameState.InMeeting) return;
+            MyPlayer.RpcRevertShapeshift(true);
+        }, KillCooldown);
         ProtectedRpc.CheckMurder(MyPlayer, target);
         return true;
     }
-    
+
 
     private bool HandlePermanentShift(PlayerControl target)
     {
         GameData.PlayerInfo myInfo = MyPlayer.Data;
         GameData.PlayerOutfit myOutfit = myInfo.DefaultOutfit;
         uint myLevel = myInfo.PlayerLevel;
-        
+
         GameData.PlayerInfo stolenIdentity = target.Data;
         GameData.PlayerOutfit targetOutfit = stolenIdentity.DefaultOutfit;
         uint targetLevel = stolenIdentity.PlayerLevel;
-        
+
         myInfo.SetOutfit(PlayerOutfitType.Default, targetOutfit);
         myInfo.PlayerLevel = targetLevel;
-        
+
         stolenIdentity.SetOutfit(PlayerOutfitType.Default, myOutfit);
         stolenIdentity.PlayerLevel = myLevel;
-        
+
         NameHolder targetNameHolder = target.NameModel().GCH<NameHolder>();
         targetNameHolder.First().SetMainText(new LiveString(MyPlayer.name));
         targetNameHolder.Add(new NameComponent(new LiveString(target.name), Game.IgnStates, ViewMode.Replace, target));
         MyPlayer.NameModel().GCH<NameHolder>().Add(new NameComponent(new LiveString(target.name, Color.white), Game.IgnStates, ViewMode.Replace));
         MyPlayer.name = target.name;
-        
+
         ProtectedRpc.CheckMurder(MyPlayer, target);
-        
+
         Players.SendPlayerData(myInfo);
         Players.SendPlayerData(stolenIdentity);
-        
+
         Async.Schedule(() => MyPlayer.CRpcShapeshift(MyPlayer, true), NetUtils.DeriveDelay(0.05f));
         MyPlayer.NameModel().Render(Game.GetAllPlayers().ToList());
         return true;
     }
-    
+
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub.KeyName("Disguise Settings", DisguiseSettings)
@@ -92,7 +96,7 @@ public class IdentityThief : Impostor
                     .Build())
                 .Build());
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => 
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .OptionOverride(Override.ShapeshiftDuration, 3000f)
             .OptionOverride(Override.ShapeshiftCooldown, 0.001f);
@@ -108,7 +112,7 @@ public class IdentityThief : Impostor
 
             [Localized(nameof(UntilKillCooldown))]
             public static string UntilKillCooldown = "Kill CD";
-            
+
             [Localized(nameof(UntilNextKill))]
             public static string UntilNextKill = "Next Kill";
 

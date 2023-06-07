@@ -1,4 +1,3 @@
-#nullable enable
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
@@ -8,10 +7,6 @@ using Lotus.GUI.Name;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
-using Lotus.API;
-using Lotus.Extensions;
-using Lotus.Factions.Impostors;
-using Lotus.Roles.Internals;
 using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;

@@ -16,6 +16,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Extensions;
 using Lotus.Roles.Subroles;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Networking.RPC.Attributes;
@@ -33,6 +34,9 @@ public class Janitor: Vanilla.Impostor
     public override HashSet<Type> BannedModifiers() => cleanOnKill ? new HashSet<Type>() : JanitorBannedModifiers;
 
     private bool cleanOnKill;
+    private float killMultiplier;
+
+    private float JanitorKillCooldown() => cleanOnKill ? KillCooldown * killMultiplier : KillCooldown;
 
     [UIComponent(UI.Cooldown)]
     private Cooldown cleanCooldown;
@@ -79,14 +83,35 @@ public class Janitor: Vanilla.Impostor
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-            .SubOption(sub => sub.Name("Clean On Kill")
+            .SubOption(sub => sub.KeyName("Clean On Kill", Translations.Options.CleanOnKill)
                 .AddOnOffValues()
                 .BindBool(b => cleanOnKill = b)
+                .ShowSubOptionPredicate(b => (bool)b)
+                .SubOption(sub2 => sub2
+                    .KeyName("Kill Cooldown Multiplier", Translations.Options.KillCooldownMultiplier)
+                    .AddFloatRange(1, 3, 0.25f, 2, "x")
+                    .BindFloat(f => killMultiplier = f)
+                    .Build())
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .OptionOverride(new IndirectKillCooldown(KillCooldown, () => cleanOnKill || cleanCooldown.NotReady()));
+            .OptionOverride(new IndirectKillCooldown(JanitorKillCooldown, () => cleanOnKill || cleanCooldown.NotReady()));
+
+    [Localized(nameof(Janitor))]
+    private static class Translations
+    {
+        [Localized(ModConstants.Options)]
+        public static class Options
+        {
+            [Localized(nameof(CleanOnKill))]
+            public static string CleanOnKill = "Clean On KIll";
+
+            [Localized(nameof(KillCooldownMultiplier))]
+            public static string KillCooldownMultiplier = "Kill Cooldown Multiplier";
+        }
+    }
+
 
     private class FakeFatalIntent : IFatalIntent
     {

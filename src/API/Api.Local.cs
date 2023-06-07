@@ -1,5 +1,3 @@
-using Lotus.Extensions;
-
 namespace Lotus.API;
 
 public partial class Api
@@ -21,8 +19,6 @@ public partial class Api
                 GameData.PlayerOutfit defaultOutfit = playerData.DefaultOutfit;
                 defaultOutfit.PlayerName = name;
                 AmongUsClient.Instance.GetClientFromCharacter(playerData.Object)?.UpdatePlayerName(name);
-                
-                if (!player.IsAlive()) playerData.PlayerName = player.name;
             }
 
             player.cosmetics.nameText.text = name;

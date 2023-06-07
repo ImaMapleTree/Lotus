@@ -3,11 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
-using Lotus.Logging;
+using Lotus.Extensions;
 using Lotus.Managers.History;
 using Lotus.Options;
+using Lotus.Roles.Extra;
 using Lotus.Victory.Conditions;
-using Microsoft.VisualBasic;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -85,20 +85,22 @@ public class LastResultCommand: CommandTranslations
         HashSet<byte> winners = Game.MatchData.GameHistory.LastWinners.Select(p => p.MyPlayer.PlayerId).ToHashSet();
         string text = GeneralColor3.Colorize("<b>Translations.ResultsText</b>") + "\n";
 
-        text = PlayerHistories.OrderBy(StatusOrder).Select(p => CreateSmallPlayerResult(p, winners.Contains(p.PlayerId)))
-            .Fuse("<line-height=3.1>\n</line-height>");
+        text = PlayerHistories
+            .Where(ph => ph.Role is not GM)
+            .OrderBy(StatusOrder)
+            .Select(p => CreateSmallPlayerResult(p, winners.Contains(p.PlayerId)))
+            .Fuse("<line-height=4>\n</line-height>");
 
         string winResult = new Optional<IWinCondition>(Game.GetWinDelegate().WinCondition()).Map(wc =>
         {
             string t;
             if (wc is IFactionWinCondition factionWin) t = factionWin.Factions().Select(f => f.FactionColor().Colorize(f.Name())).Fuse();
             else t = Game.MatchData.GameHistory.LastWinners.Select(lw => lw.Name).Fuse();
-            return $"\n\n<size=1.8>{LRTranslations.WinResultText.Formatted(t)}</size>";
+            return $"\n\n<size=1.6>{LRTranslations.WinResultText.Formatted(t)}</size>";
         }).OrElse("");
 
 
-        string content = text + winResult;
-        DevLogger.Log(content);
+        string content = $"<size=1.7>{text + winResult}</size>";
 
         ChatHandler.Of("\n".Repeat(PlayerHistories.Count - 1), content).LeftAlign().Send(source);
         return;
@@ -119,9 +121,9 @@ public class LastResultCommand: CommandTranslations
 
         int colorId = history.Outfit.ColorId;
         string coloredName = ((Color)Palette.PlayerColors[colorId]).Colorize(ModConstants.ColorNames[colorId]);
-        string modifiers = history.Subroles.Count == 0 ? "" : $"\n<size=1.4>{history.Subroles.Select(sr => sr.RoleColor.Colorize(sr.RoleName)).Fuse()}</size>";
+        string modifiers = history.Subroles.Count == 0 ? "" : $"\n<size=1.3>{history.Subroles.Select(sr => sr.ColoredRoleName()).Fuse()}</size>";
 
-        string totalText = winnerPrefix.Formatted($"{history.Name} : {coloredName} <size=1.5>({playerStatus})</size>\n{indent.Formatted($"<size=1.9>{history.Role.RoleColor.Colorize(history.Role.RoleName)}</size> {statText}{modifiers}")}");
+        string totalText = winnerPrefix.Formatted($"{history.Name} : {coloredName} <size=1.5>({playerStatus})</size>\n{indent.Formatted($"<size=1.9>{history.Role.ColoredRoleName()}</size> {statText}{modifiers}")}");
         return $"<line-height=2.2>{totalText}</line-height>";
     }
 

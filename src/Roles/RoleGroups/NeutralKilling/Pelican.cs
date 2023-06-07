@@ -1,4 +1,6 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
+using Hazel;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
@@ -49,16 +51,16 @@ public class Pelican: NeutralKillingBase
         MyPlayer.RpcMark(target);
         if (result is InteractionResult.Halt) return false;
 
-        int randomX = Random.RandomRange(5000, 99999);
-        int randomY = Random.RandomRange(5000, 99999);
-        lastLocation = new Vector2(-randomX, -randomY);
-        Utils.Teleport(target.NetTransform, lastLocation);
+        TeleportPlayer(target);
         gulpedPlayers.Add(target.PlayerId);
         _gulpedPlayerStat.Update(MyPlayer.UniquePlayerId(), i => i + 1);
 
-        RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetScanner).Write(true).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId());
-        Async.Schedule(() => RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetScanner).Write(false).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId()), 0.8f);
+        RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetScanner, SendOption.None).Write(true).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId());
+        Async.Schedule(() => RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetScanner, SendOption.None).Write(false).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId()), 0.8f);
 
+        if (Players.GetAllPlayers(PlayerFilter.Alive).Count(p => p.PlayerId != MyPlayer.PlayerId) == gulpedPlayers.Count)
+            KillGulpedPlayers();
+        
         return false;
     }
 
@@ -86,15 +88,29 @@ public class Pelican: NeutralKillingBase
         gulpedPlayers.Filter(Players.PlayerById).ForEach(p => Utils.Teleport(p.NetTransform, myLocation));
     }
 
+    private void TeleportPlayer(PlayerControl player)
+    {
+        int randomX = Random.RandomRange(5000, 99999);
+        int randomY = Random.RandomRange(5000, 99999);
+        lastLocation = new Vector2(-randomX, -randomY);
+        Utils.Teleport(player.NetTransform, lastLocation);
+    }
+
     public void CheckForTeleport(PlayerTeleportedHookEvent teleportedHookEvent)
     {
         PlayerControl player = teleportedHookEvent.Player;
         if (!gulpedPlayers.Contains(player.PlayerId)) return;
         if (teleportedHookEvent.NewLocation == lastLocation) return;
-        if (teleportedHookEvent.NewLocation is { x: < -1000, y: < -1000 }) return;
+        if (teleportedHookEvent.NewLocation is { x: < -1000, y: < -1000 })
+        {
+            gulpedPlayers.Add(player.PlayerId);
+            VentLogger.Trace($"Player: {player.name} has teleported into the Pelican ({MyPlayer.name}) and is going to be eaten.", "PelicanEnter");
+            return;
+        }
 
         VentLogger.Trace($"Player: {player.name} has teleported out of the Pelican ({MyPlayer.name})", "PelicanEscape");
-        gulpedPlayers.Remove(player.PlayerId);
+        if (allowPelicanEscape) gulpedPlayers.Remove(player.PlayerId);
+        else TeleportPlayer(player);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

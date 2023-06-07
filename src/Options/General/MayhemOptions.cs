@@ -68,11 +68,6 @@ public class MayhemOptions
             .BindBool(b => CamoComms = b)
             .BuildAndRegister());
 
-        AllOptions.Add(Builder("All Roles Can Vent")
-            .Name(MayhemOptionTranslations.AllRolesVentText)
-            .BindBool(b => AllRolesCanVent = b)
-            .BuildAndRegister());
-
         additionalOptions.ForEach(o =>
         {
             o.Register();

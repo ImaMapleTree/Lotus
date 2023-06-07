@@ -46,8 +46,8 @@ public class RpcSetTasksPatch
 
         if (!hasTasks) return true;
 
-        if (shortTaskCount == -1) shortTaskCount = AUSettings.NumShortTasks();
-        if (longTaskCount == -1) longTaskCount = AUSettings.NumLongTasks();
+        if (shortTaskCount == -1 || !overrideTasks) shortTaskCount = AUSettings.NumShortTasks();
+        if (longTaskCount == -1 || !overrideTasks) longTaskCount = AUSettings.NumLongTasks();
 
 
         if (tasksOverride != null)

@@ -138,5 +138,5 @@ public class Postman: Crewmate
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier)
         .RoleColor(new Color(0.6f, 0.6f, 0.6f))
         .SpecialType(SpecialType.Neutral)
-        .Faction(FactionInstances.Solo);
+        .Faction(FactionInstances.Neutral);
 }

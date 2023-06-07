@@ -4,17 +4,19 @@ using System.Linq;
 using Lotus.Factions;
 using Lotus.Factions.Interfaces;
 using Lotus.Extensions;
+using Lotus.Roles.Extra;
+using Lotus.Roles.Interfaces;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 
 namespace Lotus.Roles.Subroles;
 
-public abstract class Subrole: CustomRole
+public abstract class Subrole: CustomRole, ISubrole
 {
     public readonly HashSet<IFaction> FactionRestrictions = new();
     public readonly HashSet<Type> RoleRestrictions = new();
 
-    public abstract string? Identifier();
+    public abstract string Identifier();
 
     /// <summary>
     /// Returns the <see cref="CompatabilityMode"/> handling for set of types returned by <see cref="RestrictedRoles"/>
@@ -42,6 +44,7 @@ public abstract class Subrole: CustomRole
     public virtual bool IsAssignableTo(PlayerControl player)
     {
         CustomRole role = player.GetCustomRole();
+        if (role is GM) return false;
         if (role.BannedModifiers().Contains(this.GetType())) return false;
 
         Type factionType = role.Faction.GetType();

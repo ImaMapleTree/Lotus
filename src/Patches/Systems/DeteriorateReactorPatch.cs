@@ -1,14 +1,11 @@
-using System;
 using HarmonyLib;
 using Lotus.API.Vanilla.Sabotages;
 using Lotus.Options;
 
 namespace Lotus.Patches.Systems;
-//参考
-//https://github.com/Koke1024/Town-Of-Moss/blob/main/TownOfMoss/Patches/MeltDownBoost.cs
 
 [HarmonyPatch(typeof(ReactorSystemType), nameof(ReactorSystemType.Detoriorate))]
-public static class ReactorSystemTypePatch
+public static class DeteriorateReactorPatch
 {
     public static void Prefix(ReactorSystemType __instance)
     {
@@ -31,34 +28,6 @@ public static class ReactorSystemTypePatch
                 if (__instance.Countdown > GeneralOptions.SabotageOptions.PolusReactorCountdown)
                     __instance.Countdown = GeneralOptions.SabotageOptions.PolusReactorCountdown;
                 break;
-            default:
-                break;
         }
-    }
-}
-
-[HarmonyPatch(typeof(LifeSuppSystemType), nameof(LifeSuppSystemType.Detoriorate))]
-public static class LifeSupportSystemPatch
-{
-    public static void Prefix(LifeSuppSystemType __instance)
-    {
-        if (SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Oxygen)
-            SabotagePatch.SabotageCountdown = __instance.Countdown;
-    }
-}
-
-[HarmonyPatch(typeof(HeliSabotageSystem), nameof(HeliSabotageSystem.Detoriorate))]
-public static class HeliSabotageSystemPatch
-{
-    public static void Prefix(HeliSabotageSystem __instance)
-    {
-        if (!__instance.IsActive) return;
-
-        if (AirshipStatus.Instance == null) return;
-
-        if (!GeneralOptions.SabotageOptions.CustomAirshipReactorCountdown) return;
-
-        if (__instance.Countdown > GeneralOptions.SabotageOptions.AirshipReactorCountdown)
-            __instance.Countdown = GeneralOptions.SabotageOptions.AirshipReactorCountdown;
     }
 }

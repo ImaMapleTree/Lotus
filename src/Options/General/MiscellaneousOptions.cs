@@ -20,9 +20,6 @@ public class MiscellaneousOptions
     public bool AutoDisplayResults;
     public int SuffixMode;
     public bool ColorNameMode;
-    public int LadderDeathChance = -1;
-
-    public bool EnableLadderDeath => LadderDeathChance > 0;
 
     public List<GameOption> AllOptions = new();
 
@@ -72,19 +69,10 @@ public class MiscellaneousOptions
             .BindBool(b => AutoDisplayResults = b)
             .BuildAndRegister());
 
-        /*var suffixMode = Builder("Suffix Mode")*/
-
         AllOptions.Add(Builder("Color Names")
             .Name(MiscOptionTranslations.ColorNames)
             .AddOnOffValues(false)
             .BindBool(b => ColorNameMode = b)
-            .BuildAndRegister());
-
-        AllOptions.Add(Builder("Ladder Death")
-            .Name(MiscOptionTranslations.LadderDeathText)
-            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(-1).Color(Color.red).Build())
-            .AddIntRange(10, 100, 5, suffix: "%")
-            .BindInt(i => LadderDeathChance = i)
             .BuildAndRegister());
 
         additionalOptions.ForEach(o =>
@@ -129,9 +117,6 @@ public class MiscellaneousOptions
 
         [Localized(nameof(ColorNames))]
         public static string ColorNames = "Color Names";
-
-        [Localized("LadderDeath")]
-        public static string LadderDeathText = "Ladder Death";
     }
 
 }

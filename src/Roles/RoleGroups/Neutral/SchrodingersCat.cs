@@ -66,8 +66,8 @@ public class SchrodingersCat: CustomRole
         roleModifier
             .RoleColor(new Color(0.41f, 0.41f, 0.41f))
             .VanillaRole(RoleTypes.Crewmate)
-            .Faction(FactionInstances.Solo)
-            .RoleFlags(RoleFlag.CannotWinAlone | RoleFlag.VariationRole)
+            .Faction(FactionInstances.Neutral)
+            .RoleFlags(RoleFlag.CannotWinAlone)
             .SpecialType(SpecialType.Neutral);
 
     [Localized(nameof(SchrodingersCat))]

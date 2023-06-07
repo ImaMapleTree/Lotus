@@ -3,6 +3,7 @@ using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Chat;
+using Lotus.Extensions;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
@@ -20,7 +21,6 @@ using static Lotus.Roles.RoleGroups.Neutral.Swapper.SwapperTranslations;
 
 namespace Lotus.Roles.RoleGroups.Neutral;
 
-[Localized("Roles")]
 public class Swapper : Crewmate
 {
     private byte target1 = byte.MaxValue;
@@ -43,9 +43,9 @@ public class Swapper : Crewmate
         target1 = byte.MaxValue;
         target2 = byte.MaxValue;
         skippedAbility = false;
-        Async.Schedule(() => ChatHandler.Of(SwapperInfoMessage, RoleColor.Colorize(SwapperAbility)).LeftAlign().Send(MyPlayer), 1f);
+        if (MyPlayer.IsAlive()) Async.Schedule(() => ChatHandler.Of(SwapperInfoMessage, RoleColor.Colorize(SwapperAbility)).LeftAlign().Send(MyPlayer), 1f);
     }
-    
+
     [RoleAction(RoleActionType.MyVote)]
     private void SwapperVoteSelection(Optional<PlayerControl> votedPlayer, MeetingDelegate meetingDelegate, ActionHandle handle)
     {
@@ -71,7 +71,7 @@ public class Swapper : Crewmate
                 CHandler().Message(SwapperSelectMessage2.Formatted(Utils.GetPlayerById(target2)?.name, Utils.GetPlayerById(target1)?.name)).Send(MyPlayer);
             }, () => meetingDelegate.CastVote(MyPlayer, Utils.PlayerById(target1)));
         }
-        // Target 1 is not selected yet so this is either a complete skip or 
+        // Target 1 is not selected yet so this is either a complete skip or
         else
         {
             handle.Cancel();
@@ -88,12 +88,12 @@ public class Swapper : Crewmate
     {
         if (target1 == byte.MaxValue || target2 == byte.MaxValue) return;
         VentLogger.Trace($"Swapping Votes for {Utils.GetPlayerById(target1)?.name} <=> {Utils.GetPlayerById(target2)?.name}", "Swapper");
-        
+
         ChatHandler handler = ChatHandler.Of(SwapperPublicMessage.Formatted(Utils.GetPlayerById(target1)?.name, Utils.GetPlayerById(target2)?.name))
             .Title(t => t.Text(SwapperAbility).Color(RoleColor).PrefixSuffix("↔").Build());
 
         Async.Schedule(() => handler.Send(), 0.1f);
-        
+
         List<byte> votesForPlayer1 = new();
         List<byte> votesForPlayer2 = new();
         meetingDelegate.CurrentVotes().ForEach(kv =>
@@ -110,16 +110,16 @@ public class Swapper : Crewmate
                 });
             });
         });
-        
+
         Optional<byte> player1Optional = Optional<byte>.NonNull(target1);
         Optional<byte> player2Optional = Optional<byte>.NonNull(target2);
-        
+
         votesForPlayer1.ForEach(player =>
         {
             meetingDelegate.RemoveVote(player, player1Optional);
             meetingDelegate.CastVote(player, player2Optional);
         });
-        
+
         votesForPlayer2.ForEach(player =>
         {
             meetingDelegate.RemoveVote(player, player2Optional);
@@ -153,10 +153,10 @@ public class Swapper : Crewmate
 
         [Localized(nameof(SwapperSelectMessage1))]
         public static string SwapperSelectMessage1 = "You've selected to swap {0}'s votes.";
-    
+
         [Localized(nameof(SwapperSelectMessage2))]
         public static string SwapperSelectMessage2 = "You've selected to swap {0}'s votes. {1} and {0} will now have their votes swapped.";
-    
+
         [Localized(nameof(SwapperUnselectMessage))]
         public static string SwapperUnselectMessage = "You've unselected {0}.";
 
@@ -166,7 +166,7 @@ public class Swapper : Crewmate
         [Localized(nameof(SwapperAbility))]
         public static string SwapperAbility = "Swapper Ability";
 
-        [Localized("Options.SwapsPerGame")] 
+        [Localized("Options.SwapsPerGame")]
         public static string SwapsPerGame = "Swaps::0 Per Game";
     }
 }

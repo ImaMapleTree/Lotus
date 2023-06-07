@@ -42,7 +42,7 @@ public class Unstoppable: Subrole
 
     public override bool IsAssignableTo(PlayerControl player)
     {
-        return player.GetVanillaRole().IsImpostor() && base.IsAssignableTo(player);
+        return player.GetCustomRole().RoleAbilityFlags.HasFlag(RoleAbilityFlag.IsAbleToKill) && base.IsAssignableTo(player);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

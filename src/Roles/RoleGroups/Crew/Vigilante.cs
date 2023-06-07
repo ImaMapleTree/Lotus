@@ -78,10 +78,11 @@ public class Vigilante: Crewmate
         foreach (var tuple in roles.Indexed())
         {
             string name = tuple.item.Select(r => r.RoleColor.Colorize(r.RoleName)).Join();
-            INameModel nameModel = players[tuple.index].NameModel();
+            PlayerControl player = players[tuple.index];
+            INameModel nameModel = player.NameModel();
 
             nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(name, new [] { GameState.InMeeting }, ViewMode.Replace, MyPlayer));
-            nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(new LiveString(nameModel.Unaltered), new [] { GameState.InMeeting }, ViewMode.Replace, MyPlayer));
+            nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(new LiveString(player.name), new [] { GameState.InMeeting }, ViewMode.Replace, MyPlayer));
         }
     }
 

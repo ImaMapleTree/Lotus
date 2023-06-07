@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using AmongUs.Data;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Meetings;
@@ -9,8 +10,11 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
 using Lotus.Managers.History.Events;
+using Lotus.Options;
+using Lotus.Options.General;
 using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Patches;
 
@@ -82,6 +86,9 @@ static class ExileControllerWrapUpPatch
     /// </summary>
     private static void BeginRoundStart()
     {
+        if (GeneralOptions.MeetingOptions.ResolveTieMode is ResolveTieMode.KillAll && MeetingDelegate.Instance.TiedPlayers.Count >= 2)
+            MeetingDelegate.Instance.TiedPlayers.Filter(Players.PlayerById).ForEach(p => p.RpcExileV2());
+
         Game.RenderAllForAll(force: true);
         Game.State = GameState.Roaming;
         ActionHandle handle = ActionHandle.NoInit();

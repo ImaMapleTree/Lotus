@@ -1,4 +1,5 @@
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Gamemodes;
@@ -6,7 +7,9 @@ using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.RPC;
 using VentLib.Logging;
+using VentLib.Utilities;
 using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Patches.Actions;
@@ -70,9 +73,13 @@ public static class MurderPatches
         target.Trigger(RoleActionType.MyDeath, ref ignored, __instance, deathEvent.Instigator(), deathEvent);
         Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, __instance, deathEvent.Instigator(), deathEvent);
 
-
         PlayerMurderHookEvent playerMurderHookEvent = new(__instance, target, deathEvent);
         Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);
         Hooks.PlayerHooks.PlayerDeathHook.Propagate(playerMurderHookEvent);
+
+        Async.Schedule(() =>
+        {
+            if (target != null) target.SetChatName(target.name);
+        }, 0.1f);
     }
 }

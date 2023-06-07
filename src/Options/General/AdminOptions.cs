@@ -4,6 +4,7 @@ using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
+using VentLib.Options.IO;
 
 namespace Lotus.Options.General;
 
@@ -20,6 +21,7 @@ public class AdminOptions
     public int KickPlayersUnderLevel;
     public bool KickMobilePlayers;
     public int AutoStart;
+    public bool AutoPlayAgain;
 
     public bool AutoStartEnabled => AutoStart != -1;
     public List<GameOption> AllOptions = new();
@@ -35,7 +37,7 @@ public class AdminOptions
 
         AllOptions.Add(Builder("HostGM")
             .Name(AdminOptionTranslations.HostGmText)
-            .AddOnOffValues()
+            .AddOnOffValues(false)
             .BindBool(b => HostGM = b)
             .IsHeader(true)
             .BuildAndRegister());
@@ -70,7 +72,14 @@ public class AdminOptions
             .Name(AdminOptionTranslations.AutoStartText)
             .Value(v => v.Text(GeneralOptionTranslations.DisabledText).Value(-1).Color(Color.red).Build())
             .AddIntRange(5, 15, suffix: " " + AdminOptionTranslations.AutoStartSuffix)
+            .IOSettings(io => io.UnknownValueAction = ADEAnswer.Allow)
             .BindInt(i => AutoStart = i)
+            .BuildAndRegister());
+
+        AllOptions.Add(Builder("Auto Play Again")
+            .Name(AdminOptionTranslations.AutoPlayAgain)
+            .AddEnableDisabledValues()
+            .BindBool(b => AutoPlayAgain = b)
             .BuildAndRegister());
 
         additionalOptions.ForEach(o =>
@@ -101,8 +110,8 @@ public class AdminOptions
         [Localized("HostGM")]
         public static string HostGmText = "Host GM";
 
-        [Localized("AutoKick")]
-        public static string AutoKickText = "Chat AutoKick";
+        [Localized("AutoKick", ForceOverride = true)]
+        public static string AutoKickText = "Chat Auto Kick";
 
         [Localized("AutoKickNoFriendcode")]
         public static string AutoKickNoFriendCodeText = "Kick Players w/o Friendcodes";
@@ -114,10 +123,14 @@ public class AdminOptions
         public static string AutoKickMobile = "Kick Mobile Players";
 
         // Auto Start
-        [Localized("AutoStart")]
-        public static string AutoStartText = "AutoStart";
+        [Localized("AutoStart", ForceOverride = true)]
+        public static string AutoStartText = "Auto Start";
+
         [Localized("AutoStartOptionSuffix")]
         public static string AutoStartSuffix = "Players";
+
+        [Localized(nameof(AutoPlayAgain))]
+        public static string AutoPlayAgain = "Auto Play Again";
     }
 
 }

@@ -57,6 +57,14 @@ class IntroDestroyPatch
     {
         if (player == null) yield break;
 
+        if (player.GetVanillaRole().IsImpostor())
+        {
+            float cooldown = GeneralOptions.GameplayOptions.GetFirstKillCooldown(player);
+            VentLogger.Trace($"Fixing First Kill Cooldown for {player.name} (Cooldown={cooldown}s)", "Fix First Kill Cooldown");
+            player.SetKillCooldown(cooldown);
+            player.Data.Role.SetCooldown();
+        }
+
         if (GeneralOptions.MayhemOptions.RandomSpawn) Game.RandomSpawn.Spawn(player);
 
         player.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3);
@@ -81,13 +89,6 @@ class IntroDestroyPatch
         Players.SendPlayerData(playerData);
         yield return new WaitForSeconds(NetUtils.DeriveDelay(0.05f));
         if (player == null) yield break;
-
-        if (player.GetVanillaRole().IsImpostor())
-        {
-            float cooldown = GeneralOptions.GameplayOptions.GetFirstKillCooldown(player);
-            VentLogger.Trace($"Fixing First Kill Cooldown for {player.name} (Cooldown={cooldown}s)", "Fix First Kill Cooldown");
-            player.SetKillCooldown(cooldown);
-        }
 
         if (!hasPet) player.CRpcShapeshift(player, false);
     }

@@ -1,9 +1,11 @@
 using System.Collections.Generic;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Extensions;
+using Lotus.Logging;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
@@ -22,8 +24,7 @@ public class NameUpdateProcess
 
     static NameUpdateProcess()
     {
-        Hooks.GameStateHooks.GameStartHook.Bind(NameUpdateProcessHookKey, _ => Game.GetAllPlayers().ForEach(p => _players.Enqueue(p))
-        );
+        Hooks.GameStateHooks.GameStartHook.Bind(NameUpdateProcessHookKey, _ => Game.GetAllPlayers().ForEach(p => _players.Enqueue(p)));
         Hooks.GameStateHooks.RoundStartHook.Bind(NameUpdateProcessHookKey, _ =>
         {
             if (!AmongUsClient.Instance.AmHost) return;
@@ -57,10 +58,17 @@ public class NameUpdateProcess
         if (allPlayers.Length == 0) return;
 
         Profiler.Sample sample = Profilers.Global.Sampler.Sampled();
-        allPlayers.ForEach(p => nameModel.RenderFor(p));
+        bool updated = false;
+        allPlayers.ForEach(p =>
+        {
+            nameModel.RenderFor(p);
+            updated |= nameModel.Updated();
+        });
         sample.Stop();
 
         Async.Schedule(NameUpdateLoop, 0.1f / allPlayers.Length);
+        if (!updated || player.IsAlive()) return;
+        player.SetChatName(player.name);
     }
 
 }

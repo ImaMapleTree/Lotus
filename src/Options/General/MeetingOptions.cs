@@ -15,10 +15,10 @@ public class MeetingOptions
     public int MeetingButtonPool = -1;
     public bool SyncMeetingButtons => MeetingButtonPool != -1;
     public ResolveTieMode ResolveTieMode;
-    public bool ExplodeOnSkip;
-    
+    public SkipVoteMode SkipVoteMode;
+
     public List<GameOption> AllOptions = new();
-    
+
     public MeetingOptions()
     {
         AllOptions.Add(new GameOptionTitleBuilder()
@@ -34,7 +34,7 @@ public class MeetingOptions
             .Value(v => v.Text(GeneralOptionTranslations.OffText).Color(Color.red).Value(-1).Build())
             .AddIntRange(1, 30)
             .BuildAndRegister());
-        
+
         AllOptions.Add(Builder("Resolve Tie Mode")
             .Name(MeetingOptionTranslations.ResolveTieMode)
             .Value(v => v.Text(GeneralOptionTranslations.OffText).Color(Color.red).Value(0).Build())
@@ -42,30 +42,36 @@ public class MeetingOptions
             .Value(v => v.Text(MeetingOptionTranslations.KillAll).Color(ModConstants.Palette.GeneralColor4).Value(2).Build())
             .BindInt(i => ResolveTieMode = (ResolveTieMode)i)
             .BuildAndRegister());
-        
-        AllOptions.Add(Builder("Explode on Skip")
-            .Name(MeetingOptionTranslations.ExplodeOnSkip)
-            .AddOnOffValues(false)
-            .BindBool(b => ExplodeOnSkip = b)
+
+        AllOptions.Add(Builder("Skip Vote Mode")
+            .Name(MeetingOptionTranslations.SkipVoteMode)
+            .Value(v => v.Text(GeneralOptionTranslations.OffText).Color(Color.red).Value(0).Build())
+            .Value(v => v.Text(MeetingOptionTranslations.NegateVote).Color(ModConstants.Palette.InfinityColor).Value(1).Build())
+            .Value(v => v.Text(MeetingOptionTranslations.ReverseVote).Color(new Color(0.55f, 0.73f, 1f)).Value(2).Build())
+            .Value(v => v.Text(MeetingOptionTranslations.ExplodeOnSkip).Color(new Color(1f, 0.4f, 0.2f)).Value(3).Build())
+            .BindInt(i => SkipVoteMode = (SkipVoteMode)i)
             .BuildAndRegister());
-        
+
         additionalOptions.ForEach(o =>
         {
             o.Register();
             AllOptions.Add(o);
         });
     }
-    
+
     private GameOptionBuilder Builder(string key) => new GameOptionBuilder().Key(key).Tab(DefaultTabs.GeneralTab).Color(_optionColor);
-    
-    private static class MeetingOptionTranslations
+
+    public static class MeetingOptionTranslations
     {
-        [Localized(nameof(RandomPlayer))] 
+        [Localized(nameof(ButtonsRemainingMessage))]
+        public static string ButtonsRemainingMessage = "There are {0} emergency buttons remaining.";
+
+        [Localized(nameof(RandomPlayer))]
         public static string RandomPlayer = "Random Player";
 
         [Localized(nameof(KillAll))]
         public static string KillAll = "Kill All";
-        
+
         [Localized(nameof(MeetingOptions))]
         public static string SectionTitle = "Meeting Options";
 
@@ -75,8 +81,17 @@ public class MeetingOptions
         [Localized(nameof(ResolveTieMode))]
         public static string ResolveTieMode = "Resolve Tie Mode";
 
+        [Localized(nameof(SkipVoteMode))]
+        public static string SkipVoteMode = "Skip Vote Mode";
+
         [Localized(nameof(ExplodeOnSkip))]
-        public static string ExplodeOnSkip = "Explode On Skip";
+        public static string ExplodeOnSkip = "Explode";
+
+        [Localized(nameof(ReverseVote))]
+        public static string ReverseVote = "Reverse";
+
+        [Localized(nameof(NegateVote))]
+        public static string NegateVote = "Negate";
     }
 }
 
@@ -85,4 +100,12 @@ public enum ResolveTieMode
     None,
     Random,
     KillAll
+}
+
+public enum SkipVoteMode
+{
+    None,
+    Negate,
+    Reverse,
+    Explode
 }

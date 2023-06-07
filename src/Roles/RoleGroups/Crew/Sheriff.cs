@@ -95,7 +95,7 @@ public class Sheriff : Crewmate
         base.RegisterOptions(optionStream)
             .Color(RoleColor)
             .SubOption(sub => sub
-                .Name("Can Kill Crewmates")
+                .Name("Kill On Misfire")
                 .Bind(v => canKillCrewmates = (bool)v)
                 .AddOnOffValues(false)
                 .Build())

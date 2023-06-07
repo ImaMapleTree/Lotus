@@ -13,6 +13,7 @@ using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
+using Lotus.Logging;
 using Lotus.Managers.History.Events;
 using Lotus.Options;
 using Lotus.Roles.Events;
@@ -86,6 +87,8 @@ public class Charmer: Crewmate
 
         taskAbilityCount = 0;
         MyPlayer.RpcMark(player);
+        if (MyPlayer.InteractWith(player, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return true;
+
         LiveString charmString = new(Translations.CharmedText, _charmedColor);
         NameComponent component = new(charmString, GameStates.IgnStates, ViewMode.Additive, MyPlayer, player);
 
@@ -169,7 +172,7 @@ public class Charmer: Crewmate
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .RoleColor(new Color(0.71f, 0.67f, 0.9f))
-            .VanillaRole(usesKillButton ? RoleTypes.Impostor : RoleTypes.Crewmate)
+            .DesyncRole(usesKillButton ? RoleTypes.Impostor : RoleTypes.Crewmate)
             .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod())
             .OptionOverride(new IndirectKillCooldown(() => charmingCooldown.Duration <= -1 ? AUSettings.KillCooldown() : charmingCooldown.Duration));
 

@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API.Player;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers;
 using Lotus.Extensions;
-using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -16,6 +17,8 @@ public class MeetingDelegate
 {
     public static MeetingDelegate Instance = null!;
     public GameData.PlayerInfo? ExiledPlayer { get; set; }
+    public HashSet<byte> TiedPlayers = new();
+
     public bool IsTie { get; set; }
     internal BlackscreenResolver BlackscreenResolver { get; }
 
@@ -81,13 +84,21 @@ public class MeetingDelegate
 
     public void EndVoting(VoterState[] voterStates, GameData.PlayerInfo? exiledPlayer, bool isTie = false)
     {
+        this.ExiledPlayer = exiledPlayer;
+        this.IsTie = isTie;
+
+        if (ExiledPlayer != null)
+        {
+            List<byte> playerVotes = CurrentVotes().SelectMany(kv => kv.Value.Filter().Where(i => i == ExiledPlayer.PlayerId).Select(i => kv.Key)).ToList();
+            PlayerControl p;
+            if ((p = ExiledPlayer.Object) != null) p.SetName(AUSettings.ConfirmImpostor() ? $"<b>{p.GetCustomRole().RoleName}</b>\n{p.name}" : p.name);
+            Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(ExiledPlayer, playerVotes));
+        }
+
         MeetingHud.RpcVotingComplete(voterStates, exiledPlayer, isTie);
     }
 
-    public void EndVoting(GameData.PlayerInfo? exiledPlayer, bool isTie = false)
-    {
-        MeetingHud.RpcVotingComplete(new Il2CppStructArray<VoterState>(0), exiledPlayer, isTie);
-    }
+    public void EndVoting(GameData.PlayerInfo? exiledPlayer, bool isTie = false) => EndVoting(Array.Empty<VoterState>(), exiledPlayer, isTie);
 
     internal bool IsForceEnd() => isForceEnd;
 
@@ -96,17 +107,22 @@ public class MeetingDelegate
         List<KeyValuePair<byte, int>> sortedVotes = this.CurrentVoteCount().Sorted(kvp => kvp.Value).Reverse().ToList();
         bool isTie = false;
         byte exiledPlayer = byte.MaxValue;
+        int mostVotes = 0;
         switch (sortedVotes.Count)
         {
             case 0: break;
             case 1:
+                mostVotes = sortedVotes[0].Value;
                 exiledPlayer = sortedVotes[0].Key;
-                break; 
+                break;
             case >= 2:
+                mostVotes = sortedVotes[0].Value;
                 isTie = sortedVotes[0].Value == sortedVotes[1].Value;
                 exiledPlayer = sortedVotes[0].Key;
                 break;
         }
+
+        TiedPlayers = sortedVotes.Where(sv => sv.Value == mostVotes).Select(sv => sv.Key).ToHashSet();
 
         this.ExiledPlayer = Players.PlayerById(exiledPlayer).Map(p => p.Data).OrElse(null!);
         this.IsTie = isTie;

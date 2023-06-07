@@ -2,7 +2,6 @@ extern alias JBAnnotations;
 using System.Collections.Generic;
 using System.Linq;
 using JBAnnotations::JetBrains.Annotations;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Gamemodes.Standard.Lotteries;
 using Lotus.Managers;
@@ -13,6 +12,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
 using Lotus.Extensions;
+using Lotus.Factions.Impostors;
 using Lotus.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -29,7 +29,7 @@ public class StandardRoleAssignmentLogic
     {
         List<PlayerControl> unassignedPlayers = new(allPlayers);
         unassignedPlayers.Shuffle();
-        
+
         RoleDistribution distribution = GeneralOptions.GameplayOptions.OptimizeRoleAssignment
             ? OptimizeRoleAlgorithm.OptimizeDistribution()
             : OptimizeRoleAlgorithm.NonOptimizedDistribution();
@@ -51,10 +51,28 @@ public class StandardRoleAssignmentLogic
         // ASSIGN IMPOSTOR ROLES
         ImpostorLottery impostorLottery = new();
         int impostorCount = 0;
-        while (impostorCount < distribution.Impostors && unassignedPlayers.Count > 0)
+        int madmateCount = 0;
+
+        while ((impostorCount < distribution.Impostors || madmateCount < distribution.MinimumMadmates) && unassignedPlayers.Count > 0)
         {
             CustomRole role = impostorLottery.Next();
             if (role.GetType() == typeof(Impostor) && impostorLottery.HasNext()) continue;
+
+            if (role.Faction is Madmates)
+            {
+                if (madmateCount >= distribution.MaximumMadmates) continue;
+                MatchData.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(role));
+                madmateCount++;
+                if (RoleOptions.MadmateOptions.MadmatesTakeImpostorSlots) impostorCount++;
+                continue;
+            }
+
+            if (impostorCount >= distribution.Impostors)
+            {
+                if (!impostorLottery.HasNext()) break;
+                continue;
+            }
+
             MatchData.AssignRole(unassignedPlayers.PopRandom(), IVariableRole.PickAssignedRole(role));
             impostorCount++;
         }
@@ -67,13 +85,13 @@ public class StandardRoleAssignmentLogic
         int loops = 0;
         while (unassignedPlayers.Count > 0)
         {
-            if (nkRoles >= distribution.MinimumNeutralKilling) break;
+            if (loops > 0 && nkRoles >= distribution.MinimumNeutralKilling) break;
             CustomRole role = neutralKillingLottery.Next();
             if (role is IllegalRole)
             {
                 if (nkRoles > distribution.MaximumNeutralKilling || loops >= 10) break;
                 loops++;
-                if (!neutralKillingLottery.HasNext()) 
+                if (!neutralKillingLottery.HasNext())
                     neutralKillingLottery = new NeutralKillingLottery(); // Refresh the lottery again to fulfill the minimum requirement
                 continue;
             }
@@ -81,20 +99,20 @@ public class StandardRoleAssignmentLogic
             nkRoles++;
         }
         // --------------------------
-        
+
         // ASSIGN NEUTRAL ROLES
         NeutralLottery neutralLottery = new();
         int neutralRoles = 0;
         loops = 0;
         while (unassignedPlayers.Count > 0)
         {
-            if (neutralRoles >= distribution.MaximumNeutralPassive) break;
+            if (loops > 0 && neutralRoles >= distribution.MaximumNeutralPassive) break;
             CustomRole role = neutralLottery.Next();
             if (role is IllegalRole)
             {
                 if (neutralRoles > distribution.MinimumNeutralPassive || loops >= 10) break;
                 loops++;
-                if (!neutralLottery.HasNext()) 
+                if (!neutralLottery.HasNext())
                     neutralLottery = new NeutralLottery(); // Refresh the lottery again to fulfill the minimum requirement
                 continue;
             }
@@ -102,7 +120,7 @@ public class StandardRoleAssignmentLogic
             neutralRoles++;
         }
         // --------------------------
-        
+
         // DO ADDITIONAL LOGIC (ADDONS)
         foreach (IAdditionalAssignmentLogic additionalAssignmentLogic in _additionalAssignmentLogics)
             additionalAssignmentLogic.AssignRoles(allPlayers, unassignedPlayers);
@@ -110,9 +128,14 @@ public class StandardRoleAssignmentLogic
 
         // ASSIGN CREWMATE ROLES
         CrewmateLottery crewmateLottery = new();
-        while (unassignedPlayers.Count > 0) MatchData.AssignRole(unassignedPlayers.PopRandom(), crewmateLottery.Next());
+        while (unassignedPlayers.Count > 0)
+        {
+            CustomRole role = crewmateLottery.Next();
+            if (role.GetType() == typeof(Crewmate) && crewmateLottery.HasNext()) continue;
+            MatchData.AssignRole(unassignedPlayers.PopRandom(), crewmateLottery.Next());
+        }
         // ====================
-        
+
         // ASSIGN SUB-ROLES
         AssignSubroles();
         // ================
@@ -132,7 +155,7 @@ public class StandardRoleAssignmentLogic
             if (count > evenDistribution) return false;
             return RoleOptions.SubroleOptions.UncappedModifiers || count < RoleOptions.SubroleOptions.ModifierLimits;
         }
-        
+
         foreach (CustomRole role in subRoleLottery)
         {
             if (role is IllegalRole) continue;
@@ -151,12 +174,8 @@ public class StandardRoleAssignmentLogic
             {
                 PlayerControl victim = players.PopRandom();
                 if (victim.GetSubroles().Any(r => r.GetType() == variant.GetType())) continue;
-                if (variant is Subrole subrole)
-                {
-                    if (!(assigned = subrole.IsAssignableTo(victim))) continue;
-                    MatchData.AssignSubrole(victim, subrole);
-                }
-                else MatchData.AssignRole(victim, variant);
+                if (variant is ISubrole subrole && !(assigned = subrole.IsAssignableTo(victim))) continue;
+                MatchData.AssignSubrole(victim, variant);
             }
         }
     }

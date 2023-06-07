@@ -1,6 +1,7 @@
 using System.Linq;
 using HarmonyLib;
 using Hazel;
+using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
@@ -9,6 +10,8 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Options.General;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
@@ -16,7 +19,7 @@ using VentLib.Utilities.Optionals;
 namespace Lotus.Patches.Meetings;
 
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CastVote))]
-public class MeetingVotePatch
+public class CastVotePatch
 {
     public static bool Prefix(MeetingHud __instance, byte srcPlayerId, byte suspectPlayerId)
     {
@@ -31,11 +34,23 @@ public class MeetingVotePatch
 
         if (!handle.IsCanceled)
         {
+            switch (GeneralOptions.MeetingOptions.SkipVoteMode)
+            {
+                case SkipVoteMode.Reverse:
+                    voted = Optional<PlayerControl>.Of(voter);
+                    break;
+                case SkipVoteMode.Explode:
+                    ProtectedRpc.CheckMurder(voter, voter);
+                    return true;
+                case SkipVoteMode.Negate:
+                    return true;
+            }
+
             Hooks.MeetingHooks.CastVoteHook.Propagate(new CastVoteHookEvent(voter, voted));
             MeetingDelegate.Instance.CastVote(voter, voted);
             return true;
         }
-        
+
         __instance.playerStates.ToArray().FirstOrDefault(state => state.TargetPlayerId == srcPlayerId)?.UnsetVote();
 
         VentLogger.Debug($"Canceled Vote from {voter.GetNameWithRole()}");

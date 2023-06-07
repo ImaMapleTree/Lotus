@@ -6,8 +6,8 @@ namespace Lotus;
 
 public static class ModConstants
 {
-    public static Color HColor1 = new Color(0.03f, 0.53f, 0.01f);
-    public static Color HColor2 = new Color(0.71f, 0.33f, 0f);
+    public static Color HColor1 = new(0.03f, 0.53f, 0.01f);
+    public static Color HColor2 = new(0.71f, 0.33f, 0f);
 
     public const int MaxPlayers = 15;
 
@@ -41,11 +41,15 @@ public static class ModConstants
     public static class Palette
     {
         public static Color InfinityColor = new(0.77f, 0.71f, 1f);
+
+        public static Color ModifierColor = new(0.44f, 0.27f, 0.81f);
+
         public static Color NeutralColor = new(1f, 0.67f, 0.11f);
         public static Color PassiveColor = new(1f, 0.87f, 0.91f);
         public static Color KillingColor = new(1f, 0.27f, 0.18f);
         public static Color MadmateColor = new(0.73f, 0.18f, 0.02f);
-        public static Color ModifierColor = new(0.44f, 0.27f, 0.81f);
+        public static Color CrewmateColor = new(0.71f, 0.94f, 1f);
+
 
         public static Color GeneralColor1 = new(0.15f, 0.27f, 0.33f);
         public static Color GeneralColor2 = new(0.16f, 0.62f, 0.56f);
@@ -85,6 +89,14 @@ public static class ModConstants
 
         [Localized(nameof(Misfired))]
         public static string Misfired = "Misfired";
+
+        [Localized(nameof(Parried))]
+        public static string Parried = "Parried";
+    }
+
+    public static class Localization
+    {
+        public const string Misc = "Misc";
     }
 
     public static Dictionary<string, string> Pets = new()
@@ -102,7 +114,7 @@ public static class ModConstants
         { "Doggy", "pet_Doggy" },
         { "E. Rose", "pet_Ellie" },
         { "Frankendog", "pet_frankendog" },
-        { "Ghost", "pet_Ghost" },
+        { "Ghost", "pet_D2GhostPet" },
         { "Glitch Pet", "pet_test" },
         { "Guilty Spark", "pet_GuiltySpark" },
         { "H. Stickmin", "pet_Stickmin" },
