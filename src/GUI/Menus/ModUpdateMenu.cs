@@ -4,10 +4,12 @@ using System.Linq;
 using Lotus.GUI.Components;
 using Lotus.GUI.Menus.OptionsMenu;
 using Lotus.GUI.Menus.OptionsMenu.Components;
+using Lotus.GUI.Patches;
 using Lotus.Utilities;
 using TMPro;
 using UnityEngine;
 using VentLib.Localization.Attributes;
+using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
@@ -46,6 +48,9 @@ public class ModUpdateMenu: MonoBehaviour
         ContinueButton.SetToggleOnAction(ProcessClose);
         ContinueButton.gameObject.SetActive(false);
         AnchorObject.SetActive(false);
+
+        VentLogger.Trace($"Update ready during Mod Menu Creation: {SplashPatch.UpdateReady}", "ModUpdateMenu");
+        if (SplashPatch.UpdateReady) Open();
     }
 
     private void Start()

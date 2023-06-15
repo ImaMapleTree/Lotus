@@ -61,6 +61,8 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
 
 
+
+
     public ProjectLotus()
     {
 #if DEBUG
@@ -80,7 +82,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
     private void BeginUpdate(Release release)
     {
-        UnityOptional<ModUpdateMenu>.Of(SplashPatch.ModUpdateMenu).IfPresent(o => o.Open());
+        UnityOptional<ModUpdateMenu>.Of(SplashPatch.ModUpdateMenu).Handle(o => o.Open(), () => SplashPatch.UpdateReady = true);
         ModUpdateMenu.AddUpdateItem("Lotus", null, ex => ModUpdater.Update(errorCallback: ex)!);
         Assembly ventAssembly = typeof(Vents).Assembly;
 

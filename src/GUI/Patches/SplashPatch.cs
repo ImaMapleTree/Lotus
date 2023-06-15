@@ -5,12 +5,9 @@ using HarmonyLib;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.GUI.Menus;
-using Lotus.GUI.Menus.OptionsMenu;
 using Lotus.Logging;
 using TMPro;
 using UnityEngine;
-using UnityEngine.Events;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
@@ -26,6 +23,7 @@ class SplashPatch
     private static UnityOptional<GameObject> _customSplash = UnityOptional<GameObject>.Null();
     internal static ModUpdateMenu ModUpdateMenu;
     internal static UnityOptional<GameObject> UpdateButton = UnityOptional<GameObject>.Null();
+    public static bool UpdateReady;
 
     private static GameObject howToPlayButton;
 
