@@ -2,10 +2,12 @@ using System;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Chat;
+using Lotus.Extensions;
 using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Options.General;
@@ -39,22 +41,31 @@ public class MeetingStartPatch
         MeetingDelegate meetingDelegate = MeetingPrep.PrepMeeting()!;
         PlayerControl reporter = Utils.GetPlayerById(__instance.reporterId)!;
 
-        try
+
+        Players.GetPlayers().Do(p =>
         {
-            Game.GetAlivePlayers().Do(p =>
+            ActionHandle handle = ActionHandle.NoInit();
+            try
             {
                 if (Game.MatchData.MeetingsCalled == 0)
-                    PluginDataManager.TemplateManager.GetTemplates("meeting-first")?.ForEach(t => t.SendMessage(PlayerControl.LocalPlayer, p));
-                else PluginDataManager.TemplateManager.GetTemplates("meeting-subsequent")?.ForEach(t => t.SendMessage(PlayerControl.LocalPlayer, p));
+                    PluginDataManager.TemplateManager.GetTemplates("meeting-first")
+                        ?.ForEach(t => t.SendMessage(PlayerControl.LocalPlayer, p));
+                else
+                    PluginDataManager.TemplateManager.GetTemplates("meeting-subsequent")
+                        ?.ForEach(t => t.SendMessage(PlayerControl.LocalPlayer, p));
 
-                PluginDataManager.TemplateManager.GetTemplates("meeting-start")?.ForEach(t => t.SendMessage(PlayerControl.LocalPlayer, p));
-            });
-        } catch (Exception ex) { VentLogger.Exception(ex, "Error Sending Template Information!"); }
-
-
-        ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.RoundEnd, ref handle, meetingDelegate, false);
-        Game.RenderAllForAll(GameState.InMeeting, true);
+                PluginDataManager.TemplateManager.GetTemplates("meeting-start")
+                    ?.ForEach(t => t.SendMessage(PlayerControl.LocalPlayer, p));
+            }
+            catch (Exception ex)
+            {
+                VentLogger.Exception(ex, "Error Sending Template Information!");
+            }
+            finally
+            {
+                p.Trigger(RoleActionType.RoundEnd, ref handle, meetingDelegate, false);
+            }
+        });
 
         Hooks.MeetingHooks.MeetingCalledHook.Propagate(new MeetingHookEvent(reporter, MeetingPrep.Reported, meetingDelegate));
         Hooks.GameStateHooks.RoundEndHook.Propagate(new GameStateHookEvent(Game.MatchData));

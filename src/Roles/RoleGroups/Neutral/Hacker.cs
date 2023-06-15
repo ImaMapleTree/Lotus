@@ -54,7 +54,7 @@ public class Hacker: Engineer
 
     public void CheckHackerWin()
     {
-        if (sabotageCount >= sabotageTotal) ManualWin.Activate(MyPlayer, WinReason.RoleSpecificWin, 100);
+        if (sabotageCount >= sabotageTotal) ManualWin.Activate(MyPlayer, ReasonType.RoleSpecificWin, 100);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -113,7 +113,7 @@ public class Hacker: Engineer
         internal static class HackerOptionTranslations
         {
             [Localized(nameof(HackerSabotagePointAmount), ForceOverride = true)]
-            public static string HackerSabotagePointAmount = "Hacker::0 Sabotage Amount";
+            public static string HackerSabotagePointAmount = "Points Needed to Win";
 
             [Localized(nameof(HackerCanVent))]
             public static string HackerCanVent = "Hacker::0 Can Vent";

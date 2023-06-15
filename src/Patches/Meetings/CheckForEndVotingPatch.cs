@@ -1,7 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
@@ -12,6 +12,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Logging;
 using Lotus.Options;
 using Lotus.Options.General;
 using VentLib.Logging;
@@ -32,10 +33,32 @@ public class CheckForEndVotingPatch
         if (!meetingDelegate.IsForceEnd() && __instance.playerStates.Any(ps => !ps.AmDead && !ps.DidVote)) return false;
         VentLogger.Debug("Beginning End Voting", "CheckEndVotingPatch");
 
+
+        if (GeneralOptions.MeetingOptions.NoVoteMode is not (SkipVoteMode.None))
+            Players.GetPlayers(PlayerFilter.Alive)
+                .Where(p => new Dictionary<byte, List<Optional<byte>>>(meetingDelegate.CurrentVotes()).GetOptional(p.PlayerId).Compare(r => !r.IsEmpty()) == false).ForEach(p =>
+                {
+                    DevLogger.Log($"Non-Voters: {p.name}");
+                    switch (GeneralOptions.MeetingOptions.NoVoteMode)
+                    {
+                        case SkipVoteMode.Random:
+                            meetingDelegate.CastVote(p, new Optional<PlayerControl>(Players.GetPlayers(PlayerFilter.Alive).ToList().GetRandom()));
+                            break;
+                        case SkipVoteMode.Reverse:
+                            meetingDelegate.CastVote(p, new Optional<PlayerControl>(p));
+                            break;
+                        case SkipVoteMode.Explode:
+                            ProtectedRpc.CheckMurder(p, p);
+                            break;
+                        default:
+                            throw new ArgumentOutOfRangeException();
+                    }
+                });
+
+
         // Calculate the exiled player once so that we can send the voting complete signal
         VentLogger.Trace($"End Vote Count: {meetingDelegate.CurrentVoteCount().Select(kv => $"{Utils.GetPlayerById(kv.Key).GetNameWithRole()}: {kv.Value}").Join()}");
         meetingDelegate.CalculateExiledPlayer();
-
 
         byte exiledPlayer = meetingDelegate.ExiledPlayer?.PlayerId ?? 255;
 
@@ -59,11 +82,12 @@ public class CheckForEndVotingPatch
             // Finally we transform the exiled player votes into the player's playerID
             .SelectMany(kv => kv.Value.Filter().Where(i => i == exiledPlayer).Select(i => kv.Key)).ToList();
 
+
+
         if (meetingDelegate.ExiledPlayer != null)
         {
-            PlayerControl p;
-            if ((p = meetingDelegate.ExiledPlayer.Object) != null) p.SetName(AUSettings.ConfirmImpostor() ? $"<b>{p.GetCustomRole().RoleName}</b>\n{p.name}" : p.name);
             Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(meetingDelegate.ExiledPlayer, playerVotes));
+            meetingDelegate.CheckAndSetConfirmEjectText(meetingDelegate.ExiledPlayer.Object);
         }
         __instance.RpcVotingComplete(votingStates.ToArray(), meetingDelegate.ExiledPlayer, meetingDelegate.IsTie);
         return false;
@@ -94,6 +118,9 @@ public class CheckForEndVotingPatch
     public static void VotingCompletePatch(MeetingHud __instance, [HarmonyArgument(1)] GameData.PlayerInfo? playerInfo)
     {
         if (!AmongUsClient.Instance.AmHost) return;
+
+
+
         MeetingDelegate meetingDelegate = MeetingDelegate.Instance;
         meetingDelegate.ExiledPlayer = playerInfo;
 

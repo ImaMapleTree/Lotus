@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Lotus.API;
@@ -13,7 +14,6 @@ using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.Logging;
 using Lotus.Managers.History.Events;
 using Lotus.Options;
 using Lotus.Roles.Events;
@@ -23,11 +23,14 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Subroles;
+using Lotus.Statuses;
 using Lotus.Utilities;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
+using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -37,6 +40,9 @@ namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Charmer: Crewmate
 {
+    public static HashSet<Type> CharmerBannedModifiers = new() { typeof(Bloodlust) };
+    public override HashSet<Type> BannedModifiers() => CharmerBannedModifiers;
+
     private static IAccumulativeStatistic<int> _charmedPlayers = Statistic<int>.CreateAccumulative($"Roles.{nameof(Charmer)}.CharmedPlayers", () => Translations.CharmedStatistic);
     public static List<Statistic> AlurerStatistics = new() { _charmedPlayers };
     public override List<Statistic> Statistics() => AlurerStatistics;
@@ -49,19 +55,23 @@ public class Charmer: Crewmate
     private bool breakCharmOnDeath;
     private int maxCharmedPlayers;
 
+    private int TasksPerUsage => usesKillButton ? 0 : tasksPerUsage;
+
     private int taskAbilityCount;
 
     [UIComponent(UI.Cooldown)]
     public Cooldown charmingCooldown;
 
 
-    [NewOnSetup] private Dictionary<byte, (Remote<NameComponent>, IFaction)> charmedPlayers = new();
+    [NewOnSetup] private Dictionary<byte, (Remote<NameComponent>, Remote<IStatus>, IFaction)> charmedPlayers = new();
+
+    public override bool HasTasks() => !usesKillButton;
 
     protected override void PostSetup()
     {
         if (charmedPlayersWinWithCrew) Game.GetWinDelegate().AddSubscriber(CharmedWinWithCrew);
-        if (tasksPerUsage == 0) return;
-        LiveString taskCounter = new(() => RoleUtils.Counter(taskAbilityCount, tasksPerUsage, RoleColor), Color.white);
+        if (TasksPerUsage == 0) return;
+        LiveString taskCounter = new(() => RoleUtils.Counter(taskAbilityCount, TasksPerUsage, RoleColor), Color.white);
         MyPlayer.NameModel().GCH<CounterHolder>().Add(new CounterComponent(taskCounter, Game.IgnStates, ViewMode.Additive, MyPlayer));
     }
 
@@ -69,14 +79,16 @@ public class Charmer: Crewmate
     {
         if (winDelegate.WinCondition() is not IFactionWinCondition factionWinCondition) return;
         if (factionWinCondition.Factions().All(f => f is not Crewmates)) return;
-        winDelegate.GetWinners().AddRange(charmedPlayers.Keys.Filter(Players.PlayerById));
+        charmedPlayers.Keys.Filter(Players.PlayerById).ForEach(winDelegate.AddAdditionalWinner);
     }
 
     [RoleAction(RoleActionType.Attack)]
     public bool CharmPlayer(PlayerControl player)
     {
-        if (taskAbilityCount < tasksPerUsage) return false;
+        VentLogger.Trace($"Charmer - Charming Player: {player.name} | {taskAbilityCount} < {TasksPerUsage} | {charmedPlayers.Count}", "CharmPlayer");
+        if (taskAbilityCount < TasksPerUsage) return false;
         if (maxCharmedPlayers > 0 && charmedPlayers.Count >= maxCharmedPlayers) return false;
+        if (charmedPlayers.ContainsKey(player.PlayerId)) return false;
 
         if (Relationship(player) is Relation.FullAllies)
         {
@@ -87,14 +99,16 @@ public class Charmer: Crewmate
 
         taskAbilityCount = 0;
         MyPlayer.RpcMark(player);
-        if (MyPlayer.InteractWith(player, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return true;
+        if (MyPlayer.InteractWith(player, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return true;
 
         LiveString charmString = new(Translations.CharmedText, _charmedColor);
         NameComponent component = new(charmString, GameStates.IgnStates, ViewMode.Additive, MyPlayer, player);
 
         CustomRole playerRole = player.GetCustomRole();
-        charmedPlayers[player.PlayerId] = (player.NameModel().GCH<NameHolder>().Insert(0, component), playerRole.Faction);
+        IStatus status = CustomStatus.Of(Translations.CharmedText).Description(Translations.CharmedDescription).Color(_charmedColor).Build();
+        charmedPlayers[player.PlayerId] = (player.NameModel().GCH<NameHolder>().Insert(0, component), MatchData.GetStatuses(player).Add(status), playerRole.Faction);
         playerRole.Faction = _charmedFaction;
+        _charmedPlayers.Increment(MyPlayer.UniquePlayerId());
 
         return true;
     }
@@ -115,7 +129,7 @@ public class Charmer: Crewmate
     {
         if (breakCharmOnDeath && !MyPlayer.IsAlive()) return;
         if (!charmedPlayers.ContainsKey(actor.PlayerId)) return;
-        if (interaction.Intent() is not (IFatalIntent or IHostileIntent)) return;
+        if (interaction.Intent is not (IFatalIntent or IHostileIntent)) return;
         if (Relationship(target) is not Relation.FullAllies) return;
         handle.Cancel();
     }
@@ -124,19 +138,21 @@ public class Charmer: Crewmate
     public override void HandleDisconnect()
     {
         if (!breakCharmOnDeath) return;
-        charmedPlayers.Keys.ToArray().Filter(Players.PlayerById).ForEach(CheckPlayerDeathAndDisconnect);
+        charmedPlayers.Keys.ToArray().Filter(Players.PlayerById).ForEach(UncharmPlayer);
     }
 
     [RoleAction(RoleActionType.AnyDeath)]
     [RoleAction(RoleActionType.Disconnect)]
-    public void CheckPlayerDeathAndDisconnect(PlayerControl player)
+    public void UncharmPlayer(PlayerControl player)
     {
-        if (!charmedPlayers.Remove(player.PlayerId, out (Remote<NameComponent>, IFaction) tuple)) return;
+        if (!charmedPlayers.Remove(player.PlayerId, out (Remote<NameComponent>, Remote<IStatus>, IFaction) tuple)) return;
         tuple.Item1.Delete();
-        player.GetCustomRole().Faction = tuple.Item2;
+        tuple.Item2.Delete();
+        player.GetCustomRole().Faction = tuple.Item3;
     }
 
-    protected override void OnTaskComplete(Optional<NormalPlayerTask> _) => tasksPerUsage++;
+
+    protected override void OnTaskComplete(Optional<NormalPlayerTask> _) => taskAbilityCount = Mathf.Clamp(++taskAbilityCount, 0, TasksPerUsage);
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
@@ -144,10 +160,11 @@ public class Charmer: Crewmate
                 .Value(v => v.Text(Translations.Options.PetButton).Value(false).Color(ModConstants.Palette.PassiveColor).Build())
                 .Value(v => v.Text(Translations.Options.KillButton).Value(true).Color(ModConstants.Palette.KillingColor).Build())
                 .BindBool(b => usesKillButton = b)
-                .Build())
-            .SubOption(sub => sub.KeyName("Tasks Needed for Ability", Translations.Options.TasksPerAbility)
-                .AddIntRange(0, 10, 1, 0)
-                .BindInt(i => tasksPerUsage = i)
+                .ShowSubOptionPredicate(b => !(bool)b)
+                .SubOption(sub2 => sub2.KeyName("Tasks Needed for Ability", Translations.Options.TasksPerAbility)
+                    .AddIntRange(0, 10, 1, 0)
+                    .BindInt(i => tasksPerUsage = i)
+                    .Build())
                 .Build())
             .SubOption(sub2 => sub2.Name(Translations.Options.CharmingCooldown)
                 .Key("Charming Cooldown")
@@ -173,6 +190,7 @@ public class Charmer: Crewmate
         base.Modify(roleModifier)
             .RoleColor(new Color(0.71f, 0.67f, 0.9f))
             .DesyncRole(usesKillButton ? RoleTypes.Impostor : RoleTypes.Crewmate)
+            .RoleAbilityFlags(RoleAbilityFlag.CannotVent | RoleAbilityFlag.CannotSabotage)
             .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod())
             .OptionOverride(new IndirectKillCooldown(() => charmingCooldown.Duration <= -1 ? AUSettings.KillCooldown() : charmingCooldown.Duration));
 
@@ -182,7 +200,7 @@ public class Charmer: Crewmate
 
         public override bool CanSeeRole(PlayerControl player) => false;
 
-        public override Color FactionColor() => _charmedColor;
+        public override Color Color => _charmedColor;
 
         public override Relation RelationshipOther(IFaction other) => other is Crewmates ? Relation.SharedWinners : Relation.None;
     }
@@ -193,6 +211,9 @@ public class Charmer: Crewmate
     {
         [Localized(nameof(CharmedText))]
         public static string CharmedText = "Charmed";
+
+        [Localized(nameof(CharmedDescription))]
+        public static string CharmedDescription = "You have been Charmed. So long as you are charmed, you cannot kill Crewmates and are considered allies with them.";
 
         [Localized(nameof(CharmedStatistic))]
         public static string CharmedStatistic = "Charmed Players";

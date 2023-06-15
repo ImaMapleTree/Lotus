@@ -8,7 +8,6 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Factions.Interfaces;
-using Lotus.Factions.Neutrals;
 using Lotus.Roles.Internals;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
@@ -61,7 +60,7 @@ public class Egoist: Shapeshifter
     {
         public override bool CanSeeRole(PlayerControl player) => false;
 
-        public override Color FactionColor() => new(0.34f, 0f, 1f);
+        public override Color Color => new(0.34f, 0f, 1f);
 
         public override Relation RelationshipOther(IFaction other)
         {

@@ -34,15 +34,8 @@ public class TitleManager
         if (!AmongUsClient.Instance.AmHost) return playerName;
         if (Game.State is not GameState.InLobby) return playerName;
         if (friendCode == "") return playerName;
-        return titles.GetOptional(friendCode)
+        return titles.GetOptional(friendCode).CoalesceEmpty(() => titles.GetOptional("_MASS"))
             .Transform(p => p.LastOrDefault()?.ApplyTo(playerName, nameOnly) ?? playerName, () => playerName);
-    }
-
-    public CustomTitle? GetTitle(string friendCode)
-    {
-        if (!AmongUsClient.Instance.AmHost) return null;
-        if (Game.State is not GameState.InLobby) return null;
-        return friendCode == "" ? null : titles.GetOptional(friendCode).Map(c => c.LastOrDefault()).OrElse(null);
     }
 
     public bool HasTitle(PlayerControl player)

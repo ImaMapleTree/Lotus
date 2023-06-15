@@ -17,6 +17,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Extensions;
 using Lotus.GUI.Name;
+using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Impostors;
 using Lotus.Roles.Subroles;
 using Lotus.Utilities;
@@ -36,8 +37,11 @@ public class Copycat: CustomRole
     /// </summary>
     public static readonly Dictionary<Type, Func<CustomRole>> FallbackTypes = new()
     {
-        {typeof(CrewPostor), () => CustomRoleManager.Static.Madmate },
-        {typeof(Mafioso), () => CustomRoleManager.Static.Impostor }
+        {typeof(CrewPostor), () => CustomRoleManager.Static.Amnesiac },
+        {typeof(Mafioso), () => CustomRoleManager.Static.Amnesiac },
+        {typeof(Snitch), () => CustomRoleManager.Static.Amnesiac },
+        {typeof(Postman), () => CustomRoleManager.Static.Amnesiac },
+        {typeof(Phantom), () => CustomRoleManager.Static.Amnesiac },
     };
 
     public bool KillerKnowsCopycat;
@@ -49,7 +53,7 @@ public class Copycat: CustomRole
     [RoleAction(RoleActionType.Interaction)]
     protected void CopycatAttacked(PlayerControl actor, Interaction interaction, ActionHandle handle)
     {
-        if (turned || interaction.Intent() is not (IFatalIntent or Unstoppable.UnstoppableIntent)) return;
+        if (turned || interaction.Intent is not (IFatalIntent or Unstoppable.UnstoppableIntent)) return;
         turned = true;
         AssignRole(actor);
         handle.Cancel();
@@ -88,7 +92,7 @@ public class Copycat: CustomRole
         }, NetUtils.DeriveDelay(0.05f));
 
 
-        if (role.GetActions(RoleActionType.Shapeshift).Any()) return;
+        if (role.GetActions(RoleActionType.Shapeshift).Any() || role.RealRole is RoleTypes.Shapeshifter) return;
 
         VentLogger.Trace("Adding shapeshift action to base role", "Copycat::AssignRole");
         RoleAction action = this.GetActions(RoleActionType.Shapeshift).First().Item1.Clone();

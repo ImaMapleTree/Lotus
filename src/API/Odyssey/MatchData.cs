@@ -8,6 +8,7 @@ using Lotus.Managers.History;
 using Lotus.Roles;
 using Lotus.Roles.Overrides;
 using Lotus.RPC;
+using Lotus.Statuses;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -28,9 +29,21 @@ public class MatchData
     public int MeetingsCalled;
     public int EmergencyButtonsUsed;
 
+    public Dictionary<byte, RemoteList<IStatus>> Statuses = new();
+
 
     public RoleData Roles = new();
 
+    public FrozenPlayer? FrozenPlayer(PlayerControl? player)
+    {
+        return player == null ? null : FrozenPlayers[player.GetGameID()];
+    }
+
+    public void Cleanup()
+    {
+        UnreportableBodies.Clear();
+        Roles = new RoleData();
+    }
 
     public class RoleData
     {
@@ -76,5 +89,10 @@ public class MatchData
         CustomRole instantiated = role.Instantiate(player, true);
         Game.MatchData.Roles.AddSubrole(player.PlayerId, instantiated);
         if (sendToClient) role.Assign();
+    }
+
+    public static RemoteList<IStatus> GetStatuses(PlayerControl player)
+    {
+        return player == null ? new RemoteList<IStatus>() : Game.MatchData.Statuses.GetOrCompute(player.PlayerId, () => new RemoteList<IStatus>());
     }
 }

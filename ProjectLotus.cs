@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Reflection;
 using BepInEx;
 using HarmonyLib;
-using UnityEngine;
 using AmongUs.GameOptions;
 using BepInEx.Unity.IL2CPP;
 using Lotus;
@@ -10,19 +9,21 @@ using Lotus.Addons;
 using Lotus.API;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
-using Lotus.Chat;
 using Lotus.Gamemodes;
 using Lotus.GUI.Menus;
 using Lotus.GUI.Patches;
+using Lotus.Logging;
 using Lotus.Managers;
-using Lotus.Managers.Reporting;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
+using UnityEngine;
 using VentLib;
 using VentLib.Logging;
 using VentLib.Networking.Handshake;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
+using VentLib.Utilities;
+using VentLib.Utilities.Optionals;
 using VentLib.Version;
 using VentLib.Version.Git;
 using VentLib.Version.Updater;
@@ -50,19 +51,22 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
     public static readonly string ModColor = "#4FF918";
 
 
-    public static readonly bool DevVersion = true;
-    public static readonly string DevVersionStr = "Alpha 31.05.2023";
+    public static bool DevVersion = false;
+    public static readonly string DevVersionStr = "Alpha 10.06.2023";
 
     public Harmony Harmony { get; } = new(PluginGuid);
     public static string CredentialsText = null!;
 
-    public static RProfiler Profiler = new("General");
     public static ModUpdater ModUpdater = null!;
 
 
 
     public ProjectLotus()
     {
+#if DEBUG
+        DevVersion = true;
+        RpcMonitor.Enable();
+#endif
         Instance = this;
         Vents.Initialize();
         VersionControl versionControl = ModVersion.VersionControl = VersionControl.For(this);
@@ -72,20 +76,17 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         ModUpdater = ModUpdater.Default();
         ModUpdater.EstablishConnection();
         ModUpdater.RegisterReleaseCallback(BeginUpdate, true);
-        RpcMonitor.Enable();
     }
 
     private void BeginUpdate(Release release)
     {
-        if (Constraints.DLLConstraint.Enabled) return;
-        SplashPatch.UpdateButton.IfPresent(b => b.gameObject.SetActive(true));
+        UnityOptional<ModUpdateMenu>.Of(SplashPatch.ModUpdateMenu).IfPresent(o => o.Open());
         ModUpdateMenu.AddUpdateItem("Lotus", null, ex => ModUpdater.Update(errorCallback: ex)!);
         Assembly ventAssembly = typeof(Vents).Assembly;
 
         if (release.ContainsDLL($"{ventAssembly.GetName().Name!}.dll"))
             ModUpdateMenu.AddUpdateItem("VentFramework", null, ex => ModUpdater.Update(ventAssembly, ex)!);
     }
-
 
     public static NormalGameOptionsV07 NormalOptions => GameOptionsManager.Instance.currentNormalGameOptions;
 
@@ -98,13 +99,10 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
     public override void Load()
     {
+        DevLogger.Log("Starting load()");
         //Profilers.Global.SetActive(false);
-        ReportManager.AddProducer(Profiler);
-        uint id = Profiler.Sampler.Start();
         GameOptionController.Enable();
         GamemodeManager = new GamemodeManager();
-
-        BanManager.Init();
 
         VentLogger.Info($"{Application.version}", "AmongUs Version");
         VentLogger.Info(CurrentVersion.ToString(), "GitVersion");
@@ -118,9 +116,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
         GamemodeManager.Setup();
         ShowerPages.InitPages();
-        //OptionManager.AllHolders.AddRange(OptionManager.Options().SelectMany(opt => opt.GetHoldersRecursive()));
-        Profiler.Sampler.Stop(id);
-
+        DevLogger.Log("finsihing load()");
     }
 
     public GitVersion Version() => CurrentVersion;
@@ -128,7 +124,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
     public HandshakeResult HandshakeFilter(Version handshake)
     {
         if (handshake is NoVersion) return HandshakeResult.FailDoNothing;
-        if (handshake is AmongUsMenuVersion) return HandshakeResult.Ban;
+        if (handshake is AmongUsMenuVersion) return HandshakeResult.FailDoNothing;
         if (handshake is not GitVersion git) return HandshakeResult.DisableRPC;
         if (git.MajorVersion != CurrentVersion.MajorVersion && git.MinorVersion != CurrentVersion.MinorVersion) return HandshakeResult.FailDoNothing;
         return HandshakeResult.PassDoNothing;
@@ -136,13 +132,24 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
     private static void ReceiveVersion(Version version, PlayerControl player)
     {
+        if (player == null) return;
+        if (version is AmongUsMenuVersion)
+        {
+            PluginDataManager.BanManager.BanWithReason(player, "Cheating - Among Us Menu Auto Ban");
+            return;
+        }
         if (version is not NoVersion)
         {
             //ModRPC rpc = Vents.FindRPC((uint)ModCalls.SendOptionPreview)!;
             //rpc.Send(new[] { player.GetClientId() }, new BatchList<Option>(OptionManager.GetManager().GetOptions()));
         }
 
-        PluginDataManager.TemplateManager.GetTemplates("lobby-join")?.ForEach(t => t.SendMessage(PlayerControl.LocalPlayer, player));
+        PluginDataManager.TemplateManager.GetTemplates("lobby-join")?.ForEach(t =>
+        {
+            if (player == null) return;
+            t.SendMessage(PlayerControl.LocalPlayer, player);
+        });
+
         Hooks.NetworkHooks.ReceiveVersionHook.Propagate(new ReceiveVersionHookEvent(player, version));
     }
 }

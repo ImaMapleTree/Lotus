@@ -27,6 +27,6 @@ public class BittenDeathEvent : DeathEvent
     public override string Message()
     {
         string baseMessage = $"{Game.GetName(Player())} succumbed to their bite";
-        return Instigator().Transform(klr => baseMessage + $" from {Game.GetName(klr)}.", () => baseMessage + ".");
+        return Instigator().Transform(klr => baseMessage + $" from {klr.Name}.", () => baseMessage + ".");
     }
 }

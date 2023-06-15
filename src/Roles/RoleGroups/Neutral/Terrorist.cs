@@ -35,7 +35,7 @@ public class Terrorist : Engineer
     private void TerroristWinCheck()
     {
         if (!HasAllTasksComplete) return;
-        ManualWin.Activate(MyPlayer, WinReason.TasksComplete, 900);
+        ManualWin.Activate(MyPlayer, ReasonType.TasksComplete, 900);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

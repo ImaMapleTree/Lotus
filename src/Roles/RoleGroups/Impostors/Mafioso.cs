@@ -138,7 +138,7 @@ public class Mafioso: Engineer
         if (closestPlayer == null) return;
         bulletCount--;
         gunCooldown.Start();
-        MyPlayer.InteractWith(closestPlayer, DirectInteraction.FatalInteraction.Create(this));
+        MyPlayer.InteractWith(closestPlayer, LotusInteraction.FatalInteraction.Create(this));
         killedPlayers.Add(closestPlayer.PlayerId);
     }
 
@@ -165,7 +165,7 @@ public class Mafioso: Engineer
     [RoleAction(RoleActionType.Interaction)]
     private void HandleInteraction(Interaction interaction, ActionHandle handle)
     {
-        switch (interaction.Intent())
+        switch (interaction.Intent)
         {
             case IFatalIntent:
                 if (Relationship(interaction.Emitter()) is Relation.FullAllies) handle.Cancel();
@@ -184,7 +184,7 @@ public class Mafioso: Engineer
             case ManipulatedInteraction:
             case RangedInteraction:
             case Transporter.TransportInteraction:
-            case DirectInteraction:
+            case LotusInteraction:
                 handle.Cancel();
                 break;
         }
@@ -207,6 +207,7 @@ public class Mafioso: Engineer
 
     private void HandleSelfVote(ActionHandle handle)
     {
+        if (!hasVoted) return;
         if (currentShopItems.Length == 0) return;
         handle.Cancel();
         if (selectedShopItem == byte.MaxValue) selectedShopItem = 0;
@@ -242,11 +243,11 @@ public class Mafioso: Engineer
                 .BindBool(b => modifyShopCosts = b)
                 .ShowSubOptionPredicate(b => (bool)b)
                 .SubOption(sub2 => sub2.KeyName("Gun Cost", GunCost)
-                    .AddIntRange(0, 20, 1, 6)
+                    .AddIntRange(0, 20, 1, 3)
                     .BindInt(i => gunCost = i)
                     .Build())
                 .SubOption(sub2 => sub2.KeyName("Bullet Cost", BulletCost)
-                    .AddIntRange(0, 20, 1, 6)
+                    .AddIntRange(0, 20, 1, 0)
                     .BindInt(i => bulletCost = i)
                     .Build())
                 .SubOption(sub2 => sub2.KeyName("Vest Cost", VestCost)
@@ -254,7 +255,7 @@ public class Mafioso: Engineer
                     .BindInt(i => vestCost = i)
                     .Build())
                 .SubOption(sub2 => sub2.KeyName("Revealer Cost", RoleRevealerCost)
-                    .AddIntRange(0, 20, 1, 5)
+                    .AddIntRange(0, 20, 1, 10)
                     .BindInt(i => revealerCost = i)
                     .Build())
                 .Build())

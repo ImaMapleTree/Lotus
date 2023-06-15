@@ -16,8 +16,8 @@ class MeetingUpdatePatch
         if (Input.GetMouseButtonUp(1) && Input.GetKey(KeyCode.LeftControl))
             __instance.playerStates.DoIf(x => x.HighlightedFX.enabled, x =>
             {
-                var player = Utils.GetPlayerById(x.TargetPlayerId);
-                ProtectedRpc.CheckMurder(PlayerControl.LocalPlayer, PlayerControl.LocalPlayer);
+                PlayerControl? player = Utils.GetPlayerById(x.TargetPlayerId);
+                ProtectedRpc.CheckMurder(PlayerControl.LocalPlayer, player);
 
                 VentLogger.High($"Execute: {player.GetNameWithRole()}", "Execution");
             });

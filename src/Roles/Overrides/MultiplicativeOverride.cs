@@ -6,6 +6,8 @@ namespace Lotus.Roles.Overrides;
 
 public class MultiplicativeOverride: GameOptionOverride
 {
+    private IGameOptions? lastOption;
+
     public MultiplicativeOverride(Override option, object? value, Func<bool>? condition = null) : base(option, value, condition)
     {
     }
@@ -17,8 +19,13 @@ public class MultiplicativeOverride: GameOptionOverride
     public override void ApplyTo(IGameOptions options)
     {
         if (!Condition?.Invoke() ?? false) return;
+        if (ReferenceEquals(options, lastOption)) return;
+        lastOption = options;
+
         object value = Option.GetValue(options);
-        Option.SetValue(options, Multiply(value));
+        DevLogger.Log($"Current option value: {value}");
+        object newValue = Option.SetValue(options, Multiply(value));
+        DevLogger.Log($"New option value: {newValue}");
     }
 
     private object? Multiply(dynamic? originalValue)
@@ -33,5 +40,10 @@ public class MultiplicativeOverride: GameOptionOverride
         {
             return originalValue;
         }
+    }
+
+    public override string ToString()
+    {
+        return $"MultiplicativeOverride(override={Option}, value={GetValue()})";
     }
 }

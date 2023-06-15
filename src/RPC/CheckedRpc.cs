@@ -1,16 +1,16 @@
 using AmongUs.GameOptions;
 using Hazel;
+using Lotus.API.Odyssey;
 using Lotus.Extensions;
-using Lotus.Logging;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
-using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.RPC;
 
 public static class CheckedRpc
 {
+    // TODO Shapeshift queue so that i dont need to stacktrace shapeshifting
     public static void CRpcShapeshift(this PlayerControl player, PlayerControl target, bool animate)
     {
         if (!player.IsAlive()) return;
@@ -18,7 +18,7 @@ public static class CheckedRpc
 
         RpcV3.Mass(SendOption.Reliable)
             .Start(player.NetId, RpcCalls.Shapeshift).Write(target).Write(animate).End()
-            .SendExcluding(PlayerControl.LocalPlayer.GetClientId());
+            .Send();
     }
 
     public static void CRpcRevertShapeshift(this PlayerControl player, bool animate)
@@ -26,16 +26,16 @@ public static class CheckedRpc
         VentLogger.Trace("CRevertShapeshift");
         if (!player.IsAlive()) return;
         if (AmongUsClient.Instance.AmClient) player.Shapeshift(player, animate);
-        player.SetName(player.name);
         RpcV3.Mass(SendOption.Reliable)
             .Start(player.NetId, RpcCalls.Shapeshift).Write(player).Write(animate).End()
-            .SendExcluding(PlayerControl.LocalPlayer.GetClientId());
+            .Send();
+        player.NameModel().Render(sendToPlayer: true, force: true);
     }
 
     public static void CRpcSetRole(this PlayerControl player, RoleTypes role)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (player.IsHost()) player.SetRole(role);
-        player.RpcSetRole(role);
+        RpcV3.Immediate(player.NetId, RpcCalls.SetRole).Write((ushort)role).Send();
     }
 }

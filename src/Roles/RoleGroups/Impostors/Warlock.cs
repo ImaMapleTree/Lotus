@@ -35,7 +35,7 @@ public class Warlock : Shapeshifter
     public override bool TryKill(PlayerControl target)
     {
         if (Shapeshifted) return base.TryKill(target);
-        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         cursedPlayers.Add(target.PlayerId);
         MyPlayer.RpcMark(target);

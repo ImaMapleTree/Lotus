@@ -64,7 +64,7 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
 
     public bool Updated(byte playerId) => updated.GetValueOrDefault(playerId, false);
 
-    public new Remote<T> Add(T component)
+    public new virtual Remote<T> Add(T component)
     {
         Remote<T> remote = base.Add(component);
         eventConsumers.ForEach(ev => ev(component));

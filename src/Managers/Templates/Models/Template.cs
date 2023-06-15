@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Lotus.API.Player;
 using Lotus.Chat;
+using Lotus.Managers.Templates.Models.Units;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Managers.Templates.Models;
 
@@ -11,6 +12,8 @@ public class Template: TemplateUnit
     public string? Title { get; set; }
     public string? Tag { get; set; }
     public List<string>? Aliases { get; set; }
+    public List<TTrigger>? Triggers { get; set; }
+    public bool AliasOnly = false;
 
     public Template()
     {
@@ -25,27 +28,24 @@ public class Template: TemplateUnit
 
     public void SendMessage(PlayerControl user, PlayerControl? viewer, object? data = null)
     {
-        if (Condition != null)
-        {
-            if (!Condition.VerifyUser(user)) return;
-            if (!Condition.VerifyUnspecific()) return;
-        }
-
-        if (viewer == null) Players.GetAllPlayers().ForEach(p => SendTo(p, data));
+        if (viewer == null) Players.GetPlayers().ForEach(p => SendTo(p, data));
         else SendTo(viewer, data);
     }
 
-    private void SendTo(PlayerControl player, Object? data)
+    private void SendTo(PlayerControl player, object? data)
     {
-        if (Condition != null)
-        {
-            if (!Condition.VerifyRole(player)) return;
-            if (!Condition.VerifyStatus(player)) return;
-        }
-
         data ??= player;
-        string result = Format(player, data);
 
-        ChatHandler.Of(result, Title ?? PlayerControl.LocalPlayer.name).LeftAlign().Send(player);
+        if (!Evaluate(data)) return;
+
+        string result = Format(data);
+
+        string title = Title != null ? Format(Title, data) : PlayerControl.LocalPlayer.name;
+        ChatHandler.Of(result, title.Replace("\\n", "\n")).LeftAlign().Send(UnityOptional<PlayerControl>.Of(player));
+    }
+
+    internal void Setup()
+    {
+        Triggers?.ForEach(t => t.Setup(this));
     }
 }

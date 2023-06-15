@@ -54,6 +54,11 @@ public class Hooks
         public static readonly Hook<PlayerTeleportedHookEvent> PlayerTeleportedHook = new SimpleHook<PlayerTeleportedHookEvent>();
     }
 
+    public static class ModHooks
+    {
+        public static readonly Hook<PlayerStatusReceivedHook> StatusReceivedHook = new SimpleHook<PlayerStatusReceivedHook>();
+    }
+
     public static class MeetingHooks
     {
         public static readonly Hook<MeetingHookEvent> MeetingCalledHook = new SimpleHook<MeetingHookEvent>();

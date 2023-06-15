@@ -4,6 +4,7 @@ using Lotus.API.Vanilla.Meetings;
 using Lotus.Chat.Commands;
 using Lotus.Roles.Interactions;
 using Lotus.Extensions;
+using Lotus.Options;
 using Lotus.Patches.Client;
 using Lotus.Roles;
 using UnityEngine;
@@ -41,13 +42,17 @@ public class ModKeybindings
 
         // Instant begin game
         Bind(KeyCode.LeftShift)
-            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown))
+            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown && !HudManager.Instance.Chat.IsOpen))
             .Do(() => GameStartManager.Instance.countDownTimer = 0);
 
         // Restart countdown timer
         Bind(KeyCode.C)
             .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown))
-            .Do(() => GameStartManager.Instance.ResetStartState());
+            .Do(() =>
+            {
+                GeneralOptions.AdminOptions.AutoStartMaxTime = -1;
+                GameStartManager.Instance.ResetStartState();
+            });
 
         Bind(KeyCode.C)
             .If(p => p.HostOnly().Predicate(() => EndGameManagerPatch.IsRestarting))
@@ -93,7 +98,7 @@ public class ModKeybindings
 
     private static void Suicide()
     {
-        PlayerControl.LocalPlayer.InteractWith(PlayerControl.LocalPlayer, DirectInteraction.FatalInteraction.Create(PlayerControl.LocalPlayer));
+        PlayerControl.LocalPlayer.InteractWith(PlayerControl.LocalPlayer, LotusInteraction.FatalInteraction.Create(PlayerControl.LocalPlayer));
     }
 
     private static void ResetGameOptions()

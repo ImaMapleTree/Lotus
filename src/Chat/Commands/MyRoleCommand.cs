@@ -1,21 +1,25 @@
 using System.Linq;
 using Lotus.Roles;
-using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.Managers;
-using UnityEngine;
+using Lotus.Managers.Templates.Models;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
-using VentLib.Options;
-using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Chat.Commands;
 
-public class RoleInfoCommand
+public class MyRoleCommand
 {
     private static int _previousLevel;
+
+    public static string GenerateMyRoleText(CustomRole role)
+    {
+        string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.Color.Colorize(role.Faction.Name())}):";
+        output += $"\n{role.Description}";
+        return output;
+    }
 
     [Command(CommandFlag.InGameOnly, "m", "myrole")]
     public static void MyRole(PlayerControl source, CommandContext context)
@@ -32,38 +36,28 @@ public class RoleInfoCommand
     private static void ShowRoleDescription(PlayerControl source)
     {
         CustomRole role = source.GetCustomRole();
-        string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.FactionColor().Colorize(role.Faction.Name())}):";
-        output += $"\n{role.Description}";
+        string output = GenerateMyRoleText(role);
         ChatHandler.Of(output).LeftAlign().Send(source);
-        if (!source.GetSubroles().IsEmpty()) BasicCommands.Modifiers(source);
+        if (!source.GetSubroles().IsEmpty()) ChatHandler.Of(new Template("${ModsDescriptive}").Format(source), "Modifiers").LeftAlign().Send(source);
     }
 
     [Command(CommandFlag.InGameOnly, "desc", "description")]
     private static void ShowFirstMeetingText(PlayerControl source)
     {
-        if (PluginDataManager.TemplateManager.TryFormat(source, source, "meeting-first", out string message))
-            ChatHandler.Of(message).Send(source);
+        PluginDataManager.TemplateManager.GetTemplates("meeting-first")?.ForEach(t => t.SendMessage(source, source));
     }
 
     [Command(CommandFlag.InGameOnly, "o", "option", "options")]
     private static void ShowRoleOptions(PlayerControl source)
     {
         CustomRole role = source.GetCustomRole();
-        string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.FactionColor().Colorize(role.Faction.Name())}):\n";
+        string output = $"{role.RoleColor.Colorize(role.RoleName)} ({role.Faction.Color.Colorize(role.Faction.Name())}):\n";
 
         output += OptionUtils.OptionText(role.RoleOptions);
 
+        if (!source.GetSubroles().IsEmpty()) output += "\n";
+        output += source.GetSubroles().Select(sr => $"{sr.ColoredRoleName()}\n{OptionUtils.OptionText(sr.RoleOptions)}").Fuse("\n");
+
         ChatHandler.Of(output).LeftAlign().Send(source);
     }
-
-    /*private static void UpdateOutput(ref string output, Option options)
-    {
-        if (options is not GameOption gameOption) return;
-        if (gameOption.Level < _previousLevel)
-            output += "\n";
-        _previousLevel = gameOption.Level;
-        string valueText = gameOption.Color == Color.white ? gameOption.GetValueText() : gameOption.Color.Colorize(gameOption.GetValueText());
-        output += $"\n{gameOption.Name()} => {valueText}";
-
-    }*/
 }

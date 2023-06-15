@@ -37,8 +37,8 @@ public class YinYanger : Vanilla.Impostor
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
-        if (!InYinMode) return true;
+        if (!InYinMode) return base.TryKill(target);
+        if (MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         if (yinPlayer != null && yinPlayer.PlayerId == target.PlayerId || yangPlayer != null && yangPlayer.PlayerId == target.PlayerId) return false;
 
         Color indicatorColor = yinPlayer == null ? Color.white : Color.black;
@@ -56,6 +56,7 @@ public class YinYanger : Vanilla.Impostor
     }
 
 
+    [RoleAction(RoleActionType.MyDeath)]
     [RoleAction(RoleActionType.RoundEnd)]
     private void RoundEnd()
     {
@@ -66,7 +67,7 @@ public class YinYanger : Vanilla.Impostor
     }
 
     [RoleAction(RoleActionType.FixedUpdate)]
-    private void YingYangerKillCheck()
+    private void YinYangerKillCheck()
     {
         if (!fixedUpdateLock.AcquireLock()) return;
         if (yinPlayer == null || yangPlayer == null) return;
@@ -88,17 +89,10 @@ public class YinYanger : Vanilla.Impostor
     [RoleAction(RoleActionType.AnyDeath)]
     private void CheckPlayerDeaths(PlayerControl player)
     {
-        if (lazyDefer == false) return;
-        if (yinPlayer != null && yinPlayer.PlayerId == player.PlayerId)
-        {
-            remotes.GetValueOrDefault(yinPlayer.PlayerId)?.Delete();
-            yinPlayer = null;
-        }
-        else if (yangPlayer != null && yangPlayer.PlayerId == player.PlayerId)
-        {
-            remotes.GetValueOrDefault(yangPlayer.PlayerId)?.Delete();
-            yinPlayer = null;
-        }
+        if (lazyDefer) return;
+        remotes.GetValueOrDefault(player.PlayerId)?.Delete();
+        if (yinPlayer != null && yinPlayer.PlayerId == player.PlayerId) yinPlayer = null;
+        else if (yangPlayer != null && yangPlayer.PlayerId == player.PlayerId) yangPlayer = null;
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

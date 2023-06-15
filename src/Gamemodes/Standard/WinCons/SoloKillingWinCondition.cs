@@ -7,12 +7,16 @@ using Lotus.Logging;
 using Lotus.Roles;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
+using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Gamemodes.Standard.WinCons;
 
 public class SoloKillingWinCondition : IWinCondition
 {
+    [Localized($"{ModConstants.Localization.WinConditions}.{nameof(SoloWin)}")]
+    public static string SoloWin = "Killed All Other Players";
+
     public bool IsConditionMet(out List<PlayerControl> winners)
     {
         winners = null;
@@ -46,5 +50,5 @@ public class SoloKillingWinCondition : IWinCondition
         return true;
     }
 
-    public WinReason GetWinReason() => WinReason.SoloWinner;
+    public WinReason GetWinReason() => new(ReasonType.SoloWinner, SoloWin);
 }

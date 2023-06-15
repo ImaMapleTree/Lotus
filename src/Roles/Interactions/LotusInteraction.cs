@@ -3,7 +3,7 @@ using Lotus.Extensions;
 
 namespace Lotus.Roles.Interactions;
 
-public class DirectInteraction : Interaction
+public class LotusInteraction : Interaction
 {
     public static Stub FatalInteraction = new(new FatalIntent());
     public static Stub HostileInteraction = new(new HostileIntent());
@@ -11,19 +11,18 @@ public class DirectInteraction : Interaction
     public static Stub HelpfulInteraction = new(new HelpfulIntent());
 
     private CustomRole role;
-    private Intent intent;
 
-    public DirectInteraction(Intent intent, CustomRole customRole)
+    public LotusInteraction(Intent intent, CustomRole customRole)
     {
-        this.intent = intent;
+        this.Intent = intent;
         this.role = customRole;
     }
 
     public CustomRole Emitter() => role;
+    public Intent Intent { get; set; }
+    public bool IsPromised { get; set; }
 
-    public Intent Intent() => intent;
-
-    public virtual Interaction Modify(Intent intent) => new DirectInteraction(intent, role);
+    public virtual Interaction Modify(Intent intent) => new LotusInteraction(intent, role);
 
     public class Stub
     {
@@ -33,14 +32,14 @@ public class DirectInteraction : Interaction
             this.intent = intent;
         }
 
-        public DirectInteraction Create(CustomRole role)
+        public LotusInteraction Create(CustomRole role)
         {
-            return new DirectInteraction(intent, role);
+            return new LotusInteraction(intent, role);
         }
 
-        public DirectInteraction Create(PlayerControl player)
+        public LotusInteraction Create(PlayerControl player)
         {
-            return new DirectInteraction(intent, player.GetCustomRole());
+            return new LotusInteraction(intent, player.GetCustomRole());
         }
     }
 }

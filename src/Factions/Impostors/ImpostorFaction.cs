@@ -12,7 +12,7 @@ public class ImpostorFaction : Faction<ImpostorFaction>
 
     public override bool CanSeeRole(PlayerControl player) => true;
 
-    public override Color FactionColor() => Color.red;
+    public override Color Color => Color.red;
 
     public override string Name() => "Impostors";
 
@@ -22,7 +22,7 @@ public class ImpostorFaction : Faction<ImpostorFaction>
         {
             TheUndead => Relation.None,
             Crewmates => Relation.None,
-            Neutral => Relation.None,
+            Neutral when other.GetType() == typeof(Neutral) => Relation.None,
             _ => other.Relationship(this)
         };
     }

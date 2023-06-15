@@ -33,8 +33,6 @@ class EnterVentPatch
         ActionHandle vented = ActionHandle.NoInit();
         pc.Trigger(RoleActionType.MyEnterVent, ref vented, __instance);
 
-        DevLogger.Log($"Vent Cooldown: {AUSettings.EngineerCooldown()}");
-        DevLogger.Log($"Vent Cooldown 2: {pc.Data.Role.TryCast<EngineerRole>()?.GetCooldown()}");
         if (!role.CanVent())
         {
             VentLogger.Trace($"{pc.GetNameWithRole()} cannot enter vent. Booting.");

@@ -13,6 +13,7 @@ using VentLib.Networking;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Chat;
 
@@ -80,6 +81,8 @@ public class ChatHandler
         Send(targetPlayer, message ?? "", title, leftAligned);
     }
 
+    public void Send(UnityOptional<PlayerControl> targetPlayer) => targetPlayer.IfPresent(Send);
+
     public static ChatHandler Of(string? message = null, string? title = null)
     {
         ChatHandler ch = new();
@@ -105,6 +108,7 @@ public class ChatHandler
 
             title ??= _defaultTitle;
 
+            DevLogger.Log($"Player: {player} || NUll: {player == null}");
             if (player == null) MassSend(sender, message, title, leftAligned);
             else if (player.IsHost()) SendToHost(sender, message, title, leftAligned);
             else if (title.Length < _maxMessagePacketSize) InternalSendLM(sender, player, message, title, name);
@@ -116,6 +120,8 @@ public class ChatHandler
 
     private static void SendToHost(PlayerControl sender, string message, string title, bool leftAligned)
     {
+        message = message.Replace("@n", "\n");
+        title = title.Replace("@n", "\n");
         if (leftAligned) ChatBubblePatch.SetLeftQueue.Enqueue(0);
         string name = sender.name;
         sender.SetName(title);
@@ -146,7 +152,7 @@ public class ChatHandler
             leftIndex = FindGoodSplitPoint(ref subMessage, leftIndex);
             rightIndex = Mathf.Min(message.Length, leftIndex + _maxMessagePacketSize);
 
-            subMessage = subMessage.Trim('\n');
+            subMessage = subMessage.Trim('\n').Replace("@n", "\n");
 
             RpcV3.Mass()
                 .Start(sender.NetId, RpcCalls.SetName)
@@ -161,7 +167,7 @@ public class ChatHandler
                 .Send(recipient.GetClientId());
         }
 
-        message = message[leftIndex..rightIndex].Trim('\n');
+        message = message[leftIndex..rightIndex].Trim('\n').Replace("@n", "\n");
 
         RpcV3.Mass()
             .Start(sender.NetId, RpcCalls.SetName)
@@ -188,7 +194,7 @@ public class ChatHandler
             leftIndex = FindGoodSplitPoint(ref subTitle, leftIndex);
             rightIndex = Mathf.Min(title.Length, leftIndex + _maxMessagePacketSize);
 
-            subTitle = subTitle.Trim('\n');
+            subTitle = subTitle.Trim('\n').Replace("@n", "\n");
 
             RpcV3.Mass()
                 .Start(sender.NetId, RpcCalls.SetName)
@@ -203,7 +209,7 @@ public class ChatHandler
                 .Send(recipient.GetClientId());
         }
 
-        title = title[leftIndex..rightIndex].Trim('\n');
+        title = title[leftIndex..rightIndex].Trim('\n').Replace("@n", "\n");
 
         RpcV3.Mass()
             .Start(sender.NetId, RpcCalls.SetName)

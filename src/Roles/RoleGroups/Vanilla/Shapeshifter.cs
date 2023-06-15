@@ -9,8 +9,8 @@ namespace Lotus.Roles.RoleGroups.Vanilla;
 
 public class Shapeshifter : Impostor
 {
-    protected float? ShapeshiftCooldown = null;
-    protected float? ShapeshiftDuration = null;
+    protected float? ShapeshiftCooldown;
+    protected float? ShapeshiftDuration;
 
     [RoleAction(RoleActionType.Attack, Subclassing = false)]
     public override bool TryKill(PlayerControl target) => base.TryKill(target);

@@ -1,6 +1,8 @@
+using System.Collections.Generic;
 using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
@@ -11,6 +13,8 @@ using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
+using VentLib.Utilities.Collections;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
@@ -20,6 +24,9 @@ public class TimeThief : Vanilla.Impostor
     private int meetingTimeSubtractor;
     private int minimumVotingTime;
     private bool returnTimeAfterDeath;
+
+    private List<IRemote>? discussionRemote;
+    private List<IRemote>? votingRemote;
 
     [UIComponent(UI.Counter)]
     public string TimeStolenCounter() => RoleUtils.Counter(kills * meetingTimeSubtractor + "s", color: RoleColor);
@@ -33,9 +40,11 @@ public class TimeThief : Vanilla.Impostor
         return flag;
     }
 
-    [RoleAction(RoleActionType.RoundEnd)]
+    [RoleAction(RoleActionType.MeetingCalled, triggerAfterDeath: true)]
     private void TimeThiefSubtractMeetingTime()
     {
+        discussionRemote?.ForEach(d => d.Delete());
+        votingRemote?.ForEach(v => v.Delete());
         if (!MyPlayer.IsAlive() && returnTimeAfterDeath) return;
         int discussionTime = AUSettings.DiscussionTime();
         int votingTime = AUSettings.VotingTime();
@@ -54,8 +63,15 @@ public class TimeThief : Vanilla.Impostor
         int modifiedVotingTime = Mathf.Clamp(votingTime - totalStolenTime, minimumVotingTime, votingTime);
 
         VentLogger.Debug($"{MyPlayer.name} | Time Thief | Meeting Time: {modifiedDiscussionTime} | Voting Time: {modifiedVotingTime}", "TimeThiefStolen");
-        GameOptionOverride[] overrides = { new(Override.DiscussionTime, modifiedDiscussionTime), new(Override.VotingTime, modifiedVotingTime) };
-        Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions(overrides));
+
+        discussionRemote = new List<IRemote>();
+        votingRemote = new List<IRemote>();
+        Players.GetPlayers().ForEach(p =>
+        {
+            discussionRemote.Add(Game.MatchData.Roles.AddOverride(p.PlayerId, new GameOptionOverride(Override.DiscussionTime, modifiedDiscussionTime)));
+            votingRemote.Add(Game.MatchData.Roles.AddOverride(p.PlayerId, new GameOptionOverride(Override.VotingTime, modifiedVotingTime)));
+        });
+
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

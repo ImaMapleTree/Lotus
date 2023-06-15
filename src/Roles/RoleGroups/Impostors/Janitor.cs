@@ -14,6 +14,8 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -28,7 +30,7 @@ using Object = UnityEngine.Object;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
-public class Janitor: Vanilla.Impostor
+public class Janitor: Impostor
 {
     public static HashSet<Type> JanitorBannedModifiers = new() { typeof(Oblivious), typeof(Sleuth) };
     public override HashSet<Type> BannedModifiers() => cleanOnKill ? new HashSet<Type>() : JanitorBannedModifiers;
@@ -49,9 +51,8 @@ public class Janitor: Vanilla.Impostor
         if (!cleanOnKill) return base.TryKill(target);
 
         MyPlayer.RpcMark(target);
-        if (MyPlayer.InteractWith(target, new DirectInteraction(new FakeFatalIntent(), this)) is InteractionResult.Halt) return false;
-        RpcV3.Standard(MyPlayer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
-        target.RpcExileV2();
+        if (MyPlayer.InteractWith(target, new LotusInteraction(new FakeFatalIntent(), this)) is InteractionResult.Halt) return false;
+        MyPlayer.RpcVaporize(target);
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target));
         Game.MatchData.GameHistory.AddEvent(new GenericAbilityEvent(MyPlayer, $"{Color.red.Colorize(MyPlayer.name)} cleaned {target.GetRoleColor().Colorize(target.name)}."));
         return true;
@@ -126,5 +127,12 @@ public class Janitor: Vanilla.Impostor
         public Optional<IDeathEvent> CauseOfDeath() => Optional<IDeathEvent>.Null();
 
         public bool IsRanged() => false;
+
+        private Dictionary<string, object?>? meta;
+        public object? this[string key]
+        {
+            get => (meta ?? new Dictionary<string, object?>()).GetValueOrDefault(key);
+            set => (meta ?? new Dictionary<string, object?>())[key] = value;
+        }
     }
 }

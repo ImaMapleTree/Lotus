@@ -1,5 +1,5 @@
+using System;
 using System.Collections.Generic;
-using AmongUs.Data;
 using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
@@ -13,7 +13,6 @@ using Lotus.Managers.History.Events;
 using Lotus.Options;
 using Lotus.Options.General;
 using VentLib.Logging;
-using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Patches;
@@ -72,7 +71,6 @@ static class ExileControllerWrapUpPatch
         try
         {
             MeetingDelegate.Instance.BlackscreenResolver.ClearBlackscreen(BeginRoundStart);
-            SoundManager.Instance.ChangeMusicVolume(DataManager.Settings.Audio.MusicVolume);
             VentLogger.Debug("Start Task Phase", "Phase");
         }
         catch
@@ -87,9 +85,17 @@ static class ExileControllerWrapUpPatch
     private static void BeginRoundStart()
     {
         if (GeneralOptions.MeetingOptions.ResolveTieMode is ResolveTieMode.KillAll && MeetingDelegate.Instance.TiedPlayers.Count >= 2)
-            MeetingDelegate.Instance.TiedPlayers.Filter(Players.PlayerById).ForEach(p => p.RpcExileV2());
+            MeetingDelegate.Instance.TiedPlayers.Filter(Players.PlayerById).ForEach(p => p.RpcExileV2(true));
 
-        Game.RenderAllForAll(force: true);
+        try
+        {
+            Game.RenderAllForAll(force: true);
+        }
+        catch (Exception exception)
+        {
+            VentLogger.Exception(exception);
+        }
+
         Game.State = GameState.Roaming;
         ActionHandle handle = ActionHandle.NoInit();
         VentLogger.Debug("Triggering RoundStart Action!!", "Exile::BeginRoundStart");

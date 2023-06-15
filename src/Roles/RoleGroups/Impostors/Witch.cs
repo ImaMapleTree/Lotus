@@ -49,7 +49,7 @@ public class Witch: Vanilla.Impostor
 
         MyPlayer.RpcMark(target);
         if (switchModesAfterAttack) isCursingMode = !isCursingMode;
-        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         if (cursedPlayers.Contains(target.PlayerId)) return false;
 
         cursedPlayers.Add(target.PlayerId);

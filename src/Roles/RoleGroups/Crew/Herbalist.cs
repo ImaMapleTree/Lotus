@@ -79,9 +79,9 @@ public class Herbalist: Crewmate
         blooming.Remove(playerId);
         PlayerControl? player = Players.FindPlayerById(playerId);
         if (player == null) return;
-        RpcV3.Immediate(player.NetId, RpcCalls.SetScanner, SendOption.None).Write(false).Write((byte)0).Send(MyPlayer.GetClientId());
+        RpcV3.Immediate(player.NetId, RpcCalls.SetScanner, SendOption.None).Write(false).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId());
         _bloomsGrown.Update(MyPlayer.UniquePlayerId(), i => i + 1);
-        bloomCounts.Compose(playerId, i => i + 1, () =>
+        int count = bloomCounts.Compose(playerId, i => i + 1, () =>
         {
             LiveString ls = new(() =>
             {
@@ -90,15 +90,14 @@ public class Herbalist: Crewmate
                 return _bloomColor.Colorize("✿");
             });
 
-            if (revealOnBloom)
-            {
-                player.NameModel().GCH<RoleHolder>().Last().AddViewer(MyPlayer);
-                revealedPlayers.GetOrCompute(player.PlayerId, () => new List<byte>()).Add(MyPlayer.PlayerId);
-            }
-
             player.NameModel().GCH<CounterHolder>().Add(new CounterComponent(ls, Game.IgnStates, ViewMode.Additive, MyPlayer));
             return 1;
         });
+
+        if (!revealOnBloom || count < bloomsBeforeReveal) return;
+
+        player.NameModel().GCH<RoleHolder>().Last().AddViewer(MyPlayer);
+        revealedPlayers.GetOrCompute(player.PlayerId, () => new List<byte>()).Add(MyPlayer.PlayerId);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

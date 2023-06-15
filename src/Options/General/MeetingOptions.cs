@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Lotus.Extensions;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -15,7 +14,7 @@ public class MeetingOptions
     public int MeetingButtonPool = -1;
     public bool SyncMeetingButtons => MeetingButtonPool != -1;
     public ResolveTieMode ResolveTieMode;
-    public SkipVoteMode SkipVoteMode;
+    public SkipVoteMode NoVoteMode;
 
     public List<GameOption> AllOptions = new();
 
@@ -43,13 +42,13 @@ public class MeetingOptions
             .BindInt(i => ResolveTieMode = (ResolveTieMode)i)
             .BuildAndRegister());
 
-        AllOptions.Add(Builder("Skip Vote Mode")
+        AllOptions.Add(Builder("No Vote Mode")
             .Name(MeetingOptionTranslations.SkipVoteMode)
             .Value(v => v.Text(GeneralOptionTranslations.OffText).Color(Color.red).Value(0).Build())
-            .Value(v => v.Text(MeetingOptionTranslations.NegateVote).Color(ModConstants.Palette.InfinityColor).Value(1).Build())
+            .Value(v => v.Text(MeetingOptionTranslations.RandomVote).Color(ModConstants.Palette.InfinityColor).Value(1).Build())
             .Value(v => v.Text(MeetingOptionTranslations.ReverseVote).Color(new Color(0.55f, 0.73f, 1f)).Value(2).Build())
             .Value(v => v.Text(MeetingOptionTranslations.ExplodeOnSkip).Color(new Color(1f, 0.4f, 0.2f)).Value(3).Build())
-            .BindInt(i => SkipVoteMode = (SkipVoteMode)i)
+            .BindInt(i => NoVoteMode = (SkipVoteMode)i)
             .BuildAndRegister());
 
         additionalOptions.ForEach(o =>
@@ -82,16 +81,19 @@ public class MeetingOptions
         public static string ResolveTieMode = "Resolve Tie Mode";
 
         [Localized(nameof(SkipVoteMode))]
-        public static string SkipVoteMode = "Skip Vote Mode";
+        public static string SkipVoteMode = "No Vote Mode";
 
         [Localized(nameof(ExplodeOnSkip))]
         public static string ExplodeOnSkip = "Explode";
 
         [Localized(nameof(ReverseVote))]
-        public static string ReverseVote = "Reverse";
+        public static string ReverseVote = "Self";
 
         [Localized(nameof(NegateVote))]
         public static string NegateVote = "Negate";
+
+        [Localized(nameof(RandomVote))]
+        public static string RandomVote = "Random";
     }
 }
 
@@ -105,7 +107,7 @@ public enum ResolveTieMode
 public enum SkipVoteMode
 {
     None,
-    Negate,
+    Random,
     Reverse,
     Explode
 }

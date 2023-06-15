@@ -32,19 +32,11 @@ public class CheckEndGamePatch
             .Do(() =>
             {
                 Deferred = false;
-                ManualWin manualWin = new(new List<PlayerControl>(), WinReason.HostForceEnd);
+                ManualWin manualWin = new(new List<PlayerControl>(), ReasonType.HostForceEnd);
                 manualWin.Activate();
                 GameManager.Instance.LogicFlow.CheckEndCriteria();
             });
-        Hooks.PlayerHooks.PlayerDisconnectHook.Bind(nameof(CheckEndGamePatch), _ =>
-        {
-            if (BeginWin) return;
-            bool wasDeferred = Deferred;
-            Deferred = false;
-            _fixedUpdateLock.Unlock();
-            Prefix();
-            Deferred = wasDeferred;
-        });
+        Hooks.PlayerHooks.PlayerDisconnectHook.Bind(nameof(CheckEndGamePatch), _ => ForceCheckEndGame());
     }
 
     // ReSharper disable once UnusedMethodReturnValue.Global
@@ -72,25 +64,25 @@ public class CheckEndGamePatch
         if (winners == null!) winners = new List<PlayerControl>();
         bool impostorsWon = winners.Count == 0 || winners[0].Data.Role.IsImpostor;
 
-        GameOverReason reason = winDelegate.GetWinReason() switch
+        GameOverReason reason = winDelegate.GetWinReason().ReasonType switch
         {
-            WinReason.FactionLastStanding => impostorsWon ? GameOverReason.ImpostorByKill : GameOverReason.HumansByVote,
-            WinReason.RoleSpecificWin => impostorsWon ? GameOverReason.ImpostorByKill : GameOverReason.HumansByVote,
-            WinReason.TasksComplete => GameOverReason.HumansByTask,
-            WinReason.Sabotage => GameOverReason.ImpostorBySabotage,
-            WinReason.NoWinCondition => GameOverReason.ImpostorDisconnect,
-            WinReason.HostForceEnd => GameOverReason.ImpostorDisconnect,
-            WinReason.GamemodeSpecificWin => GameOverReason.ImpostorByKill,
-            WinReason.SoloWinner => GameOverReason.ImpostorByKill,
+            ReasonType.FactionLastStanding => impostorsWon ? GameOverReason.ImpostorByKill : GameOverReason.HumansByVote,
+            ReasonType.RoleSpecificWin => impostorsWon ? GameOverReason.ImpostorByKill : GameOverReason.HumansByVote,
+            ReasonType.TasksComplete => GameOverReason.HumansByTask,
+            ReasonType.Sabotage => GameOverReason.ImpostorBySabotage,
+            ReasonType.NoWinCondition => GameOverReason.ImpostorDisconnect,
+            ReasonType.HostForceEnd => GameOverReason.ImpostorDisconnect,
+            ReasonType.GamemodeSpecificWin => GameOverReason.ImpostorByKill,
+            ReasonType.SoloWinner => GameOverReason.ImpostorByKill,
         };
 
-        
+
         Game.MatchData.GameHistory.PlayerHistory = Game.MatchData.FrozenPlayers.Values.Select(p => new PlayerHistory(p)).ToList();
-        VictoryScreen.ShowWinners(winDelegate.GetWinners(), reason);
+        VictoryScreen.ShowWinners(winDelegate, reason);
 
         Deferred = true;
         BeginWin = true;
-        Async.Schedule(() => DelayedWin(reason), NetUtils.DeriveDelay(0.6f));
+        Async.Schedule(() => DelayedWin(reason), NetUtils.DeriveDelay(0.01f));
 
         Profilers.Global.Sampler.Stop(id);
         return false;
@@ -103,5 +95,16 @@ public class CheckEndGamePatch
         VentLogger.Info("Ending Game", "DelayedWin");
         GameManager.Instance.RpcEndGame(reason, false);
         Async.Schedule(() => GameManager.Instance.EndGame(), 0.1f);
+    }
+
+    public static bool ForceCheckEndGame()
+    {
+        if (BeginWin) return BeginWin;
+        bool wasDeferred = Deferred;
+        Deferred = false;
+        _fixedUpdateLock.Unlock();
+        Prefix();
+        Deferred = wasDeferred;
+        return BeginWin;
     }
 }

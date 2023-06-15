@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using AmongUs.GameOptions;
 using Lotus.API;
+using Lotus.API.Odyssey;
 using Lotus.API.Stats;
 using Lotus.Factions;
 using Lotus.Options;
@@ -11,6 +12,7 @@ using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Internals;
+using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
@@ -24,19 +26,18 @@ public class Jester : CustomRole
     private bool canUseVents;
     private bool impostorVision;
     private int meetingThreshold;
-    public bool cantCallMeetings;
+    private bool cantCallMeetings;
 
-    private int meetingsCalled;
 
     [UIComponent(UI.Counter)]
-    public string MeetingCounter() => meetingThreshold > 0 ? RoleUtils.Counter(meetingsCalled, meetingThreshold, RoleColor) : "";
+    public string MeetingCounter() => meetingThreshold > 0 ? RoleUtils.Counter(Game.MatchData.MeetingsCalled, meetingThreshold, RoleColor) : "";
 
     [RoleAction(RoleActionType.SelfExiled)]
     public void JesterWin()
     {
-        if (meetingsCalled < meetingThreshold) return;
+        if (Game.MatchData.MeetingsCalled < meetingThreshold) return;
         VentLogger.Fatal("Forcing Win by Jester");
-        ManualWin jesterWin = new(MyPlayer, WinReason.SoloWinner, 999);
+        ManualWin jesterWin = new(MyPlayer, new WinReason(ReasonType.SoloWinner, TranslationUtil.Colorize(Translations.WinConditionName, RoleColor)), 999);
         jesterWin.Activate();
     }
 
@@ -46,12 +47,6 @@ public class Jester : CustomRole
         if (caller.PlayerId != MyPlayer.PlayerId) return;
         // Cancel if the jester can't call emergency meetings
         if (!deadBody.Exists() && cantCallMeetings) handle.Cancel();
-    }
-
-    [RoleAction(RoleActionType.MeetingEnd)]
-    public void MeetingIncrementer()
-    {
-        meetingsCalled++;
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -91,6 +86,9 @@ public class Jester : CustomRole
     [Localized(nameof(Jester))]
     private static class Translations
     {
+        [Localized(nameof(WinConditionName))]
+        public static string WinConditionName = "Jester::0 Exiled";
+
         [Localized(ModConstants.Options)]
         public static class Options
         {

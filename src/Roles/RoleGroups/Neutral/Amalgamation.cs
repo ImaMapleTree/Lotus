@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
+using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
 using Lotus.Factions;
@@ -13,6 +15,7 @@ using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Legacy;
+using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -21,11 +24,15 @@ using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
+using Object = UnityEngine.Object;
 
 namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Amalgamation: CustomRole
 {
+    public static HashSet<Type> AmalgamationBannedModifier = new() { typeof(Oblivious), typeof(Sleuth) };
+    public override HashSet<Type> BannedModifiers() => AmalgamationBannedModifier;
+
     private int maxRoles;
     private bool hasArrowsToBodies;
     private bool absorbModifiers;

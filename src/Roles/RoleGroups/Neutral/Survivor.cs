@@ -41,7 +41,7 @@ public class Survivor : CustomRole
     private void SurvivorProtection(Interaction interaction, ActionHandle handle)
     {
         if (vestDuration.IsReady()) return;
-        if (interaction.Intent() is not IFatalIntent) return;
+        if (interaction.Intent is not IFatalIntent) return;
         handle.Cancel();
     }
 
@@ -55,8 +55,8 @@ public class Survivor : CustomRole
 
     private void GameEnd(WinDelegate winDelegate)
     {
-        if (!MyPlayer.IsAlive() || winDelegate.GetWinReason() is WinReason.SoloWinner) return;
-        winDelegate.GetWinners().Add(MyPlayer);
+        if (!MyPlayer.IsAlive() || winDelegate.GetWinReason().ReasonType is ReasonType.SoloWinner) return;
+        winDelegate.AddAdditionalWinner(MyPlayer);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

@@ -23,7 +23,7 @@ public class IngredientDeath: Ingredient, IWorldIngredient
 
     public override string Name() => "Vial of Decay";
 
-    public override Color Color() => FactionInstances.TheUndead.FactionColor();
+    public override Color Color() => FactionInstances.TheUndead.Color;
 
     public override string Symbol() => "⚠";
 

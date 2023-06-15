@@ -10,6 +10,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Options;
 
@@ -80,7 +81,7 @@ public static class DesyncOptions
     public static IGameOptions GetModifiedOptions(IEnumerable<GameOptionOverride> overrides)
     {
         IGameOptions clonedOptions = AUSettings.StaticOptions.DeepCopy();
-        overrides.Where(o => o != null!).Do(optionOverride => optionOverride.ApplyTo(clonedOptions));
+        overrides.Where(o => o != null!).ForEach(optionOverride => optionOverride.ApplyTo(clonedOptions));
         return clonedOptions;
     }
 

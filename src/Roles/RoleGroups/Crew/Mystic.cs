@@ -41,8 +41,7 @@ public class Mystic : Crewmate, ISubrole
     protected override void PostSetup()
     {
         if (!isSubrole) return;
-        CounterHolder ch = MyPlayer.NameModel().GCH<CounterHolder>();
-        ch.RemoveAt(ch.Count - 1);
+        MyPlayer.NameModel().GCH<CounterHolder>().RemoveLast();
     }
 
     public bool IsAssignableTo(PlayerControl player)
@@ -100,7 +99,7 @@ public class Mystic : Crewmate, ISubrole
                     else RoleFlags &= ~RoleFlag.IsSubrole;
                 })
                 .ShowSubOptionPredicate(b => (bool)b)
-                .SubOption(sub2 => sub2.KeyName("Restricted to Crewmates", TranslationUtil.Colorize(Translations.Options.RestrictedToCrewmates, FactionInstances.Crewmates.FactionColor()))
+                .SubOption(sub2 => sub2.KeyName("Restricted to Crewmates", TranslationUtil.Colorize(Translations.Options.RestrictedToCrewmates, FactionInstances.Crewmates.Color))
                     .AddOnOffValues()
                     .BindBool(b => restrictedToCrew = b)
                     .Build())

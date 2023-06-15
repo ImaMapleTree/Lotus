@@ -46,10 +46,10 @@ public class Veteran : Crewmate
     [RoleAction(RoleActionType.OnPet)]
     public void AssumeAlert()
     {
-        if (remainingAlerts <= 0 || veteranCooldown.NotReady()) return;
+        if (remainingAlerts <= 0 || veteranCooldown.NotReady() || veteranDuration.NotReady()) return;
         VeteranAlertCounter().DebugLog("Veteran Alert Counter: ");
-        veteranCooldown.Start();
         veteranDuration.Start();
+        Async.Schedule(() => veteranCooldown.Start(), veteranDuration.Duration);
         remainingAlerts--;
     }
 
@@ -71,7 +71,7 @@ public class Veteran : Crewmate
         handle.Cancel();
         Game.MatchData.GameHistory.AddEvent(new VettedEvent(MyPlayer, actor));
         IDeathEvent deathEvent = new CustomDeathEvent(MyPlayer, actor, ModConstants.DeathNames.Parried);
-        MyPlayer.InteractWith(actor, new DirectInteraction(new FatalIntent(interaction is not DirectInteraction, () => deathEvent), this));
+        MyPlayer.InteractWith(actor, new LotusInteraction(new FatalIntent(interaction is not LotusInteraction, () => deathEvent), this));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

@@ -12,7 +12,7 @@ namespace Lotus.Chat.Patches;
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSendChat))]
 internal class RpcSendChatPatch
 {
-    private static readonly OrderedSet<string> ChatHistory = new();
+    private static readonly List<string> ChatHistory = new();
     private static int _index = -1;
 
     static RpcSendChatPatch()
@@ -64,7 +64,8 @@ internal class RpcSendChatPatch
 
         EatCommand = false;
 
-        ChatHistory.Insert(0, chatText);
+        if (ChatHistory.Count == 0 || ChatHistory[0] != chatText)
+            ChatHistory.Insert(0, chatText);
         if (ChatHistory.Count >= 100) ChatHistory.RemoveAt(99);
 
 

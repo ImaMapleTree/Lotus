@@ -50,7 +50,7 @@ public class Occultist: NeutralKillingBase
 
         MyPlayer.RpcMark(target);
         if (switchModesAfterAttack) isCursingMode = !isCursingMode;
-        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         if (cursedPlayers.Contains(target.PlayerId)) return false;
 
         cursedPlayers.Add(target.PlayerId);
@@ -97,6 +97,7 @@ public class Occultist: NeutralKillingBase
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .RoleColor(new Color(0.39f, 0.47f, 0.87f))
+            .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage)
             .OptionOverride(new IndirectKillCooldown(KillCooldown, () => isCursingMode));
 
 

@@ -23,5 +23,5 @@ public abstract partial class TheUndead : Faction<TheUndead>
         };
     }
 
-    public override Color FactionColor() => new(0.59f, 0.76f, 0.36f);
+    public override Color Color => new(0.59f, 0.76f, 0.36f);
 }

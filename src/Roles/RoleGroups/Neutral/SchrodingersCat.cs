@@ -32,7 +32,7 @@ public class SchrodingersCat: CustomRole
     [RoleAction(RoleActionType.Interaction)]
     private void SchrodingerCatAttacked(PlayerControl actor, Interaction interaction, ActionHandle handle)
     {
-        if (interaction.Intent() is not IFatalIntent) return;
+        if (interaction.Intent is not IFatalIntent) return;
         if (numberOfLives <= 0) return;
         numberOfLives--;
         AssignFaction(actor);

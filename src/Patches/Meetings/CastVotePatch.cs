@@ -34,7 +34,7 @@ public class CastVotePatch
 
         if (!handle.IsCanceled)
         {
-            switch (GeneralOptions.MeetingOptions.SkipVoteMode)
+            /*switch (GeneralOptions.MeetingOptions.NoVoteMode)
             {
                 case SkipVoteMode.Reverse:
                     voted = Optional<PlayerControl>.Of(voter);
@@ -44,7 +44,7 @@ public class CastVotePatch
                     return true;
                 case SkipVoteMode.Negate:
                     return true;
-            }
+            }*/
 
             Hooks.MeetingHooks.CastVoteHook.Propagate(new CastVoteHookEvent(voter, voted));
             MeetingDelegate.Instance.CastVote(voter, voted);

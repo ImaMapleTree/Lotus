@@ -117,7 +117,7 @@ public class Bodyguard: Crewmate
     [RoleAction(RoleActionType.AnyInteraction)]
     private void AnyPlayerInteraction(PlayerControl actor, PlayerControl target, Interaction interaction, ActionHandle handle)
     {
-        Intent intent = interaction.Intent();
+        Intent intent = interaction.Intent;
         if (actor.PlayerId == MyPlayer.PlayerId) return;
         if (Game.State is not GameState.Roaming) return;
         if (guardedPlayer != target.PlayerId) return;
@@ -134,8 +134,8 @@ public class Bodyguard: Crewmate
 
         RoleUtils.SwapPositions(target, MyPlayer);
         Game.MatchData.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, actor));
-        DirectInteraction directInteraction = new(new FatalIntent(false, () => new CustomDeathEvent(MyPlayer, actor, ModConstants.DeathNames.Parried)), this);
-        InteractionResult result = MyPlayer.InteractWith(actor, directInteraction);
+        LotusInteraction lotusInteraction = new(new FatalIntent(false, () => new CustomDeathEvent(MyPlayer, actor, ModConstants.DeathNames.Parried)), this);
+        InteractionResult result = MyPlayer.InteractWith(actor, lotusInteraction);
 
         if (result is InteractionResult.Proceed) Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, actor));
 
@@ -145,7 +145,7 @@ public class Bodyguard: Crewmate
             .Handle(t => t.Item1.Execute(t.Item2, new object[] { MyPlayer} ),
             () =>
             {
-                if (actor.InteractWith(MyPlayer, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed)
+                if (actor.InteractWith(MyPlayer, LotusInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed)
                     Game.MatchData.GameHistory.AddEvent(new KillEvent(actor, MyPlayer));
             });
     }

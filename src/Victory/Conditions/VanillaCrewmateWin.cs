@@ -6,13 +6,21 @@ using Lotus.Factions.Interfaces;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
 using Lotus.Extensions;
+using VentLib.Localization.Attributes;
 
 namespace Lotus.Victory.Conditions;
 
+
 public class VanillaCrewmateWin: IFactionWinCondition
 {
+    [Localized($"{ModConstants.Localization.WinConditions}.{nameof(TaskWin)}")]
+    public static string TaskWin = "Task Win";
+
+    [Localized($"{ModConstants.Localization.WinConditions}.{nameof(LastFactionStanding)}")]
+    public static string LastFactionStanding = "Last Faction Standing";
+
     private static readonly List<IFaction> CrewmateFaction = new() { FactionInstances.Crewmates };
-    private WinReason winReason = WinReason.TasksComplete;
+    private WinReason winReason = new(ReasonType.TasksComplete, TaskWin);
 
     public List<IFaction> Factions() => CrewmateFaction;
 
@@ -22,7 +30,7 @@ public class VanillaCrewmateWin: IFactionWinCondition
 
         if (Game.State is not (GameState.Roaming or GameState.InMeeting)) return false;
 
-        winReason = WinReason.TasksComplete;
+        winReason = new WinReason(ReasonType.TasksComplete, TaskWin);
 
 
         bool hasAliveEnemy = false;
@@ -36,7 +44,7 @@ public class VanillaCrewmateWin: IFactionWinCondition
 
         if (hasAliveEnemy && hasOneTaskDoer) return CheckTaskCompletion();
 
-        winReason = WinReason.FactionLastStanding;
+        winReason = new WinReason(ReasonType.FactionLastStanding, LastFactionStanding);
         return !hasAliveEnemy;
     }
 

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Lotus.Extensions;
+using Lotus.GUI;
 using Lotus.Roles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -18,6 +19,7 @@ public class MiscellaneousOptions
     public int ChangeNameUsers;
     public int ChangeColorAndLevelUsers;
     public bool AutoDisplayResults;
+    public bool AutoDisplayCOD;
     public int SuffixMode;
     public bool ColorNameMode;
 
@@ -69,6 +71,12 @@ public class MiscellaneousOptions
             .BindBool(b => AutoDisplayResults = b)
             .BuildAndRegister());
 
+        AllOptions.Add(Builder("Auto Display Cause of Death")
+            .Name(MiscOptionTranslations.AutoDisplayCauseOfDeath)
+            .AddOnOffValues()
+            .BindBool(b => AutoDisplayCOD = b)
+            .BuildAndRegister());
+
         AllOptions.Add(Builder("Color Names")
             .Name(MiscOptionTranslations.ColorNames)
             .AddOnOffValues(false)
@@ -111,6 +119,9 @@ public class MiscellaneousOptions
 
         [Localized("AutoDisplayResults")]
         public static string AutoDisplayResultsText = "Auto Display Results";
+
+        [Localized(nameof(AutoDisplayCauseOfDeath))]
+        public static string AutoDisplayCauseOfDeath = "Auto Display Cause of Death";
 
         [Localized("SuffixMode")]
         public static string SuffixModeText = "Suffix Mode";

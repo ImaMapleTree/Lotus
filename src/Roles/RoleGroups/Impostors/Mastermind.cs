@@ -51,11 +51,12 @@ public class Mastermind : Impostor
             : new [] { MyPlayer };
         TextComponent alliedText = new(new LiveString(ManipulatedText, RoleColor), GameState.Roaming, ViewMode.Additive, viewers);
 
-        Remote<TextComponent>?[] textComponents = { target.NameModel().GCH<TextHolder>().Add(alliedText), null };
         ClearManipulated(target);
+        Remote<TextComponent>?[] textComponents = { target.NameModel().GCH<TextHolder>().Add(alliedText), null };
 
         remotes[target.PlayerId] = textComponents;
         manipulatedPlayers.Add(target.PlayerId);
+
 
         Async.Schedule(() => BeginSuicideCountdown(target), 5f);
         RefreshKillCooldown(target);
@@ -117,9 +118,7 @@ public class Mastermind : Impostor
 
     private void ExecuteSuicide(PlayerControl target)
     {
-        if (!manipulatedPlayers.Contains(target.PlayerId)) return;
         target.InteractWith(target, new UnblockedInteraction(new FatalIntent(false, () => new ManipulatedPlayerDeathEvent(target, target)), this));
-        ClearManipulated(target);
     }
 
 
@@ -135,11 +134,19 @@ public class Mastermind : Impostor
         });
     }
 
+    [RoleAction(RoleActionType.AnyDeath)]
+    private void HandleManipulatedDeath(PlayerControl deadPlayer)
+    {
+        ClearManipulated(deadPlayer);
+    }
+
     private void ClearManipulated(PlayerControl player)
     {
         remotes.GetValueOrDefault(player.PlayerId)?.ForEach(r => r?.Delete());
         manipulatedPlayers.Remove(player.PlayerId);
         expirationTimers.GetValueOrDefault(player.PlayerId)?.Finish();
+        expirationTimers.Remove(player.PlayerId);
+        remotes.Remove(player.PlayerId);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

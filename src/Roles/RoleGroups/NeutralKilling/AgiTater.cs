@@ -40,6 +40,7 @@ public class AgiTater: NeutralKillingBase
     [NewOnSetup] private Dictionary<byte, int> bombCounts = null!;
     [NewOnSetup] private FixedUpdateLock fixedUpdateLock = new(0.1f);
 
+    private float bombTransferRate;
     private int currentBombs;
 
     [UIComponent(UI.Counter, ViewMode.Additive, GameState.Roaming)]
@@ -49,7 +50,7 @@ public class AgiTater: NeutralKillingBase
     public override bool TryKill(PlayerControl target)
     {
         if (currentBombs == 0) return false;
-        bool canBomb = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is Proceed;
+        bool canBomb = MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is Proceed;
         if (!canBomb) return false;
         currentBombs--;
 
@@ -90,30 +91,35 @@ public class AgiTater: NeutralKillingBase
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        AddKillCooldownOptions(base.RegisterOptions(optionStream), key: "Place Bomb Cooldown", name: AgitaterTranslations.AgiOptions.PlaceBombCooldown)
-            .SubOption(sub => sub.KeyName("Explode On Meeting", AgitaterTranslations.AgiOptions.ExplodeOnMeetings)
+        AddKillCooldownOptions(base.RegisterOptions(optionStream), key: "Place Bomb Cooldown", name: AgiOptions.PlaceBombCooldown)
+            .SubOption(sub => sub.KeyName("Explode On Meeting", AgiOptions.ExplodeOnMeetings)
                 .AddOnOffValues()
                 .BindBool(FlagSetter(ExplodeCondition.Meetings))
                 .ShowSubOptionPredicate(o => (bool)o)
                 .Build())
-            .SubOption(sub => sub.KeyName("Explode After Duration", AgitaterTranslations.AgiOptions.ExplodeAfterDuration)
+            .SubOption(sub => sub.KeyName("Explode After Duration", AgiOptions.ExplodeAfterDuration)
                 .AddOnOffValues(false)
                 .BindBool(FlagSetter(ExplodeCondition.Duration))
                 .ShowSubOptionPredicate(b => (bool)b)
-                .SubOption(sub2 => sub2.KeyName("Bomb Duration", AgitaterTranslations.AgiOptions.BombDuration)
+                .SubOption(sub2 => sub2.KeyName("Bomb Duration", AgiOptions.BombDuration)
                     .AddFloatRange(2.5f, 120f, 2.5f, 7, GeneralOptionTranslations.SecondsSuffix)
                     .BindFloat(bombDuration.SetDuration)
                     .Build())
                 .Build())
-            .SubOption(sub => sub.KeyName("Explode When Bombed Twice", AgitaterTranslations.AgiOptions.ExplodeDoubleBombed)
+            .SubOption(sub => sub.KeyName("Explode When Bombed Twice", AgiOptions.ExplodeDoubleBombed)
                 .AddOnOffValues(false)
                 .BindBool(FlagSetter(ExplodeCondition.DoubleBomb))
                 .Build())
-            .SubOption(sub2 => sub2.KeyName("Bombs per Round", AgitaterTranslations.AgiOptions.BombsPerRound)
+            .SubOption(sub2 => sub2.KeyName("Bombs per Round", AgiOptions.BombsPerRound)
                 .Value(v => v.Text(ModConstants.Infinity).Color(ModConstants.Palette.InfinityColor).Value(-1).Build())
                 .AddIntRange(1, 15, 1, 3)
                 .IOSettings(io => io.UnknownValueAction = ADEAnswer.UseDefault)
                 .BindInt(i => bombsPerRound = i)
+                .Build())
+            .SubOption(sub => sub
+                .KeyName("Bomb Transfer Rate", AgiOptions.BombTransferRate)
+                .BindFloat(f => bombTransferRate = f)
+                .AddFloatRange(0.25f, 10, 0.25f, 3, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
 
 
@@ -136,18 +142,19 @@ public class AgiTater: NeutralKillingBase
     private class AgiBomb
     {
         public byte Owner;
-        public Cooldown? Duration;
 
-        private AgiTater agitater;
+        private readonly Cooldown? duration;
+        private readonly AgiTater agitater;
+        private readonly FixedUpdateLock fixedUpdateLock;
         private Remote<AgiBomb>? remote;
         private Remote<TextComponent>? bombText;
-        private FixedUpdateLock fixedUpdateLock = new(0.8f);
 
         public AgiBomb(byte owner, AgiTater source, Cooldown? duration)
         {
             Owner = owner;
             agitater = source;
-            Duration = duration;
+            this.duration = duration;
+            fixedUpdateLock = new FixedUpdateLock(source.bombTransferRate);
             duration?.Start();
             Utils.PlayerById(owner).IfPresent(p => bombText = SetBombText(p));
         }
@@ -179,7 +186,7 @@ public class AgiTater: NeutralKillingBase
             if (owner == null || !owner.IsAlive()) return DeleteBomb();
 
             // The timer has run out thus the bomb has exploded
-            if (Duration?.IsReady() ?? false) return Explode();
+            if (duration?.IsReady() ?? false) return Explode();
 
             List<PlayerControl> inRangePlayers = owner.GetPlayersInAbilityRangeSorted();
             return !inRangePlayers.IsEmpty() && Transfer(inRangePlayers[0]);
@@ -219,10 +226,10 @@ public class AgiTater: NeutralKillingBase
 
         private string IndicatorString()
         {
-            if (Duration == null) return new Color(0.71f, 0.58f, 0.27f).Colorize(PassTheBombText);
-            if (Duration.IsReady()) return "";
-            if (Duration.TimeRemaining() > 20) return Color.green.Colorize(HoldingBombLevel1);
-            if (Duration.TimeRemaining() > 10) return Color.yellow.Colorize(HoldingBombLevel2);
+            if (duration == null) return new Color(0.71f, 0.58f, 0.27f).Colorize(PassTheBombText);
+            if (duration.IsReady()) return "";
+            if (duration.TimeRemaining() > 20) return Color.green.Colorize(HoldingBombLevel1);
+            if (duration.TimeRemaining() > 10) return Color.yellow.Colorize(HoldingBombLevel2);
             return Color.red.Colorize(HoldingBombLevel3);
         }
     }
@@ -271,6 +278,9 @@ public class AgiTater: NeutralKillingBase
 
             [Localized(nameof(BombsPerRound))]
             public static string BombsPerRound = "Bombs per Round";
+
+            [Localized(nameof(BombTransferRate))]
+            public static string BombTransferRate = "Bomb Transfer Rate";
         }
     }
 }

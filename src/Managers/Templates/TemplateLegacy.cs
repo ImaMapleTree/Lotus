@@ -105,35 +105,31 @@ public class TemplateLegacy
 
     public static readonly Dictionary<string, string> TemplateVariables = new()
     {
-        { "\"$\" Variables", "Variables that start with \"$\" are static variables that are independent of the template viewer."},
-        { "$RoomCode", "The current room code." },
-        { "$Host", "The host's name." },
-        { "$AUVersion", "The current version of Among Us." },
-        { "$ModVersion", "The current mod version." },
-        { "$Map", "The current map name." },
-        { "$Gamemode", "The current gamemode name." },
-        { "$Date", "The current date (based on the host)." },
-        { "$Time", "The current time (based on the host)." },
-        { "$Players", "A list of all player names separated by a comma." },
-        { "$PlayerCount", "A count of all players currently in the lobby." },
-        { "\n\"@\" Variables", "Variables that start with \"@\" pertain specifically to the viewing player. For example, @Role is the Role of the player viewing this template."},
-        { "@Name", "The player's name." },
-        { "@Color", "The player's color." },
-        { "@Role", "The player's role." },
-        { "@Blurb", "The player's role blurb." },
-        { "@Description", "The player's role description." },
-        { "@Options", "The player's role options." },
-        { "@Faction", "The player's faction." },
-        { "@Subroles", "The player's subroles (modifiers) as a list of names" },
-        { "@Modifiers", "Identical to @Subroles, shows the player's subroles (modifiers) as a list of names" },
-        { "@ModsDescriptive", "Uses the modifier-info template to display descriptive info about each of a player's modifiers" },
-        { "\n\"^\" Variables", "Variables that start with \"^\" followed by a word and underscore are variables that relate to the first word before the underscore. For example, ^Role_Options refers to the options of a specific role. These variables are used in a select few places and when usable, should be mentioned under /t tags." },
-        { "^Role_Name", "The name of the related role." },
-        { "^Role_Description", "The description of the related role." },
-        { "^Role_Blurb", "The blurb of the related role." },
-        { "^Role_Options", "The options of the related role." },
-        { "^Role_Faction", "The faction of the related role." },
-        { "^Role_Basis", "The vanilla basis of the related role." },
+        { "RoomCode", "The current room code." },
+        { "Host", "The host's name." },
+        { "AUVersion", "The current version of Among Us." },
+        { "ModVersion", "The current mod version." },
+        { "ModName", "The current mod name." },
+        { "Map", "The current map name." },
+        { "Gamemode", "The current gamemode name." },
+        { "Date", "The current date (based on the host)." },
+        { "Time", "The current time (based on the host)." },
+        { "Players", "A list of all player names separated by a comma." },
+        { "PlayerCount", "A count of all players currently in the lobby." },
+        { "AllRoles", "A categorized list of all roles in the mod." },
+        { "AllModifiers", "A list of all modifiers in the mod." },
+        { "MyRole", "Echoes the text of /myrole which shows the player's role and role description." },
+
+        { "Name", "The player's name." },
+        { "Color", "The player's color." },
+        { "Role", "The player's role." },
+        { "Blurb", "The player's role blurb." },
+        { "Description", "The player's role description." },
+        { "Death", "The player's cause of death." },
+        { "Options", "The player's role options." },
+        { "Faction", "The player's faction." },
+        { "Modifiers", "Identical to @Subroles, shows the player's modifiers as a list of names" },
+        { "ModsDescriptive", "Uses the modifier-info template to display descriptive info about each of a player's modifiers" },
     };
 
     private static readonly Dictionary<string, Func<object, string, string>> VariableValues = new()
@@ -145,7 +141,7 @@ public class TemplateLegacy
     {
         if (PluginDataManager.TemplateManager.HasTemplate("modifier-info"))
         {
-            return player.GetSubroles().Select(sr => !PluginDataManager.TemplateManager.TryFormat(player, sr, "modifier-info", out string text) ? "" : text).Fuse("\n\n");
+            return player.GetSubroles().Select(sr => !PluginDataManager.TemplateManager.TryFormat(sr, "modifier-info", out string text) ? "" : text).Fuse("\n\n");
         }
 
         return player.GetSubroles().Select(sr =>

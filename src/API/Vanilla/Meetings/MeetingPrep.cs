@@ -1,12 +1,8 @@
 using System;
-using System.Linq;
 using Lotus.API.Odyssey;
-using Lotus.API.Player;
 using Lotus.API.Processes;
 using Lotus.API.Reactive;
-using Lotus.Logging;
 using Lotus.Victory;
-using Lotus.Patches.Actions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.RPC;
@@ -55,12 +51,12 @@ internal class MeetingPrep
         if (reporter != null)
             Async.Schedule(() =>
             {
-                /*Game.GetAllPlayers().ForEach(p => p.CRpcRevertShapeshift(false));*/
                 QuickStartMeeting(reporter);
+                /*Async.Schedule(() => Game.GetAllPlayers().ForEach(p => p.CRpcRevertShapeshift(false)), 0.1f);*/
             }, 0.1f);
 
         Game.RenderAllForAll(GameState.InMeeting, true);
-        Async.Schedule(FixChatNames, NetUtils.DeriveDelay(4f));
+        Async.Schedule(FixChatNames, 5f);
 
         VentLogger.Trace("Finished Prepping", "MeetingPrep");
         Prepped = true;
@@ -73,12 +69,11 @@ internal class MeetingPrep
     private static void QuickStartMeeting(PlayerControl reporter)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-
         MeetingCalledTime = DateTime.Now;
+        if (CheckEndGamePatch.ForceCheckEndGame()) return;
         MeetingRoomManager.Instance.AssignSelf(reporter, Reported);
         DestroyableSingleton<HudManager>.Instance.OpenMeetingRoom(reporter);
         reporter.RpcStartMeeting(Reported);
-        GameManager.Instance.LogicFlow.CheckEndCriteria();
     }
 
     private static void FixChatNames() => Game.GetAllPlayers().ForEach(p => p.RpcSetName(Color.white.Colorize(p.name)));

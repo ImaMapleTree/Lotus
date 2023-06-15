@@ -10,7 +10,7 @@ using VentLib.Utilities.Collections;
 
 namespace Lotus.Roles.Subroles;
 
-public class Flash : Subrole, IVariableSubrole
+public class Flash : Subrole, IVariantSubrole
 {
     private static Escalation _escalation = new();
 

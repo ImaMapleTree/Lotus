@@ -43,7 +43,7 @@ public class Swooper: Impostor
     {
         if (!remainInvisibleOnKill || swoopingDuration.IsReady()) return base.TryKill(target);
         MyPlayer.RpcMark(target);
-        InteractionResult result = MyPlayer.InteractWith(target, new DirectInteraction(new FatalIntent(true, () => new DeathEvent(MyPlayer, target)), this));
+        InteractionResult result = MyPlayer.InteractWith(target, new LotusInteraction(new FatalIntent(true, () => new DeathEvent(target, MyPlayer)), this));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }

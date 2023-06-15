@@ -7,15 +7,20 @@ using Lotus.Options;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Factions.Crew;
 using Lotus.GUI;
 using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Legacy;
+using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options.Game;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 using Object = UnityEngine.Object;
 
@@ -27,6 +32,16 @@ public class Amnesiac : CustomRole, IVariableRole
 
     private bool stealExactRole;
     private bool hasArrowsToBodies;
+
+    private Remote<IndicatorComponent>? arrowComponent;
+
+    protected override void PostSetup()
+    {
+        if (!hasArrowsToBodies) return;
+        IndicatorComponent? indicator = MyPlayer.NameModel().GCH<IndicatorHolder>().LastOrDefault();
+        if (indicator == null) return;
+        arrowComponent = MyPlayer.NameModel().GCH<IndicatorHolder>().GetRemote(indicator);
+    }
 
     [UIComponent(UI.Indicator)]
     private string Arrows() => hasArrowsToBodies ? Object.FindObjectsOfType<DeadBody>()
@@ -48,7 +63,7 @@ public class Amnesiac : CustomRole, IVariableRole
                 targetRole = CustomRoleManager.Static.Hitman;
             else if (targetRole.SpecialType == SpecialType.Neutral)
                 targetRole = CustomRoleManager.Static.Opportunist;
-            else if (targetRole.IsCrewmate())
+            else if (targetRole.Faction is Crewmates)
                 targetRole = CustomRoleManager.Static.Sheriff;
             else
                 targetRole = CustomRoleManager.Static.Jester;
@@ -60,6 +75,7 @@ public class Amnesiac : CustomRole, IVariableRole
 
         CustomRole role = MyPlayer.GetCustomRole();
         role.DesyncRole = RoleTypes.Impostor;
+        arrowComponent?.Delete();
         handle.Cancel();
     }
 

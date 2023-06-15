@@ -1,18 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using HarmonyLib;
 using Lotus.GUI.Menus.OptionsMenu.Components;
 using Lotus.GUI.Menus.OptionsMenu.Submenus;
 using TMPro;
-using Lotus.Extensions;
-using Lotus.Logging;
-using Lotus.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.UI;
 using VentLib.Localization.Attributes;
-using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -110,8 +105,9 @@ public class CustomOptionContainer: MonoBehaviour
             returnButton.gameObject.SetActive(false);
         });
 
-        menuBehaviour.FindChild<PassiveButton>("Background").OnClick = new Button.ButtonClickedEvent();
+        menuBehaviour.GetComponentsInChildren<PassiveButton>().Where(pb => pb.name.Contains("Background")).ForEach(pb => pb.OnClick = new Button.ButtonClickedEvent());
         menuBehaviour.Background.enabled = false;
+
 
         menuBehaviour.Tabs.ForEach(t => t.gameObject.SetActive(false));
         menuBehaviour.Tabs[0].Content.SetActive(false);

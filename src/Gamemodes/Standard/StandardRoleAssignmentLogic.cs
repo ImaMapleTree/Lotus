@@ -13,6 +13,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
 using Lotus.Extensions;
 using Lotus.Factions.Impostors;
+using Lotus.Logging;
 using Lotus.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -83,7 +84,7 @@ public class StandardRoleAssignmentLogic
         NeutralKillingLottery neutralKillingLottery = new();
         int nkRoles = 0;
         int loops = 0;
-        while (unassignedPlayers.Count > 0)
+        while (unassignedPlayers.Count > 0 && nkRoles < distribution.MaximumNeutralKilling)
         {
             if (loops > 0 && nkRoles >= distribution.MinimumNeutralKilling) break;
             CustomRole role = neutralKillingLottery.Next();
@@ -104,7 +105,7 @@ public class StandardRoleAssignmentLogic
         NeutralLottery neutralLottery = new();
         int neutralRoles = 0;
         loops = 0;
-        while (unassignedPlayers.Count > 0)
+        while (unassignedPlayers.Count > 0 && neutralRoles < distribution.MaximumNeutralPassive)
         {
             if (loops > 0 && neutralRoles >= distribution.MaximumNeutralPassive) break;
             CustomRole role = neutralLottery.Next();
@@ -132,7 +133,7 @@ public class StandardRoleAssignmentLogic
         {
             CustomRole role = crewmateLottery.Next();
             if (role.GetType() == typeof(Crewmate) && crewmateLottery.HasNext()) continue;
-            MatchData.AssignRole(unassignedPlayers.PopRandom(), crewmateLottery.Next());
+            MatchData.AssignRole(unassignedPlayers.PopRandom(), role);
         }
         // ====================
 
@@ -159,7 +160,7 @@ public class StandardRoleAssignmentLogic
         foreach (CustomRole role in subRoleLottery)
         {
             if (role is IllegalRole) continue;
-            CustomRole variant = role is Subrole sr ? IVariableSubrole.PickAssignedRole(sr) : IVariableRole.PickAssignedRole(role);
+            CustomRole variant = role is Subrole sr ? IVariantSubrole.PickAssignedRole(sr) : IVariableRole.PickAssignedRole(role);
             List<PlayerControl> players = Game.GetAllPlayers().Where(CanAssignTo).ToList();
             if (players.Count == 0)
             {

@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Player;
@@ -6,15 +5,27 @@ using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers;
 using Lotus.Extensions;
+using VentLib.Localization.Attributes;
 using VentLib.Logging;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using static MeetingHud;
 
 namespace Lotus.API.Vanilla.Meetings;
 
+[Localized("Meetings")]
 public class MeetingDelegate
 {
+    [Localized(nameof(RoleRevealText))]
+    public static string RoleRevealText = "{0} was the {1}.";
+
+    [Localized(nameof(RemainingImpostorsText))]
+    public static string RemainingImpostorsText = "{0} impostors remaining.";
+
+    [Localized(nameof(NoImpostorsText))]
+    public static string NoImpostorsText = "No impostors remaining.";
+
     public static MeetingDelegate Instance = null!;
     public GameData.PlayerInfo? ExiledPlayer { get; set; }
     public HashSet<byte> TiedPlayers = new();
@@ -70,35 +81,33 @@ public class MeetingDelegate
 
     public void EndVoting() => isForceEnd = true;
 
-    public void EndVoting(Dictionary<byte, int> voteCounts, GameData.PlayerInfo? exiledPlayer, bool isTie = false)
+    public void EndVoting(GameData.PlayerInfo? exiledPlayer, bool isTie = false)
     {
-        List<VoterState> voterStates = new List<VoterState>();
-        voteCounts.ForEach(t =>
+        List<VoterState> voterStates = new();
+        CurrentVoteCount().ForEach(t =>
         {
             VoterState voterState = new() { VotedForId = t.Key };
             for (int i = 0; i < t.Value; i++) voterStates.Add(voterState);
         });
 
-        MeetingHud.RpcVotingComplete(voterStates.ToArray(), exiledPlayer, isTie);
+        EndVoting(voterStates.ToArray(), exiledPlayer, isTie);
     }
 
     public void EndVoting(VoterState[] voterStates, GameData.PlayerInfo? exiledPlayer, bool isTie = false)
     {
+        this.isForceEnd = true;
         this.ExiledPlayer = exiledPlayer;
         this.IsTie = isTie;
 
         if (ExiledPlayer != null)
         {
             List<byte> playerVotes = CurrentVotes().SelectMany(kv => kv.Value.Filter().Where(i => i == ExiledPlayer.PlayerId).Select(i => kv.Key)).ToList();
-            PlayerControl p;
-            if ((p = ExiledPlayer.Object) != null) p.SetName(AUSettings.ConfirmImpostor() ? $"<b>{p.GetCustomRole().RoleName}</b>\n{p.name}" : p.name);
+            CheckAndSetConfirmEjectText(ExiledPlayer.Object);
             Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(ExiledPlayer, playerVotes));
         }
 
         MeetingHud.RpcVotingComplete(voterStates, exiledPlayer, isTie);
     }
-
-    public void EndVoting(GameData.PlayerInfo? exiledPlayer, bool isTie = false) => EndVoting(Array.Empty<VoterState>(), exiledPlayer, isTie);
 
     internal bool IsForceEnd() => isForceEnd;
 
@@ -131,5 +140,17 @@ public class MeetingDelegate
         VentLogger.Trace($"Calculated player votes. Player with most votes = {mostVotedPlayer}, isTie = {isTie}");
 
         if (IsTie) this.ExiledPlayer = null;
+    }
+
+    public void CheckAndSetConfirmEjectText(PlayerControl player)
+    {
+        if (!AUSettings.ConfirmImpostor() || player == null) return;
+
+        int impostors = Players.GetPlayers(PlayerFilter.Impostor | PlayerFilter.Alive).Count();
+
+        string textFormatting = "<size=0><size=2.5>" + RoleRevealText.Formatted(player.name, player.GetCustomRole().RoleColor.Colorize(player.GetCustomRole().RoleName));
+        textFormatting += "\n" + (impostors == 0 ? NoImpostorsText : RemainingImpostorsText.Formatted(impostors)) + "</size>";
+
+        player.RpcSetName(textFormatting);
     }
 }

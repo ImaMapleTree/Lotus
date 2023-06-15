@@ -39,5 +39,5 @@ public class VanillaImpostorWin: IFactionWinCondition
         return aliveImpostors > 0 && aliveImpostors >= aliveOthers && aliveKillers == 0;
     }
 
-    public WinReason GetWinReason() => WinReason.FactionLastStanding;
+    public WinReason GetWinReason() => new(ReasonType.FactionLastStanding);
 }

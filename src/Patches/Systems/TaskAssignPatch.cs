@@ -24,8 +24,10 @@ class AddTasksFromListPatch
                 case TaskTypes.UploadData when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.UploadData):
                 case TaskTypes.StartReactor when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.StartReactor):
                 case TaskTypes.ResetBreakers when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.ResetBreaker):
-                case TaskTypes.FixWiring when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.FixWiring):
                     disabledTasks.Add(task);
+                    break;
+                case TaskTypes.FixWiring when GeneralOptions.GameplayOptions.DisabledTaskFlag.HasFlag(DisabledTask.FixWiring):
+                    if (disabledTasks.Count + 1 < unusedTasks.Count) disabledTasks.Add(task);
                     break;
             }
         }

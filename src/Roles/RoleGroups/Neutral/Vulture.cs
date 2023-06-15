@@ -56,7 +56,7 @@ public class Vulture : CustomRole
     {
         Game.MatchData.UnreportableBodies.Add(body.PlayerId);
 
-        if (++bodyCount >= bodyAmount) ManualWin.Activate(MyPlayer, WinReason.RoleSpecificWin, 100);
+        if (++bodyCount >= bodyAmount) ManualWin.Activate(MyPlayer, ReasonType.RoleSpecificWin, 100);
 
         handle.Cancel();
     }

@@ -1,5 +1,7 @@
 using System.Collections.Generic;
+using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Extensions;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
@@ -8,8 +10,8 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Utilities;
 using Lotus.Options;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -27,7 +29,7 @@ public class Vampire : Impostor, IVariableRole
     public override bool TryKill(PlayerControl target)
     {
         MyPlayer.RpcMark(target);
-        InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this));
+        InteractionResult result = MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this));
         if (result is InteractionResult.Halt) return false;
 
         bitten.Add(target.PlayerId);
@@ -46,7 +48,7 @@ public class Vampire : Impostor, IVariableRole
     public void ResetBitten() => bitten.Clear();
 
     [RoleAction(RoleActionType.MeetingCalled)]
-    public void KillBitten() => bitten.Filter(b => Utils.PlayerById(b)).ForEach(p => MyPlayer.InteractWith(p, CreateInteraction(p)));
+    public void KillBitten() => bitten.Filter(Players.PlayerById).Where(p => p.IsAlive()).ForEach(p => MyPlayer.InteractWith(p, CreateInteraction(p)));
 
     private DelayedInteraction CreateInteraction(PlayerControl target)
     {
@@ -71,7 +73,14 @@ public class Vampire : Impostor, IVariableRole
             .OptionOverride(new IndirectKillCooldown(KillCooldown))
             .LinkedRoles(_vampiress);
 
-    /*case Vampire:
-                    __instance.KillButton.OverrideText($"{GetString("VampireBiteButtonText")}");
-                    break;*/
+    [Localized(nameof(Vampire))]
+    public static class VampireTranslations
+    {
+        [Localized(nameof(Options))]
+        public static class Options
+        {
+            [Localized(nameof(KillDelay))]
+            public static string KillDelay = "Kill Delay";
+        }
+    }
 }

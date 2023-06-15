@@ -1,6 +1,4 @@
-using System.Collections.Generic;
 using System.Linq;
-using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.Chat.Patches;
 using Lotus.Managers;
@@ -21,53 +19,12 @@ public class TemplateCommands: CommandTranslations, ICommandReceiver
 {
     public static string TemplateTitle = ModConstants.Palette.GeneralColor4.Colorize("Templates");
 
-    [Command(CommandFlag.HostOnly, "create", "c")]
-    public static void CreateTemplate(PlayerControl source, string text)
-    {
-        int id = Templates.CreateTemplate(text);
-        SuccessMsg(TemplateCommandTranslations.CreatedTemplateText.Formatted(id + 1)).Send();
-    }
-
-    [Command(CommandFlag.HostOnly, "edit", "e")]
-    public static void EditTemplate(PlayerControl source, int id, string text)
-    {
-        if (!Templates.EditTemplate(id - 1, text)) ErrorMsg(TemplateCommandTranslations.ErrorEditingTemplateText.Formatted(id)).Send(source);
-        else SuccessMsg(TemplateCommandTranslations.SuccessEditingTemplateText.Formatted(id)).Send(source);
-    }
-
-    [Command(CommandFlag.HostOnly, "remove", "r")]
-    public static void RemoveTemplate(PlayerControl source, int id)
-    {
-        if (!Templates.DeleteTemplate(id)) ErrorMsg(TemplateCommandTranslations.ErrorRemovingTemplateText).Send(source);
-        else SuccessMsg(TemplateCommandTranslations.SuccessRemovingTemplateText.Formatted(id)).Send(source);
-    }
 
     [Command(CommandFlag.HostOnly, "list", "l")]
     public static void ListTemplates(PlayerControl source)
     {
         string templates = Templates.ListTemplates.Select((t, i) => TemplateText(i + 1, t)).Fuse("\n\n");
         SuccessMsg(templates).Send(source);
-    }
-
-    [Command(CommandFlag.HostOnly, "tag", "t")]
-    public static void TagTemplate(PlayerControl source, int id, string tag)
-    {
-        if (!Templates.TagTemplate(id - 1, tag)) ErrorMsg(TemplateCommandTranslations.ErrorTaggingTemplateText.Formatted(tag, id)).Send(source);
-        else SuccessMsg(TemplateCommandTranslations.SuccessTaggingTemplateText.Formatted(tag, id)).Send(source);
-    }
-
-    [Command(CommandFlag.HostOnly, "untag", "ut")]
-    public static void UntagTemplate(PlayerControl source, int id)
-    {
-        if (!Templates.UntagTemplate(id - 1)) ErrorMsg(TemplateCommandTranslations.ErrorRemovingTagText.Formatted(id)).Send(source);
-        else SuccessMsg(TemplateCommandTranslations.SuccessRemovingTagText.Formatted(id)).Send(source);
-    }
-
-    [Command(CommandFlag.HostOnly, "preview", "p")]
-    public static void Preview(PlayerControl source, int id)
-    {
-        if (!Templates.Preview(source, id - 1))
-            ErrorMsg(TemplateCommandTranslations.ErrorPreviewingTemplateText.Formatted(id)).Send(source);
     }
 
     [Command(CommandFlag.HostOnly, "tags")]
@@ -80,16 +37,29 @@ public class TemplateCommands: CommandTranslations, ICommandReceiver
     [Command(CommandFlag.HostOnly, "variables", "v")]
     public static void ListVariables(PlayerControl source)
     {
-        string variables = TemplateUnit.TemplateValues.Select(t => $"<b>{t.Key}</b>: {t.Value}").Fuse("\n");
+        string variables = TemplateLegacy.TemplateVariables.Select(t => $"<b>{t.Key}</b>: {t.Value}").Fuse("\n");
         SuccessMsg(variables).Send(source);
     }
 
     [Command(CommandFlag.HostOnly, "reload")]
     public static void Reload(PlayerControl source)
     {
+        OnChatPatch.EatMessage = true;
         string? exception = PluginDataManager.TemplateManager.LoadTemplates();
         if (exception != null) ErrorMsg(exception).Send(source);
         else SuccessMsg(TemplateCommandTranslations.ReloadTemplatesText).Send(source);
+    }
+
+    [Command(CommandFlag.HostOnly, "help", "h")]
+    public static void Help(PlayerControl source)
+    {
+        const string help = @"/template [tag] → Shows the template with the given tag to all players.
+/template variables → Shows all built-in template variables.
+/template tags → Shows all built-in template tags.
+/template list → Shows all loaded templates
+/template reload → Reloads all templates from file.
+";
+        SuccessMsg(help).Send(source);
     }
 
     private static string TemplateText(int i, Template t)
@@ -149,7 +119,11 @@ public class TemplateCommands: CommandTranslations, ICommandReceiver
         if (source.IsHost()) RpcSendChatPatch.EatCommand = true;
 
         string tag = context.Join();
-        if (source.IsHost() && HotkeyManager.HoldingRightShift) Templates.ShowAll(tag, source, Players.GetAllPlayers(PlayerFilter.Dead));
-        else Templates.ShowAll(tag, source);
+        if (source.IsHost() && HotkeyManager.HoldingRightShift) Templates.ShowAll(tag, source, Players.GetPlayers(PlayerFilter.Dead));
+        else if (source.IsHost()) Templates.ShowAll(tag, source);
+        else Templates.GetTemplates(tag)?.ForEach(t =>
+        {
+            if (!t.AliasOnly) t.SendMessage(PlayerControl.LocalPlayer, source);
+        });
     }
 }

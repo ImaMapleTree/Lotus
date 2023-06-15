@@ -11,7 +11,7 @@ public class Workhorse: Subrole
 {
     private int additionalShortTasks;
     private int additionalLongTasks;
-    
+
     public override string Identifier() => "<size=2.2>Θ</size>";
 
     protected override void PostSetup()
@@ -21,13 +21,13 @@ public class Workhorse: Subrole
 
     public override bool IsAssignableTo(PlayerControl player)
     {
-        return player.GetCustomRole() is ITaskHolderRole && base.IsAssignableTo(player);
+        return player.GetCustomRole() is ITaskHolderRole itr && itr.HasTasks() && base.IsAssignableTo(player);
     }
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => 
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(0.12f, 0.49f, 0.15f));
 
-    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => 
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddRestrictToCrew(base.RegisterOptions(optionStream))
             .SubOption(sub => sub.KeyName("Additional Short Tasks", Translations.Options.AdditionalShortTasks)
                 .AddIntRange(0, 60, 1, 1)
@@ -46,7 +46,7 @@ public class Workhorse: Subrole
         {
             [Localized(nameof(AdditionalShortTasks))]
             public static string AdditionalShortTasks = "Additional Short Tasks";
-            
+
             [Localized(nameof(AdditionalLongTasks))]
             public static string AdditionalLongTasks = "Additional Long Tasks";
         }

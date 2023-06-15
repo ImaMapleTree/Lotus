@@ -72,7 +72,7 @@ public class Investigator : Crewmate
 
         abilityCooldown.Start();
         PlayerControl player = players[0];
-        if (MyPlayer.InteractWith(player, DirectInteraction.NeutralInteraction.Create(this)) is InteractionResult.Halt) return;
+        if (MyPlayer.InteractWith(player, LotusInteraction.NeutralInteraction.Create(this)) is InteractionResult.Halt) return;
 
         investigated.Add(player.PlayerId);
         CustomRole role = player.GetCustomRole();

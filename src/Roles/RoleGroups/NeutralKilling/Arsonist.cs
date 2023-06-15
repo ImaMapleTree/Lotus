@@ -3,6 +3,7 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Stats;
 using Lotus.Factions;
 using Lotus.GUI;
@@ -42,6 +43,7 @@ public class Arsonist : NeutralKillingBase
     private int requiredAttacks;
     private bool canIgniteAnyitme;
 
+    private int backedAlivePlayers;
     private int knownAlivePlayers;
     [NewOnSetup] private HashSet<byte> dousedPlayers;
     [NewOnSetup] private Dictionary<byte, Remote<IndicatorComponent>> indicators;
@@ -51,12 +53,12 @@ public class Arsonist : NeutralKillingBase
     private string DouseCounter() => RoleUtils.Counter(dousedPlayers.Count, knownAlivePlayers);
 
     [UIComponent(UI.Text)]
-    private string DisplayWin() => dousedPlayers.Count >= knownAlivePlayers ? RoleColor.Colorize(Translations.PressIgniteToWinMessage) : "";
+    private string DisplayWin() => dousedPlayers.Count >= backedAlivePlayers ? RoleColor.Colorize(Translations.PressIgniteToWinMessage) : "";
 
     [RoleAction(RoleActionType.Attack)]
     public new bool TryKill(PlayerControl target)
     {
-        bool douseAttempt = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Proceed;
+        bool douseAttempt = MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Proceed;
         if (!douseAttempt) return false;
 
         int progress = douseProgress[target.PlayerId] = douseProgress.GetValueOrDefault(target.PlayerId) + 1;
@@ -71,6 +73,7 @@ public class Arsonist : NeutralKillingBase
         _dousedPlayers.Update(MyPlayer.UniquePlayerId(), i => i + 1);
 
         MyPlayer.NameModel().Render();
+        backedAlivePlayers = CountAlivePlayers();
 
         return false;
     }
@@ -90,7 +93,7 @@ public class Arsonist : NeutralKillingBase
     [RoleAction(RoleActionType.OnPet)]
     private void KillDoused() => dousedPlayers.Filter(p => Utils.PlayerById(p)).Where(p => p.IsAlive()).Do(p =>
     {
-        if (dousedPlayers.Count < knownAlivePlayers && !canIgniteAnyitme) return;
+        if (dousedPlayers.Count < CountAlivePlayers() && !canIgniteAnyitme) return;
         FatalIntent intent = new(true, () => new CustomDeathEvent(p, MyPlayer, Translations.IncineratedDeathName));
         IndirectInteraction interaction = new(intent, this);
         MyPlayer.InteractWith(p, interaction);
@@ -100,9 +103,13 @@ public class Arsonist : NeutralKillingBase
     [RoleAction(RoleActionType.RoundStart)]
     protected override void PostSetup()
     {
-        knownAlivePlayers = Game.GetAlivePlayers().Count(p => p.PlayerId != MyPlayer.PlayerId && Relationship(p) is not Relation.FullAllies);
+        knownAlivePlayers = CountAlivePlayers();
         dousedPlayers.RemoveWhere(p => Utils.PlayerById(p).Transform(pp => !pp.IsAlive(), () => true));
     }
+
+    [RoleAction(RoleActionType.Disconnect)]
+    [RoleAction(RoleActionType.AnyDeath)]
+    private int CountAlivePlayers() => backedAlivePlayers = Players.GetPlayers(PlayerFilter.Alive | PlayerFilter.NonPhantom).Count(p => p.PlayerId != MyPlayer.PlayerId && Relationship(p) is not Relation.FullAllies);
 
     [RoleAction(RoleActionType.MyDeath)]
     private void ArsonistDies() => indicators.Values.ForEach(v => v.Delete());

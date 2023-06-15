@@ -38,7 +38,11 @@ public class PlagueBearer: NeutralKillingBase
 
     public override bool CanSabotage() => false;
 
-    protected override void PostSetup() => RelatedRoles.Add(typeof(Pestilence));
+    protected override void PostSetup()
+    {
+        RelatedRoles.Add(typeof(Pestilence));
+        CheckPestilenceTransform(new ActionHandle(RoleActionType.RoundStart));
+    }
 
     [UIComponent(UI.Counter)]
     private string InfectionCounter() => RoleUtils.Counter(infectedPlayers.Count, alivePlayers, RoleColor);
@@ -52,7 +56,7 @@ public class PlagueBearer: NeutralKillingBase
             return false;
         }
 
-        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         MyPlayer.RpcMark(target);
 
         DevLogger.Log(Translations.InfectedHistoryMessage);
@@ -92,7 +96,7 @@ public class PlagueBearer: NeutralKillingBase
 
     private IEnumerable<PlayerControl> GetAlivePlayers()
     {
-        return Players.GetAllPlayers(PlayerFilter.Alive | PlayerFilter.NonPhantom)
+        return Players.GetPlayers(PlayerFilter.Alive | PlayerFilter.NonPhantom)
             .Where(p => p.PlayerId != MyPlayer.PlayerId && Relationship(p) is not Relation.FullAllies);
     }
 

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using HarmonyLib;
+using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Managers;
 using Lotus.Options;
@@ -15,9 +16,9 @@ class CoStartGamePatch
         if (GeneralOptions.MiscellaneousOptions.ColorNameMode) Game.GetAllPlayers().ForEach(player =>
         {
             if (player == null) return;
-            string colorName = Palette.GetColorName(player.cosmetics.ColorId).ToLower();
-            colorName = char.ToUpper(colorName[0]) + colorName[1..];
+            string colorName = player.Data.ColorName.Trim('(', ')');
             player.RpcSetName(colorName);
+            Api.Local.SetName(player, colorName, true);
         });
 
         Game.Setup();

@@ -1,11 +1,14 @@
 using Lotus.API;
+using Lotus.API.Odyssey;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
 using Lotus.Logging;
+using Lotus.Managers.History.Events;
 using Lotus.Options;
+using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -16,7 +19,7 @@ namespace Lotus.Roles.RoleGroups.NeutralKilling;
 public class Marksman : NeutralKillingBase
 {
     private const int KillDistanceMax = 3;
-    
+
     private bool canVent;
     private bool impostorVision;
 
@@ -29,14 +32,16 @@ public class Marksman : NeutralKillingBase
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        if (!base.TryKill(target)) return false;
+        InteractionResult result = MyPlayer.InteractWith(target, new LotusInteraction(new FatalIntent(true), this));
+        Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
+        if (result is InteractionResult.Halt) return false;
 
         if (++currentKills >= killsBeforeIncrease)
         {
             currentKills = 0;
             KillDistance = Mathf.Clamp(++KillDistance, 0, KillDistanceMax);
         }
-        
+
         SyncOptions();
         return true;
     }
@@ -48,7 +53,7 @@ public class Marksman : NeutralKillingBase
                 .BindInt(i => killsBeforeIncrease = i)
                 .Build())
             .SubOption(sub => sub.Name("Starting Kill Distance")
-                .Value(v => v.Text("Common").Value(-1).Color(new Color(1f, 0.61f, 0.33f)).Build())
+                .Value(v => v.Text(GeneralOptionTranslations.GlobalText).Value(-1).Color(new Color(1f, 0.61f, 0.33f)).Build())
                 .AddIntRange(0, 3)
                 .BindInt(i => KillDistance = i)
                 .Build())
@@ -72,6 +77,7 @@ public class Marksman : NeutralKillingBase
         base.Modify(roleModifier)
             .RoleColor(new Color(0.14f, 0.92f, 0.56f))
             .CanVent(canVent)
+            .OptionOverride(new IndirectKillCooldown(KillCooldown))
             .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod(), () => !impostorVision)
             .OptionOverride(Override.KillDistance, () => KillDistance);
 }

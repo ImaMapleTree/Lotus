@@ -26,7 +26,7 @@ public static class StandardWinConditions
             return lastPlayer.GetCustomRole().Faction is Neutral;
         }
 
-        public WinReason GetWinReason() => WinReason.FactionLastStanding;
+        public WinReason GetWinReason() => new(ReasonType.FactionLastStanding);
     }
 
 
@@ -45,7 +45,7 @@ public static class StandardWinConditions
             return loversRealRole.Partner != null && loversRealRole.Partner.PlayerId == lovers[1].PlayerId;*/
         }
 
-        public WinReason GetWinReason() => WinReason.RoleSpecificWin;
+        public WinReason GetWinReason() => new(ReasonType.RoleSpecificWin);
 
         public int Priority() => 100;
     }

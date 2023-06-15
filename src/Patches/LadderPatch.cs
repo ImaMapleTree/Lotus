@@ -1,8 +1,13 @@
 using System.Collections.Generic;
 using HarmonyLib;
+using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Roles.Interactions;
 using Lotus.RPC;
+using Lotus.Utilities;
 using UnityEngine;
+using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
 namespace Lotus.Patches
@@ -46,17 +51,9 @@ namespace Lotus.Patches
                         Vector2 targetPos = (Vector2)TargetLadderData[player.PlayerId] + new Vector2(0.1f, 0f);
                         ushort num = (ushort)(NetHelpers.XRange.ReverseLerp(targetPos.x) * 65535f);
                         ushort num2 = (ushort)(NetHelpers.YRange.ReverseLerp(targetPos.y) * 65535f);
-                        CustomRpcSender sender = CustomRpcSender.Create("LadderFallRpc", sendOption: Hazel.SendOption.None);
-                        sender.AutoStartRpc(player.NetTransform.NetId, (byte)RpcCalls.SnapTo)
-                                .Write(num)
-                                .Write(num2)
-                        .EndRpc();
-                        sender.AutoStartRpc(player.NetId, (byte)RpcCalls.MurderPlayer)
-                                .WriteNetObject(player)
-                        .EndRpc();
-                        sender.SendMessage();
-                        player.NetTransform.SnapTo(targetPos);
-                        player.MurderPlayer(player);
+
+                        Utils.Teleport(player.NetTransform, new Vector2(num, num2));
+                        player.InteractWith(player, new UnblockedInteraction(new FatalIntent(), player.GetCustomRole()));
                     }, 0.05f);
                 }
             }

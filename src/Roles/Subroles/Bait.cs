@@ -1,4 +1,5 @@
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Roles.Internals.Attributes;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -11,12 +12,12 @@ public class Bait: Subrole
     private bool triggered;
 
     [RoleAction(RoleActionType.MyDeath)]
-    private void BaitDies(PlayerControl killer, Optional<PlayerControl> realKiller)
+    private void BaitDies(PlayerControl killer, Optional<FrozenPlayer> realKiller)
     {
         if (triggered) return;
         if (Game.State is not GameState.Roaming) return;
         triggered = true;
-        realKiller.OrElse(killer).ReportDeadBody(MyPlayer.Data);
+        realKiller.FlatMap(rk => new UnityOptional<PlayerControl>(rk.MyPlayer)).OrElse(killer).ReportDeadBody(MyPlayer.Data);
     }
 
     public override string Identifier() => "★";

@@ -26,7 +26,7 @@ public class TemplateCommandMigrator
         this.file = file;
         if (!file.Exists) return;
         Load();
-        Dictionary<string, Template> commands = PluginDataManager.TemplateManager.Commands;
+        Dictionary<string, List<Template>> commands = PluginDataManager.TemplateManager.Commands;
         bool addedAlias = false;
         commandAliases.ForEach(ca =>
         {
@@ -34,7 +34,7 @@ public class TemplateCommandMigrator
             if (template == null) return;
             template.Aliases ??= new List<string>();
             template.Aliases.Add(ca.Key);
-            commands[ca.Key] = template;
+            commands.GetOrCompute(ca.Key, () => new List<Template>()).Add(template);
             addedAlias = true;
         });
         if (addedAlias) PluginDataManager.TemplateManager.SaveTemplates();

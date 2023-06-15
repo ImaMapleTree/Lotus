@@ -5,7 +5,7 @@ namespace Lotus.Managers.History.Events;
 
 public interface IWinEvent : IHistoryEvent
 {
-    public WinReason WinReason();
+    public ReasonType WinReason();
 
     public List<PlayerControl> Winners();
 }

@@ -38,7 +38,7 @@ public partial class Medium: Crewmate, IModdable
     [RoleAction(RoleActionType.AnyDeath)]
     private void AnyPlayerDeath(PlayerControl player, IDeathEvent deathEvent)
     {
-        killerDictionary[player.PlayerId] = deathEvent.Instigator().Map(p => p.GetCustomRole());
+        killerDictionary[player.PlayerId] = deathEvent.Instigator().Map(p => Optional<CustomRole>.Of(p.MyPlayer.GetCustomRoleSafe()).OrElse(p.Role));
     }
 
     [RoleAction(RoleActionType.SelfReportBody)]

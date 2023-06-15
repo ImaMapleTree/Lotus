@@ -4,6 +4,7 @@ using Lotus.Factions;
 using Lotus.Options;
 using Lotus.Extensions;
 using Lotus.Roles.Interfaces;
+using Lotus.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
@@ -16,7 +17,7 @@ public sealed class GM : CustomRole, IPhantomRole
 
     protected override void PostSetup()
     {
-        MyPlayer.RpcExileV2();
+        MyPlayer.RpcExileV2(false);
 
         Game.GetAllPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId)
             .SelectMany(p => p.NameModel().ComponentHolders())
@@ -36,7 +37,8 @@ public sealed class GM : CustomRole, IPhantomRole
     protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier
         .RoleColor(GMColor)
         .Faction(FactionInstances.Neutral)
-        .RoleFlags(RoleFlag.Hidden | RoleFlag.Unassignable | RoleFlag.CannotWinAlone);
+        .RoleFlags(RoleFlag.Hidden | RoleFlag.Unassignable | RoleFlag.CannotWinAlone)
+        .OptionOverride(Override.AnonymousVoting, false);
 
     public bool IsCountedAsPlayer() => false;
 }

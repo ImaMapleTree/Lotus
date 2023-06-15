@@ -145,15 +145,15 @@ public static class CustomRoleManager
 
         //assassin
         //bomber
+        public Assassin Assassin = new Assassin();
         public Blackmailer Blackmailer = new Blackmailer();
         public BountyHunter BountyHunter = new BountyHunter();
         public Camouflager Camouflager = new Camouflager();
-        public Conman Conman = new Conman();
         public Consort Consort = new Consort();
         public Creeper Creeper = new Creeper();
         public Disperser Disperser = new Disperser();
         public Escapist Escapist = new Escapist();
-        public FireWorker FireWorker = new FireWorker();
+        public FireWorks FireWorks = new FireWorks();
         public Freezer Freezer = new Freezer();
         public Grenadier Grenadier = new Grenadier();
         public IdentityThief IdentityThief = new IdentityThief();
@@ -190,10 +190,10 @@ public static class CustomRoleManager
         //Crewmates
 
         public Alchemist Alchemist = new Alchemist();
-        public Charmer Charmer = new Charmer();
         public Bastion Bastion = new Bastion();
         public Bodyguard Bodyguard = new Bodyguard();
         public Chameleon Chameleon = new Chameleon();
+        public Charmer Charmer = new Charmer();
         public Crewmate Crewmate = new Crewmate();
         public Crusader Crusader = new Crusader();
         public Demolitionist Demolitionist = new Demolitionist();
@@ -235,6 +235,7 @@ public static class CustomRoleManager
         public AgiTater AgiTater = new AgiTater();
         public Arsonist Arsonist = new Arsonist();
         public BloodKnight BloodKnight = new BloodKnight();
+        public Demon Demon = new Demon();
         public Egoist Egoist = new Egoist();
         public Hitman Hitman = new Hitman();
         public Jackal Jackal = new Jackal();
@@ -242,8 +243,8 @@ public static class CustomRoleManager
         public Marksman Marksman = new Marksman();
         public Necromancer Necromancer = new Necromancer();
         public Occultist Occultist = new Occultist();
-        public PlagueBearer PlagueBearer = new PlagueBearer();
         public Pelican Pelican = new Pelican();
+        public PlagueBearer PlagueBearer = new PlagueBearer();
         public Retributionist Retributionist = new Retributionist();
         public Glitch Glitch = new Glitch();
         public Werewolf Werewolf = new Werewolf();
@@ -265,6 +266,7 @@ public static class CustomRoleManager
         public Terrorist Terrorist = new Terrorist();
         public Vulture Vulture = new Vulture();
 
+        /*public Guesser Guesser = new Guesser();*/
         public CustomRole LOAD_MODIFIER_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadSubroleOptions());
     }
 
@@ -276,6 +278,7 @@ public static class CustomRoleManager
         public Deadly Deadly = new Deadly();
         public Diseased Diseased = new Diseased();
         public Flash Flash = new Flash();
+        public Honed Honed = new Honed();
         public Nimble Nimble = new Nimble();
         public Oblivious Oblivious = new Oblivious();
         public Romantic Romantic = new Romantic();

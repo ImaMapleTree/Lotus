@@ -32,7 +32,6 @@ public class GameOptionOverride
     }
 
 
-    // TODO figure out applyto
     public virtual void ApplyTo(IGameOptions options)
     {
         if (!Condition?.Invoke() ?? false) return;

@@ -12,4 +12,5 @@ public class FactionInstances
     public static Madmates Madmates { get; } = new();
     public static TheUndead TheUndead { get; } = new TheUndead.Origin();
     public static Neutral Neutral { get; } = new();
+    public static Modifiers Modifiers { get; } = new();
 }

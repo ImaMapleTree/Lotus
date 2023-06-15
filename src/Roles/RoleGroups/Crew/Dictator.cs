@@ -31,7 +31,11 @@ public class Dictator: Crewmate
     private int totalDictates;
 
     private int currentDictates;
+    private bool showDictatorVoteAtEnd;
 
+    private GameData.PlayerInfo? dictatedPlayer;
+    private ChatHandler? dictateMessage;
+    private bool shouldSuicide;
 
     [UIComponent(UI.Counter, ViewMode.Replace, GameState.InMeeting)]
     private string DictateCounter() => RoleUtils.Counter(currentDictates, totalDictates, RoleColor);
@@ -43,11 +47,12 @@ public class Dictator: Crewmate
     {
         if (!target.Exists()) return;
         PlayerControl player = target.Get();
-        meetingDelegate.EndVoting(player.Data);
-        ChatHandler.Of(TranslationUtil.Colorize(DictateMessage.Formatted(player.name, RoleName), RoleColor))
+        dictatedPlayer = player.Data;
+
+        dictateMessage = ChatHandler
+            .Of(TranslationUtil.Colorize(DictateMessage.Formatted(player.name, RoleName), RoleColor))
             .Title(t => t.Color(RoleColor).Text(RoleName).Build())
-            .LeftAlign()
-            .Send();
+            .LeftAlign();
 
         _playersEjected.Increment(MyPlayer.UniquePlayerId());
         Game.MatchData.GameHistory.AddEvent(new DictatorVoteEvent(MyPlayer, player));
@@ -59,7 +64,35 @@ public class Dictator: Crewmate
         //     OR
         // Target relationship is not allied
         // Then: Return
-        if (--currentDictates > 0 && (!suicideIfVoteCrewmate || Relationship(player) is not Relation.FullAllies)) return;
+        if (--currentDictates <= 0) shouldSuicide = true;
+        else if (suicideIfVoteCrewmate && Relationship(player) is not Relation.FullAllies)
+        {
+            shouldSuicide = true;
+            return;
+        }
+        else return;
+
+        FinalizeDictate();
+        meetingDelegate.EndVoting(dictatedPlayer);
+    }
+
+    [RoleAction(RoleActionType.VotingComplete, priority: Priority.High)]
+    private void OverrideDictatedPlayer(MeetingDelegate meetingDelegate)
+    {
+        if (showDictatorVoteAtEnd && dictatedPlayer != null && currentDictates > 0)
+        {
+            meetingDelegate.ExiledPlayer = dictatedPlayer;
+            FinalizeDictate();
+        }
+        dictateMessage = null;
+        dictatedPlayer = null;
+        shouldSuicide = false;
+    }
+
+    private void FinalizeDictate()
+    {
+        dictateMessage?.Send();
+        if (!shouldSuicide) return;
 
         ProtectedRpc.CheckMurder(MyPlayer, MyPlayer);
         Game.MatchData.GameHistory.AddEvent(new SuicideEvent(MyPlayer));
@@ -70,6 +103,12 @@ public class Dictator: Crewmate
             .SubOption(sub => sub.KeyName("Number of Dictates", NumberOfDictates)
                 .AddIntRange(1, 15)
                 .BindInt(i => totalDictates = i)
+                .ShowSubOptionPredicate(i => (int)i > 1)
+                .SubOption(sub2 => sub2
+                    .KeyName("Show Dictate at End of Meeting", ShowDictatorVoteAtMeetingEnd)
+                    .BindBool(b => showDictatorVoteAtEnd = b)
+                    .AddOnOffValues()
+                    .Build())
                 .Build())
             .SubOption(sub => sub.KeyName("Suicide if Crewmate Executed", TranslationUtil.Colorize(SuicideIfVoteCrewmate, ModConstants.Palette.CrewmateColor))
                 .AddOnOffValues(false)
@@ -109,6 +148,9 @@ public class Dictator: Crewmate
 
             [Localized(nameof(SuicideIfVoteCrewmate))]
             public static string SuicideIfVoteCrewmate = "Suicide if Crewmate::0 Executed";
+
+            [Localized(nameof(ShowDictatorVoteAtMeetingEnd))]
+            public static string ShowDictatorVoteAtMeetingEnd = "Show Dictate at End of Meeting";
         }
     }
 }

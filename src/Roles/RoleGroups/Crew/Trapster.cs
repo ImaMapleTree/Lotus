@@ -25,15 +25,14 @@ public class Trapster : Crewmate
 
     private float trappedDuration;
     private bool trapOnIndirectKill;
-    private bool blockReportWhileTrapped;
 
     private byte trappedPlayer = byte.MaxValue;
 
     [RoleAction(RoleActionType.Interaction)]
     private void TrapsterDeath(PlayerControl actor, Interaction interaction)
     {
-        if (interaction.Intent() is not IFatalIntent) return;
-        if (interaction is not DirectInteraction && !trapOnIndirectKill) return;
+        if (interaction.Intent is not IFatalIntent) return;
+        if (interaction is not LotusInteraction && !trapOnIndirectKill) return;
 
         trappedPlayer = actor.PlayerId;
         CustomRole actorRole = actor.GetCustomRole();
@@ -49,7 +48,6 @@ public class Trapster : Crewmate
     [RoleAction(RoleActionType.AnyReportedBody)]
     private void PreventReportingOfBody(PlayerControl reporter, GameData.PlayerInfo body, ActionHandle handle)
     {
-        if (!blockReportWhileTrapped) return;
         if (reporter.PlayerId != trappedPlayer) return;
         if (body.PlayerId != MyPlayer.PlayerId) return;
         handle.Cancel();
@@ -67,11 +65,6 @@ public class Trapster : Crewmate
                 .KeyName("Trapped Duration", TrappedDuration)
                 .Bind(v => trappedDuration = (float)v)
                 .AddFloatRange(1, 45, 0.5f, 8, GeneralOptionTranslations.SecondsSuffix)
-                .Build())
-            .SubOption(sub => sub
-                .KeyName("Block Report While Trapped", BlockReportWhileTrapped)
-                .AddOnOffValues()
-                .BindBool(b => blockReportWhileTrapped = b)
                 .Build());
 
 
@@ -88,9 +81,6 @@ public class Trapster : Crewmate
 
             [Localized(nameof(TrappedDuration))]
             public static string TrappedDuration = "Trapped Duration";
-
-            [Localized(nameof(BlockReportWhileTrapped))]
-            public static string BlockReportWhileTrapped = "Block Report While Trapped";
         }
     }
 }

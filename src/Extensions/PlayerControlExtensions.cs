@@ -1,5 +1,6 @@
 #nullable enable
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
@@ -10,8 +11,11 @@ using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
+using Lotus.Gamemodes.Standard;
 using Lotus.Logging;
 using Lotus.Managers;
+using Lotus.Managers.History.Events;
+using Lotus.Patches.Actions;
 using Lotus.Roles;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
@@ -23,6 +27,7 @@ using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
+using VentLib.Utilities.Optionals;
 using GameStates = Lotus.API.GameStates;
 
 namespace Lotus.Extensions;
@@ -105,6 +110,24 @@ public static class PlayerControlExtensions
             });
     }
 
+    public static CustomRole? GetCustomRoleSafe(this PlayerControl player)
+    {
+        if (player == null) return null;
+
+        CustomRole? role = Game.MatchData.Roles.MainRoles.GetValueOrDefault(player.PlayerId);
+        return role ?? (player.Data.Role == null ? CustomRoleManager.Default
+            : player.Data.Role.Role switch
+            {
+                RoleTypes.Crewmate => CustomRoleManager.Static.Crewmate,
+                RoleTypes.Engineer => CustomRoleManager.Static.Mechanic,
+                RoleTypes.Scientist => CustomRoleManager.Static.Physicist,
+                /*RoleTypes.GuardianAngel => CustomRoleManager.Static.GuardianAngel,*/
+                RoleTypes.Impostor => CustomRoleManager.Static.Impostor,
+                RoleTypes.Shapeshifter => CustomRoleManager.Static.Morphling,
+                _ => CustomRoleManager.Default,
+            });
+    }
+
     public static CustomRole? GetSubrole(this PlayerControl player)
     {
         List<CustomRole>? role = Game.MatchData.Roles.SubRoles.GetValueOrDefault(player.PlayerId);
@@ -120,6 +143,14 @@ public static class PlayerControlExtensions
     public static List<CustomRole> GetSubroles(this PlayerControl player)
     {
         return Game.MatchData.Roles.SubRoles.GetValueOrDefault(player.PlayerId, new List<CustomRole>());
+    }
+
+    public static void SyncAll(this PlayerControl player)
+    {
+        if (player == null) return;
+        CustomRole playerRole = player.GetCustomRole();
+        IEnumerable<GameOptionOverride> overrides = playerRole.CurrentRoleOverrides().Concat(player.GetSubroles().SelectMany(sr => sr.CurrentRoleOverrides()));
+        playerRole.SyncOptions(overrides, parameterOverridesAreAbsolute: true);
     }
 
     public static void RpcSetRoleDesync(this PlayerControl player, RoleTypes role, int clientId)
@@ -156,7 +187,12 @@ public static class PlayerControlExtensions
 
     public static void SetKillCooldown(this PlayerControl player, float time)
     {
-        if (player.AmOwner) player.SetKillTimer(time);
+        if (player.AmOwner)
+        {
+            player.SyncAll();
+            DevLogger.Log("Synced all cooldowns");
+            player.SetKillTimer(time);
+        }
         else
         {
             // IMPORTANT: This could be a possible "issue" area
@@ -241,11 +277,54 @@ public static class PlayerControlExtensions
         }, 0.4f + delay);
     }
 
-    public static void RpcExileV2(this PlayerControl player)
+    public static void RpcExileV2(this PlayerControl player, bool reallyExiled, bool hookDeath = true)
     {
         VentLogger.Trace($"Exiled (V2): {player.GetNameWithRole()}");
         player.Exiled();
         RpcV3.Immediate(player.NetId, RpcCalls.Exiled, SendOption.None);
+
+        if (!reallyExiled)
+        {
+            if (hookDeath) Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerDeathHookEvent(player, new ExiledEvent(player, new List<PlayerControl>(), new List<PlayerControl>())));
+            return;
+        }
+
+        ActionHandle uselessHandle = ActionHandle.NoInit();
+        player.Trigger(RoleActionType.SelfExiled, ref uselessHandle);
+        Game.TriggerForAll(RoleActionType.AnyExiled, ref uselessHandle, player);
+
+        Hooks.PlayerHooks.PlayerExiledHook.Propagate(new PlayerHookEvent(player));
+        Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerDeathHookEvent(player, new ExiledEvent(player, new List<PlayerControl>(), new List<PlayerControl>())));
+    }
+
+    public static void RpcVaporize(this PlayerControl player, PlayerControl target, IDeathEvent? deathEvent = null)
+    {
+        if (player == null || target == null) return;
+        VentLogger.Trace($"{player.name} vaporize => {target.name}");
+        target.RpcExileV2(false, false);
+
+        MurderPatches.MurderLocks.GetOrCompute(player.PlayerId, MurderPatches.TimeoutSupplier).AcquireLock();
+
+        deathEvent ??= new DeathEvent(target, player);
+
+        ActionHandle ignored = ActionHandle.NoInit();
+        target.Trigger(RoleActionType.MyDeath, ref ignored, player, Optional<PlayerControl>.Null(), deathEvent);
+        Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, player, Optional<PlayerControl>.Null(), deathEvent);
+
+        PlayerMurderHookEvent playerMurderHookEvent = new(player, target, deathEvent);
+        Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);
+        Hooks.PlayerHooks.PlayerDeathHook.Propagate(playerMurderHookEvent);
+
+        Async.Schedule(() =>
+        {
+            if (target != null) target.SetChatName(target.name);
+        }, 0.1f);
+    }
+
+    public static CustomRole GetCustomRole(this GameData.PlayerInfo? playerInfo)
+    {
+        if (playerInfo == null) return CustomRoleManager.Default;
+        return Game.MatchData.Roles.GetMainRole(playerInfo.PlayerId);
     }
 
     ///<summary>

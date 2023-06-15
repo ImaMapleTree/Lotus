@@ -1,6 +1,9 @@
 using System.Collections.Generic;
 using Lotus.Managers;
 using Lotus.Extensions;
+using Lotus.GUI;
+using Lotus.Logging;
+using Lotus.Patches.Network;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -20,10 +23,14 @@ public class AdminOptions
     public bool KickPlayersWithoutFriendcodes;
     public int KickPlayersUnderLevel;
     public bool KickMobilePlayers;
-    public int AutoStart;
+
+    public int AutoStartPlayerThreshold;
+    public int AutoStartMaxTime = -1;
+    public int AutoStartGameCountdown;
     public bool AutoPlayAgain;
 
-    public bool AutoStartEnabled => AutoStart != -1;
+    public Cooldown AutoCooldown = new();
+    public bool AutoStartEnabled;
     public List<GameOption> AllOptions = new();
 
     public AdminOptions()
@@ -68,12 +75,45 @@ public class AdminOptions
             .BindBool(b => KickMobilePlayers = b)
             .BuildAndRegister());
 
-        AllOptions.Add(Builder("AutoStart")
+        AllOptions.Add(Builder("Auto Start")
             .Name(AdminOptionTranslations.AutoStartText)
-            .Value(v => v.Text(GeneralOptionTranslations.DisabledText).Value(-1).Color(Color.red).Build())
-            .AddIntRange(5, 15, suffix: " " + AdminOptionTranslations.AutoStartSuffix)
-            .IOSettings(io => io.UnknownValueAction = ADEAnswer.Allow)
-            .BindInt(i => AutoStart = i)
+            .AddOnOffValues(false)
+            .BindBool(b =>
+            {
+                AutoStartEnabled = b;
+                if (GameStartManager.Instance != null && !b) GameStartManager.Instance.ResetStartState();
+            })
+            .ShowSubOptionPredicate(b => (bool)b)
+            .SubOption(sub2 => sub2
+                .KeyName("Player Threshold", AdminOptionTranslations.AutoStartPlayerThreshold)
+                .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(-1).Color(Color.red).Build())
+                .AddIntRange(5, 15, suffix: " " + AdminOptionTranslations.AutoStartSuffix)
+                .IOSettings(io => io.UnknownValueAction = ADEAnswer.Allow)
+                .BindInt(i => AutoStartPlayerThreshold = i)
+                .Build())
+            .SubOption(sub2 => sub2
+                .KeyName("Maximum Wait Time", AdminOptionTranslations.AutoStartMaxWaitTime)
+                .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(-1).Color(Color.red).Build())
+                .AddIntRange(30, 540, 15, 0, GeneralOptionTranslations.SecondsSuffix)
+                .IOSettings(io => io.UnknownValueAction = ADEAnswer.Allow)
+                .BindInt(i =>
+                {
+                    if (LobbyBehaviour.Instance == null) return;
+                    AutoStartMaxTime = i;
+                    if (i == -1) AutoCooldown.Finish();
+                    else
+                    {
+                        AutoCooldown.SetDuration(i);
+                        AutoCooldown.Start();
+                    }
+                    PlayerJoinPatch.CheckAutostart();
+                })
+                .Build())
+            .SubOption(sub2 => sub2
+                .KeyName("Game Countdown", AdminOptionTranslations.AutoStartGameCountdown)
+                .AddIntRange(0, 20, 2, 5, GeneralOptionTranslations.SecondsSuffix)
+                .BindInt(i => AutoStartGameCountdown = i)
+                .Build())
             .BuildAndRegister());
 
         AllOptions.Add(Builder("Auto Play Again")
@@ -123,8 +163,17 @@ public class AdminOptions
         public static string AutoKickMobile = "Kick Mobile Players";
 
         // Auto Start
-        [Localized("AutoStart", ForceOverride = true)]
+        [Localized("AutoStart")]
         public static string AutoStartText = "Auto Start";
+
+        [Localized(nameof(AutoStartPlayerThreshold))]
+        public static string AutoStartPlayerThreshold = "Player Threshold";
+
+        [Localized(nameof(AutoStartMaxWaitTime))]
+        public static string AutoStartMaxWaitTime = "Maximum Wait Time";
+
+        [Localized(nameof(AutoStartGameCountdown))]
+        public static string AutoStartGameCountdown = "Game Countdown";
 
         [Localized("AutoStartOptionSuffix")]
         public static string AutoStartSuffix = "Players";

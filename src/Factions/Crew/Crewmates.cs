@@ -12,7 +12,7 @@ public class Crewmates : Faction<Crewmates>
 
     public override bool CanSeeRole(PlayerControl player) => false;
 
-    public override Color FactionColor() => ModConstants.Palette.CrewmateColor;
+    public override Color Color => ModConstants.Palette.CrewmateColor;
 
     public override Relation RelationshipOther(IFaction other)
     {
@@ -20,7 +20,7 @@ public class Crewmates : Faction<Crewmates>
         {
             TheUndead => Relation.None,
             ImpostorFaction => Relation.None,
-            Neutral => Relation.None,
+            Neutral when other.GetType() == typeof(Neutral) => Relation.None,
             _ => other.Relationship(this)
         };
     }

@@ -4,7 +4,10 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Lotus.API.Player;
+using Lotus.Logging;
+using Lotus.Managers.Hotkeys;
 using Lotus.Managers.Templates.Models;
+using Lotus.Managers.Templates.Models.Units;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using YamlDotNet.Serialization;
@@ -14,8 +17,11 @@ namespace Lotus.Managers.Templates;
 
 public class TemplateManager
 {
+    public static int GlobalTriggerCount;
+
     private IDeserializer deserializer = new DeserializerBuilder()
         .IgnoreUnmatchedProperties()
+        .WithDuplicateKeyChecking()
         .WithNamingConvention(PascalCaseNamingConvention.Instance)
         .Build();
 
@@ -25,14 +31,13 @@ public class TemplateManager
         .Build();
 
     private FileInfo templateFileInfo;
-    private TemplateFIle tFile;
+    private TemplateFile tFile;
 
     private Dictionary<string, List<Template>> templates = null!;
     private Dictionary<string, TemplateUnit>? variables;
-    internal Dictionary<string, Template> Commands = null!;
+    internal Dictionary<string, List<Template>> Commands = null!;
 
     private List<Template>? allTemplates;
-    private Exception? exception;
 
     private Dictionary<string, string> registeredTags = new()
     {
@@ -52,7 +57,7 @@ public class TemplateManager
     internal void AddTemplate(Template template)
     {
         allTemplates?.Add(template);
-        template.Aliases?.ForEach(a => Commands[a] = template);
+        template.Aliases?.ForEach(a => Commands.GetOrCompute(a, () => new List<Template>()).Add(template));
 
         if (template.Tag != null) templates.GetOrCompute(template.Tag, () => new List<Template>()).Add(template);
         SaveTemplates();
@@ -60,89 +65,56 @@ public class TemplateManager
 
     internal bool CheckAndRunCommand(PlayerControl source, string input)
     {
-        input = input.TrimStart('/');
-        Template? template = Commands.GetValueOrDefault(input);
-        if (template == null) return false;
-        template.SendMessage(source, source);
+        if (input.Length < 2 || !input.StartsWith("/")) return false;
+        input = input[1..];
+        List<Template>? templates = Commands.GetValueOrDefault(input);
+        if (templates == null) return false;
+        templates.ForEach(template =>
+        {
+            if (source.IsHost())
+            {
+                DevLogger.Log(input);
+                if (HotkeyManager.HoldingRightShift) ShowAll(template, source, Players.GetPlayers(PlayerFilter.Dead));
+                else ShowAll(template, source);
+            }
+            else template.SendMessage(source, source);
+        });
         return true;
     }
 
-    public int CreateTemplate(string template)
-    {
-        int id = allTemplates!.Count;
-        allTemplates.Add(new Template(template));
-        SaveTemplates();
-        return id;
-    }
-
-    public bool DeleteTemplate(int id)
-    {
-        if (allTemplates == null) return false;
-        Template oldTemplate = allTemplates[id];
-        allTemplates.RemoveAt(id);
-        if (oldTemplate.Tag != null) templates.GetValueOrDefault(oldTemplate.Tag)?.Remove(oldTemplate);
-        SaveTemplates();
-        return true;
-    }
-
-    public bool EditTemplate(int id, string template)
-    {
-        if (allTemplates == null || allTemplates.Count <= id || id < 0) return false;
-        allTemplates[id].Text = template;
-        SaveTemplates();
-        return true;
-    }
-
-    public string? FormatVariable(string variable, PlayerControl? user, object? obj)
+    public string? FormatVariable(string variable, object? obj)
     {
         if (variables == null) return null;
-        return variables.TryGetValue(variable, out TemplateUnit? templateUnit) ? templateUnit.Format(user, obj) : null;
+        return variables.TryGetValue(variable, out TemplateUnit? templateUnit) ? templateUnit.Format(obj) : null;
     }
 
-    public bool Preview(PlayerControl? viewer, int id)
-    {
-        if (allTemplates == null || id < 0 || id >= allTemplates.Count) return false;
-        allTemplates?[id].SendMessage(viewer!, viewer, viewer);
-        return true;
-    }
-
-    public bool ShowAll(string tag, PlayerControl source, object? obj = null) => ShowAll(tag, source, Players.GetAllPlayers(), obj);
+    public bool ShowAll(string tag, PlayerControl source, object? obj = null) => ShowAll(tag, source, Players.GetPlayers(), obj);
 
     public bool ShowAll(string tag, PlayerControl source, IEnumerable<PlayerControl> viewers, object? obj = null)
     {
         List<Template>? templs = GetTemplates(tag);
-        if (templs == null) return false;
-        templs.ForEach(t => viewers.ForEach(v => t.SendMessage(source, v, obj)));
+        return templs != null && ShowAll(templs, source, viewers, obj);
+    }
+
+    public bool ShowAll(Template template, PlayerControl source, object? obj = null) => ShowAll(template, source, Players.GetPlayers(), obj);
+
+    public bool ShowAll(Template template, PlayerControl source, IEnumerable<PlayerControl> viewers, object? obj = null)
+    {
+        return ShowAll(new List<Template> { template }, source, viewers, obj);
+    }
+
+    public bool ShowAll(List<Template> template, PlayerControl source, IEnumerable<PlayerControl> viewers, object? obj = null)
+    {
+        template.ForEach(t => viewers.ForEach(v => t.SendMessage(source, v, obj)));
         return true;
     }
 
-    public bool TryFormat(PlayerControl? viewer, object? obj, string tag, out string formatted, bool ignoreWarning = false)
+    public bool TryFormat(object? obj, string tag, out string formatted, bool ignoreWarning = false)
     {
         formatted = "";
         if (!ignoreWarning && !registeredTags.ContainsKey(tag)) VentLogger.Warn($"Tag \"{tag}\" is not registered. Please ensure all template tags have been registered through TemplateManager.RegisterTag().", "TemplateManager");
         if (!templates!.ContainsKey(tag)) return false;
-        formatted = templates.GetValueOrDefault(tag)?.Select(v => v.Format(viewer, obj).Replace("\\n", "\n")).Where(t => t != "").Fuse("\n") ?? "";
-        return true;
-    }
-
-    public bool TagTemplate(int id, string tag)
-    {
-        if (allTemplates == null || allTemplates.Count <= id || id < 0) return false;
-        Template template = allTemplates[id];
-        if (template.Tag != null) templates!.Remove(template.Tag);
-        template.Tag = tag;
-        templates!.GetOrCompute(tag, () => new List<Template>()).Add(template);
-        SaveTemplates();
-        return true;
-    }
-
-    public bool UntagTemplate(int id)
-    {
-        if (allTemplates == null || allTemplates.Count <= id || id < 0) return false;
-        Template template = allTemplates[id];
-        if (template.Tag != null) templates?.GetValueOrDefault(template.Tag)?.Remove(template);
-        template.Tag = null;
-        SaveTemplates();
+        formatted = templates.GetValueOrDefault(tag)?.Select(v => v.Format(obj).Replace("\\n", "\n")).Where(t => t != "").Fuse("\n") ?? "";
         return true;
     }
 
@@ -164,23 +136,33 @@ public class TemplateManager
 
     public string? LoadTemplates()
     {
-        Commands = new Dictionary<string, Template>();
+        GlobalTriggerCount = 0;
+        TTrigger.BoundHooks.ForEach(kv => kv.Value.Unbind(kv.Key));
+        TTrigger.BoundHooks.Clear();
+
+        Commands = new Dictionary<string, List<Template>>();
         templates = new Dictionary<string, List<Template>>();
         try
         {
             string result;
             using (StreamReader reader = new(templateFileInfo.Open(FileMode.OpenOrCreate))) result = reader.ReadToEnd();
-            tFile = deserializer.Deserialize<TemplateFIle>(result);
+            if (result == null!) tFile = new TemplateFile();
+            else tFile = deserializer.Deserialize<TemplateFile>(result);
+            if (tFile == null!) tFile = new TemplateFile();
 
             allTemplates = tFile.Templates;
-            allTemplates?.Where(kv => kv.Tag != null).ForEach(kv => templates.GetOrCompute(kv.Tag!, () => new List<Template>()).Add(kv));
+            allTemplates?.Where(kv =>
+            {
+                kv.Setup();
+                return kv.Tag != null;
+            }).ForEach(kv => templates.GetOrCompute(kv.Tag!, () => new List<Template>()).Add(kv));
+
             variables = tFile.Variables;
-            allTemplates?.Where(t => t.Aliases != null).ForEach(t => t.Aliases!.ForEach(a => Commands[a] = t));
+            allTemplates?.Where(t => t.Aliases != null).ForEach(t => t.Aliases!.ForEach(a => Commands.GetOrCompute(a, () => new List<Template>()).Add(t)));
             return null;
         }
         catch (Exception e)
         {
-            this.exception = e;
             VentLogger.Exception(e);
             return e.ToString();
         }

@@ -141,8 +141,8 @@ public class GameplayOptions
 
         AllOptions.Add(Builder("Modifier Text Mode")
             .Name(GameplayOptionTranslations.ModifierTextMode)
-            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
-            .Value(v => v.Text(GameplayOptionTranslations.FirstValue).Value(1).Color(ModConstants.Palette.InfinityColor).Build())
+            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(1).Color(Color.red).Build())
+            .Value(v => v.Text(GameplayOptionTranslations.FirstValue).Value(0).Color(ModConstants.Palette.InfinityColor).Build())
             .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(2).Color(Color.green).Build())
             .BindInt(i => ModifierTextMode = (ModifierTextMode)i)
             .BuildAndRegister());
@@ -262,7 +262,7 @@ public enum FirstKillCooldown
 
 public enum ModifierTextMode
 {
-    Off,
     First,
+    Off,
     All
 }

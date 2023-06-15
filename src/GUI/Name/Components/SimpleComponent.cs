@@ -25,8 +25,7 @@ public class SimpleComponent : INameModelComponent
 
     private SimpleComponent() {}
 
-    protected SimpleComponent(LiveString mainText, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive,
-        Func<List<PlayerControl>>? viewers = null)
+    protected SimpleComponent(LiveString mainText, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive, Func<List<PlayerControl>>? viewers = null)
     {
         this.viewers = viewers;
         List<PlayerControl> allViewers = PlayerControl.AllPlayerControls.ToArray().ToList();

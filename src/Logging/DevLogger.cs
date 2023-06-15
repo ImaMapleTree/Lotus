@@ -1,5 +1,8 @@
 using System;
+using System.Linq;
+using Lotus.Utilities;
 using VentLib.Logging;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Logging;
 
@@ -30,5 +33,11 @@ public static class DevLogger
     public static void Log(object obj)
     {
         if (_enabled) VentLogger.Log(LogLevel, obj.ToString()!, "DEV");
+    }
+
+    public static void GameInfo()
+    {
+        if (_enabled)
+            VentLogger.Log(LogLevel, GameData.Instance.AllPlayers.ToArray().Select(p => (p.PlayerName.RemoveHtmlTags().Replace("\n", ""), p.Role.Role, "Dead " + p.IsDead, "Disconnected " + p.Disconnected)).StrJoin(), "DEV");
     }
 }

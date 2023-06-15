@@ -49,7 +49,7 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
     [RoleAction(RoleActionType.Attack, Subclassing = false)]
     public virtual bool TryKill(PlayerControl target)
     {
-        InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this));
+        InteractionResult result = MyPlayer.InteractWith(target, LotusInteraction.FatalInteraction.Create(this));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }

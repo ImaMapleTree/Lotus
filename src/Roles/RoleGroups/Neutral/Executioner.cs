@@ -52,7 +52,7 @@ public class Executioner : CustomRole
         if (target == null || target.PlayerId != exiled.PlayerId) return;
         List<PlayerControl> winners = new() { MyPlayer };
         if (target.GetCustomRole() is Jester) winners.Add(target);
-        ManualWin win = new(winners, WinReason.SoloWinner);
+        ManualWin win = new(winners, ReasonType.SoloWinner);
         win.Activate();
     }
 

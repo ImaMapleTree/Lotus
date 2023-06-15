@@ -35,10 +35,10 @@ class IntroDestroyPatch
         if (!GameStates.IsInGame) return;
         if (!AmongUsClient.Instance.AmHost) return;
 
-        if (PlayerControl.LocalPlayer.GetCustomRole() is GM) PlayerControl.LocalPlayer.RpcExileV2();
+        if (PlayerControl.LocalPlayer.GetCustomRole() is GM) PlayerControl.LocalPlayer.RpcExileV2(false);
 
         string pet = GeneralOptions.MiscellaneousOptions.AssignedPet;
-        pet = pet != "Random" ? pet : ModConstants.Pets.Values.ToList().GetRandom();
+        while (pet == "Random") pet = ModConstants.Pets.Values.ToList().GetRandom();
 
         Game.GetAllPlayers().ForEach(p => Async.Execute(PreGameSetup(p, pet)));
         Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.6f));
@@ -78,7 +78,7 @@ class IntroDestroyPatch
         if (role is not ITaskHolderRole taskHolder || !taskHolder.TasksApplyToTotal())
         {
             VentLogger.Trace($"Clearing Tasks For: {player.name}", "SyncTasks");
-            playerData.Tasks.Clear();
+            playerData.Tasks?.Clear();
         }
 
         bool hasPet = !(player.cosmetics?.CurrentPet?.Data?.ProductId == "pet_EmptyPet");

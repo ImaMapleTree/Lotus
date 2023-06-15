@@ -7,6 +7,7 @@ using Lotus.Roles;
 using Lotus.Roles.Interfaces;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Logging;
 
 namespace Lotus.Patches.Systems;
 
@@ -44,6 +45,7 @@ public class RpcSetTasksPatch
                 break;
         }
 
+        DevLogger.Log("Hello!!!");
         if (!hasTasks) return true;
 
         if (shortTaskCount == -1 || !overrideTasks) shortTaskCount = AUSettings.NumShortTasks();

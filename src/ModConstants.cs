@@ -4,6 +4,7 @@ using VentLib.Localization.Attributes;
 
 namespace Lotus;
 
+[Localized("Constants")]
 public static class ModConstants
 {
     public static Color HColor1 = new(0.03f, 0.53f, 0.01f);
@@ -21,7 +22,7 @@ public static class ModConstants
     public const float DeriveDelayMultiplier = 0.0003f;
     public const float DeriveDelayFlatValue = 0.4f;
 
-    public const int RecursiveDepthLimit = 200;
+    public const int RecursiveDepthLimit = 20;
 
     public const float MaxPlayerSpeed = 3f;
 
@@ -36,7 +37,7 @@ public static class ModConstants
 
     public const string Infinity = "∞";
 
-    public const string DiscordInvite = "https://discord.gg/tohtor";
+    public const string DiscordInvite = "https://discord.gg/projectlotus";
 
     public static class Palette
     {
@@ -61,6 +62,8 @@ public static class ModConstants
         public static Color GlobalColor = new(1f, 0.61f, 0.33f);
         public static Color InvalidUsage = new(1f, 0.67f, 0.11f);
         public static Color WinnerColor = new(1f, 0.83f, 0.24f);
+
+        public static Color UndeadBlue = new(0.33f, 0.46f, 0.76f);
     }
 
     [Localized("DeathNames")]
@@ -97,6 +100,7 @@ public static class ModConstants
     public static class Localization
     {
         public const string Misc = "Misc";
+        public const string WinConditions = "WinConditions";
     }
 
     public static Dictionary<string, string> Pets = new()
@@ -120,7 +124,7 @@ public static class ModConstants
         { "H. Stickmin", "pet_Stickmin" },
         { "Hammy", "pet_HamPet" },
         { "Hampton", "pet_Hamster" },
-        { "Headslug", "pet_Allien" },
+        { "Headslug", "pet_Alien" },
         { "Poro", "pet_poro" },
         { "Magmate", "pet_Lava" },
         { "Crewmate", "pet_Crewmate" },
@@ -131,6 +135,6 @@ public static class ModConstants
         { "Nugget", "pet_nuggetPet" },
         { "Toppat Chopper", "pet_Charles_Red" },
         { "UFO", "pet_UFO" },
-        { "Worm", "pet_Worm" },
+        { "Worm", "pet_D2WormPet" },
     };
 }

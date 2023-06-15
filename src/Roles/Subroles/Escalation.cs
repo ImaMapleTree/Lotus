@@ -29,7 +29,7 @@ public class Escalation : Subrole
     public void CheckPlayerDeath(PlayerControl target, PlayerControl killer, IDeathEvent deathEvent)
     {
         if (target.PlayerId == MyPlayer.PlayerId) remote?.Delete();
-        killer = deathEvent.Instigator().OrElse(killer);
+        killer = deathEvent.Instigator().Map(p => p.MyPlayer).OrElse(killer);
         if (killer.PlayerId != MyPlayer.PlayerId) return;
 
         kills++;

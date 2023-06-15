@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.Extensions;
 using Lotus.Managers.History;
 using Lotus.Options;
+using Lotus.Roles;
 using Lotus.Roles.Extra;
+using Lotus.Victory;
 using Lotus.Victory.Conditions;
 using UnityEngine;
 using VentLib.Commands;
@@ -41,7 +44,7 @@ public class LastResultCommand: CommandTranslations
         });
     }
 
-    [Command(CommandFlag.LobbyOnly, "last", "l")]
+    [Command(CommandFlag.LobbyOnly, "last", "l", "lastresult")]
     public static void LastGame(PlayerControl source, CommandContext context)
     {
         if (PlayerHistories == null) ErrorHandler(source).Message(LRTranslations.NoPreviousGameText).Send();
@@ -59,8 +62,7 @@ public class LastResultCommand: CommandTranslations
             return;
         }
 
-
-        string coloredName = ((Color)Palette.PlayerColors[foundPlayer.Outfit.ColorId]).Colorize(ModConstants.ColorNames[foundPlayer.Outfit.ColorId]);
+        string coloredName = foundPlayer.ColorName;
 
         string statusText = foundPlayer.Status is PlayerStatus.Dead ? foundPlayer.CauseOfDeath?.SimpleName() ?? foundPlayer.Status.ToString() : foundPlayer.Status.ToString();
         string playerStatus = StatusColor(foundPlayer.Status).Colorize(statusText);
@@ -91,12 +93,25 @@ public class LastResultCommand: CommandTranslations
             .Select(p => CreateSmallPlayerResult(p, winners.Contains(p.PlayerId)))
             .Fuse("<line-height=4>\n</line-height>");
 
-        string winResult = new Optional<IWinCondition>(Game.GetWinDelegate().WinCondition()).Map(wc =>
+        WinDelegate winDelegate = Game.GetWinDelegate();
+        string winResult = new Optional<IWinCondition>(winDelegate.WinCondition()).Map(wc =>
         {
             string t;
-            if (wc is IFactionWinCondition factionWin) t = factionWin.Factions().Select(f => f.FactionColor().Colorize(f.Name())).Fuse();
-            else t = Game.MatchData.GameHistory.LastWinners.Select(lw => lw.Name).Fuse();
-            return $"\n\n<size=1.6>{LRTranslations.WinResultText.Formatted(t)}</size>";
+            if (wc is IFactionWinCondition factionWin)
+            {
+                t = factionWin.Factions().Select(f => f.Color.Colorize(f.Name())).Distinct().Fuse();
+                List<FrozenPlayer> additionalWinners = Game.MatchData.GameHistory.AdditionalWinners;
+                if (additionalWinners.Count > 0)
+                {
+                    string awText = additionalWinners.Select(fp => new List<CustomRole> {fp.Role}.Concat(fp.Subroles).MaxBy(r => r.DisplayOrder)).Fuse();
+                    t += $" + {awText}";
+                }
+            }
+            else t = Game.MatchData.GameHistory.LastWinners.Select(lw => lw.Role.ColoredRoleName()).Fuse();
+
+            string? wcText = wc.GetWinReason().ReasonText;
+            string reasonText = wcText == null ? "" : $"\n<size=1.45>{LRTranslations.WinReasonText.Formatted(wcText)}</size>";
+            return $"\n\n<size=1.6>{LRTranslations.WinResultText.Formatted(t)}{reasonText}</size>";
         }).OrElse("");
 
 
@@ -161,7 +176,10 @@ public class LastResultCommand: CommandTranslations
         [Localized(nameof(ResultsText))]
         public static string ResultsText = "Results";
 
-        [Localized(nameof(WinResultText), ForceOverride = true)]
+        [Localized(nameof(WinResultText))]
         public static string WinResultText = "Winners: {0}";
+
+        [Localized(nameof(WinReasonText))]
+        public static string WinReasonText = "Reason: {0}";
     }
 }

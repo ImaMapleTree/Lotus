@@ -50,7 +50,7 @@ public class Medic: Crewmate
         if (Game.State is not GameState.Roaming) return;
         if (guardedPlayer != target.PlayerId) return;
 
-        if (interaction.Intent() is not (IHostileIntent or IFatalIntent)) return;
+        if (interaction.Intent is not (IHostileIntent or IFatalIntent)) return;
         handle.Cancel();
         Game.MatchData.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, killer));
     }

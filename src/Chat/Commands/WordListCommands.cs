@@ -1,34 +1,25 @@
-using System.Linq;
-using HarmonyLib;
 using Lotus.Managers;
-using Lotus.Utilities;
+using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
+using VentLib.Utilities;
 
 namespace Lotus.Chat.Commands;
 
 [Command(CommandFlag.HostOnly, "wordlist", "wl")]
-public class WordListCommands
+public class WordListCommands: CommandTranslations
 {
-    [Command("list")]
-    private static void ListWords(PlayerControl source)
-    {
-        ChatHandler.Send(source, ChatManager.BannedWords.Select((w, i) => $"{i+1}) {w}").Join(delimiter: "\n"));
-    }
-
-    [Command("add")]
-    private static void AddWord(PlayerControl source, CommandContext context, string word)
-    {
-        ChatManager.AddWord(word);
-    }
-
     [Command("reload")]
     private static void Reload(PlayerControl source)
     {
-        ChatManager.Reload();
-        ChatHandler.Send(source, "Successfully Reloaded Wordlist");
+        string? exception = PluginDataManager.ChatManager.Reload();
+        if (exception != null) ErrorMsg(exception).Send(source);
+        else SuccessMsg("Success Reloading").Send(source);
     }
 
     private static ChatManager ChatManager => PluginDataManager.ChatManager;
 
+    private static ChatHandler SuccessMsg(string message) => ChatHandler.Of(message, title: Color.green.Colorize("Success")).LeftAlign();
+
+    private static ChatHandler ErrorMsg(string message) => ChatHandler.Of(message, title: CommandError).LeftAlign();
 }

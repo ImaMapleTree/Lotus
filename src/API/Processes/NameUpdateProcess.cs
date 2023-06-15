@@ -1,12 +1,9 @@
 using System.Collections.Generic;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API.Odyssey;
-using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Extensions;
-using Lotus.Logging;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Debug.Profiling;
@@ -22,6 +19,9 @@ public class NameUpdateProcess
     internal static bool Paused;
     private static Queue<PlayerControl> _players = new();
 
+    private static int _forceFixCount;
+    private static readonly HashSet<byte> ForceFixedPlayers = new();
+
     static NameUpdateProcess()
     {
         Hooks.GameStateHooks.GameStartHook.Bind(NameUpdateProcessHookKey, _ => Game.GetAllPlayers().ForEach(p => _players.Enqueue(p)));
@@ -29,6 +29,11 @@ public class NameUpdateProcess
         {
             if (!AmongUsClient.Instance.AmHost) return;
             Paused = false;
+            Async.Schedule(() =>
+            {
+                ForceFixedPlayers.Clear();;
+                _forceFixCount = _players.Count;
+            }, 1f);
             NameUpdateLoop();
         });
         Hooks.GameStateHooks.RoundEndHook.Bind(NameUpdateProcessHookKey, _ => Paused = true);
@@ -62,12 +67,14 @@ public class NameUpdateProcess
         allPlayers.ForEach(p =>
         {
             nameModel.RenderFor(p);
-            updated |= nameModel.Updated();
+            updated |= (nameModel.Updated() && !player.IsAlive());
         });
         sample.Stop();
 
         Async.Schedule(NameUpdateLoop, 0.1f / allPlayers.Length);
-        if (!updated || player.IsAlive()) return;
+        if (!updated)
+            if (player.IsAlive() || _forceFixCount-- <= 0 || ForceFixedPlayers.Contains(player.PlayerId)) return;
+        ForceFixedPlayers.Add(player.PlayerId);
         player.SetChatName(player.name);
     }
 

@@ -84,6 +84,7 @@ public class VentLibMenu: MonoBehaviour, IBaseOptionMenuComponent
             maxPacketSizeLabel.text = "Max Packet Size";
             maxPacketSizeValue.text = NetworkRules.MaxPacketSize.ToString();
             allowLobbySendingText.text = "Open Rooms To Discovery";
+            allowLobbySendingText.color = Color.white;
         }, 0.00001f);
     }
 

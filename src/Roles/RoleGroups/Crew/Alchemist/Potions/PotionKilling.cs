@@ -19,13 +19,13 @@ public class PotionKilling: Potion
 
     public override string Name() => PotionName;
 
-    public override Color Color() => FactionInstances.TheUndead.FactionColor();
+    public override Color Color() => FactionInstances.TheUndead.Color;
 
     public override bool Use(PlayerControl user)
     {
         List<PlayerControl> sortedPlayers = user.GetPlayersInAbilityRangeSorted();
         if (sortedPlayers.Count == 0) return false;
-        user.InteractWith(sortedPlayers[0], DirectInteraction.FatalInteraction.Create(user.GetCustomRole()));
+        user.InteractWith(sortedPlayers[0], LotusInteraction.FatalInteraction.Create(user.GetCustomRole()));
         return true;
     }
 }

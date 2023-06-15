@@ -65,7 +65,7 @@ public class Retributionist : NeutralKillingBase
     {
         if (retributionLimit != -1 && remainingRevenges == 0) return;
         if (revengeDuration.NotReady()) return;
-        if (interaction.Intent() is not (IFatalIntent or Unstoppable.UnstoppableIntent)) return;
+        if (interaction.Intent is not (IFatalIntent or Unstoppable.UnstoppableIntent)) return;
 
         remainingRevenges--;
         switch (interaction)
@@ -98,10 +98,10 @@ public class Retributionist : NeutralKillingBase
         Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(randomVent.Id).Send(MyPlayer.GetClientId()), NetUtils.DeriveDelay(1.1f));
     }
 
-    [RoleAction(RoleActionType.RoundEnd)]
+    [RoleAction(RoleActionType.MeetingCalled)]
     private void CheckRevenge()
     {
-        if (attacker == null) return;
+        if (!MyPlayer.IsAlive() || attacker == null) return;
         remote?.Delete();
         remote = null;
         attacker.InteractWith(MyPlayer, new UnblockedInteraction(new FatalIntent(true), attacker.GetCustomRole()));

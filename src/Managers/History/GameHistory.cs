@@ -13,6 +13,7 @@ namespace Lotus.Managers.History;
 public class GameHistory
 {
     public List<FrozenPlayer> LastWinners { get; internal set; } = new();
+    public List<FrozenPlayer> AdditionalWinners { get; internal set; } = new();
     public List<PlayerHistory>? PlayerHistory;
     public readonly List<IHistoryEvent> Events = new();
 

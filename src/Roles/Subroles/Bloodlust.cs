@@ -48,7 +48,7 @@ public class Bloodlust: Subrole
     private bool TryKill(PlayerControl target)
     {
         if (!requiresBaseKillMethod) return false;
-        InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this));
+        InteractionResult result = MyPlayer.InteractWith(target, LotusInteraction.FatalInteraction.Create(this));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }

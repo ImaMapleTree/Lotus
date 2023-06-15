@@ -3,12 +3,12 @@ using Lotus.Roles.Subroles;
 
 namespace Lotus.Roles.Interfaces;
 
-public interface IVariableSubrole
+public interface IVariantSubrole
 {
     [SuppressMessage("ReSharper", "SuspiciousTypeConversion.Global")]
     public static Subrole PickAssignedRole(Subrole baseRole)
     {
-        if (baseRole is not IVariableSubrole variableRole) return baseRole;
+        if (baseRole is not IVariantSubrole variableRole) return baseRole;
         return variableRole.AssignVariation() ? variableRole.Variation() : baseRole;
     }
 

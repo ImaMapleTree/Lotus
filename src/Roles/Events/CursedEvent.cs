@@ -27,6 +27,6 @@ public class CursedDeathEvent : DeathEvent
     public override string Message()
     {
         string baseMessage = $"{Game.GetName(Player())}'s curse";
-        return $"{Game.GetName(Player())}'s curse {Instigator().Map(klr => baseMessage + $"from {Game.GetName(klr)}").OrElse("")} got the best of them.";
+        return $"{Game.GetName(Player())}'s curse {Instigator().Map(klr => baseMessage + $"from {klr.Name}").OrElse("")} got the best of them.";
     }
 }

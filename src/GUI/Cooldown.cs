@@ -1,6 +1,5 @@
 using System;
 using System.Globalization;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Interfaces;
 using UnityEngine;
 
@@ -11,7 +10,7 @@ public class Cooldown: ICloneOnSetup<Cooldown>
     public float Duration;
     private float remaining;
     private DateTime lastTick = DateTime.Now;
-    private Action action;
+    private Action? action;
 
     public Cooldown() {}
 

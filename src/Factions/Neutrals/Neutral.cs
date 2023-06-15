@@ -24,7 +24,7 @@ public class Neutral : Faction<Neutral>
 
     public override bool CanSeeRole(PlayerControl player) => RoleOptions.NeutralOptions.KnowAlliedRoles;
 
-    public override Color FactionColor() => Color.gray;
+    public override Color Color => Color.gray;
 
     public override Relation RelationshipOther(IFaction other) => Relation.None;
 }

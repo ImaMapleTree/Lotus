@@ -46,10 +46,11 @@ public class Romantic: Subrole
 
     protected override void PostSetup()
     {
+        DisplayOrder = 100;
         winDelegateRemote = Game.GetWinDelegate().AddSubscriber(InterceptWinCondition);
         CustomRole myRole = MyPlayer.GetCustomRole();
         originalFaction = myRole.Faction;
-        myRole.Faction = myFaction = new RomanticFaction();
+        myRole.Faction = myFaction = new RomanticFaction(originalFaction);
     }
 
     [RoleAction(RoleActionType.OnPet, priority: Priority.VeryHigh)]
@@ -74,7 +75,7 @@ public class Romantic: Subrole
     public void InterceptActions(PlayerControl _, PlayerControl target, Interaction interaction, ActionHandle handle)
     {
         if (protectionDuration.IsReady()) return;
-        if (interaction.Intent() is not IFatalIntent) return;
+        if (interaction.Intent is not IFatalIntent) return;
         if (target.PlayerId == partner) handle.Cancel();
     }
 
@@ -121,7 +122,7 @@ public class Romantic: Subrole
         myFaction.Partner = votedId;
         RHandler(Translations.ConfirmedPartnerMessage.Formatted(player.name)).Send(MyPlayer);
 
-        string partnerText = TranslationUtil.Colorize(Translations.PartnerText.Formatted(player.name), RoleColor);
+        string partnerText = TranslationUtil.Colorize(Translations.PartnerIndicator.Formatted(player.name), RoleColor);
         NameComponent nameComponent = new(new LiveString(partnerText), Game.IgnStates, ViewMode.Replace, MyPlayer);
         player.NameModel().GCH<NameHolder>().Add(nameComponent);
         LiveString protectionIndicator = new(() => protectionDuration.NotReady() ? RoleColor.Colorize(Identifier()) : "");
@@ -129,7 +130,7 @@ public class Romantic: Subrole
 
         if (!targetKnowsRomantic) return;
 
-        string myText = TranslationUtil.Colorize(Translations.PartnerText.Formatted(MyPlayer.name), RoleColor);
+        string myText = TranslationUtil.Colorize(Translations.PartnerIndicator.Formatted(MyPlayer.name), RoleColor);
         nameComponent = new NameComponent(new LiveString(myText), Game.IgnStates, ViewMode.Replace, player);
         MyPlayer.NameModel().GCH<NameHolder>().Add(nameComponent);
         RHandler(Translations.NotifyPartnerMessage.Formatted(MyPlayer.name)).Send(player);
@@ -143,9 +144,14 @@ public class Romantic: Subrole
 
     private void InterceptWinCondition(WinDelegate winDelegate)
     {
-        if (winDelegate.GetWinners().All(w => w.PlayerId != partner)) return;
+        Players.PlayerById(partner).IfPresent(p => p.GetSubroles().Insert(0, new Partner()));
+        if (winDelegate.GetWinners().All(w => w.PlayerId != partner))
+        {
+            winDelegate.RemoveWinner(MyPlayer);
+            return;
+        }
         if (!Players.FindPlayerById(partner)?.IsAlive() ?? true) return;
-        winDelegate.GetWinners().Add(MyPlayer);
+        winDelegate.AddAdditionalWinner(MyPlayer);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -173,8 +179,10 @@ public class Romantic: Subrole
     [Localized(nameof(Romantic))]
     private static class Translations
     {
-        [Localized(nameof(PartnerText), ForceOverride = true)]
-        public static string PartnerText = "Partner::0 {0} ♥::0";
+        [Localized(nameof(PartnerText))]
+        public static string PartnerText = "Partner ♥";
+
+        public static string PartnerIndicator = "{0} ♥::0";
 
         [Localized(nameof(RomanticMessage))]
         public static string RomanticMessage = "You are a Romantic. You must select a partner by the end of this meeting or die! To select a partner, vote them twice! Afterwards, you may vote normally.";

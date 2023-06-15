@@ -62,11 +62,11 @@ public abstract class Subrole: CustomRole, ISubrole
         return anyMatchRoles || FactionCompatabilityMode is not CompatabilityMode.Whitelisted;
     }
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier.RoleFlags(RoleFlag.IsSubrole);
+    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier.RoleFlags(RoleFlag.IsSubrole).Faction(FactionInstances.Modifiers);
 
     protected GameOptionBuilder AddRestrictToCrew(GameOptionBuilder builder, bool defaultOn = false)
     {
-        return builder.SubOption(sub => sub.Name($"Restricted to {FactionInstances.Crewmates.FactionColor().Colorize(FactionInstances.Crewmates.Name())}")
+        return builder.SubOption(sub => sub.Name($"Restricted to {FactionInstances.Crewmates.Color.Colorize(FactionInstances.Crewmates.Name())}")
             .Key("Restricted to Crew")
             .AddOnOffValues(defaultOn)
             .BindBool(b =>
