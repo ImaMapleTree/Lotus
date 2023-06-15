@@ -98,6 +98,7 @@ public class Sheriff : Crewmate
     [RoleAction(RoleActionType.OnPet)]
     public bool TryKillWithPet(ActionHandle handle)
     {
+
         VentLogger.Trace("Sheriff Shoot Ability (Pet)", "SheriffAbility");
         handle.Cancel();
         if (isSheriffDesync || !shootCooldown.IsReady() || !HasShots()) return false;
