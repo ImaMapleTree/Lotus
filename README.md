@@ -104,10 +104,11 @@ Project: Lotus (The Mod) is considered a Host Only Mod (or, Host Only Environmen
 | Function                         | Command                | Aliases      |
 | -------------------------------- | ---------------------- | ------------ |
 | Shows all players and their IDs  | `/id`                  |              |
-| Displays message to ALL players  | `/say [msg]`           | `/s`         |
+| Displays message to ALL players  | `/say [msg]`           | `/s [msg]`   |
 | Kicks the provided player        | `/kick [name]`         | `/kick [id]` |
 | Bans the provided player         | `/ban [name]`          | `/ban [id]`  |
 | Output log to desktop            | `/dump`                | `Ctrl`+`F1`  |
+| Reloads local title files        | `/tload`               |              |
 
 
 ### All Clients
@@ -116,7 +117,7 @@ Project: Lotus (The Mod) is considered a Host Only Mod (or, Host Only Environmen
 | Function                           | Command       | Aliases            |
 |------------------------------------|---------------|--------------------|
 | Show Game Results                  | `/lastresult` | `/l`               |
-| Show Winner                        | `/winner` or  | `/win`             |
+| Show Winner                        | `/winner`     | `/w`               |
 
 #### Configurable Commands
 | Function                           | Command                            |
@@ -130,7 +131,7 @@ Project: Lotus (The Mod) is considered a Host Only Mod (or, Host Only Environmen
 |------------------------------------|----------------------|-------------|
 | Show Active Roles Settings         | `/now roles`         | `/n r`      |
 | Show Active Settings               | `/now`               | `/n`        |
-| Show % for All Roles > 0%          | `/perc`              |             |
+| Show % for All Roles > 0%          | `/perc`              | `/p`        |
 | Show Role Description              | `/roles [role]`      | `/r [role]` |
 
 
