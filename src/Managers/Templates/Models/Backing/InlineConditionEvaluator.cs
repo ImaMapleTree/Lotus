@@ -24,7 +24,7 @@ internal class InlineConditionEvaluator
     private const string MCH = "[Matches]";
     private const string DMCH = "[!Matches]";
 
-    private static Regex _regex = new($@"(.*?)\s*({CEQ}|{CNE}|{EQ}|{NE}|{GT}|{LT}|{LTE}|{GTE}|\{CTN}|\{DCTN}|\{DMCH}|\{MCH})\s*(.*)");
+    private static Regex _regex = new($@"(.*?)\s*({CEQ}|{CNE}|{EQ}|{NE}|{GTE}|{LTE}|{LT}|{GT}|\{CTN}|\{DCTN}|\{DMCH}|\{MCH})\s*(.*)");
 
 
     public static bool Evaluate(string inlineCondition, object? obj)

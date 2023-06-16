@@ -150,7 +150,7 @@ public class AdminOptions
         [Localized("HostGM")]
         public static string HostGmText = "Host GM";
 
-        [Localized("AutoKick", ForceOverride = true)]
+        [Localized("AutoKick")]
         public static string AutoKickText = "Chat Auto Kick";
 
         [Localized("AutoKickNoFriendcode")]

@@ -55,7 +55,6 @@ public class Warlock : Shapeshifter
         }
     }
 
-
     [RoleAction(RoleActionType.Shapeshift)]
     private void WarlockKillCheck()
     {
@@ -87,7 +86,7 @@ public class Warlock : Shapeshifter
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
+        AddShapeshiftOptions(base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Cursed Players Kill Immediately")
                 .BindBool(b => cursedPlayersKillImmediately = b)
                 .AddOnOffValues()
@@ -96,7 +95,7 @@ public class Warlock : Shapeshifter
                     .BindBool(b => limitedCurseKillRange = b)
                     .AddOnOffValues(false)
                     .Build())
-                .Build());
+                .Build()));
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).OptionOverride(new IndirectKillCooldown(KillCooldown, () => !Shapeshifted));

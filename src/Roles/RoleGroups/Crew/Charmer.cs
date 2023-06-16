@@ -63,7 +63,7 @@ public class Charmer: Crewmate
     public Cooldown charmingCooldown;
 
 
-    [NewOnSetup] private Dictionary<byte, (Remote<NameComponent>, Remote<IStatus>, IFaction)> charmedPlayers = new();
+    [NewOnSetup] private Dictionary<byte, (Remote<NameComponent>, Remote<IStatus>?, IFaction)> charmedPlayers = new();
 
     public override bool HasTasks() => !usesKillButton;
 
@@ -106,7 +106,7 @@ public class Charmer: Crewmate
 
         CustomRole playerRole = player.GetCustomRole();
         IStatus status = CustomStatus.Of(Translations.CharmedText).Description(Translations.CharmedDescription).Color(_charmedColor).Build();
-        charmedPlayers[player.PlayerId] = (player.NameModel().GCH<NameHolder>().Insert(0, component), MatchData.GetStatuses(player).Add(status), playerRole.Faction);
+        charmedPlayers[player.PlayerId] = (player.NameModel().GCH<NameHolder>().Insert(0, component), MatchData.AddStatus(player, status, MyPlayer), playerRole.Faction);
         playerRole.Faction = _charmedFaction;
         _charmedPlayers.Increment(MyPlayer.UniquePlayerId());
 
@@ -145,9 +145,9 @@ public class Charmer: Crewmate
     [RoleAction(RoleActionType.Disconnect)]
     public void UncharmPlayer(PlayerControl player)
     {
-        if (!charmedPlayers.Remove(player.PlayerId, out (Remote<NameComponent>, Remote<IStatus>, IFaction) tuple)) return;
+        if (!charmedPlayers.Remove(player.PlayerId, out (Remote<NameComponent>, Remote<IStatus>?, IFaction) tuple)) return;
         tuple.Item1.Delete();
-        tuple.Item2.Delete();
+        tuple.Item2?.Delete();
         player.GetCustomRole().Faction = tuple.Item3;
     }
 

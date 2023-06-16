@@ -38,6 +38,9 @@ public class FireWorks: Shapeshifter
         ShapeshiftDuration = 5f;
     }
 
+    [RoleAction(RoleActionType.Attack)]
+    public override bool TryKill(PlayerControl target) => base.TryKill(target);
+
     [RoleAction(RoleActionType.FixedUpdate)]
     public void FireworkImpostorCounter()
     {
@@ -52,7 +55,7 @@ public class FireWorks: Shapeshifter
         else if (totalFireworks is -1 or >= 1)
         {
             fireWorkLocations.Add(MyPlayer.GetTruePosition());
-            totalFireworks--;
+            if (totalFireworks != -1) totalFireworks--;
         }
     }
 

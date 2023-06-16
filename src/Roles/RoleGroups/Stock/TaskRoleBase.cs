@@ -22,6 +22,7 @@ namespace Lotus.Roles.RoleGroups.Stock;
 public abstract class TaskRoleBase: CustomRole, IOverridenTaskHolderRole
 {
     public int TotalTasks => initialized ? tasks : taskSupplier?.Invoke() ?? 0;
+    public int CompleteTasks => TasksComplete;
     public int TasksComplete;
     public bool HasAllTasksComplete => TasksComplete >= TotalTasks;
 

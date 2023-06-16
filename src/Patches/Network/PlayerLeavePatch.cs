@@ -28,6 +28,7 @@ class OnPlayerLeftPatch
         if (Game.State is GameState.InLobby)
         {
             PlayerJoinPatch.CheckAutostart();
+            Hooks.PlayerHooks.PlayerDisconnectHook.Propagate(new PlayerHookEvent(data.Character));
             return;
         }
 

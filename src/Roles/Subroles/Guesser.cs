@@ -11,6 +11,7 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Internals.Trackers;
 using VentLib.Localization.Attributes;
+using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -21,11 +22,15 @@ public class Guesser: CustomRole
 {
     private MeetingPlayerSelector voteSelector = new();
 
+    private int guessesPerMeeting;
     private bool hasMadeGuess;
     private byte guessingPlayer = byte.MaxValue;
     private bool skippedVote;
     private CustomRole? guessedRole;
-    private string? guesserMessage;
+    private int guessesThisMeeting;
+
+    protected int CorrectGuesses;
+    protected string? GuesserMessage;
 
     [RoleAction((RoleActionType.RoundStart))]
     [RoleAction((RoleActionType.RoundEnd))]
@@ -36,7 +41,8 @@ public class Guesser: CustomRole
         guessingPlayer = byte.MaxValue;
         skippedVote = false;
         guessedRole = null;
-        guesserMessage = null;
+        GuesserMessage = null;
+        guessesThisMeeting = 0;
     }
 
     [RoleAction(RoleActionType.MyVote)]
@@ -68,6 +74,13 @@ public class Guesser: CustomRole
         }
 
         if (!hasMadeGuess) return;
+
+        if (++guessesThisMeeting < guessesPerMeeting)
+        {
+            hasMadeGuess = false;
+            voteSelector.Reset();
+        }
+
         PlayerControl? guessed = Players.FindPlayerById(guessingPlayer);
         if (guessed == null || guessedRole == null)
         {
@@ -78,21 +91,23 @@ public class Guesser: CustomRole
 
         if (guessed.GetCustomRole().GetType() == guessedRole.GetType())
         {
-            guesserMessage = Translations.GuessAnnouncementMessage.Formatted(guessed.name);
+            GuesserMessage = Translations.GuessAnnouncementMessage.Formatted(guessed.name);
             MyPlayer.InteractWith(guessed, LotusInteraction.FatalInteraction.Create(this));
+            CorrectGuesses++;
         }
-        else
-        {
-            guesserMessage = Translations.GuessAnnouncementMessage.Formatted(MyPlayer.name);
-            MyPlayer.InteractWith(MyPlayer, LotusInteraction.FatalInteraction.Create(this));
-        }
+        else HandleBadGuess();
     }
 
+    protected virtual void HandleBadGuess()
+    {
+        GuesserMessage = Translations.GuessAnnouncementMessage.Formatted(MyPlayer.name);
+        MyPlayer.InteractWith(MyPlayer, LotusInteraction.FatalInteraction.Create(this));
+    }
 
     [RoleAction(RoleActionType.MeetingEnd, triggerAfterDeath: true)]
     public void CheckRevive()
     {
-        if (guesserMessage != null) GuesserHandler(guesserMessage).Send();
+        if (GuesserMessage != null) GuesserHandler(GuesserMessage).Send();
     }
 
     [RoleAction(RoleActionType.Chat)]
@@ -126,6 +141,13 @@ public class Guesser: CustomRole
         GuesserHandler(Translations.PickedRoleText.Formatted(Players.FindPlayerById(guessingPlayer)?.name, guessedRole.RoleName)).Send(MyPlayer);
     }
 
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
+        base.RegisterOptions(optionStream)
+            .SubOption(sub => sub.KeyName("Guesses per Meeting", Translations.Options.GuesserPerMeeting)
+                .AddIntRange(1, 10, 1, 0)
+                .BindInt(i => guessesPerMeeting = i)
+                .Build());
+
     protected ChatHandler GuesserHandler(string message) => ChatHandler.Of(message, RoleColor.Colorize(Translations.GuesserTitle)).LeftAlign();
 
     [Localized(nameof(Guesser))]
@@ -154,6 +176,12 @@ public class Guesser: CustomRole
 
         [Localized(nameof(GuessAnnouncementMessage))]
         public static string GuessAnnouncementMessage = "The guesser has made a guess. {0} died.";
+
+        [Localized(ModConstants.Options)]
+        public static class Options
+        {
+            public static string GuesserPerMeeting = "Guesses per Meeting";
+        }
     }
 
 

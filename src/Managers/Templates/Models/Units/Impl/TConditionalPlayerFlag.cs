@@ -32,10 +32,10 @@ public class TConditionalPlayerFlag: CommonConditionalUnit
             switch (flag)
             {
                 case PlayerFlag.HasModifier:
-                    if (player.GetSubroles().IsEmpty()) return false;
+                    if (!player.GetSubroles().IsEmpty()) return true;
                     break;
                 case PlayerFlag.HasNoModifier:
-                    if (!player.GetSubroles().IsEmpty()) return false;
+                    if (player.GetSubroles().IsEmpty()) return true;
                     break;
                 default:
                     VentLogger.Warn($"PlayerFlag {flag} is not properly setup and will not result in a proper conditional validation.", "VerifyPlayerFlags");

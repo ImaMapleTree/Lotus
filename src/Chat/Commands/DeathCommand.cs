@@ -1,4 +1,5 @@
-﻿using Lotus.API.Odyssey;
+﻿using System.Linq;
+using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.Extensions;
 using Lotus.Managers.History.Events;
@@ -17,6 +18,11 @@ public class DeathCommand: CommandTranslations, ICommandReceiver
 {
     public void Receive(PlayerControl source, CommandContext context)
     {
+        if (!Game.MatchData.FrozenPlayers.Any())
+        {
+            ChatHandlers.InvalidCmdUsage(NoPreviousGameText).Send(source);
+            return;
+        }
         if (source.IsAlive() && Game.State is not GameState.InLobby)
         {
             ChatHandlers.InvalidCmdUsage().LeftAlign().Message(Translations.CannotViewDeathWhileAlive).Send(source);

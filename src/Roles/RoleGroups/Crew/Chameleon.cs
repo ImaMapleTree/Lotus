@@ -78,7 +78,7 @@ public class Chameleon: Engineer
     [Localized(nameof(Chameleon))]
     public static class Translations
     {
-        [Localized(nameof(HiddenText), ForceOverride = true)]
+        [Localized(nameof(HiddenText))]
         public static string HiddenText = "Hidden::0 {0}";
 
         [Localized(nameof(TimesInvisibleStatistic))]

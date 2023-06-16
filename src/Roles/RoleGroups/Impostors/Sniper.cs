@@ -63,7 +63,6 @@ public class Sniper: Shapeshifter
         foreach (PlayerControl target in Game.GetAllPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && p.Relationship(MyPlayer) is not Relation.FullAllies))
         {
             DevLogger.Log(target.name);
-
             Vector3 targetPos = target.transform.position - (Vector3)MyPlayer.GetTruePosition();
             Vector3 targetDirection = targetPos.normalized;
             DevLogger.Log($"Target direction: {targetDirection}");
@@ -74,10 +73,10 @@ public class Sniper: Shapeshifter
             if (dotProduct < 0.98 || (error >= 1.0 && preciseShooting)) continue;
             float distance = Vector2.Distance(MyPlayer.transform.position, target.transform.position);
             InteractionResult result = MyPlayer.InteractWith(target, new RangedInteraction(new FatalIntent(true), distance, this));
-            if (result == InteractionResult.Halt) continue;
+            if (result is InteractionResult.Halt) continue;
             kills++;
             MyPlayer.RpcMark();
-            if (kills > playerPiercing) break;
+            if (kills > playerPiercing && playerPiercing != -1) break;
         }
 
         if (kills > 0 && refundOnKill) currentBulletCount++;

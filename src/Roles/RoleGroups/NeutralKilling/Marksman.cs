@@ -32,6 +32,7 @@ public class Marksman : NeutralKillingBase
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
+        MyPlayer.RpcMark(target);
         InteractionResult result = MyPlayer.InteractWith(target, new LotusInteraction(new FatalIntent(true), this));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         if (result is InteractionResult.Halt) return false;

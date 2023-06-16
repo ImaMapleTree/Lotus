@@ -47,7 +47,7 @@ public class LastResultCommand: CommandTranslations
     [Command(CommandFlag.LobbyOnly, "last", "l", "lastresult")]
     public static void LastGame(PlayerControl source, CommandContext context)
     {
-        if (PlayerHistories == null) ErrorHandler(source).Message(LRTranslations.NoPreviousGameText).Send();
+        if (PlayerHistories == null) ErrorHandler(source).Message(NoPreviousGameText).Send();
         else if (context.Args.Length == 0) GeneralResults(source);
         else PlayerResults(source, context.Join());
     }
@@ -161,9 +161,6 @@ public class LastResultCommand: CommandTranslations
     [Localized("LastResults")]
     public static class LRTranslations
     {
-        [Localized(nameof(NoPreviousGameText))]
-        public static string NoPreviousGameText = "No game played yet!";
-
         [Localized(nameof(RoleText))]
         public static string RoleText = "<b>Role:</b> {0}";
 

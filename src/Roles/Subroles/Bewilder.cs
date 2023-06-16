@@ -36,7 +36,7 @@ public class Bewilder: Subrole
         killer.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent(Identifier(), RoleColor, GameState.Roaming, killer));
 
         CustomStatus status = CustomStatus.Of(Translations.BewilderedStatus).Description(Translations.BewilderedDescription).Color(RoleColor).StatusFlags(StatusFlag.Hidden).Build();
-        MatchData.GetStatuses(killer).Add(status);
+        MatchData.AddStatus(killer, status, MyPlayer);
     }
 
 

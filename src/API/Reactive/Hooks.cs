@@ -22,6 +22,7 @@ public class Hooks
     {
         public static readonly Hook<WinnersHookEvent> WinnersHook = new SimpleHook<WinnersHookEvent>();
         public static readonly Hook<LosersHookEvent> LosersHook = new SimpleHook<LosersHookEvent>();
+        public static readonly Hook<EmptyHookEvent> ForceEndGameHook = new SimpleHook<EmptyHookEvent>();
     }
 
     public static class NetworkHooks

@@ -108,7 +108,6 @@ public class ChatHandler
 
             title ??= _defaultTitle;
 
-            DevLogger.Log($"Player: {player} || NUll: {player == null}");
             if (player == null) MassSend(sender, message, title, leftAligned);
             else if (player.IsHost()) SendToHost(sender, message, title, leftAligned);
             else if (title.Length < _maxMessagePacketSize) InternalSendLM(sender, player, message, title, name);
@@ -156,7 +155,7 @@ public class ChatHandler
 
             RpcV3.Mass()
                 .Start(sender.NetId, RpcCalls.SetName)
-                .Write(title)
+                .Write(title.Replace("@n", "\n"))
                 .End()
                 .Start(sender.NetId, RpcCalls.SendChat)
                 .Write(recipient.IsModded() ? subMessage : subMessage.RemoveHtmlTags())
@@ -171,7 +170,7 @@ public class ChatHandler
 
         RpcV3.Mass()
             .Start(sender.NetId, RpcCalls.SetName)
-            .Write(title)
+            .Write(title.Replace("@n", "\n"))
             .End()
             .Start(sender.NetId, RpcCalls.SendChat)
             .Write(recipient.IsModded() ? message : message.RemoveHtmlTags())
@@ -201,7 +200,7 @@ public class ChatHandler
                 .Write(subTitle)
                 .End()
                 .Start(sender.NetId, RpcCalls.SendChat)
-                .Write(recipient.IsModded() ? message : message.RemoveHtmlTags())
+                .Write(recipient.IsModded() ? message.Replace("@n", "\n") : message.RemoveHtmlTags().Replace("@n", "\n"))
                 .End()
                 .Start(sender.NetId, RpcCalls.SetName)
                 .Write(originalName)
@@ -216,7 +215,7 @@ public class ChatHandler
             .Write(title)
             .End()
             .Start(sender.NetId, RpcCalls.SendChat)
-            .Write(recipient.IsModded() ? message : message.RemoveHtmlTags())
+            .Write(recipient.IsModded() ? message.Replace("@n", "\n") : message.RemoveHtmlTags().Replace("@n", "\n"))
             .End()
             .Start(sender.NetId, RpcCalls.SetName)
             .Write(originalName)

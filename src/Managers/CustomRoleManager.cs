@@ -22,6 +22,7 @@ using VentLib.Options.Game;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using Medium = Lotus.Roles.RoleGroups.Crew.Medium;
+using Pirate = Lotus.Roles.RoleGroups.Neutral.Pirate;
 
 namespace Lotus.Managers;
 
@@ -153,7 +154,7 @@ public static class CustomRoleManager
         public Creeper Creeper = new Creeper();
         public Disperser Disperser = new Disperser();
         public Escapist Escapist = new Escapist();
-        public FireWorks FireWorks = new FireWorks();
+        /*public FireWorks FireWorks = new FireWorks();*/
         public Freezer Freezer = new Freezer();
         public Grenadier Grenadier = new Grenadier();
         public IdentityThief IdentityThief = new IdentityThief();
@@ -252,14 +253,15 @@ public static class CustomRoleManager
         private CustomRole NEUTRAL_PASSIVE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>❀ Neutral Passive ❀</size>").Color(ModConstants.Palette.PassiveColor).Tab(DefaultTabs.NeutralTab).Build());
 
         public Amnesiac Amnesiac = new Amnesiac();
-        public Archangel Archangel = new Archangel();
+        /*public Archangel Archangel = new Archangel();*/
         public Copycat Copycat = new Copycat();
         public Executioner Executioner = new Executioner();
-        public GuardianAngel GuardianAngel = new GuardianAngel();
+        /*public GuardianAngel GuardianAngel = new GuardianAngel();*/
         public Hacker Hacker = new Hacker();
         public Jester Jester = new Jester();
         public Opportunist Opportunist = new Opportunist();
         public Phantom Phantom = new Phantom();
+        public Pirate Pirate = new Pirate();
         public Postman Postman = new Postman();
         public SchrodingersCat SchrodingersCat = new SchrodingersCat();
         public Survivor Survivor = new Survivor();

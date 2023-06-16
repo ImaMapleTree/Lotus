@@ -6,6 +6,7 @@ using Lotus.Extensions;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
+using Lotus.Statuses;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -27,6 +28,9 @@ public class Diseased: Subrole
         killer.GetCustomRole().SyncOptions();
         string name = killer.name;
         killer.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent(Identifier(), RoleColor, GameState.Roaming, killer));
+
+        CustomStatus status = CustomStatus.Of(RoleName).Description(Translations.DiseasedAffectDescription).Color(RoleColor).Build();
+        MatchData.AddStatus(killer, status, MyPlayer);
     }
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

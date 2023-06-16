@@ -44,11 +44,10 @@ public class Transporter : Crewmate
     }
 
     [RoleAction(RoleActionType.OnPet)]
-    public void TransportSelect(PlayerControl target, ActionHandle handle)
+    public void TransportSelect(ActionHandle handle)
     {
         if (this.transportsRemaining == 0 || !transportCooldown.IsReady()) return;
 
-        VentLogger.Trace($"{MyPlayer.GetNameWithRole()} => Selected ({target.GetNameWithRole()})", "Transporter");
         List<PlayerControl> players = Players.GetPlayers(PlayerFilter.Alive).ToList();
         if (players.Count < 2) return;
 
@@ -100,7 +99,6 @@ public class Transporter : Crewmate
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .VanillaRole(RoleTypes.Crewmate)
-            .DesyncRole(RoleTypes.Shapeshifter)
             .RoleColor("#00EEFF");
 
 

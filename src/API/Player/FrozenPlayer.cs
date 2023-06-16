@@ -6,6 +6,7 @@ using Lotus.Managers.History.Events;
 using Lotus.Roles;
 using Lotus.Statuses;
 using Lotus.Utilities;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 using static GameData;
 
@@ -19,7 +20,7 @@ public class FrozenPlayer
     public string ColorName;
     public CustomRole Role;
     public List<CustomRole> Subroles;
-    public List<IStatus> Statuses;
+    public RemoteList<IStatus> Statuses = new RemoteList<IStatus>();
     public uint Level;
     public PlayerOutfit Outfit;
     public ulong GameID;

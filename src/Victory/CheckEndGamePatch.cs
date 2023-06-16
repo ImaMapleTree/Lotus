@@ -4,6 +4,7 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.Logging;
 using Lotus.Managers.History;
 using Lotus.Managers.Hotkeys;
@@ -35,6 +36,7 @@ public class CheckEndGamePatch
                 ManualWin manualWin = new(new List<PlayerControl>(), ReasonType.HostForceEnd);
                 manualWin.Activate();
                 GameManager.Instance.LogicFlow.CheckEndCriteria();
+                Hooks.ResultHooks.ForceEndGameHook.Propagate(new EmptyHookEvent());
             });
         Hooks.PlayerHooks.PlayerDisconnectHook.Bind(nameof(CheckEndGamePatch), _ => ForceCheckEndGame());
     }

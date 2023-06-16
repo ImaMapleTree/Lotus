@@ -147,7 +147,7 @@ public class Swapper : Crewmate
     [Localized("Swapper")]
     internal static class SwapperTranslations
     {
-        [Localized(nameof(SwapperInfoMessage), ForceOverride = true)]
+        [Localized(nameof(SwapperInfoMessage))]
         public static string SwapperInfoMessage =
             "You are Swapper. To swap the votes received by two players, vote two separate players.\nYou may change the first swapped person by re-voting them.\nAdditionally, you may bypass this ability by initially skipping.";
 
@@ -160,7 +160,7 @@ public class Swapper : Crewmate
         [Localized(nameof(SwapperUnselectMessage))]
         public static string SwapperUnselectMessage = "You've unselected {0}.";
 
-        [Localized(nameof(SwapperPublicMessage), ForceOverride = true)]
+        [Localized(nameof(SwapperPublicMessage))]
         public static string SwapperPublicMessage = "Swapper has swapped the votes received by {0} and {1}!";
 
         [Localized(nameof(SwapperAbility))]

@@ -15,11 +15,11 @@ public class TemplateTriggers
     public static Dictionary<string, TriggerBinder> TriggerHooks = new()
     {
         { "PlayerDeath", (key, action) => Hooks.PlayerHooks.PlayerDeathHook.Bind(key, action, true) },
-        { "PlayerExiled", (key, action) => Hooks.PlayerHooks.PlayerExiledHook.Bind(key, action, true) },
         { "PlayerDisconnect", (key, action) => Hooks.PlayerHooks.PlayerDisconnectHook.Bind(key, action, true) },
         { "PlayerChat", (key, action) => Hooks.PlayerHooks.PlayerMessageHook.Bind(key, action, true) },
-        { "StatusReceived", (key, action) => Hooks.PlayerHooks.PlayerMessageHook.Bind(key, action, true) },
+        { "StatusReceived", (key, action) => Hooks.ModHooks.StatusReceivedHook.Bind(key, action, true) },
         { "TaskComplete", (key, action) => Hooks.PlayerHooks.PlayerTaskCompleteHook.Bind(key, action, true) },
+        { "ForceEndGame", (key, action) => Hooks.ResultHooks.ForceEndGameHook.Bind(key, action, true) },
     };
 
     public static Dictionary<Type, Func<IHookEvent, ResolvedTrigger>> TriggerResolvers = new()
@@ -30,9 +30,16 @@ public class TemplateTriggers
 
         { typeof(PlayerTaskHookEvent), he => ResultFromPlayerTaskHook((PlayerTaskHookEvent)he) },
 
-        { typeof(PlayerDeathHookEvent), he => ResultFromPlayerHook((PlayerHookEvent)he) },
+        { typeof(PlayerMurderHookEvent), he => ResultFromPlayerHook((PlayerDeathHookEvent)he) },
+        { typeof(PlayerDeathHookEvent), he => ResultFromPlayerHook((PlayerDeathHookEvent)he) },
         { typeof(PlayerHookEvent), he => ResultFromPlayerHook((PlayerHookEvent)he) },
+        { typeof(EmptyHookEvent), he => ResultFromEmptyHook((EmptyHookEvent)he) },
     };
+
+    public static ResolvedTrigger ResultFromEmptyHook(EmptyHookEvent _)
+    {
+        return new ResolvedTrigger { Player = PlayerControl.LocalPlayer, Data = PlayerControl.LocalPlayer.name };
+    }
 
     public static ResolvedTrigger ResultFromPlayerStatusHook(PlayerStatusReceivedHook playerHookEvent)
     {

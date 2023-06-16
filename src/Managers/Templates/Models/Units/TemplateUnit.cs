@@ -12,6 +12,7 @@ using Lotus.Extensions;
 using Lotus.Factions.Interfaces;
 using Lotus.Managers.Templates.Models.Backing;
 using Lotus.Roles;
+using Lotus.Roles.Interfaces;
 using Lotus.Roles.Subroles;
 using VentLib.Options;
 using VentLib.Utilities;
@@ -112,13 +113,9 @@ public class TemplateUnit
         { "Mods", ShowModifiers },
         { "ModsDescriptive", ModifierText },
         { "MyRole", player => MyRoleCommand.GenerateMyRoleText(((PlayerControl)player).GetCustomRole()) },
-        { "TasksComplete", QW(p => p.Data.Tasks.ToArray().Count(t => t.Complete).ToString() )},
-        { "TotalTasks", QW(p => p.Data.Tasks.Count.ToString() )},
-        { "TasksRemaining", QW(p =>
-        {
-            GameData.TaskInfo[] tasks = p.Data.Tasks.ToArray();
-            return (tasks.Count(t => t.Complete) - tasks.Count(t => !t.Complete)).ToString();
-        })},
+        { "TasksComplete", QW(p => (p.GetCustomRole() is ITaskHolderRole tr ? tr.CompleteTasks : -1).ToString() )},
+        { "TotalTasks", QW(p => (p.GetCustomRole() is ITaskHolderRole tr ? tr.TotalTasks : -1).ToString() )},
+        { "TasksRemaining", QW(p => (p.GetCustomRole() is ITaskHolderRole tr ? tr.TotalTasks - tr.CompleteTasks : -1).ToString())},
 
         { "Role_Name", role => ((CustomRole) role).RoleName },
         { "Role_Description", role => ((CustomRole) role).Description },

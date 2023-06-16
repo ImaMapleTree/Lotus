@@ -15,7 +15,7 @@ public class CustomStatus: IStatus
 
     public static CustomStatusBuilder Of(string name)
     {
-        return new CustomStatusBuilder();
+        return new CustomStatusBuilder(name);
     }
 
     public void Clear()
@@ -31,6 +31,11 @@ public class CustomStatus: IStatus
     public class CustomStatusBuilder
     {
         private CustomStatus status = new CustomStatus();
+
+        public CustomStatusBuilder(string name)
+        {
+            status.Name = name;
+        }
 
         public CustomStatusBuilder Name(string name)
         {

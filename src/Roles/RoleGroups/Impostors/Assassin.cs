@@ -29,4 +29,11 @@ public class Assassin: Guesser, ISabotagerRole
             .Faction(FactionInstances.Impostors)
             .RoleAbilityFlags(RoleAbilityFlag.IsAbleToKill)
             .VanillaRole(RoleTypes.Impostor);
+
+    private static class Translations
+    {
+        public static class Options
+        {
+        }
+    }
 }

@@ -112,7 +112,7 @@ public class Hacker: Engineer
         [Localized(ModConstants.Options)]
         internal static class HackerOptionTranslations
         {
-            [Localized(nameof(HackerSabotagePointAmount), ForceOverride = true)]
+            [Localized(nameof(HackerSabotagePointAmount))]
             public static string HackerSabotagePointAmount = "Points Needed to Win";
 
             [Localized(nameof(HackerCanVent))]

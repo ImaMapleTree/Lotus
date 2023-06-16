@@ -71,7 +71,7 @@ public static class Game
     public static void TriggerForAll(RoleActionType action, ref ActionHandle handle, params object[] parameters)
     {
         List<PlayerControl> players = Players.GetPlayers().ToList();
-        VentLogger.Debug($"TriggerForAll - Players => {players.Select(p => p.name).Fuse()}");
+        /*VentLogger.Debug($"TriggerForAll - Players => {players.Select(p => p.name).Fuse()}");*/
         players.Trigger(action, ref handle, parameters);
     }
 
@@ -87,7 +87,7 @@ public static class Game
             parameters = parameters.AddToArray(handle);
             List<(RoleAction, AbstractBaseRole)> actionList = allPlayers.SelectMany(p => p.GetCustomRole().GetActions(action)).ToList();
             actionList.AddRange(allPlayers.SelectMany(p => p.GetSubroles().SelectMany(r => r.GetActions(action))));
-            VentLogger.Debug($"All Actions: {actionList.Select(a => a.Item1.ToString()).Fuse()}");
+            /*VentLogger.Debug($"All Actions: {actionList.Select(a => a.Item1.ToString()).Fuse()}");*/
             foreach ((RoleAction roleAction, AbstractBaseRole role) in actionList.OrderBy(a1 => a1.Item1.Priority))
             {
                 if (role.MyPlayer == null || !role.MyPlayer.IsAlive() && !roleAction.TriggerWhenDead) return;

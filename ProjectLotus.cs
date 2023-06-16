@@ -23,6 +23,7 @@ using VentLib.Networking.Handshake;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Optionals;
 using VentLib.Version;
 using VentLib.Version.Git;
@@ -78,6 +79,8 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         ModUpdater = ModUpdater.Default();
         ModUpdater.EstablishConnection();
         ModUpdater.RegisterReleaseCallback(BeginUpdate, true);
+
+        Profilers.Global.SetActive(false);
     }
 
     private void BeginUpdate(Release release)

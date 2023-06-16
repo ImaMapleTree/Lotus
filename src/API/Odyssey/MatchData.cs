@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Player;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.Extensions;
 using Lotus.Managers;
 using Lotus.Managers.History;
@@ -9,6 +11,7 @@ using Lotus.Roles;
 using Lotus.Roles.Overrides;
 using Lotus.RPC;
 using Lotus.Statuses;
+using MonoMod.RuntimeDetour;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -28,8 +31,6 @@ public class MatchData
     public HashSet<byte> UnreportableBodies = new();
     public int MeetingsCalled;
     public int EmergencyButtonsUsed;
-
-    public Dictionary<byte, RemoteList<IStatus>> Statuses = new();
 
 
     public RoleData Roles = new();
@@ -91,8 +92,18 @@ public class MatchData
         if (sendToClient) role.Assign();
     }
 
-    public static RemoteList<IStatus> GetStatuses(PlayerControl player)
+    public static RemoteList<IStatus>? GetStatuses(PlayerControl player)
     {
-        return player == null ? new RemoteList<IStatus>() : Game.MatchData.Statuses.GetOrCompute(player.PlayerId, () => new RemoteList<IStatus>());
+        return Game.MatchData.FrozenPlayers.GetOptional(player.GetGameID()).Map(fp => fp.Statuses).OrElse(null!);
+    }
+
+    public static Remote<IStatus>? AddStatus(PlayerControl player, IStatus status, PlayerControl? infector = null)
+    {
+        return Game.MatchData.FrozenPlayers.GetOptional(player.GetGameID()).Map(fp => fp.Statuses).Transform(statuses =>
+        {
+            Remote<IStatus> remote = statuses.Add(status);
+            Hooks.ModHooks.StatusReceivedHook.Propagate(new PlayerStatusReceivedHook(player, status, infector));
+            return remote;
+        }, () =>  null!);
     }
 }

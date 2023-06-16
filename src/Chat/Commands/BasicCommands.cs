@@ -113,7 +113,7 @@ public class BasicCommands: CommandTranslations
         if (Game.MatchData.GameHistory.LastWinners == null!) new ChatHandler()
             .Title(t => t.Text(CommandError).Color(ModConstants.Palette.KillingColor).Build())
             .LeftAlign()
-            .Message(LastResultCommand.LRTranslations.NoPreviousGameText)
+            .Message(NoPreviousGameText)
             .Send(source);
         else
         {
