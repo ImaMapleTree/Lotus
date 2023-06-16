@@ -7,4 +7,6 @@ public interface Intent
     public void Action(PlayerControl actor, PlayerControl target);
 
     public void Halted(PlayerControl actor, PlayerControl target);
+
+    public object? this[string key] { get; set; }
 }

@@ -4,10 +4,12 @@ using System.Linq;
 using Lotus.GUI.Components;
 using Lotus.GUI.Menus.OptionsMenu;
 using Lotus.GUI.Menus.OptionsMenu.Components;
+using Lotus.GUI.Patches;
 using Lotus.Utilities;
 using TMPro;
 using UnityEngine;
 using VentLib.Localization.Attributes;
+using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
@@ -44,7 +46,11 @@ public class ModUpdateMenu: MonoBehaviour
         ContinueButton = continueObject.AddComponent<MonoToggleButton>();
         ContinueButton.SetOffText(ModUpdateMenuTranslations.CloseText);
         ContinueButton.SetToggleOnAction(ProcessClose);
+        ContinueButton.gameObject.SetActive(false);
         AnchorObject.SetActive(false);
+
+        VentLogger.Trace($"Update ready during Mod Menu Creation: {SplashPatch.UpdateReady}", "ModUpdateMenu");
+        if (SplashPatch.UpdateReady) Open();
     }
 
     private void Start()
@@ -56,14 +62,14 @@ public class ModUpdateMenu: MonoBehaviour
     {
         AnchorObject.SetActive(opened = true);
     }
-    
+
 
     private void Update()
     {
         if (!opened) return;
         bool anyUpdating = false;
         bool anyComplete = false;
-        
+
         _updateItems.ForEach((i, ii) =>
         {
             // ReSharper disable once Unity.PerformanceCriticalCodeInvocation
@@ -81,7 +87,7 @@ public class ModUpdateMenu: MonoBehaviour
                     break;
             }
         });
-        
+
         if (!anyUpdating) ContinueButton.gameObject.SetActive(true);
     }
 
@@ -92,7 +98,7 @@ public class ModUpdateMenu: MonoBehaviour
         if (anyUpdates) Environment.Exit(0);
         AnchorObject.SetActive(opened = false);
     }
-    
+
 
     private void LoadUpdateItem(UpdateItem item, int offset)
     {
@@ -107,7 +113,7 @@ public class ModUpdateMenu: MonoBehaviour
         item.UpdateComponent = component;
         if (item.AutoStartUpdate) component.UpdateButton.SetState(true);
     }
-    
+
 
     public static void AddUpdateItem(string name, string? version, UpdateDelegate updateDelegate, bool autoStartUpdate = false)
     {
@@ -168,7 +174,7 @@ public class ModUpdateMenu: MonoBehaviour
 
         [Localized(nameof(CloseText))]
         public static string CloseText = "Close";
-        
+
         [Localized(nameof(UpdateText))]
         public static string UpdateText = "Update";
 

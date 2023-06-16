@@ -52,7 +52,7 @@ class RpcReporter: IReportProducer
                 return;
             }
 
-            string target = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(meta.NetId)?.name ?? Players.GetAllPlayers().FirstOrDefault(p => p.NetId == meta.NetId)?.name;
+            string target = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(meta.NetId)?.name ?? Players.GetPlayers().FirstOrDefault(p => p.NetId == meta.NetId)?.name;
             string recipient = Utils.PlayerByClientId(meta.Recipient).Map(p => p.name).OrElse("Unknown") + $" (Id: {meta.Recipient})";
             string rpc = ((RpcCalls)meta.CallId).Name();
 
@@ -64,13 +64,13 @@ class RpcReporter: IReportProducer
     private string GenerateMassContent(string timestamp, RpcMassMeta massMeta)
     {
         string content = "";
-        string target = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(massMeta.NetId)?.name ?? Players.GetAllPlayers().FirstOrDefault(p => p.NetId == massMeta.NetId)?.name;
+        string target = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(massMeta.NetId)?.name ?? Players.GetPlayers().FirstOrDefault(p => p.NetId == massMeta.NetId)?.name;
         string recipient = Utils.PlayerByClientId(massMeta.Recipient).Map(p => p.name).OrElse("Unknown") + $" (Id: {massMeta.Recipient})";
 
         content += $"[{timestamp}] MASS RPC => (Target: {target}, Recipient: {recipient}, Immediate: {massMeta.Immediate}, SendOptions: {massMeta.SendOption}, PacketSize: {massMeta.PacketSize})";
         massMeta.ChildMeta.ForEach(meta =>
         {
-            string targ = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(meta.NetId)?.name ?? Players.GetAllPlayers().FirstOrDefault(p => p.NetId == meta.NetId)?.name;
+            string targ = AmongUsClient.Instance.FindObjectByNetId<PlayerControl>(meta.NetId)?.name ?? Players.GetPlayers().FirstOrDefault(p => p.NetId == meta.NetId)?.name;
             string recip = Utils.PlayerByClientId(meta.Recipient).Map(p => p.name).OrElse("Unknown") + $" (Id: {meta.Recipient})";
             string rpc = ((RpcCalls)meta.CallId).Name();
 

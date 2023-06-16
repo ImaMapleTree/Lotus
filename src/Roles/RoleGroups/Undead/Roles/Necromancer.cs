@@ -38,7 +38,7 @@ public class Necromancer : UndeadRole
 
     private Deathknight? myDeathknight;
     private CustomRole deathknightOriginal = null!;
-    private bool disableWinCheck = false;
+    private bool disableWinCheck;
 
     protected override void Setup(PlayerControl player)
     {
@@ -50,7 +50,7 @@ public class Necromancer : UndeadRole
     private bool NecromancerConvert(PlayerControl? target)
     {
         if (target == null) return false;
-        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
         MyPlayer.RpcMark(target);
         if (isFirstConvert) return ConvertToDeathknight(target);
         ConvertToUndead(target);
@@ -60,7 +60,7 @@ public class Necromancer : UndeadRole
     [RoleAction(RoleActionType.Interaction)]
     private void NecromancerImmunity(PlayerControl actor, Interaction interaction, ActionHandle handle)
     {
-        if (interaction.Intent() is not (IHostileIntent or IFatalIntent)) return;
+        if (interaction.Intent is not (IHostileIntent or IFatalIntent)) return;
         if (IsConvertedUndead(actor)) handle.Cancel();
         else if (immuneToPartialConverted && IsUnconvertedUndead(actor)) handle.Cancel();
     }

@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using System.Linq;
+using Lotus.API.Player;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Events;
@@ -13,6 +15,7 @@ using Lotus.Options;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
@@ -20,9 +23,7 @@ public class Vampiress : Impostor
 {
     private float killDelay;
     private VampireMode mode = VampireMode.Biting;
-    private List<byte> bitten = null!;
-
-    protected override void Setup(PlayerControl player) => bitten = new List<byte>();
+    [NewOnSetup] private HashSet<byte> bitten = null!;
 
     [UIComponent(UI.Text)]
     private string CurrentMode() => mode is VampireMode.Biting ? RoleColor.Colorize("(Bite)") : RoleColor.Colorize("(Kill)");
@@ -32,10 +33,10 @@ public class Vampiress : Impostor
     {
         SyncOptions();
         if (mode is VampireMode.Killing) return base.TryKill(target);
-        InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this));
+        MyPlayer.RpcMark(target);
+        InteractionResult result = MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this));
         if (result is InteractionResult.Halt) return false;
 
-        MyPlayer.RpcMark(target);
         bitten.Add(target.PlayerId);
         Async.Schedule(() =>
         {
@@ -51,7 +52,6 @@ public class Vampiress : Impostor
     private void ResetKillState()
     {
         mode = VampireMode.Killing;
-        bitten = new List<byte>();
     }
 
     [RoleAction(RoleActionType.OnPet)]
@@ -62,15 +62,16 @@ public class Vampiress : Impostor
         VentLogger.Trace($"Swapping Vampire Mode: {currentMode} => {mode}");
     }
 
-    [RoleAction(RoleActionType.RoundEnd)]
+    [RoleAction(RoleActionType.MeetingCalled, triggerAfterDeath: true)]
     public void KillBitten()
     {
-        bitten.ForEach(id => Utils.PlayerById(id).IfPresent(p =>
+        bitten.Filter(Players.PlayerById).Where(p => p.IsAlive()).ForEach(p =>
         {
             FatalIntent intent = new(true, () => new BittenDeathEvent(p, MyPlayer));
             DelayedInteraction interaction = new(intent, killDelay, this);
             MyPlayer.InteractWith(p, interaction);
-        }));
+        });
+        bitten.Clear();
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

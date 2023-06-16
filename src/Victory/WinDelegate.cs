@@ -19,15 +19,21 @@ public class WinDelegate
     private IWinCondition? winCondition;
 
     private List<PlayerControl> winners = new();
+    private List<PlayerControl> additionalWinners = new();
     private WinReason winReason;
     private bool forcedWin;
     private bool forcedCancel;
 
-    public IWinCondition? WinCondition() => winCondition;
-    public WinReason GetWinReason() => winReason;
-    public void SetWinReason(WinReason reason) => winReason = reason;
+
     public List<PlayerControl> GetWinners() => winners;
+    public List<PlayerControl> GetAdditionalWinners() => additionalWinners;
+
+    public WinReason GetWinReason() => winReason;
+
+    public void SetWinReason(WinReason reason) => winReason = reason;
     public void SetWinners(List<PlayerControl> winners) => this.winners = winners;
+
+    public IWinCondition? WinCondition() => winCondition;
 
     public bool IsGameOver()
     {
@@ -71,15 +77,31 @@ public class WinDelegate
         return winNotifiers.Add(consumer);
     }
 
+    public void AddAdditionalWinner(PlayerControl winner)
+    {
+        if (winner == null) return;
+        if (additionalWinners.All(p => p.PlayerId != winner.PlayerId)) additionalWinners.Add(winner);
+        if (winners.All(p => p.PlayerId != winner.PlayerId)) winners.Add(winner);
+    }
+
     public void AddWinCondition(IWinCondition condition)
     {
         winConditions.Add(condition);
         winConditions.Sort();
     }
 
-    public void ForceGameWin(List<PlayerControl> forcedWinners, WinReason reason)
+    public void RemoveWinner(PlayerControl player) => RemoveWinner(player.PlayerId);
+
+    public void RemoveWinner(byte playerId)
+    {
+        winners.RemoveAll(p => p.PlayerId == playerId);
+        additionalWinners.RemoveAll(p => p.PlayerId == playerId);
+    }
+
+    public void ForceGameWin(List<PlayerControl> forcedWinners, WinReason reason, IWinCondition? win = null)
     {
         this.winners = forcedWinners;
+        this.winCondition = win;
         this.winReason = reason;
         forcedWin = true;
     }

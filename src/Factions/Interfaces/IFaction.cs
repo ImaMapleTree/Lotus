@@ -13,7 +13,7 @@ public interface IFaction
 
     public bool CanSeeRole(PlayerControl player);
 
-    public Color FactionColor();
+    public Color Color { get; }
 }
 
 public interface IFaction<in T> : IFaction where T : IFaction<T>

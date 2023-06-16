@@ -8,6 +8,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Options;
+using Lotus.Roles.Interactions;
 using Lotus.Roles.Interfaces;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -26,7 +27,7 @@ public partial class SerialKiller : Impostor, IModdable
     private bool hasKilled;
 
     [UIComponent(UI.Counter)]
-    private string CustomCooldown() => DeathTimer.IsReady() ? "" : Color.white.Colorize(DeathTimer + "s");
+    private string CustomCooldown() => (!MyPlayer.IsAlive() || DeathTimer.IsReady()) ? "" : Color.white.Colorize(DeathTimer + "s");
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
@@ -54,7 +55,7 @@ public partial class SerialKiller : Impostor, IModdable
 
         VentLogger.Trace($"Serial Killer ({MyPlayer.name}) Commiting Suicide", "SerialKiller::CheckForSuicide");
 
-        MyPlayer.RpcMurderPlayer(MyPlayer);
+        MyPlayer.InteractWith(MyPlayer, new UnblockedInteraction(new FatalIntent(), this));
         Game.MatchData.GameHistory.AddEvent(new SuicideEvent(MyPlayer));
     }
 

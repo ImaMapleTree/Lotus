@@ -36,7 +36,7 @@ internal static class OnChatPatch
         Hooks.PlayerHooks.PlayerMessageHook.Propagate(new PlayerMessageHookEvent(sourcePlayer, chatText));
         if (!UseWordList() || !PluginDataManager.ChatManager.HasBannedWord(chatText) || sourcePlayer.IsHost())
         {
-            if (PluginDataManager.TemplateCommandManager.CheckAndRunCommand(sourcePlayer, chatText)) return true;
+            if (PluginDataManager.TemplateManager.CheckAndRunCommand(sourcePlayer, chatText)) return true;
             bool eat = EatMessage;
             EatMessage = false;
             if (Game.State is GameState.InLobby) return !eat;

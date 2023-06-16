@@ -1,42 +1,40 @@
-#nullable enable
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
-using Lotus.API;
-using Lotus.Extensions;
-using Lotus.Factions.Impostors;
-using Lotus.Roles.Internals;
 using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
 using VentLib.Utilities;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
-// TODO: Make into morphling
 public class BountyHunter: Impostor
 {
-    private PlayerControl? bhTarget;
-    private Cooldown acquireNewTarget;
+    private Cooldown acquireNewTarget = null!;
+    private FrozenPlayer? bountyTarget;
 
     private float bountyKillCoolDown;
     private float punishKillCoolDown;
 
+    private IRemote? cooldownOverride;
+
     [UIComponent(UI.Text)]
-    private string ShowTarget() => Color.red.Colorize("Target: ") + Color.white.Colorize(bhTarget == null ? "None" : bhTarget.name);
+    private string ShowTarget() => Color.red.Colorize("Target: ") + Color.white.Colorize(bountyTarget == null ? "None" : bountyTarget.Name);
 
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        SendKillCooldown(bhTarget?.PlayerId == target.PlayerId);
+        SendKillCooldown(bountyTarget?.PlayerId == target.PlayerId);
         bool success = base.TryKill(target);
         if (success)
             BountyHunterAcquireTarget();
@@ -60,24 +58,25 @@ public class BountyHunter: Impostor
             .ToList();
         if (eligiblePlayers.Count == 0)
         {
-            bhTarget = null;
+            bountyTarget = null;
             return;
         }
 
         // Small function to assign a NEW random target unless there's only one eligible target alive
         PlayerControl newTarget = eligiblePlayers.PopRandom();
-        while (eligiblePlayers.Count > 1 && bhTarget?.PlayerId == newTarget.PlayerId)
+        while (eligiblePlayers.Count > 1 && bountyTarget?.PlayerId == newTarget.PlayerId)
             newTarget = eligiblePlayers.PopRandom();
 
-        bhTarget = newTarget;
+        bountyTarget = Game.MatchData.FrozenPlayer(newTarget);
         acquireNewTarget.Start();
     }
 
     private void SendKillCooldown(bool decreased)
     {
         float cooldown = decreased ? bountyKillCoolDown : punishKillCoolDown;
-        GameOptionOverride[] modifiedCooldown = { new(Override.KillCooldown, cooldown) };
-        DesyncOptions.SendModifiedOptions(modifiedCooldown, MyPlayer);
+        cooldownOverride?.Delete();
+        cooldownOverride = AddOverride(new GameOptionOverride(Override.KillCooldown, cooldown));
+        SyncOptions();
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

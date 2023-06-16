@@ -21,6 +21,9 @@ public class LiveString
     {
     }
 
+    public static explicit operator LiveString(Func<string> supplier) => new(supplier);
+
+    public static implicit operator Func<string>(LiveString liveString) => liveString.valueSupplier;
 
     public override string ToString() => mainColor == null ? valueSupplier() : mainColor.Value.Colorize(valueSupplier());
 }

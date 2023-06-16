@@ -39,11 +39,12 @@ public class CrewPostor : Engineer
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddTaskOverrideOptions(base.RegisterOptions(optionStream)
+            .IsHeader(true)
             .Tab(DefaultTabs.ImpostorsTab)
             .SubOption(sub => sub.KeyName("Warp to Target", Translations.Options.WarpToTarget)
                 .AddOnOffValues()
                 .BindBool(b => warpToTarget = b)
-                .Build()))
+                .Build())
             .SubOption(sub => sub.KeyName("Can Kill Allies", Translations.Options.CanKillAllies)
                 .AddOnOffValues(false)
                 .BindBool(b => canKillAllied = b)
@@ -51,7 +52,7 @@ public class CrewPostor : Engineer
             .SubOption(sub => sub.KeyName("Refresh Tasks When All Complete", Translations.Options.RefreshTasks)
                 .AddOnOffValues()
                 .BindBool(b => refreshTasks = b)
-                .Build());
+                .Build()));
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)

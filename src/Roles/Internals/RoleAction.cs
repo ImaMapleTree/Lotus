@@ -1,6 +1,8 @@
 using System.Reflection;
+using Lotus.API;
 using Lotus.Roles.Internals.Attributes;
 using VentLib.Logging;
+using VentLib.Utilities.Debug.Profiling;
 
 namespace Lotus.Roles.Internals;
 
@@ -27,8 +29,12 @@ public class RoleAction
 
     public virtual void Execute(AbstractBaseRole role, object[] args)
     {
-        VentLogger.Log(LogLevel.Trace, $"RoleAction(type={ActionType}, priority={Priority}, method={Method}, executer={Executer ?? role}))", "RoleAction::Execute");
+        VentLogger.Trace($"RoleAction(type={ActionType}, executer={Executer ?? role}, priority={Priority}, method={Method}))", "RoleAction::Execute");
+        Profiler.Sample sample1 = Profilers.Global.Sampler.Sampled($"Action::{ActionType}");
+        Profiler.Sample sample2 = Profilers.Global.Sampler.Sampled((Method.ReflectedType?.FullName ?? "") + "." + Method.Name);
         Method.InvokeAligned(Executer ?? role, args);
+        sample1.Stop();
+        sample2.Stop();
     }
 
     public virtual void ExecuteFixed(AbstractBaseRole role)
@@ -41,5 +47,5 @@ public class RoleAction
         return (RoleAction)this.MemberwiseClone();
     }
 
-    public override string ToString() => $"RoleAction(type={ActionType}, Priority={Priority}, Blockable={Blockable})";
+    public override string ToString() => $"RoleAction(type={ActionType}, executer={Executer}, priority={Priority}, method={Method}))";
 }

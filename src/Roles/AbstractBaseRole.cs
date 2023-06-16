@@ -25,6 +25,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
 using Lotus.API.Stats;
 using Lotus.Extensions;
+using Lotus.Logging;
 using Lotus.Roles.Internals.Interfaces;
 using Lotus.Utilities;
 using UnityEngine;
@@ -63,7 +64,9 @@ public abstract class AbstractBaseRole
     public string Blurb => Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.Blurb");
 
     public string RoleName {
-        get {
+        get
+        {
+            if (RoleFlags.HasFlag(RoleFlag.DoNotTranslate)) return OverridenRoleName ?? EnglishRoleName;
             string name = Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.RoleName");
             return OverridenRoleName ?? (name == "N/A" ? EnglishRoleName : name);
         }
@@ -74,13 +77,16 @@ public abstract class AbstractBaseRole
     public RoleTypes RealRole => DesyncRole ?? VirtualRole;
     public RoleTypes? DesyncRole;
     public RoleTypes VirtualRole;
-    public IFaction Faction { get; set; } = FactionInstances.Solo;
+    public IFaction Faction { get; set; } = FactionInstances.Neutral;
     public SpecialType SpecialType = SpecialType.None;
     public Color RoleColor = Color.white;
+    public ColorGradient? RoleColorGradient = null;
+
     public int Chance { get; private set;  }
     public int Count { get; private set; }
     public int AdditionalChance { get; private set; }
     public bool BaseCanVent = true;
+    public int DisplayOrder = 500;
 
     public RoleAbilityFlag RoleAbilityFlags;
     public RoleFlag RoleFlags;
@@ -95,7 +101,7 @@ public abstract class AbstractBaseRole
     public string EnglishRoleName { get; private set; }
     private readonly Dictionary<RoleActionType, List<RoleAction>> roleActions = new();
 
-    protected List<GameOptionOverride> roleSpecificGameOptionOverrides = new();
+    protected List<GameOptionOverride> RoleSpecificGameOptionOverrides = new();
 
     protected AbstractBaseRole()
     {
@@ -110,7 +116,7 @@ public abstract class AbstractBaseRole
         try {
             _ = _editors.Aggregate(Modify(new RoleModifier(this)), (current, editor) => editor.HookModifier(current));
         } catch { }
-        this.roleSpecificGameOptionOverrides.Clear();
+        this.RoleSpecificGameOptionOverrides.Clear();
 
         GameOptionBuilder optionBuilder = _editors.Aggregate(GetGameOptionBuilder(), (current, editor) => editor.HookOptions(current));
 
@@ -444,22 +450,21 @@ public abstract class AbstractBaseRole
             return this;
         }
 
-
         public RoleModifier OptionOverride(Override option, object? value, Func<bool>? condition = null)
         {
-            myRole.roleSpecificGameOptionOverrides.Add(new GameOptionOverride(option, value, condition));
+            myRole.RoleSpecificGameOptionOverrides.Add(new GameOptionOverride(option, value, condition));
             return this;
         }
 
         public RoleModifier OptionOverride(Override option, Func<object> valueSupplier, Func<bool>? condition = null)
         {
-            myRole.roleSpecificGameOptionOverrides.Add(new GameOptionOverride(option, valueSupplier, condition));
+            myRole.RoleSpecificGameOptionOverrides.Add(new GameOptionOverride(option, valueSupplier, condition));
             return this;
         }
 
         public RoleModifier OptionOverride(GameOptionOverride @override)
         {
-            myRole.roleSpecificGameOptionOverrides.Add(@override);
+            myRole.RoleSpecificGameOptionOverrides.Add(@override);
             return this;
         }
 
@@ -476,9 +481,30 @@ public abstract class AbstractBaseRole
             return this;
         }
 
+        public RoleModifier Gradient(ColorGradient colorGradient)
+        {
+            myRole.RoleColorGradient = colorGradient;
+            return this;
+        }
+
+        public RoleModifier Gradient(params Color[] colors)
+        {
+            myRole.RoleColorGradient = new ColorGradient(colors);
+            return this;
+        }
+
         public RoleModifier RoleColor(Color color)
         {
             myRole.RoleColor = color;
+
+            System.Drawing.Color dColor = System.Drawing.Color.FromArgb(
+                Mathf.FloorToInt(color.a * 255),
+                Mathf.FloorToInt(color.r * 255),
+                Mathf.FloorToInt(color.g * 255),
+                Mathf.FloorToInt(color.b * 255));
+
+            DevLogger.Log($"Name: {ColorMapper.GetNearestName(dColor)}");
+
             return this;
         }
 

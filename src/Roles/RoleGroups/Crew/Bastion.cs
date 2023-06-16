@@ -14,6 +14,7 @@ using Lotus.Options;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options.Game;
+using VentLib.Options.IO;
 using VentLib.Utilities.Collections;
 using static Lotus.Roles.RoleGroups.Crew.Bastion.BastionTranslations.BastionOptionTranslations;
 
@@ -27,6 +28,7 @@ public class Bastion: Engineer
 
     private int currentBombs;
     private Remote<CounterComponent>? counterRemote;
+
 
     protected override void PostSetup()
     {
@@ -72,7 +74,8 @@ public class Bastion: Engineer
                 .KeyName("Plant Bomb Cooldown", PlantBombCooldown)
                 .BindFloat(v => VentCooldown = v)
                 .Value(1f)
-                .AddFloatRange(2, 120, 2.5f, 8, GeneralOptionTranslations.SecondsSuffix)
+                .IOSettings(io => io.UnknownValueAction = ADEAnswer.Allow)
+                .AddFloatRange(2.5f, 120, 2.5f, 8, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
                 .KeyName("Bombs per Round", BombsPerRound)

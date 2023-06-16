@@ -1,5 +1,3 @@
-using System;
-using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Lotus.API.Odyssey;
@@ -9,23 +7,41 @@ using Lotus.Options;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Factions.Crew;
 using Lotus.GUI;
 using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Interfaces;
 using Lotus.Roles.Legacy;
+using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options.Game;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 using Object = UnityEngine.Object;
 
 namespace Lotus.Roles.RoleGroups.Neutral;
 
-public class Amnesiac : CustomRole
+public class Amnesiac : CustomRole, IVariableRole
 {
+    private static Amalgamation _amalgamation = new();
+
     private bool stealExactRole;
     private bool hasArrowsToBodies;
+
+    private Remote<IndicatorComponent>? arrowComponent;
+
+    protected override void PostSetup()
+    {
+        if (!hasArrowsToBodies) return;
+        IndicatorComponent? indicator = MyPlayer.NameModel().GCH<IndicatorHolder>().LastOrDefault();
+        if (indicator == null) return;
+        arrowComponent = MyPlayer.NameModel().GCH<IndicatorHolder>().GetRemote(indicator);
+    }
 
     [UIComponent(UI.Indicator)]
     private string Arrows() => hasArrowsToBodies ? Object.FindObjectsOfType<DeadBody>()
@@ -43,13 +59,14 @@ public class Amnesiac : CustomRole
 
         if (!stealExactRole)
         {
-            if (targetRole.SpecialType == SpecialType.NeutralKilling) { }
+            if (targetRole.SpecialType == SpecialType.NeutralKilling)
+                targetRole = CustomRoleManager.Static.Hitman;
             else if (targetRole.SpecialType == SpecialType.Neutral)
                 targetRole = CustomRoleManager.Static.Opportunist;
-            else if (targetRole.IsCrewmate())
+            else if (targetRole.Faction is Crewmates)
                 targetRole = CustomRoleManager.Static.Sheriff;
             else
-                targetRole = CustomRoleManager.Static.Terrorist;
+                targetRole = CustomRoleManager.Static.Jester;
         }
 
         CustomRole newRole = CustomRoleManager.GetCleanRole(targetRole);
@@ -58,6 +75,7 @@ public class Amnesiac : CustomRole
 
         CustomRole role = MyPlayer.GetCustomRole();
         role.DesyncRole = RoleTypes.Impostor;
+        arrowComponent?.Delete();
         handle.Cancel();
     }
 
@@ -74,13 +92,15 @@ public class Amnesiac : CustomRole
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.RoleColor(new Color(0.51f, 0.87f, 0.99f))
-            .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.CannotVent | RoleAbilityFlag.IsAbleToKill)
+            .RoleFlags(RoleFlag.CannotWinAlone)
+            .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.CannotVent)
             .SpecialType(SpecialType.Neutral)
             .DesyncRole(RoleTypes.Impostor)
-            .Faction(FactionInstances.Solo);
+            .Faction(FactionInstances.Neutral)
+            .LinkedRoles(_amalgamation);
 
     [Localized(nameof(Amnesiac))]
-    private static class Translations
+    public static class Translations
     {
         [Localized(ModConstants.Options)]
         public static class Options
@@ -93,4 +113,7 @@ public class Amnesiac : CustomRole
         }
     }
 
+    public CustomRole Variation() => _amalgamation;
+
+    public bool AssignVariation() => RoleUtils.RandomSpawn(_amalgamation);
 }

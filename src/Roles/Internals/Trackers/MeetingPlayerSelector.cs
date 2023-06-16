@@ -13,9 +13,9 @@ namespace Lotus.Roles.Internals.Trackers;
 [Localized("Roles.Miscellaneous.PlayerSelector")]
 public class MeetingPlayerSelector: IPlayerSelector, ICloneOnSetup<MeetingPlayerSelector>
 {
-    [Localized(nameof(SelectPlayerString), ForceOverride = true)] private static string SelectPlayerString = "You have selected: <b>{0}</b>";
-    [Localized(nameof(UnselectPlayerString), ForceOverride = true)] private static string UnselectPlayerString = "You have unselected: <b>{0}</b>";
-    [Localized(nameof(ConfirmationString), ForceOverride = true)] private static string ConfirmationString = "You have confirmed: <b>{0}</b>";
+    [Localized(nameof(SelectPlayerString))] private static string SelectPlayerString = "You have selected: <b>{0}</b>";
+    [Localized(nameof(UnselectPlayerString))] private static string UnselectPlayerString = "You have unselected: <b>{0}</b>";
+    [Localized(nameof(ConfirmationString))] private static string ConfirmationString = "You have confirmed: <b>{0}</b>";
 
     private byte selectedPlayer = byte.MaxValue;
     private bool confirmed;

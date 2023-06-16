@@ -35,13 +35,13 @@ public class NowCommand: ICommandReceiver
     [Command("crewmates", "crewmate", "crew", "cr")]
     public void ListCrewmateOptions(PlayerControl source)
     {
-        string title = FactionInstances.Crewmates.FactionColor().Colorize($"★ {FactionInstances.Crewmates.Name()} ★");
+        string title = FactionInstances.Crewmates.Color.Colorize($"★ {FactionInstances.Crewmates.Name()} ★");
         ListRoleGroup(source, title, CustomRoleManager.AllRoles.Where(r => r.Faction is Crewmates));
     }
     [Command("impostors", "imp")]
     public void ListImpostorOptions(PlayerControl source)
     {
-        string title = FactionInstances.Impostors.FactionColor().Colorize($"★ {FactionInstances.Impostors.Name()} ★");
+        string title = FactionInstances.Impostors.Color.Colorize($"★ {FactionInstances.Impostors.Name()} ★");
         ListRoleGroup(source, title, CustomRoleManager.AllRoles.Where(r => r.Faction is ImpostorFaction));
     }
 

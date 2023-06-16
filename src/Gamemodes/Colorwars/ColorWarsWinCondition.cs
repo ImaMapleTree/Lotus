@@ -20,5 +20,5 @@ public class ColorWarsWinCondition: IWinCondition
         return true;
     }
 
-    public WinReason GetWinReason() => WinReason.GamemodeSpecificWin;
+    public WinReason GetWinReason() => new WinReason(ReasonType.GamemodeSpecificWin);
 }

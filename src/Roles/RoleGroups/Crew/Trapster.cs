@@ -20,25 +20,38 @@ namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Trapster : Crewmate
 {
-    public static HashSet<Type> TrapsterBannedModifiers = new() { typeof(Trapster) };
+    public static HashSet<Type> TrapsterBannedModifiers = new() { typeof(Bait) };
     public override HashSet<Type> BannedModifiers() => TrapsterBannedModifiers;
 
     private float trappedDuration;
     private bool trapOnIndirectKill;
 
-    [RoleAction(RoleActionType.Interaction)]
-    private void TrapperDeath(PlayerControl actor, Interaction interaction)
-    {
-        if (interaction.Intent() is not IFatalIntent) return;
-        if (interaction is not DirectInteraction && !trapOnIndirectKill) return;
+    private byte trappedPlayer = byte.MaxValue;
 
+    [RoleAction(RoleActionType.Interaction)]
+    private void TrapsterDeath(PlayerControl actor, Interaction interaction)
+    {
+        if (interaction.Intent is not IFatalIntent) return;
+        if (interaction is not LotusInteraction && !trapOnIndirectKill) return;
+
+        trappedPlayer = actor.PlayerId;
         CustomRole actorRole = actor.GetCustomRole();
         Remote<GameOptionOverride> optionOverride = actorRole.AddOverride(new GameOptionOverride(Override.PlayerSpeedMod, 0.01f));
         Async.Schedule(() =>
         {
             optionOverride.Delete();
             actorRole.SyncOptions();
+            trappedPlayer = byte.MaxValue;
         }, trappedDuration);
+    }
+
+    [RoleAction(RoleActionType.AnyReportedBody)]
+    private void PreventReportingOfBody(PlayerControl reporter, GameData.PlayerInfo body, ActionHandle handle)
+    {
+        if (reporter.PlayerId != trappedPlayer) return;
+        if (body.PlayerId != MyPlayer.PlayerId) return;
+        handle.Cancel();
+
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -53,7 +66,6 @@ public class Trapster : Crewmate
                 .Bind(v => trappedDuration = (float)v)
                 .AddFloatRange(1, 45, 0.5f, 8, GeneralOptionTranslations.SecondsSuffix)
                 .Build());
-
 
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).RoleColor(new Color(0.35f, 0.56f, 0.82f));

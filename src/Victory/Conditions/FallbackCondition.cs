@@ -15,7 +15,7 @@ public class FallbackCondition: IWinCondition
         return !Game.GetAlivePlayers().Any();
     }
 
-    public WinReason GetWinReason() => WinReason.NoWinCondition;
+    public WinReason GetWinReason() => new(ReasonType.NoWinCondition);
 
     public int Priority() => Int32.MinValue;
 }

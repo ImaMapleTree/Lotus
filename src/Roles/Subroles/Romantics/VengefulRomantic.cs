@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
 using Lotus.Factions.Interfaces;
@@ -49,7 +50,7 @@ public class VengefulRomantic: Subrole
 
         if (target.PlayerId == killerId || canKillBystander)
         {
-            MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this));
+            MyPlayer.InteractWith(target, LotusInteraction.FatalInteraction.Create(this));
             return;
         }
 

@@ -35,10 +35,10 @@ class IntroDestroyPatch
         if (!GameStates.IsInGame) return;
         if (!AmongUsClient.Instance.AmHost) return;
 
-        if (PlayerControl.LocalPlayer.GetCustomRole() is GM) PlayerControl.LocalPlayer.RpcExileV2();
+        if (PlayerControl.LocalPlayer.GetCustomRole() is GM) PlayerControl.LocalPlayer.RpcExileV2(false);
 
         string pet = GeneralOptions.MiscellaneousOptions.AssignedPet;
-        pet = pet != "Random" ? pet : ModConstants.Pets.Values.ToList().GetRandom();
+        while (pet == "Random") pet = ModConstants.Pets.Values.ToList().GetRandom();
 
         Game.GetAllPlayers().ForEach(p => Async.Execute(PreGameSetup(p, pet)));
         Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.6f));
@@ -57,6 +57,14 @@ class IntroDestroyPatch
     {
         if (player == null) yield break;
 
+        if (player.GetVanillaRole().IsImpostor())
+        {
+            float cooldown = GeneralOptions.GameplayOptions.GetFirstKillCooldown(player);
+            VentLogger.Trace($"Fixing First Kill Cooldown for {player.name} (Cooldown={cooldown}s)", "Fix First Kill Cooldown");
+            player.SetKillCooldown(cooldown);
+            player.Data.Role.SetCooldown();
+        }
+
         if (GeneralOptions.MayhemOptions.RandomSpawn) Game.RandomSpawn.Spawn(player);
 
         player.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3);
@@ -70,7 +78,7 @@ class IntroDestroyPatch
         if (role is not ITaskHolderRole taskHolder || !taskHolder.TasksApplyToTotal())
         {
             VentLogger.Trace($"Clearing Tasks For: {player.name}", "SyncTasks");
-            playerData.Tasks.Clear();
+            playerData.Tasks?.Clear();
         }
 
         bool hasPet = !(player.cosmetics?.CurrentPet?.Data?.ProductId == "pet_EmptyPet");
@@ -81,13 +89,6 @@ class IntroDestroyPatch
         Players.SendPlayerData(playerData);
         yield return new WaitForSeconds(NetUtils.DeriveDelay(0.05f));
         if (player == null) yield break;
-
-        if (player.GetVanillaRole().IsImpostor())
-        {
-            float cooldown = GeneralOptions.GameplayOptions.GetFirstKillCooldown(player);
-            VentLogger.Trace($"Fixing First Kill Cooldown for {player.name} (Cooldown={cooldown}s)", "Fix First Kill Cooldown");
-            player.SetKillCooldown(cooldown);
-        }
 
         if (!hasPet) player.CRpcShapeshift(player, false);
     }

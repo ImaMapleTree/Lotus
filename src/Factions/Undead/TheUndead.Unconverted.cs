@@ -8,9 +8,9 @@ public partial class TheUndead
     public class Unconverted : TheUndead, ISubFaction<TheUndead>
     {
         public IFaction PreviousFaction { get; }
-        public NameComponent UnconvertedName { get; }
+        public IndicatorComponent UnconvertedName { get; }
 
-        public Unconverted(IFaction previousFaction, NameComponent unconvertedName)
+        public Unconverted(IFaction previousFaction, IndicatorComponent unconvertedName)
         {
             this.PreviousFaction = previousFaction;
             this.UnconvertedName = unconvertedName;

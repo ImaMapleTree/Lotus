@@ -31,7 +31,7 @@ public class Ninja : Vanilla.Impostor
     {
         SyncOptions();
         if (Mode is NinjaMode.Killing) return base.TryKill(target);
-        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         playerList.Add(target);
         MyPlayer.RpcMark(target);
@@ -74,11 +74,11 @@ public class Ninja : Vanilla.Impostor
         foreach (var target in playerList.Where(target => target.IsAlive()))
         {
             if (!playerTeleportsToNinja)
-                MyPlayer.RpcMurderPlayer(target);
+                MyPlayer.InteractWith(target, LotusInteraction.FatalInteraction.Create(this));
             else
             {
                 Utils.Teleport(target.NetTransform, MyPlayer.transform.position);
-                Async.Schedule(() => MyPlayer.RpcMurderPlayer(target), 0.25f);
+                Async.Schedule(() => MyPlayer.InteractWith(target, LotusInteraction.FatalInteraction.Create(this)), 0.25f);
             }
         }
 

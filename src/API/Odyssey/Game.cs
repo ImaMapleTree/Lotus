@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Factions.Impostors;
@@ -43,8 +44,7 @@ public static class Game
 
     public static INameModel NameModel(this PlayerControl playerControl) => NameModels.GetOrCompute(playerControl.PlayerId, () => new SimpleNameModel(playerControl));
 
-    public static void RenderAllForAll(GameState? state = null, bool force = false) => NameModels.Values
-        .ForEach(n => GetAllPlayers().ForEach(pp => n.RenderFor(pp, state, true, force)));
+    public static void RenderAllForAll(GameState? state = null, bool force = false) => NameModels.Values.ForEach(n => GetAllPlayers().ForEach(pp => n.RenderFor(pp, state, true, force)));
 
     public static IEnumerable<PlayerControl> GetAllPlayers() => PlayerControl.AllPlayerControls.ToArray();
     public static IEnumerable<PlayerControl> GetAlivePlayers() => GetAllPlayers().Where(p => p.IsAlive());
@@ -66,17 +66,18 @@ public static class Game
         GetAllPlayers()
             .Where(p => roles.Any(r => r.GetType() == p.GetCustomRole().GetType()) || p.GetSubroles().Any(s => s.GetType() == roles.GetType()));
 
-    public static void SyncAll() => GetAllPlayers().Do(p =>
-    {
-        p.GetCustomRole().SyncOptions();
-        p.GetSubroles().ForEach(r => r.SyncOptions());
-    });
+    public static void SyncAll() => GetAllPlayers().Do(p => p.SyncAll());
 
-    public static void TriggerForAll(RoleActionType action, ref ActionHandle handle, params object[] parameters) => GetAllPlayers().Trigger(action, ref handle, parameters);
+    public static void TriggerForAll(RoleActionType action, ref ActionHandle handle, params object[] parameters)
+    {
+        List<PlayerControl> players = Players.GetPlayers().ToList();
+        /*VentLogger.Debug($"TriggerForAll - Players => {players.Select(p => p.name).Fuse()}");*/
+        players.Trigger(action, ref handle, parameters);
+    }
 
     public static void Trigger(this IEnumerable<PlayerControl> players, RoleActionType action, ref ActionHandle handle, params object[] parameters)
     {
-        if (action == RoleActionType.FixedUpdate)
+        if (action is RoleActionType.FixedUpdate)
             foreach (PlayerControl player in players) player.Trigger(action, ref handle, parameters);
         // Using a new Trigger algorithm to deal with ordering of triggers
         else
@@ -86,8 +87,8 @@ public static class Game
             parameters = parameters.AddToArray(handle);
             List<(RoleAction, AbstractBaseRole)> actionList = allPlayers.SelectMany(p => p.GetCustomRole().GetActions(action)).ToList();
             actionList.AddRange(allPlayers.SelectMany(p => p.GetSubroles().SelectMany(r => r.GetActions(action))));
-            actionList.Sort((a1, a2) => a1.Item1.Priority.CompareTo(a2.Item1.Priority));
-            foreach ((RoleAction roleAction, AbstractBaseRole role) in actionList)
+            /*VentLogger.Debug($"All Actions: {actionList.Select(a => a.Item1.ToString()).Fuse()}");*/
+            foreach ((RoleAction roleAction, AbstractBaseRole role) in actionList.OrderBy(a1 => a1.Item1.Priority))
             {
                 if (role.MyPlayer == null || !role.MyPlayer.IsAlive() && !roleAction.TriggerWhenDead) return;
                 roleAction.Execute(role, parameters);
@@ -129,7 +130,7 @@ public static class Game
     public static void Cleanup(bool newLobby = false)
     {
         NameModels.Clear();
-        if (newLobby) MatchData = new MatchData();
+        if (newLobby) MatchData.Cleanup();
         Hooks.GameStateHooks.GameEndHook.Propagate(new GameStateHookEvent(MatchData));
         State = GameState.InLobby;
     }

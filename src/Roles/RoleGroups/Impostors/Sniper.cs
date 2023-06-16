@@ -1,5 +1,4 @@
 using System.Linq;
-using AmongUs.GameOptions;
 using Lotus.API.Odyssey;
 using Lotus.Factions;
 using Lotus.GUI;
@@ -8,160 +7,135 @@ using Lotus.Options;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.API;
 using Lotus.Extensions;
+using Lotus.Logging;
 using UnityEngine;
-using VentLib.Logging;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
-using VentLib.Utilities;
-using VentLib.Utilities.Extensions;
-using Convert = System.Convert;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
-// TODO: Redo Sniper
 public class Sniper: Shapeshifter
 {
-    private bool preciseShooting = true;
-    [UIComponent(UI.Cooldown)]
-    private Cooldown loadBulletCooldown;
-    private Cooldown killCooldown;
+    private bool preciseShooting;
+    private int playerPiercing;
+    private bool refundOnKill;
 
-    private int totalBulletCount = 10;
-    private int loadedBullets;
-    private int maxLoadedBullets;
-    private int sniperMode;
-    private bool canBeVetted;
-
-    private float realKillCooldown;
+    private int totalBulletCount;
     private int currentBulletCount;
-    private Vector2 lastDirection;
+    private Vector2 startingLocation;
 
     [UIComponent(UI.Counter)]
-    private string BulletCountCounter() => RoleUtils.Counter(currentBulletCount, totalBulletCount);
+    private string BulletCountCounter() => currentBulletCount >= 0 ? RoleUtils.Counter(currentBulletCount, color: ModConstants.Palette.MadmateColor) : "";
 
-    [UIComponent(UI.Indicator)]
-    private string LoadedBulletDisplay() => Color.red.Colorize("▫".Repeat(loadedBullets));
-
-    protected override void Setup(PlayerControl player)
+    protected override void PostSetup()
     {
         currentBulletCount = totalBulletCount;
-        realKillCooldown = GameOptionsManager.Instance.currentGameOptions.GetFloat(FloatOptionNames.KillCooldown);
-        killCooldown.Duration = realKillCooldown;
+        ShapeshiftDuration = 5f;
     }
 
     [RoleAction(RoleActionType.Attack)]
-    private bool TryKill(PlayerControl target)
+    public override bool TryKill(PlayerControl target)
     {
-        killCooldown.Start();
-        return base.TryKill(target);
-    }
-
-    [RoleAction(RoleActionType.OnPet)]
-    private void LoadBullet()
-    {
-
-        if (currentBulletCount == 0 || loadBulletCooldown.NotReady() || loadedBullets >= maxLoadedBullets || sniperMode == 0) return;
-        loadedBullets++;
-        currentBulletCount--;
-        loadBulletCooldown.Start();
-        GameOptionOverride[] killCooldown = { new(Override.KillCooldown, loadBulletCooldown.Duration * 2) };
-        DesyncOptions.SendModifiedOptions(killCooldown, MyPlayer);
-        MyPlayer.RpcMark();
-    }
-
-    [RoleAction(RoleActionType.FixedUpdate)]
-    private void SniperDirectionUpdate()
-    {
-        if (MyPlayer.MyPhysics.Velocity.magnitude != 0)
-            lastDirection = MyPlayer.MyPhysics.Velocity;
+        bool success = currentBulletCount == 0 && base.TryKill(target);
+        if (success && refundOnKill && currentBulletCount >= 0) currentBulletCount++;
+        return success;
     }
 
     [RoleAction(RoleActionType.Shapeshift)]
-    private bool FireBullet(ActionHandle handle)
+    private void StartSniping()
     {
-        VentLogger.Trace("Firing Bullet");
-        handle.Cancel();
-        if (sniperMode == 1)
-        {
-            if (loadedBullets == 0 || killCooldown.NotReady() || loadBulletCooldown.NotReady()) return false;
-            loadedBullets--;
-        }
-        else
-        {
-            if (currentBulletCount <= 0 || killCooldown.NotReady()) return false;
-            currentBulletCount--;
-        }
+        startingLocation = MyPlayer.GetTruePosition();
+        DevLogger.Log($"Starting position: {startingLocation}");
+    }
 
-        Vector2 dir = lastDirection != null ? lastDirection : MyPlayer.MyPhysics.Velocity;
-        bool killed = false;
+    [RoleAction(RoleActionType.Unshapeshift)]
+    private bool FireBullet()
+    {
+        if (currentBulletCount == 0) return false;
+        currentBulletCount--;
+
+        Vector2 targetPosition = (MyPlayer.GetTruePosition() - startingLocation).normalized;
+        DevLogger.Log($"Target Position: {targetPosition}");
+        int kills = 0;
 
         foreach (PlayerControl target in Game.GetAllPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && p.Relationship(MyPlayer) is not Relation.FullAllies))
         {
-            Vector3 targetPos = target.transform.position - MyPlayer.transform.position;
+            DevLogger.Log(target.name);
+            Vector3 targetPos = target.transform.position - (Vector3)MyPlayer.GetTruePosition();
             Vector3 targetDirection = targetPos.normalized;
-            float dotProduct = Vector3.Dot(dir, targetDirection);
-            float error = !preciseShooting ? targetPos.magnitude : Vector3.Cross(dir, targetPos).magnitude;
-            if (dotProduct < 0.98 || (error < 1.0 && preciseShooting)) continue;
+            DevLogger.Log($"Target direction: {targetDirection}");
+            float dotProduct = Vector3.Dot(targetPosition, targetDirection);
+            DevLogger.Log($"Dot Product: {dotProduct}");
+            float error = !preciseShooting ? targetPos.magnitude : Vector3.Cross(targetPosition, targetPos).magnitude;
+            DevLogger.Log($"Error: {error}");
+            if (dotProduct < 0.98 || (error >= 1.0 && preciseShooting)) continue;
             float distance = Vector2.Distance(MyPlayer.transform.position, target.transform.position);
             InteractionResult result = MyPlayer.InteractWith(target, new RangedInteraction(new FatalIntent(true), distance, this));
-            if (result == InteractionResult.Halt) continue;
+            if (result is InteractionResult.Halt) continue;
+            kills++;
             MyPlayer.RpcMark();
-            killed = true;
+            if (kills > playerPiercing && playerPiercing != -1) break;
         }
 
-        float refundCooldown = realKillCooldown * 0.5f;
-        GameOptionOverride[] modifiedCooldown = { new(Override.KillCooldown, refundCooldown) };
-        DesyncOptions.SendModifiedOptions(modifiedCooldown, MyPlayer);
-        killCooldown.Start(refundCooldown * 0.5f);
+        if (kills > 0 && refundOnKill) currentBulletCount++;
 
-        Async.Schedule(() => MyPlayer.RpcRevertShapeshift(true), 0.3f);
-        Async.Schedule(this.SyncOptions, 1f);
-
-        return killed;
+        return kills > 0;
     }
 
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .SubOption(sub => sub
-                .Name("Sniper Bullet Count")
-                .Bind(v => totalBulletCount = (int)v)
-                .AddIntRange(1, 30, 5, 5)
-                .Build())
-            .SubOption(sub => sub
-                .Name("Precise Shooting")
-                .Bind(v => preciseShooting = (bool)v)
-                .AddOnOffValues()
-                .Build())
-            .SubOption(sub => sub
-                .Name("Can Be Vetted On Snipe")
-                .Bind(v => canBeVetted = (bool)v)
-                .AddOnOffValues()
-                .Build())
-            .SubOption(sub => sub
-                .Name("Sniper Mode")
-                .Bind(v => sniperMode = (int)v)
-                .Value(v => v.Text("Normal Mode").Value(0).Build())
-                .Value(v => v.Text("Load Bullet Mode").Value(1).Build())
-                .ShowSubOptionPredicate(obj => SniperMode.LoadBullet == (SniperMode)obj)
+                .KeyName("Sniper Bullet Count", Translations.Options.SniperBulletCount)
+                .Value(v => v.Text(ModConstants.Infinity).Color(ModConstants.Palette.InfinityColor).Value(-1).Build())
+                .BindInt(v => totalBulletCount = v)
                 .SubOption(sub2 => sub2
-                    .Name("Load Bullet Cooldown")
-                    .Bind(v => loadBulletCooldown.Duration = Convert.ToSingle(v))
-                    .AddFloatRange(5, 120, 2.5f, 5, GeneralOptionTranslations.SecondsSuffix)
+                    .KeyName("Refund Bullet on Kills", Translations.Options.RefundBulletOnKill)
+                    .BindBool(b => refundOnKill = b)
+                    .AddOnOffValues(false)
                     .Build())
-                .SubOption(sub2 => sub2
-                    .Name("Max Loaded Bullets")
-                    .Bind(v => maxLoadedBullets = (int)v)
-                    .AddIntRange(1, 10, 1)
-                    .Build())
+                .AddIntRange(1, 20, 1, 8)
+                .Build())
+            .SubOption(sub => sub
+                .KeyName("Sniping Cooldown", Translations.Options.SnipingCooldown)
+                .BindFloat(f => ShapeshiftCooldown = f + 5f)
+                .AddFloatRange(2.5f, 120f, 2.5f, 19, GeneralOptionTranslations.SecondsSuffix)
+                .Build())
+            .SubOption(sub => sub
+                .KeyName("Precise Shooting", Translations.Options.PreciseShooting)
+                .BindBool(v => preciseShooting = v)
+                .AddOnOffValues(false)
+                .Build())
+            .SubOption(sub => sub
+                .KeyName("Player Piercing", Translations.Options.PlayerPiercing)
+                .Value(v => v.Text(ModConstants.Infinity).Color(ModConstants.Palette.InfinityColor).Value(-1).Build())
+                .BindInt(v => playerPiercing = v)
+                .AddIntRange(1, 15, 1, 2)
                 .Build());
 
-    private enum SniperMode
+    [Localized(nameof(Sniper))]
+    private static class Translations
     {
-        Normal,
-        LoadBullet,
+        [Localized(ModConstants.Options)]
+        public static class Options
+        {
+            [Localized(nameof(SniperBulletCount))]
+            public static string SniperBulletCount = "Sniper Bullet Count";
+
+            [Localized(nameof(SnipingCooldown))]
+            public static string SnipingCooldown = "Sniping Cooldown";
+
+            [Localized(nameof(RefundBulletOnKill))]
+            public static string RefundBulletOnKill = "Refund Bullet on Kills";
+
+            [Localized(nameof(PreciseShooting))]
+            public static string PreciseShooting = "Precise Shooting";
+
+            [Localized(nameof(PlayerPiercing))]
+            public static string PlayerPiercing = "Player Piercing";
+        }
     }
+
 }

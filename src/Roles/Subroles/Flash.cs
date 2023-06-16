@@ -10,7 +10,7 @@ using VentLib.Utilities.Collections;
 
 namespace Lotus.Roles.Subroles;
 
-public class Flash : Subrole, IVariableSubrole
+public class Flash : Subrole, IVariantSubrole
 {
     private static Escalation _escalation = new();
 
@@ -21,7 +21,7 @@ public class Flash : Subrole, IVariableSubrole
 
     public Subrole Variation() => _escalation;
 
-    public bool AssignVariation() => Random.RandomRange(0, 100) <= _escalation.Chance;
+    public bool AssignVariation() => RoleUtils.RandomSpawn(_escalation);
 
     [RoleAction(RoleActionType.RoundStart)]
     private void GameStart(bool isStart)

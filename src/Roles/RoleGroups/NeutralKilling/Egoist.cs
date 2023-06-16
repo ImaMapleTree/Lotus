@@ -8,7 +8,6 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Factions.Interfaces;
-using Lotus.Options.Roles;
 using Lotus.Roles.Internals;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
@@ -45,10 +44,10 @@ public class Egoist: Shapeshifter
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .Tab(DefaultTabs.NeutralTab)
-            .SubOption(sub => sub.Name("Egoist is Shapeshifter")
+            .SubOption(sub => AddShapeshiftOptions(sub.Name("Egoist is Shapeshifter")
                 .BindBool(b => egoistIsShapeshifter = b)
-                .AddOnOffValues()
-                .Build());
+                .ShowSubOptionPredicate(b => (bool)b)
+                .AddOnOffValues()).Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
@@ -57,24 +56,15 @@ public class Egoist: Shapeshifter
             .SpecialType(SpecialType.NeutralKilling)
             .RoleColor(new Color(0.34f, 0f, 1f));
 
-    private class EgoistFaction : Faction<EgoistFaction>
+    private class EgoistFaction : Factions.Neutrals.Neutral
     {
-        public override Relation Relationship(EgoistFaction sameFaction)
-        {
-            return Options.RoleOptions.NeutralOptions.NeutralTeamingMode is not NeutralTeaming.Disabled
-                ? Relation.FullAllies
-                : Relation.None;
-        }
+        public override bool CanSeeRole(PlayerControl player) => false;
 
-        public override bool CanSeeRole(PlayerControl player)
-        {
-            return false;
-        }
-
-        public override Color FactionColor() => new(0.34f, 0f, 1f);
+        public override Color Color => new(0.34f, 0f, 1f);
 
         public override Relation RelationshipOther(IFaction other)
         {
+            if (Game.State is not (GameState.InLobby or GameState.InIntro)) return Relation.None;
             return other is ImpostorFaction ? Relation.FullAllies : Relation.None;
         }
     }

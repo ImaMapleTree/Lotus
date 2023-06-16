@@ -1,12 +1,21 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using Hazel;
+using Lotus.API;
+using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Stats;
 using Lotus.API.Vanilla.Sabotages;
 using Lotus.Extensions;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Components;
+using Lotus.GUI.Name.Holders;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Interactions;
+using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
@@ -17,7 +26,9 @@ using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
+using Random = UnityEngine.Random;
 
 namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
@@ -29,7 +40,7 @@ public class Pelican: NeutralKillingBase
     private bool allowPelicanEscape;
 
     [NewOnSetup]
-    private HashSet<byte> gulpedPlayers;
+    private Dictionary<byte, Remote<TextComponent>> gulpedPlayers;
 
     private Vector2 lastLocation;
 
@@ -45,56 +56,110 @@ public class Pelican: NeutralKillingBase
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(MyPlayer));
+        InteractionResult result = MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(MyPlayer));
         MyPlayer.RpcMark(target);
         if (result is InteractionResult.Halt) return false;
 
-        int randomX = Random.RandomRange(5000, 99999);
-        int randomY = Random.RandomRange(5000, 99999);
-        lastLocation = new Vector2(-randomX, -randomY);
-        Utils.Teleport(target.NetTransform, lastLocation);
-        gulpedPlayers.Add(target.PlayerId);
+        TeleportPlayer(target);
+        LiveString swallowedText = new(Translations.DeathName, RoleColor);
+        gulpedPlayers[target.PlayerId] = target.NameModel().GCH<TextHolder>().Add(new TextComponent(swallowedText, GameState.Roaming, ViewMode.Additive, target));
         _gulpedPlayerStat.Update(MyPlayer.UniquePlayerId(), i => i + 1);
 
-        RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetScanner).Write(true).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId());
-        Async.Schedule(() => RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetScanner).Write(false).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId()), 0.8f);
+        RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetScanner, SendOption.None).Write(true).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId());
+        Async.Schedule(() => RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetScanner, SendOption.None).Write(false).Write(++MyPlayer.scannerCount).Send(MyPlayer.GetClientId()), 0.8f);
+
+        CheckPelicanEarlyWin();
 
         return false;
+    }
+
+    [RoleAction(RoleActionType.AnyInteraction, priority: Priority.First)]
+    public void InterceptKillers(PlayerControl actor, PlayerControl target, Interaction interaction, ActionHandle handle)
+    {
+        if (interaction is not LotusInteraction lotusInteraction) return;
+        if (lotusInteraction.Intent is not IKillingIntent killingIntent) return;
+        if (!gulpedPlayers.ContainsKey(target.PlayerId)) return;
+        if (killingIntent["PELICANED"] as bool? == true) return;
+
+        Func<IDeathEvent>? codSupplier = killingIntent.CauseOfDeath().Exists() ? () => killingIntent.CauseOfDeath().Get() : null;
+        FatalIntent fatalIntent = new(true, codSupplier);
+        lotusInteraction.Intent = fatalIntent;
+        fatalIntent["PELICANED"] = true;
+
+        Utils.Teleport(target.NetTransform, MyPlayer.GetTruePosition());
     }
 
     [RoleAction(RoleActionType.MeetingCalled)]
     public void KillGulpedPlayers()
     {
-        gulpedPlayers.Filter(Players.PlayerById).ForEach(p =>
+        gulpedPlayers.Keys.Filter(Players.PlayerById).Where(p => p.IsAlive()).ForEach(p =>
         {
             IDeathEvent deathEvent = new CustomDeathEvent(p, MyPlayer, Translations.DeathName);
-            MyPlayer.InteractWith(p, new UnblockedInteraction(new FatalIntent(true, () => deathEvent), this));
+            MyPlayer.InteractWith(p, new UnblockedInteraction(new FatalIntent(true, () => deathEvent) { ["PELICANED"] = true }, this));
+            gulpedPlayers.GetValueOrDefault(p.PlayerId)?.Delete();
         });
         gulpedPlayers.Clear();
+    }
+
+    [RoleAction(RoleActionType.AnyReportedBody)]
+    public void PreventReportsFromSwallowedPlayers(PlayerControl player, ActionHandle handle)
+    {
+        if (gulpedPlayers.ContainsKey(player.PlayerId)) handle.Cancel();
     }
 
     [RoleAction(RoleActionType.SabotageStarted)]
     public void PreventSabotageFromSwallowedPlayers(ISabotage sabotage, ActionHandle handle)
     {
-        if (sabotage.Caller().Compare(s => gulpedPlayers.Contains(s.PlayerId))) handle.Cancel();
+        if (sabotage.Caller().Compare(s => gulpedPlayers.ContainsKey(s.PlayerId))) handle.Cancel();
     }
 
     [RoleAction(RoleActionType.MyDeath)]
     public override void HandleDisconnect()
     {
         Vector2 myLocation = MyPlayer.GetTruePosition();
-        gulpedPlayers.Filter(Players.PlayerById).ForEach(p => Utils.Teleport(p.NetTransform, myLocation));
+        gulpedPlayers.Keys.Filter(Players.PlayerById).ForEach(p =>
+        {
+            Utils.Teleport(p.NetTransform, myLocation);
+            gulpedPlayers.GetValueOrDefault(p.PlayerId)?.Delete();
+        });
+        gulpedPlayers.Clear();
+    }
+
+    [RoleAction(RoleActionType.AnyDeath)]
+    [RoleAction(RoleActionType.Disconnect)]
+    private void CheckPelicanEarlyWin()
+    {
+        if (Players.GetPlayers(PlayerFilter.Alive).Count(p => p.PlayerId != MyPlayer.PlayerId) == gulpedPlayers.Count) KillGulpedPlayers();
+    }
+
+    private void TeleportPlayer(PlayerControl player)
+    {
+        int randomX = Random.RandomRange(5000, 99999);
+        int randomY = Random.RandomRange(5000, 99999);
+        lastLocation = new Vector2(-randomX, -randomY);
+        Utils.Teleport(player.NetTransform, lastLocation);
     }
 
     public void CheckForTeleport(PlayerTeleportedHookEvent teleportedHookEvent)
     {
         PlayerControl player = teleportedHookEvent.Player;
-        if (!gulpedPlayers.Contains(player.PlayerId)) return;
+        if (!gulpedPlayers.ContainsKey(player.PlayerId)) return;
         if (teleportedHookEvent.NewLocation == lastLocation) return;
-        if (teleportedHookEvent.NewLocation is { x: < -1000, y: < -1000 }) return;
+        if (teleportedHookEvent.NewLocation is { x: < -1000, y: < -1000 })
+        {
+            LiveString swallowedText = new(Translations.DeathName, RoleColor);
+            gulpedPlayers[player.PlayerId] = player.NameModel().GCH<TextHolder>().Add(new TextComponent(swallowedText, GameState.Roaming, ViewMode.Additive, player));
+            VentLogger.Trace($"Player: {player.name} has teleported into the Pelican ({MyPlayer.name}) and is going to be eaten.", "PelicanEnter");
+            return;
+        }
 
         VentLogger.Trace($"Player: {player.name} has teleported out of the Pelican ({MyPlayer.name})", "PelicanEscape");
-        gulpedPlayers.Remove(player.PlayerId);
+        if (allowPelicanEscape)
+        {
+            gulpedPlayers.GetValueOrDefault(player.PlayerId)?.Delete();
+            gulpedPlayers.Remove(player.PlayerId);
+        }
+        else TeleportPlayer(player);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

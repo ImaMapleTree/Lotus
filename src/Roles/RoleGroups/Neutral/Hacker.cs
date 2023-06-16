@@ -54,7 +54,7 @@ public class Hacker: Engineer
 
     public void CheckHackerWin()
     {
-        if (sabotageCount >= sabotageTotal) ManualWin.Activate(MyPlayer, WinReason.RoleSpecificWin, 100);
+        if (sabotageCount >= sabotageTotal) ManualWin.Activate(MyPlayer, ReasonType.RoleSpecificWin, 100);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -65,7 +65,7 @@ public class Hacker: Engineer
                 .BindBool(b => hackerCanVent = b)
                 .ShowSubOptionPredicate(b => (bool)b))
                 .Build())
-            .SubOption(sub => sub.KeyName("Hacker Sabotage Amount", GColor(HackerSabotagePointAmount))
+            .SubOption(sub => sub.KeyName("Points Needed to Win", HackerSabotagePointAmount)
                 .BindInt(i => sabotageTotal = i)
                 .AddIntRange(1, 60, 1, 7)
                 .Build())
@@ -103,7 +103,7 @@ public class Hacker: Engineer
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.RoleColor(new Color(0.21f, 0.5f, 0.07f))
             .VanillaRole(hackerCanVent ? RoleTypes.Engineer : RoleTypes.Crewmate)
-            .Faction(FactionInstances.Solo)
+            .Faction(FactionInstances.Neutral)
             .SpecialType(SpecialType.Neutral);
 
     [Localized(nameof(Hacker))]
@@ -113,7 +113,7 @@ public class Hacker: Engineer
         internal static class HackerOptionTranslations
         {
             [Localized(nameof(HackerSabotagePointAmount))]
-            public static string HackerSabotagePointAmount = "Hacker::0 Sabotage Amount";
+            public static string HackerSabotagePointAmount = "Points Needed to Win";
 
             [Localized(nameof(HackerCanVent))]
             public static string HackerCanVent = "Hacker::0 Can Vent";

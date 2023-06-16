@@ -28,7 +28,7 @@ public class Crusader: Crewmate, ISabotagerRole
     [RoleAction(RoleActionType.Attack)]
     private void SelectTarget(PlayerControl target)
     {
-        if (MyPlayer.InteractWith(target, DirectInteraction.HelpfulInteraction.Create(this)) == InteractionResult.Halt) return;
+        if (MyPlayer.InteractWith(target, LotusInteraction.HelpfulInteraction.Create(this)) == InteractionResult.Halt) return;
         protectedPlayer = Optional<byte>.NonNull(target.PlayerId);
         MyPlayer.RpcMark(target);
         Game.MatchData.GameHistory.AddEvent(new ProtectEvent(MyPlayer, target));
@@ -41,7 +41,7 @@ public class Crusader: Crewmate, ISabotagerRole
         if (killer.PlayerId == MyPlayer.PlayerId) return;
         if (!protectedPlayer.Exists()) return;
         if (target.PlayerId != protectedPlayer.Get()) return;
-        Intent intent = interaction.Intent();
+        Intent intent = interaction.Intent;
 
         switch (intent)
         {
@@ -55,7 +55,7 @@ public class Crusader: Crewmate, ISabotagerRole
 
         handle.Cancel();
         RoleUtils.SwapPositions(target, MyPlayer);
-        bool killed = MyPlayer.InteractWith(killer, DirectInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
+        bool killed = MyPlayer.InteractWith(killer, LotusInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
         Game.MatchData.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, killer));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, killer, killed));
     }
@@ -76,7 +76,8 @@ public class Crusader: Crewmate, ISabotagerRole
             .DesyncRole(RoleTypes.Impostor)
             .RoleFlags(RoleFlag.CannotWinAlone)
             .RoleColor(new Color(0.78f, 0.36f, 0.22f))
-            .OptionOverride(new IndirectKillCooldown(() => AUSettings.KillCooldown()));
+            .OptionOverride(new IndirectKillCooldown(() => AUSettings.KillCooldown()))
+            .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod());
 
     public bool CanSabotage() => false;
 

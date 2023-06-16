@@ -9,7 +9,7 @@ public class MadGuardian : MadCrewmate
     [RoleAction(RoleActionType.Interaction)]
     private void MadGuardianAttacked(PlayerControl actor, Interaction interaction, ActionHandle handle)
     {
-        if (interaction.Intent() is not (IFatalIntent or IHostileIntent)) return;
+        if (interaction.Intent is not (IFatalIntent or IHostileIntent)) return;
         handle.Cancel();
     }
 }

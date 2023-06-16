@@ -4,6 +4,7 @@ using Hazel;
 using Lotus.Managers.Hotkeys;
 using UnityEngine;
 using VentLib.Networking.RPC;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Chat.Patches;
@@ -11,7 +12,7 @@ namespace Lotus.Chat.Patches;
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RpcSendChat))]
 internal class RpcSendChatPatch
 {
-    private static readonly List<string> ChatHistory = new(100);
+    private static readonly List<string> ChatHistory = new();
     private static int _index = -1;
 
     static RpcSendChatPatch()
@@ -33,7 +34,7 @@ internal class RpcSendChatPatch
     }
 
     private static void BackInChatHistory() => HudManager.Instance.Chat.TextArea.SetText(_index + 1 >= ChatHistory.Count ? ChatHistory[_index] : ChatHistory[++_index]);
-    
+
     private static void ForwardInChatHistory()
     {
         string text = "";
@@ -44,7 +45,7 @@ internal class RpcSendChatPatch
             _index = -1;
         }
         else text = ChatHistory[--_index];
-        
+
         HudManager.Instance.Chat.TextArea.SetText(text);
     }
 
@@ -54,7 +55,7 @@ internal class RpcSendChatPatch
         _index = -1;
         if (string.IsNullOrWhiteSpace(chatText))
             return false;
-        
+
         if (!EatCommand) RpcV3.Standard(__instance.NetId, RpcCalls.SendChat, SendOption.None).Write(chatText).Send();
 
         OnChatPatch.EatMessage = EatCommand;
@@ -62,11 +63,12 @@ internal class RpcSendChatPatch
             DestroyableSingleton<HudManager>.Instance.Chat.AddChat(__instance, chatText);
 
         EatCommand = false;
-        
-        ChatHistory.Insert(0, chatText);
+
+        if (ChatHistory.Count == 0 || ChatHistory[0] != chatText)
+            ChatHistory.Insert(0, chatText);
         if (ChatHistory.Count >= 100) ChatHistory.RemoveAt(99);
-        
-        
+
+
 
         return false;
     }

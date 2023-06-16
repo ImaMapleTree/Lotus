@@ -32,7 +32,7 @@ public class SchrodingersCat: CustomRole
     [RoleAction(RoleActionType.Interaction)]
     private void SchrodingerCatAttacked(PlayerControl actor, Interaction interaction, ActionHandle handle)
     {
-        if (interaction.Intent() is not IFatalIntent) return;
+        if (interaction.Intent is not IFatalIntent) return;
         if (numberOfLives <= 0) return;
         numberOfLives--;
         AssignFaction(actor);
@@ -66,8 +66,8 @@ public class SchrodingersCat: CustomRole
         roleModifier
             .RoleColor(new Color(0.41f, 0.41f, 0.41f))
             .VanillaRole(RoleTypes.Crewmate)
-            .Faction(FactionInstances.Solo)
-            .RoleFlags(RoleFlag.CannotWinAlone | RoleFlag.VariationRole)
+            .Faction(FactionInstances.Neutral)
+            .RoleFlags(RoleFlag.CannotWinAlone)
             .SpecialType(SpecialType.Neutral);
 
     [Localized(nameof(SchrodingersCat))]

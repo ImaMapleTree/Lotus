@@ -8,14 +8,18 @@ using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
+using Lotus.GUI;
+using Lotus.GUI.Name;
 using Lotus.Managers;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
+using VentLib.Utilities.Attributes;
 
 namespace Lotus.Roles.Debugger;
 
+[LoadStatic]
 public class Debugger: CustomRole
 {
     private RoleTypes baseRole;
@@ -25,6 +29,17 @@ public class Debugger: CustomRole
 
     private Component progressTracker;
 
+    static Debugger()
+    {
+        CustomRoleManager.AddRole(new Debugger());
+    }
+
+
+    [UIComponent(UI.Name)]
+    public static string TestMeetingText()
+    {
+        return "<size=1>ABC\nDEF\nGHI\nJKL\nMNO</size>";
+    }
 
     [RoleAction(RoleActionType.OnPet)]
     private void OnPet()
@@ -37,7 +52,7 @@ public class Debugger: CustomRole
 
     private void CustomWinTest()
     {
-        ManualWin manualWin = new(new List<PlayerControl> { MyPlayer }, WinReason.RoleSpecificWin);
+        ManualWin manualWin = new(new List<PlayerControl> { MyPlayer }, ReasonType.RoleSpecificWin);
         manualWin.Activate();
     }
 
@@ -90,9 +105,8 @@ public class Debugger: CustomRole
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier
-            .RoleName(
-                "<b><color=#FF0000>D</color><color=#FFBF00>e</color><color=#7FFF00>b</color><color=#00FF3F>u</color><color=#00FEFF>g</color><color=#003FFF>g</color><color=#7F00FF>e</color><color=#FF00BF>r</color></b>")
             .RoleColor(new Color(0.84f, 1f, 0.64f))
-            .VanillaRole(RoleTypes.Crewmate);
+            .VanillaRole(RoleTypes.Crewmate)
+            .RoleFlags(RoleFlag.Hidden | RoleFlag.Unassignable | RoleFlag.DontRegisterOptions);
 
 }

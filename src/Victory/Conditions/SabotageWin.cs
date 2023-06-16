@@ -6,15 +6,17 @@ using Lotus.API.Vanilla.Sabotages;
 using Lotus.Factions;
 using Lotus.Factions.Impostors;
 using Lotus.Patches.Systems;
-using Lotus.API;
 using Lotus.Extensions;
+using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
-using Impostor = Lotus.Roles.RoleGroups.Vanilla.Impostor;
 
 namespace Lotus.Victory.Conditions;
 
 public class SabotageWin: IWinCondition
 {
+    [Localized($"{ModConstants.Localization.WinConditions}.{nameof(SabotagedWin)}")]
+    public static string SabotagedWin = "Sabotage Win";
+
     public bool IsConditionMet(out List<PlayerControl> winners)
     {
         winners = null!;
@@ -37,7 +39,7 @@ public class SabotageWin: IWinCondition
         return true;
     }
 
-    public WinReason GetWinReason() => WinReason.Sabotage;
+    public WinReason GetWinReason() => new(ReasonType.Sabotage, SabotagedWin);
 
     public int Priority() => 3;
 }

@@ -11,6 +11,8 @@ using Lotus.RPC;
 using Lotus.Utilities;
 using Lotus.Victory;
 using Lotus.Extensions;
+using Lotus.Logging;
+using Lotus.Roles.Legacy;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -29,12 +31,27 @@ internal class BlackscreenResolver
 
     private bool patching;
 
+    private BlackscreenResolver(byte blackscreened)
+    {
+        unpatchable = new HashSet<byte> { blackscreened };
+    }
 
     internal BlackscreenResolver(MeetingDelegate meetingDelegate)
     {
         this.meetingDelegate = meetingDelegate;
         resetCameraPlayer = Game.GetDeadPlayers().FirstOrOptional().Map(p => p.PlayerId).OrElse(byte.MaxValue);
         Hooks.PlayerHooks.PlayerMessageHook.Bind(nameof(BlackscreenResolver), _ => BlockLavaChat(), true);
+        Hooks.GameStateHooks.GameEndHook.Bind(nameof(BlackscreenResolver), _ => patching = false, true);
+    }
+
+    public static bool PerformForcedReset(PlayerControl player)
+    {
+        BlackscreenResolver blackscreenResolver = new(player.PlayerId);
+        blackscreenResolver.TryGetDeadPlayer(out PlayerControl? deadPlayer);
+        if (deadPlayer == null) return false;
+        blackscreenResolver.StoreAndTeleport(deadPlayer);
+        Async.Schedule(() => blackscreenResolver.PerformCameraReset(deadPlayer), 0.1f);
+        return true;
     }
 
     internal void BeginProcess()
@@ -146,16 +163,7 @@ internal class BlackscreenResolver
 
     private static HashSet<byte> SendPatchedData(byte exiledPlayer)
     {
-        Players.PlayerById(exiledPlayer).IfPresent(p =>
-        {
-            string name = AUSettings.ConfirmImpostor() ? $"<b>{p.GetCustomRole().RoleName}</b>\n{p.name}" : p.name;
-            p.Data.PlayerName = p.Data.DefaultOutfit.PlayerName = name;
-            p.SetName(name);
-            Players.SendPlayerData(p.Data, autoSetName: false);
-        });
-
-
-
+        DevLogger.GameInfo();
         HostRpc.RpcDebug("Game Data BEFORE Patch");
         HashSet<byte> unpatchable = AntiBlackoutLogic.PatchedData(exiledPlayer);
         HostRpc.RpcDebug("Game Data AFTER Patch");
@@ -171,14 +179,24 @@ internal class BlackscreenResolver
         PlayerControl.LocalPlayer.MurderPlayer(PlayerControl.LocalPlayer);
         Game.MatchData.UnreportableBodies.Add(PlayerControl.LocalPlayer.PlayerId);
         playerStates[0] = (true, false);
-        Async.Schedule(() => PlayerControl.LocalPlayer.RpcExileV2(), 6f);
+        Async.Schedule(() => PlayerControl.LocalPlayer.RpcVaporize(PlayerControl.LocalPlayer), 6f);
         return PlayerControl.LocalPlayer;
     }
 
     private void BlockLavaChat()
     {
         if (!patching) return;
-        ChatHandler chatHandler = ChatHandler.Of("", "-");
-        for (int i = 0; i < 20; i++) chatHandler.Send();
+        if (Game.State is GameState.InLobby)
+        {
+            patching = false;
+            return;
+        }
+        ChatHandler chatHandler = ChatHandler.Of("", "- Lava Chat Fix -");
+        foreach (PlayerControl player in Players.GetPlayers())
+        {
+            (bool isDead, bool isDisconnected) = playerStates[player.PlayerId];
+            if (isDead || isDisconnected) continue;
+            for (int i = 0; i < 20; i++) chatHandler.Send();
+        }
     }
 }

@@ -48,7 +48,7 @@ public class Bloodlust: Subrole
     private bool TryKill(PlayerControl target)
     {
         if (!requiresBaseKillMethod) return false;
-        InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.FatalInteraction.Create(this));
+        InteractionResult result = MyPlayer.InteractWith(target, LotusInteraction.FatalInteraction.Create(this));
         Game.MatchData.GameHistory.AddEvent(new KillEvent(MyPlayer, target, result is InteractionResult.Proceed));
         return result is InteractionResult.Proceed;
     }
@@ -59,7 +59,7 @@ public class Bloodlust: Subrole
         RoleHolder roleHolder = MyPlayer.NameModel().GetComponentHolder<RoleHolder>();
         string newRoleName = _psychoGradient.Apply(role.RoleName);
         roleHolder.Add(new RoleComponent(new LiveString(newRoleName), GameStates.IgnStates, ViewMode.Replace, MyPlayer));
-        role.Faction = FactionInstances.Solo;
+        role.Faction = FactionInstances.Neutral;
         if (role.RealRole.IsCrewmate())
         {
             role.DesyncRole = RoleTypes.Impostor;
@@ -70,8 +70,16 @@ public class Bloodlust: Subrole
 
     public override bool IsAssignableTo(PlayerControl player)
     {
-        return (Options.RoleOptions.NeutralOptions.NeutralTeamingMode is not NeutralTeaming.Disabled ||
-                player.GetCustomRole().SpecialType is not SpecialType.NeutralKilling) && base.IsAssignableTo(player);
+        // If the role is NOT a neutral killing role, then we immediately pass and it's legal
+        if (player.GetCustomRole().SpecialType is not SpecialType.NeutralKilling) return base.IsAssignableTo(player);
+        NeutralTeaming teaming = Options.RoleOptions.NeutralOptions.NeutralTeamingMode;
+
+        // If neutral teaming is disabled we return false, because solo NKs should never get bloodlust
+        // if neutral teaming is NP + NK or ALL then we pass as chances are, there'll be teaming there
+        if (teaming is not NeutralTeaming.SameRole) return teaming is not NeutralTeaming.Disabled && base.IsAssignableTo(player);
+
+        // This means neutral teaming is Same Role, so now we check if Max is 1. If max is 1, there'll never be a team so bloodlust is useless, return false
+        return player.GetCustomRole().Count > 1 && base.IsAssignableTo(player);
     }
 
     public override HashSet<Type>? RestrictedRoles()

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
@@ -22,27 +23,24 @@ public class Unstoppable: Subrole
 
     public override string Identifier() => "◇";
 
-    [RoleAction(RoleActionType.AnyInteraction)]
+    [RoleAction(RoleActionType.AnyInteraction, priority: Priority.First)]
     public void InterceptAnyInteraction(PlayerControl player, PlayerControl target, Interaction interaction, ActionHandle handle)
     {
-        DevLogger.Log($"PLayer: {player.name} INteraction: {interaction.Intent()}");
+        DevLogger.Log($"PLayer: {player.name} INteraction: {interaction.Intent}");
         if (player.PlayerId != MyPlayer.PlayerId) return;
-        if (interaction.Intent() is not IFatalIntent fatalIntent) return;
-        handle.Cancel(ActionHandle.CancelType.Complete);
+        if (interaction is not LotusInteraction lotusInteraction) return;
+        if (lotusInteraction.Intent is not IFatalIntent fatalIntent) return;
 
         Func<IDeathEvent>? causeOfDeath = fatalIntent.CauseOfDeath().Exists() ? () => fatalIntent.CauseOfDeath().Get() : null;
-        UnstoppableIntent unstoppableIntent = new(fatalIntent.IsRanged(), causeOfDeath);
+        lotusInteraction.Intent = new UnstoppableIntent(fatalIntent.IsRanged(), causeOfDeath);
+        lotusInteraction.IsPromised = canKillUntargetable;
 
-        Interaction newInteraction;
-        if (canKillUntargetable) newInteraction = new UnblockedInteraction(unstoppableIntent, MyPlayer.GetCustomRole());
-        else newInteraction = interaction.Modify(unstoppableIntent);
-        player.InteractWith(target, newInteraction);
-        VentLogger.Debug($"Unstoppable Interaction Swap: {interaction} => {newInteraction}", "UnstoppableInterception");
+        VentLogger.Debug($"Unstoppable Interaction Swap IsPromised={lotusInteraction.IsPromised}", "UnstoppableInterception");
     }
 
     public override bool IsAssignableTo(PlayerControl player)
     {
-        return player.GetVanillaRole().IsImpostor() && base.IsAssignableTo(player);
+        return player.GetCustomRole().RoleAbilityFlags.HasFlag(RoleAbilityFlag.IsAbleToKill) && base.IsAssignableTo(player);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -68,7 +66,7 @@ public class Unstoppable: Subrole
     }
 
 
-    public class UnstoppableIntent : Intent
+    public class UnstoppableIntent : IKillingIntent
     {
         private Func<IDeathEvent>? causeOfDeath;
         private bool ranged;
@@ -105,6 +103,13 @@ public class Unstoppable: Subrole
         public void Halted(PlayerControl actor, PlayerControl target)
         {
             actor.RpcMark(target);
+        }
+
+        private Dictionary<string, object?>? meta;
+        public object? this[string key]
+        {
+            get => (meta ?? new Dictionary<string, object?>()).GetValueOrDefault(key);
+            set => (meta ?? new Dictionary<string, object?>())[key] = value;
         }
     }
 }

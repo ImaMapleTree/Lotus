@@ -4,7 +4,9 @@ using Lotus.API.Reactive;
 using Lotus.Extensions;
 using Lotus.Managers.History.Events;
 using Lotus.Roles;
+using Lotus.Statuses;
 using Lotus.Utilities;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 using static GameData;
 
@@ -15,8 +17,10 @@ public class FrozenPlayer
     public byte PlayerId;
     public string FriendCode;
     public string Name;
+    public string ColorName;
     public CustomRole Role;
     public List<CustomRole> Subroles;
+    public RemoteList<IStatus> Statuses = new RemoteList<IStatus>();
     public uint Level;
     public PlayerOutfit Outfit;
     public ulong GameID;
@@ -29,6 +33,7 @@ public class FrozenPlayer
     public FrozenPlayer(PlayerControl player)
     {
         Name = player.name;
+        ColorName = player.Data.ColoredName();
         Level = player.Data.PlayerLevel;
         FriendCode = player.FriendCode;
         PlayerId = player.PlayerId;

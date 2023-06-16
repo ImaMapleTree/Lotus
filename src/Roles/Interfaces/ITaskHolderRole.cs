@@ -13,4 +13,8 @@ public interface ITaskHolderRole
     /// </summary>
     /// <returns>true if the tasks should count to the total, otherwise false</returns>
     public bool TasksApplyToTotal();
+
+    public int TotalTasks { get; }
+
+    public int CompleteTasks { get; }
 }

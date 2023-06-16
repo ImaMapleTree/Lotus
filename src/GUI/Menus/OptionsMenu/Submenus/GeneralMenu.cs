@@ -31,7 +31,7 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
 
     private TiledToggleButton controlScheme;
     private LanguageSetter languageSetter;
-    
+
     private GameObject anchorObject;
     private bool languageSetterExists;
 
@@ -42,8 +42,8 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         anchorObject.transform.localPosition += new Vector3(2f, 2f);
         anchorObject.transform.localScale = new Vector3(1f, 1f, 1);
     }
-    
-    
+
+
     private void Start()
     {
         title.text = "General";
@@ -64,7 +64,8 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         title.font = CustomOptionContainer.GetGeneralFont();
         title.fontSize = 5.35f;
         title.transform.localPosition += new Vector3(-3.3f, 0.2f);
-        
+        title.gameObject.layer = LayerMask.NameToLayer("UI");
+
         languageSetterExists = false;
         GameObject censorGameObject = new("Censor Button");
         censorGameObject.transform.SetParent(anchorObject.transform);
@@ -118,7 +119,7 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
 
 
         GameObject controlGameObject = new("Control Scheme Button");
-        controlsText = Instantiate(title, controlGameObject.transform);
+        controlsText = Instantiate(title, anchorObject.transform);
         controlsText.transform.localPosition += new Vector3(-1.3f, -0.2f);
 
         controlGameObject.transform.SetParent(anchorObject.transform);
@@ -171,15 +172,15 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         optionsMenuBehaviour.KeyboardOptions.SetActive(false);
         optionsMenuBehaviour.MouseAndKeyboardOptions.GetComponentsInChildren<Component>().ForEach(c => c.gameObject.SetActive(false));
 
-        
-        
+
+
 
         // =======================================
         //          Language Button
         // =========================================
         LanguageSetter languageSetterPrefab = FindObjectOfType<LanguageSetter>(true);
         if (languageSetterPrefab == null) return;
-        
+
         languageSetter = Instantiate(languageSetterPrefab, anchorObject.transform);
         languageSetter.transform.localPosition -= new Vector3(2.5f, 1.88f);
 
@@ -193,7 +194,7 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         });
         languageSetterExists = true;
     }
-    
+
 
 
     public void Open()

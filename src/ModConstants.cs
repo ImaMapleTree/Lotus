@@ -4,10 +4,11 @@ using VentLib.Localization.Attributes;
 
 namespace Lotus;
 
+[Localized("Constants")]
 public static class ModConstants
 {
-    public static Color HColor1 = new Color(0.03f, 0.53f, 0.01f);
-    public static Color HColor2 = new Color(0.71f, 0.33f, 0f);
+    public static Color HColor1 = new(0.03f, 0.53f, 0.01f);
+    public static Color HColor2 = new(0.71f, 0.33f, 0f);
 
     public const int MaxPlayers = 15;
 
@@ -21,7 +22,7 @@ public static class ModConstants
     public const float DeriveDelayMultiplier = 0.0003f;
     public const float DeriveDelayFlatValue = 0.4f;
 
-    public const int RecursiveDepthLimit = 200;
+    public const int RecursiveDepthLimit = 20;
 
     public const float MaxPlayerSpeed = 3f;
 
@@ -36,16 +37,20 @@ public static class ModConstants
 
     public const string Infinity = "∞";
 
-    public const string DiscordInvite = "https://discord.gg/tohtor";
+    public const string DiscordInvite = "https://discord.gg/projectlotus";
 
     public static class Palette
     {
         public static Color InfinityColor = new(0.77f, 0.71f, 1f);
+
+        public static Color ModifierColor = new(0.44f, 0.27f, 0.81f);
+
         public static Color NeutralColor = new(1f, 0.67f, 0.11f);
         public static Color PassiveColor = new(1f, 0.87f, 0.91f);
         public static Color KillingColor = new(1f, 0.27f, 0.18f);
         public static Color MadmateColor = new(0.73f, 0.18f, 0.02f);
-        public static Color ModifierColor = new(0.44f, 0.27f, 0.81f);
+        public static Color CrewmateColor = new(0.71f, 0.94f, 1f);
+
 
         public static Color GeneralColor1 = new(0.15f, 0.27f, 0.33f);
         public static Color GeneralColor2 = new(0.16f, 0.62f, 0.56f);
@@ -57,6 +62,8 @@ public static class ModConstants
         public static Color GlobalColor = new(1f, 0.61f, 0.33f);
         public static Color InvalidUsage = new(1f, 0.67f, 0.11f);
         public static Color WinnerColor = new(1f, 0.83f, 0.24f);
+
+        public static Color UndeadBlue = new(0.33f, 0.46f, 0.76f);
     }
 
     [Localized("DeathNames")]
@@ -85,6 +92,15 @@ public static class ModConstants
 
         [Localized(nameof(Misfired))]
         public static string Misfired = "Misfired";
+
+        [Localized(nameof(Parried))]
+        public static string Parried = "Parried";
+    }
+
+    public static class Localization
+    {
+        public const string Misc = "Misc";
+        public const string WinConditions = "WinConditions";
     }
 
     public static Dictionary<string, string> Pets = new()
@@ -102,13 +118,13 @@ public static class ModConstants
         { "Doggy", "pet_Doggy" },
         { "E. Rose", "pet_Ellie" },
         { "Frankendog", "pet_frankendog" },
-        { "Ghost", "pet_Ghost" },
+        { "Ghost", "pet_D2GhostPet" },
         { "Glitch Pet", "pet_test" },
         { "Guilty Spark", "pet_GuiltySpark" },
         { "H. Stickmin", "pet_Stickmin" },
         { "Hammy", "pet_HamPet" },
         { "Hampton", "pet_Hamster" },
-        { "Headslug", "pet_Allien" },
+        { "Headslug", "pet_Alien" },
         { "Poro", "pet_poro" },
         { "Magmate", "pet_Lava" },
         { "Crewmate", "pet_Crewmate" },
@@ -119,6 +135,6 @@ public static class ModConstants
         { "Nugget", "pet_nuggetPet" },
         { "Toppat Chopper", "pet_Charles_Red" },
         { "UFO", "pet_UFO" },
-        { "Worm", "pet_Worm" },
+        { "Worm", "pet_D2WormPet" },
     };
 }

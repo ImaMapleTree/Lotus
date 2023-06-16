@@ -34,5 +34,5 @@ public class UndeadWinCondition : IFactionWinCondition
         return necromancerAlive && aliveUndead >= aliveOther;
     }
 
-    public WinReason GetWinReason() => WinReason.FactionLastStanding;
+    public WinReason GetWinReason() => new(ReasonType.FactionLastStanding);
 }

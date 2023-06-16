@@ -25,7 +25,7 @@ namespace Lotus.Roles.RoleGroups.Crew;
 [Localized("Roles")]
 public class Medic: Crewmate
 {
-    private static Color crossColor = new(0.2f, 0.49f, 0f);
+    private static readonly Color CrossColor = new(0.2f, 0.49f, 0f);
     private GuardMode mode;
     private byte guardedPlayer = byte.MaxValue;
 
@@ -34,7 +34,7 @@ public class Medic: Crewmate
 
     private Remote<IndicatorComponent>? protectedIndicator;
 
-    private static string CrossText = "<size=3><b>+</b></size>";
+    private const string CrossText = "<size=3><b>+</b></size>";
 
     [RoleAction(RoleActionType.RoundEnd)]
     private void RoundEndMessage()
@@ -50,7 +50,7 @@ public class Medic: Crewmate
         if (Game.State is not GameState.Roaming) return;
         if (guardedPlayer != target.PlayerId) return;
 
-        if (interaction.Intent() is not (IHostileIntent or IFatalIntent)) return;
+        if (interaction.Intent is not (IHostileIntent or IFatalIntent)) return;
         handle.Cancel();
         Game.MatchData.GameHistory.AddEvent(new PlayerSavedEvent(target, MyPlayer, killer));
     }
@@ -86,26 +86,31 @@ public class Medic: Crewmate
 
         protectedIndicator?.Delete();
         guardedPlayer = player;
-        protectedIndicator = voted.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent("<b>+</b>", crossColor, Game.IgnStates, MyPlayer));
+        protectedIndicator = voted.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent("<b>+</b>", CrossColor, Game.IgnStates, MyPlayer));
         Game.GetDeadPlayers().ForEach(p => protectedIndicator?.Get().AddViewer(p));
 
         CHandler(SelectedPlayerMessage.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send(MyPlayer);
     }
 
-    [RoleAction(RoleActionType.AnyExiled)]
     [RoleAction(RoleActionType.Disconnect)]
     [RoleAction(RoleActionType.AnyDeath)]
     private void CheckForDisconnectAndDeath(PlayerControl player, ActionHandle handle)
     {
         if (player.PlayerId != guardedPlayer) return;
         bool resetGuard = handle.ActionType is RoleActionType.Disconnect;
-        resetGuard = resetGuard || handle.ActionType is RoleActionType.AnyDeath && mode is GuardMode.OnDeath;
+        resetGuard = resetGuard || handle.ActionType is RoleActionType.AnyDeath or RoleActionType.AnyExiled && mode is GuardMode.OnDeath;
 
         protectedIndicator?.Delete();
         if (!resetGuard) return;
 
         targetLockedIn = false;
         guardedPlayer = byte.MaxValue;
+    }
+
+    [RoleAction(RoleActionType.AnyExiled)]
+    private void CheckForExiledPlayer(GameData.PlayerInfo exiled, ActionHandle handle)
+    {
+        if (exiled.Object != null) CheckForDisconnectAndDeath(exiled.Object, handle);
     }
 
     [RoleAction(RoleActionType.MyDeath)]
@@ -115,7 +120,7 @@ public class Medic: Crewmate
         guardedPlayer = byte.MaxValue;
     }
 
-    public ChatHandler CHandler(string message) => new ChatHandler()
+    private ChatHandler CHandler(string message) => new ChatHandler()
         .Title(t => t.PrefixSuffix(CrossText).Color(RoleColor).Text(RoleName).Build())
         .LeftAlign().Message(message);
 

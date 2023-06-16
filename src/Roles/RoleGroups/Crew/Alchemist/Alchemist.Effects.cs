@@ -20,7 +20,7 @@ public partial class Alchemist
     private void ProtectionEffect(PlayerControl actor, Interaction interaction, ActionHandle handle)
     {
         if (!IsProtected) return;
-        if (interaction.Intent() is INeutralIntent or IHelpfulIntent) return;
+        if (interaction.Intent is INeutralIntent or IHelpfulIntent) return;
         IsProtected = false;
         handle.Cancel();
     }

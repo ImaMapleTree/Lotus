@@ -1,21 +1,35 @@
 using System.Collections.Generic;
 using System.Linq;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API.Player;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers;
 using Lotus.Extensions;
-using Lotus.Utilities;
+using VentLib.Localization.Attributes;
 using VentLib.Logging;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 using static MeetingHud;
 
 namespace Lotus.API.Vanilla.Meetings;
 
+[Localized("Meetings")]
 public class MeetingDelegate
 {
+    [Localized(nameof(RoleRevealText))]
+    public static string RoleRevealText = "{0} was the {1}.";
+
+    [Localized(nameof(RemainingImpostorsText))]
+    public static string RemainingImpostorsText = "{0} impostors remaining.";
+
+    [Localized(nameof(NoImpostorsText))]
+    public static string NoImpostorsText = "No impostors remaining.";
+
     public static MeetingDelegate Instance = null!;
     public GameData.PlayerInfo? ExiledPlayer { get; set; }
+    public HashSet<byte> TiedPlayers = new();
+
     public bool IsTie { get; set; }
     internal BlackscreenResolver BlackscreenResolver { get; }
 
@@ -67,26 +81,32 @@ public class MeetingDelegate
 
     public void EndVoting() => isForceEnd = true;
 
-    public void EndVoting(Dictionary<byte, int> voteCounts, GameData.PlayerInfo? exiledPlayer, bool isTie = false)
+    public void EndVoting(GameData.PlayerInfo? exiledPlayer, bool isTie = false)
     {
-        List<VoterState> voterStates = new List<VoterState>();
-        voteCounts.ForEach(t =>
+        List<VoterState> voterStates = new();
+        CurrentVoteCount().ForEach(t =>
         {
             VoterState voterState = new() { VotedForId = t.Key };
             for (int i = 0; i < t.Value; i++) voterStates.Add(voterState);
         });
 
-        MeetingHud.RpcVotingComplete(voterStates.ToArray(), exiledPlayer, isTie);
+        EndVoting(voterStates.ToArray(), exiledPlayer, isTie);
     }
 
     public void EndVoting(VoterState[] voterStates, GameData.PlayerInfo? exiledPlayer, bool isTie = false)
     {
-        MeetingHud.RpcVotingComplete(voterStates, exiledPlayer, isTie);
-    }
+        this.isForceEnd = true;
+        this.ExiledPlayer = exiledPlayer;
+        this.IsTie = isTie;
 
-    public void EndVoting(GameData.PlayerInfo? exiledPlayer, bool isTie = false)
-    {
-        MeetingHud.RpcVotingComplete(new Il2CppStructArray<VoterState>(0), exiledPlayer, isTie);
+        if (ExiledPlayer != null)
+        {
+            List<byte> playerVotes = CurrentVotes().SelectMany(kv => kv.Value.Filter().Where(i => i == ExiledPlayer.PlayerId).Select(i => kv.Key)).ToList();
+            CheckAndSetConfirmEjectText(ExiledPlayer.Object);
+            Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(ExiledPlayer, playerVotes));
+        }
+
+        MeetingHud.RpcVotingComplete(voterStates, exiledPlayer, isTie);
     }
 
     internal bool IsForceEnd() => isForceEnd;
@@ -96,17 +116,22 @@ public class MeetingDelegate
         List<KeyValuePair<byte, int>> sortedVotes = this.CurrentVoteCount().Sorted(kvp => kvp.Value).Reverse().ToList();
         bool isTie = false;
         byte exiledPlayer = byte.MaxValue;
+        int mostVotes = 0;
         switch (sortedVotes.Count)
         {
             case 0: break;
             case 1:
+                mostVotes = sortedVotes[0].Value;
                 exiledPlayer = sortedVotes[0].Key;
-                break; 
+                break;
             case >= 2:
+                mostVotes = sortedVotes[0].Value;
                 isTie = sortedVotes[0].Value == sortedVotes[1].Value;
                 exiledPlayer = sortedVotes[0].Key;
                 break;
         }
+
+        TiedPlayers = sortedVotes.Where(sv => sv.Value == mostVotes).Select(sv => sv.Key).ToHashSet();
 
         this.ExiledPlayer = Players.PlayerById(exiledPlayer).Map(p => p.Data).OrElse(null!);
         this.IsTie = isTie;
@@ -115,5 +140,17 @@ public class MeetingDelegate
         VentLogger.Trace($"Calculated player votes. Player with most votes = {mostVotedPlayer}, isTie = {isTie}");
 
         if (IsTie) this.ExiledPlayer = null;
+    }
+
+    public void CheckAndSetConfirmEjectText(PlayerControl player)
+    {
+        if (!AUSettings.ConfirmImpostor() || player == null) return;
+
+        int impostors = Players.GetPlayers(PlayerFilter.Impostor | PlayerFilter.Alive).Count();
+
+        string textFormatting = "<size=0><size=2.5>" + RoleRevealText.Formatted(player.name, player.GetCustomRole().RoleColor.Colorize(player.GetCustomRole().RoleName));
+        textFormatting += "\n" + (impostors == 0 ? NoImpostorsText : RemainingImpostorsText.Formatted(impostors)) + "</size>";
+
+        player.RpcSetName(textFormatting);
     }
 }

@@ -25,7 +25,7 @@ public class FriendCommands: CommandTranslations, ICommandReceiver
             PluginDataManager.FriendManager.AddFriend(p.FriendCode);
             ChatHandler.Of(FriendsCommandTranslations.SuccessText.Formatted(p.name, p.FriendCode)).LeftAlign().Send(source);
         }
-        
+
         if (context.Args.Length == 0)
         {
             ChatHandlers.InvalidCmdUsage().Send(source);
@@ -36,7 +36,7 @@ public class FriendCommands: CommandTranslations, ICommandReceiver
             Utils.PlayerById(value).Handle(AFriend, () => ChatHandler.Of(PlayerNotFoundText.Formatted("")).Send(source));
         else
             PlayerControl.AllPlayerControls.ToArray().FirstOrOptional(p => p.name == context.Join())
-                .Handle(AFriend, () => 
+                .Handle(AFriend, () =>
                     ChatHandler.Of(PlayerNotFoundText.Formatted(context.Join())).Send(source));
     }
 
@@ -46,21 +46,20 @@ public class FriendCommands: CommandTranslations, ICommandReceiver
         string friend = PluginDataManager.FriendManager.RemoveFriend(index - 1);
         ChatHandler.Of(FriendsCommandTranslations.RemoveText.Formatted(friend)).Send(source);
     }
-    
+
     [Command("list", "l")]
     public static void ListFriends(PlayerControl source)
     {
         string friends = PluginDataManager.FriendManager.Friends()
-            .Select(f => (f, PluginDataManager.LastKnownAs.Name(f)))
-            .Select((t2, i) => $"{i + 1}. {t2.f}{LastKnownAsString(t2.Item2)}")
+            .Select((t2, i) => $"{i + 1}. {t2.Item1}{LastKnownAsString(t2.Item2)}")
             .Fuse("\n");
-        
+
         ChatHandler.Of(friends).LeftAlign().Send(source);
     }
 
     private static string LastKnownAsString(string? name)
     {
-        return name != null ? " (" + FriendsCommandTranslations.LastKnownAsText.Formatted(name) + ")" : "";
+        return name != "" ? " (" + FriendsCommandTranslations.LastKnownAsText.Formatted(name) + ")" : "";
     }
 
     [Localized("Friends")]

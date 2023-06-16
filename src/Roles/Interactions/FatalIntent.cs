@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Managers.History.Events;
@@ -6,7 +7,8 @@ using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
-using VentLib.Utilities;
+using Lotus.Patches.Actions;
+using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.Interactions;
@@ -48,5 +50,13 @@ public class FatalIntent : IFatalIntent
     public void Halted(PlayerControl actor, PlayerControl target)
     {
         actor.RpcMark(target);
+        MurderPatches.MurderLocks.GetOrCompute(actor.PlayerId, MurderPatches.TimeoutSupplier).AcquireLock();
+    }
+
+    private Dictionary<string, object?>? meta;
+    public object? this[string key]
+    {
+        get => (meta ?? new Dictionary<string, object?>()).GetValueOrDefault(key);
+        set => (meta ?? new Dictionary<string, object?>())[key] = value;
     }
 }

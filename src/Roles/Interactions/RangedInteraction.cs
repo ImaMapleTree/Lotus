@@ -2,7 +2,7 @@ using Lotus.Roles.Interactions.Interfaces;
 
 namespace Lotus.Roles.Interactions;
 
-public class RangedInteraction : DirectInteraction, IRangedInteraction
+public class RangedInteraction : LotusInteraction, IRangedInteraction
 {
     private readonly float distance;
 

@@ -1,3 +1,7 @@
+using Lotus.Extensions;
+using Lotus.Managers;
+using Lotus.Roles;
+using Lotus.Roles.Interactions;
 using Lotus.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -21,17 +25,32 @@ public class KickBanCommand : ICommandReceiver
         bool ban = context.Alias == "ban";
         string message = ban ? _banMessage : _kickedMessage;
 
-        if (context.Args.Length == 0) BasicCommands.PlayerIds(source, context);
+        if (context.Args.Length == 0)
+        {
+            BasicCommands.PlayerIds(source, context);
+            return;
+        }
 
         Optional<PlayerControl> targetPlayer = Optional<PlayerControl>.Null();
         string text = context.Join();
-        if (int.TryParse(text, out int result)) targetPlayer = Utils.PlayerById(result);
+        bool banWithId = false;
+        if (int.TryParse(context.Args[0], out int result))
+        {
+            targetPlayer = Utils.PlayerById(result);
+            banWithId = true;
+        }
         else targetPlayer = PlayerControl.AllPlayerControls.ToArray()
                 .FirstOrOptional(p => p.name.ToLowerInvariant().Equals(text.ToLowerInvariant()));
 
         targetPlayer.Handle(player =>
         {
-            AmongUsClient.Instance.KickPlayer(player.GetClientId(), ban);
+            if (LobbyBehaviour.Instance == null) player.RpcExileV2(false);
+            if (banWithId && context.Args.Length > 1)
+            {
+                string reason = context.Args[1..].Fuse(" ");
+                PluginDataManager.BanManager.BanWithReason(player, reason);
+            }
+            else AmongUsClient.Instance.KickPlayer(player.GetClientId(), ban);
             ChatHandler.Of(message.Formatted(player.name), "Announcement").Send();
         }, () => ChatHandler.Of($"Unable to find player: {text}", "Announcement").Send(source));
     }

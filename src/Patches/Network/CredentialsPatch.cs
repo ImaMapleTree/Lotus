@@ -45,9 +45,10 @@ public class VersionShowerStartPatch
 
 
         var credentials = Object.Instantiate(__instance.text);
+        credentials.fontSize = 1.5f;
         credentials.text = ProjectLotus.CredentialsText;
         credentials.alignment = TextAlignmentOptions.TopRight;
-        credentials.transform.position = new Vector3(4.6f, 3.2f, 0);
+        credentials.transform.position = new Vector3(3.3f, 3f, 0);
 
 
         if (SpecialEventText == null)
@@ -60,7 +61,7 @@ public class VersionShowerStartPatch
             SpecialEventText.transform.position = new Vector3(0, 0.5f, 0);
         }
 
-        SpecialEventText.enabled = SplashPatch.AmongUsLogo != null;
+        /*SpecialEventText.enabled = SplashPatch.AmongUsLogo != null;*/
         if (!_init)
             ISpecialDate.CheckDates();
         _init = true;

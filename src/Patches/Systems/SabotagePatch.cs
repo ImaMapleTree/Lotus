@@ -15,15 +15,22 @@ using Lotus.API.Vanilla.Meetings;
 using Lotus.Extensions;
 using Lotus.Roles;
 using VentLib.Logging;
+using VentLib.Utilities.Attributes;
 using Impostor = Lotus.Roles.RoleGroups.Vanilla.Impostor;
 
 namespace Lotus.Patches.Systems;
 
+[LoadStatic]
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.RepairSystem))]
 public static class SabotagePatch
 {
     public static float SabotageCountdown = -1;
     public static ISabotage? CurrentSabotage;
+
+    static SabotagePatch()
+    {
+        Hooks.GameStateHooks.GameStartHook.Bind(nameof(SabotagePatch), _ => CurrentSabotage = null);
+    }
 
     internal static bool Prefix(ShipStatus __instance,
         [HarmonyArgument(0)] SystemTypes systemType,

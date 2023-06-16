@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using Lotus.Extensions;
+using Lotus.GUI;
 using Lotus.Roles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -18,11 +19,9 @@ public class MiscellaneousOptions
     public int ChangeNameUsers;
     public int ChangeColorAndLevelUsers;
     public bool AutoDisplayResults;
+    public bool AutoDisplayCOD;
     public int SuffixMode;
     public bool ColorNameMode;
-    public int LadderDeathChance = -1;
-
-    public bool EnableLadderDeath => LadderDeathChance > 0;
 
     public List<GameOption> AllOptions = new();
 
@@ -72,19 +71,16 @@ public class MiscellaneousOptions
             .BindBool(b => AutoDisplayResults = b)
             .BuildAndRegister());
 
-        /*var suffixMode = Builder("Suffix Mode")*/
+        AllOptions.Add(Builder("Auto Display Cause of Death")
+            .Name(MiscOptionTranslations.AutoDisplayCauseOfDeath)
+            .AddOnOffValues()
+            .BindBool(b => AutoDisplayCOD = b)
+            .BuildAndRegister());
 
         AllOptions.Add(Builder("Color Names")
             .Name(MiscOptionTranslations.ColorNames)
             .AddOnOffValues(false)
             .BindBool(b => ColorNameMode = b)
-            .BuildAndRegister());
-
-        AllOptions.Add(Builder("Ladder Death")
-            .Name(MiscOptionTranslations.LadderDeathText)
-            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(-1).Color(Color.red).Build())
-            .AddIntRange(10, 100, 5, suffix: "%")
-            .BindInt(i => LadderDeathChance = i)
             .BuildAndRegister());
 
         additionalOptions.ForEach(o =>
@@ -124,14 +120,14 @@ public class MiscellaneousOptions
         [Localized("AutoDisplayResults")]
         public static string AutoDisplayResultsText = "Auto Display Results";
 
+        [Localized(nameof(AutoDisplayCauseOfDeath))]
+        public static string AutoDisplayCauseOfDeath = "Auto Display Cause of Death";
+
         [Localized("SuffixMode")]
         public static string SuffixModeText = "Suffix Mode";
 
         [Localized(nameof(ColorNames))]
         public static string ColorNames = "Color Names";
-
-        [Localized("LadderDeath")]
-        public static string LadderDeathText = "Ladder Death";
     }
 
 }

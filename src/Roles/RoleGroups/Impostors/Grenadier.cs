@@ -70,7 +70,7 @@ public class Grenadier : Vanilla.Impostor
                 .AddFloatRange(5f, 60f, 2.5f, 4, GeneralOptionTranslations.SecondsSuffix)
                 .Build())
             .SubOption(sub => sub
-                .Name("Blind Distance")
+                .Name("Blind Effect Radius")
                 .Bind(v => blindDistance = (float)v)
                 .Value(v => v.Text("Kill Distance").Value(-1f).Build())
                 .AddFloatRange(1.5f, 3f, 0.1f, 4)

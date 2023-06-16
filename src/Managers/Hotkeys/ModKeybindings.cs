@@ -1,10 +1,11 @@
-using System.IO;
 using Lotus.API.Odyssey;
 using Lotus.API.Vanilla;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Chat.Commands;
 using Lotus.Roles.Interactions;
 using Lotus.Extensions;
+using Lotus.Options;
+using Lotus.Patches.Client;
 using Lotus.Roles;
 using UnityEngine;
 using VentLib.Localization;
@@ -12,7 +13,6 @@ using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Debug.Profiling;
-using VentLib.Utilities.Extensions;
 using static Lotus.Managers.Hotkeys.HotkeyManager;
 
 namespace Lotus.Managers.Hotkeys;
@@ -42,13 +42,21 @@ public class ModKeybindings
 
         // Instant begin game
         Bind(KeyCode.LeftShift)
-            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown))
+            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown && !HudManager.Instance.Chat.IsOpen))
             .Do(() => GameStartManager.Instance.countDownTimer = 0);
 
         // Restart countdown timer
         Bind(KeyCode.C)
             .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown))
-            .Do(() => GameStartManager.Instance.ResetStartState());
+            .Do(() =>
+            {
+                GeneralOptions.AdminOptions.AutoStartMaxTime = -1;
+                GameStartManager.Instance.ResetStartState();
+            });
+
+        Bind(KeyCode.C)
+            .If(p => p.HostOnly().Predicate(() => EndGameManagerPatch.IsRestarting))
+            .Do(EndGameManagerPatch.CancelPlayAgain);
 
         // Reset Game Options
         Bind(KeyCode.LeftControl, KeyCode.Delete)
@@ -69,7 +77,9 @@ public class ModKeybindings
             .If(p => p.State(GameState.InLobby))
             .Do(ReloadTranslations);
 
-        Bind(KeyCode.F7).Do(() => HudManager.Instance.gameObject.SetActive(hudActive = !hudActive));
+        Bind(KeyCode.F7)
+            .If(p => p.State(GameState.InLobby, GameState.Roaming).Predicate(() => MeetingHud.Instance == null))
+            .Do(() => HudManager.Instance.gameObject.SetActive(hudActive = !hudActive));
     }
 
     private static void DumpLog()
@@ -88,7 +98,7 @@ public class ModKeybindings
 
     private static void Suicide()
     {
-        PlayerControl.LocalPlayer.InteractWith(PlayerControl.LocalPlayer, DirectInteraction.FatalInteraction.Create(PlayerControl.LocalPlayer));
+        PlayerControl.LocalPlayer.InteractWith(PlayerControl.LocalPlayer, LotusInteraction.FatalInteraction.Create(PlayerControl.LocalPlayer));
     }
 
     private static void ResetGameOptions()
@@ -99,10 +109,11 @@ public class ModKeybindings
             m.GetOptions().ForEach(o =>
             {
                 o.SetValue(o.DefaultIndex);
-                OptionHelpers.GetChildren(o).ForEach(o2 => o2.SetValue(o.DefaultIndex));
+                OptionHelpers.GetChildren(o).ForEach(o2 => o2.SetValue(o2.DefaultIndex));
             });
             m.DelaySave(0);
         });
+        VentLogger.SendInGame("All options have been reset!");
     }
 
     private static void InstantReduceTimer()

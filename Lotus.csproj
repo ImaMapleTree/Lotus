@@ -19,8 +19,8 @@
   
   
   <ItemGroup>
-    <!--<Reference Include="E:\SteamLibrary\steamapps\common\Among Us\dump\Assembly-CSharp-2023.3.28.dll" />-->
-    <PackageReference Include="AmongUs.GameLibs.Steam" Version="2023.3.28" />
+    <!--<Reference Include="E:\SteamLibrary\steamapps\common\Among Us - LOTUS\dump\Assembly-CSharp-2023.6.13.dll" />-->
+    <PackageReference Include="AmongUs.GameLibs.Steam" Version="2023.6.13" />
     <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" PrivateAssets="all" />
     <PackageReference Include="JetBrains.Annotations" Version="2023.2.0-eap2">
       <Aliases>JBAnnotations</Aliases>

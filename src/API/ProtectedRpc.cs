@@ -17,12 +17,13 @@ public class ProtectedRpc
 
         if (MeetingHud.Instance != null)
         {
-            target.RpcExileV2();
+            killer.RpcVaporize(target);
             RpcV3.Immediate(killer.NetId, RpcCalls.MurderPlayer).Write(target).Send(target.GetClientId());
             return;
         }
 
         if (AmongUsClient.Instance.AmHost) killer.MurderPlayer(target);
         RpcV3.Immediate(killer.NetId, RpcCalls.MurderPlayer).Write(target).Send();
+        target.Data.IsDead = true;
     }
 }

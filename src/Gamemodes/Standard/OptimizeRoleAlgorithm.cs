@@ -25,7 +25,9 @@ public class OptimizeRoleAlgorithm
             MinimumNeutralPassive = RoleOptions.NeutralOptions.MinimumNeutralPassiveRoles,
             MaximumNeutralPassive = RoleOptions.NeutralOptions.MaximumNeutralPassiveRoles,
             MinimumNeutralKilling = RoleOptions.NeutralOptions.MinimumNeutralKillingRoles,
-            MaximumNeutralKilling = RoleOptions.NeutralOptions.MaximumNeutralKillingRoles
+            MaximumNeutralKilling = RoleOptions.NeutralOptions.MaximumNeutralKillingRoles,
+            MinimumMadmates = RoleOptions.MadmateOptions.MadmatesTakeImpostorSlots ? 0 : RoleOptions.MadmateOptions.MinimumMadmates,
+            MaximumMadmates = RoleOptions.MadmateOptions.MaximumMadmates
         };
     }
 
@@ -37,7 +39,9 @@ public class OptimizeRoleAlgorithm
             MinimumNeutralPassive = RoleOptions.NeutralOptions.MinimumNeutralPassiveRoles,
             MaximumNeutralPassive = RoleOptions.NeutralOptions.MaximumNeutralPassiveRoles,
             MinimumNeutralKilling = RoleOptions.NeutralOptions.MinimumNeutralKillingRoles,
-            MaximumNeutralKilling = RoleOptions.NeutralOptions.MaximumNeutralKillingRoles
+            MaximumNeutralKilling = RoleOptions.NeutralOptions.MaximumNeutralKillingRoles,
+            MinimumMadmates = RoleOptions.MadmateOptions.MadmatesTakeImpostorSlots ? 0 : RoleOptions.MadmateOptions.MinimumMadmates,
+            MaximumMadmates = RoleOptions.MadmateOptions.MaximumMadmates
         };
     }
 }

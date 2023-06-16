@@ -4,12 +4,14 @@ using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.API;
+using Lotus.API.Vanilla.Meetings;
 using Lotus.Extensions;
 using Lotus.Options;
 using Lotus.Roles.Internals;
 using Lotus.RPC;
 using VentLib.Options.Game;
+using VentLib.Utilities;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
@@ -31,14 +33,22 @@ public class Camouflager: Shapeshifter
         Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcShapeshift(target, true));
     }
 
-    [RoleAction(RoleActionType.MeetingCalled)]
     [RoleAction(RoleActionType.Unshapeshift)]
     private void CamouflagerUnshapeshift(ActionHandle handle)
     {
         if (!camouflaged) return;
         camouflaged = false;
-        if (handle.ActionType is not RoleActionType.MeetingCalled)
-            Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
+        Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
+    }
+
+    [RoleAction(RoleActionType.MeetingCalled)]
+    private void HandleMeetingCall(PlayerControl reporter, Optional<GameData.PlayerInfo> reported, ActionHandle handle)
+    {
+        if (!camouflaged) return;
+        camouflaged = false;
+        Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
+        handle.Cancel();
+        Async.Schedule(() => MeetingPrep.PrepMeeting(reporter, reported.OrElse(null!)), 0.5f);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

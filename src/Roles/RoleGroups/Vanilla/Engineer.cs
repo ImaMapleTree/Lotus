@@ -22,7 +22,7 @@ public class Engineer: Crewmate
             .SubOption(sub => sub.Name(EngineerTranslations.Options.VentDuration)
                 .Key("Vent Duration")
                 .Value(1f)
-                .AddFloatRange(2, 120, 2.5f, 6, GeneralOptionTranslations.SecondsSuffix)
+                .AddFloatRange(2.5f, 120, 2.5f, 6, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(f => VentDuration = f)
                 .Build());
     }
@@ -31,8 +31,8 @@ public class Engineer: Crewmate
         base.Modify(roleModifier)
             .CanVent(true)
             .VanillaRole(RoleTypes.Engineer)
-            .OptionOverride(Override.EngVentCooldown, VentCooldown)
-            .OptionOverride(Override.EngVentDuration, VentDuration);
+            .OptionOverride(Override.EngVentCooldown, () => VentCooldown)
+            .OptionOverride(Override.EngVentDuration, () => VentDuration);
 
     [Localized(nameof(Engineer))]
     public static class EngineerTranslations
