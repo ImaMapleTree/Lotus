@@ -2649,7 +2649,7 @@ Vigilante is a nice guesser and part of the crewmate team. While in meeting the 
 
 ## AgiTater 
 
-<img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1108944832493277264/1118402911572082759/image.png?width=1193&height=671">
+<img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1108944832493277264/1118402812972384297/image.png?width=1193&height=671">
 
 __Faction__: Neutral Killing<br>
 __Base__: Impostor<br>
@@ -2680,7 +2680,7 @@ _The Global option for Place Bomb Cooldown means that this setting will be the s
 
 ## Arsonist
 
-<img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1108944832493277264/1118402812972384297/image.png?width=1193&height=671">
+<img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1108944832493277264/1118402911572082759/image.png?width=1193&height=671">
 
 __Faction__: Neutral Killing<br>
 __Base__: Impostor<br>
@@ -2740,7 +2740,7 @@ __Base__: Impostor<br>
 __Ability__: Attack Players To Reduce Their Health<br>
 __Win Condition__: Solo (be the last player alive)<br>
 
-`Original Role & Idea by Tealeaf/단풍잎`<br>
+`Idea by KARPED1EM`
 
 #### Role Description
 Demon is a neutral killing role whose goal is to kill all other players. When Demon is in the game all players spawn in with a green health bar over their heads. When the Demon attacks a player, their health bar will drop some health points. After fully reducing a player's health bar, that player will die. When Demon gets attacked, their health bar also decreases. The Demon heals some health when they kill players.
@@ -2964,7 +2964,7 @@ __Base__: Impostor<br>
 __Ability__: Gulp Down the Competiton<br>
 __Win Condition__: Gulp All Players For A Solo Win<br>
 
-`Original Role & Idea by Tealeaf/단풍잎`<br>
+`Idea by Goose Goose Duck`<br>
 
 #### Role Description
 The Pelican gulps players by using their kill button. Gulped players are teleported out of the map and are unable to interact with the game (including Sabotages). Upon a meeting being called, all gulped players will instantly die. If the Pelican dies or disconnects, all gulped players will return to where the Pelican last was.
