@@ -1145,7 +1145,7 @@ __Base__: Impostor<br>
 __Ability__: Sabotage Meetings<br>
 __Indicatior/Symbols__: "Manipulated!" text on manipulated players<br>
 
-`Original Role & Idea by Tealeaf/단풍잎`<br>
+`Idea by Gurge 44`<br>
 
 #### Role Description
 Mastermind marks a player with their Kill button. After a delay, that player will gain text saying they've been Manipulated, and a countdown will begin. That player must kill another player before their countdown ends (by using either Pet or Kill), otherwise they suicide.
