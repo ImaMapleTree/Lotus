@@ -5,6 +5,7 @@ using Lotus.Gamemodes;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Options;
 using Lotus.Utilities;
 using VentLib.Logging;
 
@@ -19,8 +20,11 @@ public class ReportDeadBodyPatch
         if (!AmongUsClient.Instance.AmHost) return true;
 
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.ReportBody) && target != null) return false;
-        if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.CallMeeting) && target == null) return false;
-
+        if (target == null)
+        {
+            if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.CallMeeting)) return false;
+            if (GeneralOptions.MeetingOptions.SyncMeetingButtons && Game.MatchData.EmergencyButtonsUsed++ >= GeneralOptions.MeetingOptions.MeetingButtonPool) return false;
+        }
 
         ActionHandle handle = ActionHandle.NoInit();
 

@@ -15,7 +15,7 @@ namespace Lotus.Roles.RoleGroups.Neutral;
 
 public class Hitman: NeutralKillingBase
 {
-    private static HitmanFaction _hitmanFaction = new HitmanFaction();
+    private static HitmanFaction _hitmanFaction = new();
     public List<string> AdditionalWinRoles = new();
 
     protected override void Setup(PlayerControl player)
@@ -30,8 +30,8 @@ public class Hitman: NeutralKillingBase
     private void GameEnd(WinDelegate winDelegate)
     {
         if (!MyPlayer.IsAlive()) return;
-        if (winDelegate.GetWinReason() is WinReason.SoloWinner && !AdditionalWinRoles.Contains(winDelegate.GetWinners()[0].GetCustomRole().EnglishRoleName)) return; 
-        winDelegate.GetWinners().Add(MyPlayer);
+        if (winDelegate.GetWinReason().ReasonType is ReasonType.SoloWinner && !AdditionalWinRoles.Contains(winDelegate.GetWinners()[0].GetCustomRole().EnglishRoleName)) return;
+        winDelegate.AddAdditionalWinner(MyPlayer);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -54,20 +54,14 @@ public class Hitman: NeutralKillingBase
                     .AddOnOffValues()
                     .BindBool(RoleUtils.BindOnOffListSetting(AdditionalWinRoles, "Jester"))
                     .Build())
-                .SubOption(sub2 => sub2
-                    .Name("Lovers")
-                    .Color(new Color(1f, 0.4f, 0.8f))
-                    .AddOnOffValues()
-                    .BindBool(RoleUtils.BindOnOffListSetting(AdditionalWinRoles, "Lovers"))
-                    .Build())
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier).Faction(_hitmanFaction);
 
 
-    private class HitmanFaction : Solo
+    private class HitmanFaction : Factions.Neutrals.Neutral
     {
-        public override Relation Relationship(Solo sameFaction)
+        public override Relation Relationship(Factions.Neutrals.Neutral sameFaction)
         {
             return Relation.SharedWinners;
         }

@@ -24,7 +24,11 @@ public class GameplayOptions
     public DisabledTask DisabledTaskFlag;
     public bool DisableTaskWin;
     public bool GhostsSeeInfo;
-    public int SyncMeetingCount;
+
+    public int LadderDeathChance = -1;
+    public bool EnableLadderDeath => LadderDeathChance > 0;
+
+    public ModifierTextMode ModifierTextMode;
 
     public float GetFirstKillCooldown(PlayerControl player)
     {
@@ -128,6 +132,21 @@ public class GameplayOptions
             .BindBool(b => GhostsSeeInfo = b)
             .BuildAndRegister());
 
+        AllOptions.Add(Builder("Ladder Death")
+            .Name(GameplayOptionTranslations.LadderDeathText)
+            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(-1).Color(Color.red).Build())
+            .AddIntRange(10, 100, 5, suffix: "%")
+            .BindInt(i => LadderDeathChance = i)
+            .BuildAndRegister());
+
+        AllOptions.Add(Builder("Modifier Text Mode")
+            .Name(GameplayOptionTranslations.ModifierTextMode)
+            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(1).Color(Color.red).Build())
+            .Value(v => v.Text(GameplayOptionTranslations.FirstValue).Value(0).Color(ModConstants.Palette.InfinityColor).Build())
+            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(2).Color(Color.green).Build())
+            .BindInt(i => ModifierTextMode = (ModifierTextMode)i)
+            .BuildAndRegister());
+
         additionalOptions.ForEach(o =>
         {
             o.Register();
@@ -210,6 +229,15 @@ public class GameplayOptions
 
         [Localized(nameof(GhostSeeInfo))]
         public static string GhostSeeInfo = "Ghosts See Info";
+
+        [Localized("LadderDeath")]
+        public static string LadderDeathText = "Ladder Death";
+
+        [Localized(nameof(ModifierTextMode))]
+        public static string ModifierTextMode = "Modifier Text Mode";
+
+        [Localized(nameof(FirstValue))]
+        public static string FirstValue = "First";
     }
 }
 
@@ -230,4 +258,11 @@ public enum FirstKillCooldown
     GlobalCooldown,
     SetCooldown,
     RoleCooldown
+}
+
+public enum ModifierTextMode
+{
+    First,
+    Off,
+    All
 }

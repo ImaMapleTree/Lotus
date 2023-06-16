@@ -34,7 +34,7 @@ public class Mayor: Crewmate
     private bool revealed;
 
     private FixedUpdateLock updateLock = new(0.25f);
-    
+
     [UIComponent(UI.Counter)]
     private string PocketCounter() => RoleUtils.Counter(remainingVotes, totalVotes);
 
@@ -42,7 +42,7 @@ public class Mayor: Crewmate
     protected override void PostSetup()
     {
         remainingVotes = totalVotes;
-        if (!hasPocketMeeting) MyPlayer.NameModel().GetComponentHolder<CounterHolder>().RemoveAt(1);
+        if (!hasPocketMeeting) MyPlayer.NameModel().GetComponentHolder<CounterHolder>().RemoveLast();
     }
 
     [RoleAction(RoleActionType.OnPet)]
@@ -66,7 +66,7 @@ public class Mayor: Crewmate
             revealed = true;
             ChatHandler.Of(MayorRevealMessage.Formatted(MyPlayer.name)).Title(t => t.Color(RoleColor).Text(MayorRevealTitle).Build()).Send();
             List<PlayerControl> allPlayers = Game.GetAllPlayers().ToList();
-            MyPlayer.NameModel().GetComponentHolder<RoleHolder>()[0].SetViewerSupplier(() => allPlayers);
+            MyPlayer.NameModel().GetComponentHolder<RoleHolder>().Last().SetViewerSupplier(() => allPlayers);
             return;
         }
         if (!voted.Exists()) return;
@@ -76,7 +76,7 @@ public class Mayor: Crewmate
     [RoleAction(RoleActionType.RoundEnd)]
     private void MayorNotify()
     {
-       if (revealToVote && !revealed) 
+       if (revealToVote && !revealed)
            ChatHandler.Of(RevealMessage).Title(t => t.Color(RoleColor).Text(MayorRevealTitle).Build()).Send(MyPlayer);
     }
 
@@ -108,13 +108,13 @@ public class Mayor: Crewmate
     {
         [Localized(nameof(RevealMessage))]
         internal static string RevealMessage = "Mr. Mayor, you must reveal yourself to gain additional votes. Currently you can vote normally, but if you vote yourself you'll reveal your role to everyone and gain more votes!";
-        
+
         [Localized(nameof(MayorRevealTitle))]
         public static string MayorRevealTitle = "Mayor Reveal";
 
         [Localized(nameof(MayorRevealMessage))]
         public static string MayorRevealMessage = "{0} revealed themself as mayor!";
-        
+
         [Localized(ModConstants.Options)]
         internal static class Options
         {

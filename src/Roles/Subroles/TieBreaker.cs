@@ -19,7 +19,7 @@ public class TieBreaker: Subrole
     [RoleAction(RoleActionType.VotingComplete)]
     public void CheckForTie(MeetingDelegate meetingDelegate)
     {
-        if (!meetingDelegate.IsTie) return;
+        if (!meetingDelegate.IsTie || meetingDelegate.IsForceEnd()) return;
         List<(byte, int)> votes = meetingDelegate.CurrentVoteCount().OrderByDescending(o => o.Value).Select(kv => (kv.Key, kv.Value)).ToList();
         if (votes.Count == 0) return;
         HashSet<byte> highestVotePlayers = votes.Where(v => v.Item2 == votes[0].Item2 && v.Item1 != 255).Select(v => v.Item1).ToHashSet();
@@ -34,7 +34,7 @@ public class TieBreaker: Subrole
         }
     }
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => 
+    protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(0.51f, 0.46f, 0.72f));
 
     [Localized(nameof(TieBreaker))]

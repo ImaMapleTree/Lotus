@@ -68,6 +68,6 @@ public partial class Alchemist: Crewmate
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
-            .RoleColor(new Color(1f, 0.69f, 0.56f))
+            .RoleColor(new Color(1f, 0.93f, 0.74f))
             .OptionOverride(Override.CrewLightMod, () => VisionMod);
 }

@@ -57,7 +57,7 @@ public class Pestilence: NeutralKillingBase
     [RoleAction(RoleActionType.Interaction)]
     private void PestilenceAttacked(PlayerControl actor, Interaction interaction, ActionHandle handle)
     {
-        Intent intent = interaction.Intent();
+        Intent intent = interaction.Intent;
         if (intent is not IFatalIntent) return;
 
         bool canceled = false;

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Reactive;
 using Lotus.Extensions;
+using Lotus.Logging;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Utilities;
@@ -17,7 +18,7 @@ public class HM2: MonoBehaviour
 {
     private GameObject anchorObject;
     private GameObject buttonObject;
-    
+
     private ReportButton historyButton;
     private SpriteRenderer background;
 
@@ -26,10 +27,10 @@ public class HM2: MonoBehaviour
     private List<(PassiveButton passiveButton, IHistoryMenuChild menuChild)> menuTabs = new();
 
     private bool opened;
-    
+
     public HM2(IntPtr intPtr) : base(intPtr)
     {
-        anchorObject = gameObject.CreateChild("Anchor", new Vector3(0.3f, -0.1f, -1.5f)); 
+        anchorObject = gameObject.CreateChild("Anchor", new Vector3(0.3f, -0.1f, -1.5f));
         buttonObject = gameObject.CreateChild("HistoryButton", new Vector3(-8.1f, -0.1f));
         Hooks.GameStateHooks.GameStartHook.Bind(nameof(HM2), _ =>
         {
@@ -40,16 +41,19 @@ public class HM2: MonoBehaviour
 
     public void PassHudManager(HudManager hudManager)
     {
-        ChatController chatController = hudManager.Chat; 
-        
+        ChatController chatController = hudManager.Chat;
+
         // =====================
         // Set up History Button
         // =====================
+        DevLogger.Log("Setting up history button");
+        hudManager.ReportButton.gameObject.SetActive(true);
         historyButton = Instantiate(hudManager.ReportButton, buttonObject.transform);
         historyButton.graphic.sprite = Utils.LoadSprite("Lotus.assets.History.png", 800);
         historyButton.GetComponentInChildren<PassiveButton>().Modify(ToggleMenu);
+        historyButton.SetActive(true);
         Async.Schedule(() => historyButton.buttonLabelText.text = "History", 0.05f);
-        
+
         // ===================
         // Set up Parent Menu
         // ===================
@@ -58,11 +62,11 @@ public class HM2: MonoBehaviour
         background.transform.localScale += new Vector3(0.3f, 0f);
 
         PassiveButton parentButton = chatController.Content.FindChild<PassiveButton>("OpenKeyboardButton");
-        
+
         ResultsMenu = anchorObject.AddComponent<ResultsMenu>();
         ResultsMenu.PassHudManager(hudManager);
         menuTabs.Add((ResultsMenu.CreateTabButton(parentButton), ResultsMenu));
-        
+
         CreateTabBehaviours();
         menuTabs[0].menuChild.Open();
         anchorObject.SetActive(false);
@@ -82,7 +86,7 @@ public class HM2: MonoBehaviour
         historyButton.SetDisabled();
 
         HudManager.Instance.IsIntroDisplayed = true;
-        
+
         opened = true;
         anchorObject.SetActive(true);
     }
@@ -92,9 +96,9 @@ public class HM2: MonoBehaviour
         HudManager.Instance.SetHudActive(true);
         GameStartManager.Instance.StartButton.gameObject.SetActive(true);
         historyButton.SetEnabled();
-        
+
         HudManager.Instance.IsIntroDisplayed = false;
-        
+
         opened = false;
         anchorObject.SetActive(false);
     }

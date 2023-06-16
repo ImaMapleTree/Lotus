@@ -17,13 +17,12 @@ public class Doctor : Scientist
     private void DoctorAnyDeath(PlayerControl dead, IDeathEvent causeOfDeath)
     {
         string coloredString = "<size=1.6>" + Color.white.Colorize($"({RoleColor.Colorize(causeOfDeath.SimpleName())})") + "</size>";
-        
+
         TextComponent textComponent = new(new LiveString(coloredString), GameState.InMeeting, viewers: MyPlayer);
-        
         dead.NameModel().GetComponentHolder<TextHolder>().Add(textComponent);
     }
 
-    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => 
+    protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddVitalsOptions(base.RegisterOptions(optionStream));
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>

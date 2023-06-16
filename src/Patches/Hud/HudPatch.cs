@@ -2,6 +2,7 @@ using HarmonyLib;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Options;
 using UnityEngine;
@@ -24,7 +25,7 @@ class HudManagerPatch
     {
         var player = PlayerControl.LocalPlayer;
         if (player == null) return;
-        
+
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             if ((!AmongUsClient.Instance.IsGameStarted || !GameStates.IsOnlineGame)
@@ -41,15 +42,17 @@ class HudManagerPatch
                 player.Collider.offset = new Vector2(0f, -0.3636f);
             }
         }
-        
+
         if (!AmongUsClient.Instance.IsGameStarted) __instance.ReportButton.Hide();
-        else __instance.ReportButton.Show();;
+        else if (Game.State is GameState.InMeeting) __instance.ReportButton.Hide();
+        else if (!PlayerControl.LocalPlayer.IsAlive()) __instance.ReportButton.Hide();
+        else __instance.ReportButton.Show();
 
 
         __instance.GameSettings.text = OptionShower.GetOptionShower().GetPage();
         //ゲーム中でなければ以下は実行されない
         if (!AmongUsClient.Instance.IsGameStarted) return;
-        
+
     }
 }
 

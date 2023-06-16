@@ -16,7 +16,7 @@ public class FixedUpdateLock: ICloneOnSetup<FixedUpdateLock>
     public FixedUpdateLock(bool beginUnlocked = true): this(ModConstants.RoleFixedUpdateCooldown, beginUnlocked: beginUnlocked)
     {
     }
-    
+
     public FixedUpdateLock(double duration, TimeUnit timeUnit = TimeUnit.Seconds, bool beginUnlocked = true)
     {
         LockDuration = duration;
@@ -26,13 +26,16 @@ public class FixedUpdateLock: ICloneOnSetup<FixedUpdateLock>
 
     public bool AcquireLock()
     {
+        bool acquirable = IsUnlocked();
+        if (acquirable) lastAcquire = DateTime.Now;
+        return acquirable;
+    }
+
+    public bool IsUnlocked()
+    {
         double elapsedTime = DateTime.Now.Subtract(lastAcquire).TotalMilliseconds;
         if (TimeUnit is TimeUnit.Seconds) elapsedTime /= 1000;
-
-        bool acquirable = elapsedTime > LockDuration;
-        if (acquirable) lastAcquire = DateTime.Now;
-
-        return acquirable;
+        return elapsedTime > LockDuration;
     }
 
     public void Unlock()

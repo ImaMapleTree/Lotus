@@ -30,4 +30,9 @@ public class TextUtils
     {
         return new ColorGradient(colors).Apply(str);
     }
+
+    public static string ApplyMark(string str, Color color)
+    {
+        return $"<mark={color.ToHex()}>{str}</mark>";
+    }
 }

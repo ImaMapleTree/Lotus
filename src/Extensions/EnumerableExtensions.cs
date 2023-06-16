@@ -14,7 +14,7 @@ public static class EnumerableExtensions
             list.Add(item);
         return list;
     }
-    
+
     private static Random rng = new Random();
 
     public static void Shuffle<T>(this IList<T> list)
@@ -25,5 +25,13 @@ public static class EnumerableExtensions
             int k = rng.Next(n + 1);
             (list[k], list[n]) = (list[n], list[k]);
         }
+    }
+
+    public static T RemoveLast<T>(this IList<T> list)
+    {
+        int index = list.Count - 1;
+        T item = list[index];
+        list.RemoveAt(index);
+        return item;
     }
 }

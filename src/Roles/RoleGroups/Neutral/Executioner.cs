@@ -39,7 +39,7 @@ public class Executioner : CustomRole
             if (p.PlayerId == MyPlayer.PlayerId) return false;
             IFaction faction = p.GetCustomRole().Faction;
             if (!canTargetImpostors && faction is ImpostorFaction) return false;
-            return canTargetNeutrals || faction is not Solo;
+            return canTargetNeutrals || faction is not Factions.Neutrals.Neutral;
         }).ToList().GetRandom();
         VentLogger.Trace($"Executioner ({MyPlayer.name}) Target: {target}");
 
@@ -52,7 +52,7 @@ public class Executioner : CustomRole
         if (target == null || target.PlayerId != exiled.PlayerId) return;
         List<PlayerControl> winners = new() { MyPlayer };
         if (target.GetCustomRole() is Jester) winners.Add(target);
-        ManualWin win = new(winners, WinReason.SoloWinner);
+        ManualWin win = new(winners, ReasonType.SoloWinner);
         win.Activate();
     }
 
@@ -70,7 +70,7 @@ public class Executioner : CustomRole
                 MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Opportunist);
                 break;
             case ExeRoleChange.SchrodingersCat:
-                MatchData.AssignRole(MyPlayer, Copycat.SchrodingersCat!);
+                MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.SchrodingersCat);
                 break;
             case ExeRoleChange.Crewmate:
                 MatchData.AssignRole(MyPlayer, CustomRoleManager.Static.Crewmate);
@@ -105,7 +105,7 @@ public class Executioner : CustomRole
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        roleModifier.RoleColor(new Color(0.55f, 0.17f, 0.33f)).Faction(FactionInstances.Solo).RoleFlags(RoleFlag.CannotWinAlone).SpecialType(SpecialType.Neutral);
+        roleModifier.RoleColor(new Color(0.55f, 0.17f, 0.33f)).Faction(FactionInstances.Neutral).RoleFlags(RoleFlag.CannotWinAlone).SpecialType(SpecialType.Neutral);
 
     private enum ExeRoleChange
     {

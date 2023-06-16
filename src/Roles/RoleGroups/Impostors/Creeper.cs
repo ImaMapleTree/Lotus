@@ -38,17 +38,15 @@ public class Creeper : Shapeshifter
     [RoleAction(RoleActionType.Shapeshift)]
     private void CreeperExplode()
     {
+        if (gracePeriod.NotReady()) return;
         RoleUtils.GetPlayersWithinDistance(MyPlayer, explosionRadius).ForEach(p =>
         {
             FatalIntent intent = new(true, () => new BombedEvent(p, MyPlayer));
-            MyPlayer.InteractWith(p, new DirectInteraction(intent, this));
+            MyPlayer.InteractWith(p, new LotusInteraction(intent, this));
         });
 
         FatalIntent suicideIntent = new(false, () => new BombedEvent(MyPlayer, MyPlayer));
-        MyPlayer.InteractWith(MyPlayer, creeperProtectedByShields
-            ? new DirectInteraction(suicideIntent, this)
-            : new UnblockedInteraction(suicideIntent, this)
-        );
+        MyPlayer.InteractWith(MyPlayer, new LotusInteraction(suicideIntent, this) { IsPromised = creeperProtectedByShields });
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

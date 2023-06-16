@@ -1,3 +1,5 @@
+using Lotus.API;
+
 namespace Lotus.Roles.Internals.Attributes;
 
 public class ModifiedActionAttribute: RoleActionAttribute

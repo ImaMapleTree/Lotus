@@ -43,7 +43,7 @@ public class BloodKnight : NeutralKillingBase
     private void InteractedWith(Interaction interaction, ActionHandle handle)
     {
         if (!isProtected) return;
-        if (interaction.Intent() is not IFatalIntent) return;
+        if (interaction.Intent is not IFatalIntent) return;
         handle.Cancel();
     }
 

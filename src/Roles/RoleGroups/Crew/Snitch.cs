@@ -24,7 +24,7 @@ namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Snitch : Crewmate
 {
-    
+
     public bool SnitchCanTrackNk;
 
     public bool EvilHaveArrow;
@@ -38,7 +38,8 @@ public class Snitch : Crewmate
     [RoleAction(RoleActionType.MyDeath)]
     private void ClearComponents() => indicatorComponents.ForEach(c => c.Delete());
 
-    
+
+
     protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
     {
         int remainingTasks = TotalTasks - TasksComplete;
@@ -61,7 +62,7 @@ public class Snitch : Crewmate
             p.NameModel().GetComponentHolder<RoleHolder>().Components().ForEach(rc => rc.AddViewer(MyPlayer));
 
             if (!SnitchHasArrow) return;
-            
+
             Color color = ArrowIsColored ? p.GetCustomRole().RoleColor : Color.white;
             LiveString liveString = new(() => RoleUtils.CalculateArrow(MyPlayer, p, color));
             var remote = MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: MyPlayer));

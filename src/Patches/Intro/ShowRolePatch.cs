@@ -15,7 +15,7 @@ class ShowRolePatch
         Async.Schedule(() =>
         {
             CustomRole role = PlayerControl.LocalPlayer.GetCustomRole();
-            if (!role.IsVanilla())
+            if (true)
             {
                 __instance.YouAreText.color = role.RoleColor;
                 __instance.RoleText.text = role.RoleName;

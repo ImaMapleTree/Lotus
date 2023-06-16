@@ -18,19 +18,19 @@ public class SabotageOptions
     public bool CustomSkeldReactorCountdown => SkeldReactorCountdown != -1;
 
     public int SkeldOxygenCountdown;
-    public bool CustomSkeldOxygenCountdown => SkeldReactorCountdown != -1;
+    public bool CustomSkeldOxygenCountdown => SkeldOxygenCountdown != -1;
 
     public int MiraReactorCountdown;
-    public bool CustomMiraReactorCountdown => SkeldReactorCountdown != -1;
+    public bool CustomMiraReactorCountdown => MiraReactorCountdown != -1;
 
     public int MiraOxygenCountdown;
-    public bool CustomMiraOxygenCountdown => SkeldReactorCountdown != -1;
+    public bool CustomMiraOxygenCountdown => MiraOxygenCountdown != -1;
 
     public int PolusReactorCountdown;
-    public bool CustomPolusReactorCountdown => SkeldReactorCountdown != -1;
+    public bool CustomPolusReactorCountdown => PolusReactorCountdown != -1;
 
     public int AirshipReactorCountdown;
-    public bool CustomAirshipReactorCountdown => SkeldReactorCountdown != -1;
+    public bool CustomAirshipReactorCountdown => AirshipReactorCountdown != -1;
 
     public SabotageType DisabledSabotages => disableSabotages ? 0 : disabledSabotageTypes;
     private bool disableSabotages;

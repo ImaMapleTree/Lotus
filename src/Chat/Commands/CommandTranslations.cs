@@ -16,6 +16,8 @@ public class CommandTranslations
     [Localized(nameof(PlayerNotFoundText))] protected static string PlayerNotFoundText = "Player \"{0}\" not found.";
     [Localized(nameof(CommandError))] protected static string CommandError = "⚠ Command Error ⚠";
 
+    [Localized(nameof(NoPreviousGameText))] public static string NoPreviousGameText = "No game played yet!";
+
     [Localized("HostOptions")]
     protected static class HostOptionTranslations
     {

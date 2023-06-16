@@ -1,9 +1,7 @@
 using HarmonyLib;
 using Lotus.API.Odyssey;
-using Lotus.API.Vanilla;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Options;
-using Lotus.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -22,6 +20,7 @@ class SetHighlightedPatch
         return false;
     }
 }
+
 
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.OnDestroy))]
 class MeetingHudOnDestroyPatch

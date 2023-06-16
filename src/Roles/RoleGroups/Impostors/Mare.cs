@@ -13,7 +13,7 @@ using Lotus.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
-using Priority = Lotus.Roles.Internals.Attributes.Priority;
+using Priority = Lotus.API.Priority;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 

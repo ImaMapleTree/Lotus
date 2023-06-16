@@ -14,29 +14,29 @@ public class CustomTitle
 {
     private static Regex _commaRegex = new("( *, *)");
     private static Regex _tagRegex = new("(<([^>]*)(=?[^>]*?)>([^<]*)<\\/\\2>)");
-    
+
     public Component? Prefix { get; set; }
     public Component? Suffix { get; set; }
     public Component? UpperText { get; set; }
     public Component? LowerText { get; set; }
     public Component? Name { get; set; }
-    
-    
+
+
     public string ApplyTo(string playerName, bool nameOnly = false)
     {
         if (AmongUsClient.Instance != null && !AmongUsClient.Instance.AmHost) return playerName;
         if (Game.State is not GameState.InLobby) return playerName;
-        
+
         string? prefix = Prefix?.Generate();
         string? suffix = Suffix?.Generate();
-        
+
         prefix = prefix == null ? "" : prefix + (Prefix?.Spaced ?? false ? " " : "");
         suffix = suffix == null ? "" : (Suffix?.Spaced ?? false ? " " : "") + suffix;
 
         playerName = Name?.GenerateName(playerName) ?? playerName;
 
         if (nameOnly) return $"{prefix}{playerName}{suffix}";
-        
+
         string? upperText = UpperText?.Generate();
         string? lowerText = LowerText?.Generate();
 
@@ -44,7 +44,7 @@ public class CustomTitle
         lowerText = lowerText == null ? "" : "\n" + lowerText;
         return $"{upperText}{prefix}{playerName}{suffix}{lowerText}";
     }
-    
+
     public class Component
     {
         public string? Size { get; set; }
@@ -64,11 +64,11 @@ public class CustomTitle
                 return "";
             }
 
-            if (GradientDegree == -1) GradientDegree = Math.Max(1, Text.Length / 9);
-            
             List<(string rich, string richValue, string text)> tuples = _tagRegex.Matches(Text).Select(m => m.Groups).Select(g => (g[2].Value, g[3].Value, g[4].Value)).ToList();
             string modifiedText = _tagRegex.Replace(Text, "⚡");
-            
+
+            if (GradientDegree == -1) GradientDegree = Math.Max(1, modifiedText.Count(c => c != '⚡') / 9);
+
             if (InternalGradient == null && Gradient != null) InternalGradient = CreateGradient(Gradient);
             if (InternalGradient != null) return ApplySize(InternalGradient.Apply(modifiedText, GradientDegree), tuples);
 
@@ -98,7 +98,7 @@ public class CustomTitle
             return text;
         }
     }
-    
+
     private static ColorGradient CreateGradient(string gradient)
     {
         Color[] colors = _commaRegex.Split(gradient)
@@ -108,12 +108,12 @@ public class CustomTitle
 
         return new ColorGradient(colors);
     }
-    
+
     private static Color ParseToColor(string input)
     {
         Color? c = input.ToColor();
         if (c != null) return c.Value;
-            
+
         VentLogger.Warn($"Could not parse to color {c}", "CustomTitleGenerator");
         return Color.white;
 

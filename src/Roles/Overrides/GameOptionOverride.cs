@@ -2,6 +2,7 @@
 using System;
 using AmongUs.GameOptions;
 using Lotus.API;
+using Lotus.Logging;
 using UnityEngine;
 using VentLib.Logging;
 
@@ -31,7 +32,6 @@ public class GameOptionOverride
     }
 
 
-    // TODO figure out applyto
     public virtual void ApplyTo(IGameOptions options)
     {
         if (!Condition?.Invoke() ?? false) return;
@@ -92,7 +92,7 @@ public class GameOptionOverride
                 break;
         }
 
-        VentLogger.Trace($"Applying Override: {Option} => {DebugValue}", "Override::ApplyTo");
+        DevLogger.Low($"Applying Override: {Option} => {DebugValue}");
     }
 
     public virtual object? GetValue() => DebugValue = supplier == null ? value : supplier.Invoke();

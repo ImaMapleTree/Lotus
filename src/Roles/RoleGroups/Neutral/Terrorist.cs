@@ -35,7 +35,7 @@ public class Terrorist : Engineer
     private void TerroristWinCheck()
     {
         if (!HasAllTasksComplete) return;
-        ManualWin.Activate(MyPlayer, WinReason.TasksComplete, 900);
+        ManualWin.Activate(MyPlayer, ReasonType.TasksComplete, 900);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
@@ -55,7 +55,8 @@ public class Terrorist : Engineer
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .RoleColor(new Color(0.52f, 0.84f, 0.28f))
-            .Faction(FactionInstances.Solo)
+            .RoleFlags(RoleFlag.CannotWinAlone)
+            .Faction(FactionInstances.Neutral)
             .SpecialType(SpecialType.Neutral);
 
     [Localized(nameof(Terrorist))]

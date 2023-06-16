@@ -73,7 +73,7 @@ public class ResultsMenu: MonoBehaviour, IHistoryMenuChild
         HashSet<byte> winners = Game.MatchData.GameHistory.LastWinners.Select(p => p.MyPlayer.PlayerId).ToHashSet();
 
         allPlayers = allPlayers.Sorted(p => winners.Contains(p.PlayerId) ? (int)p.Status : 99 + (int)p.Status).ToList();
-        
+
         playerPrefab.gameObject.SetActive(true);
         playerPrefab.UpdateFromLocalPlayer(PlayerMaterial.MaskType.SimpleUI);
 
@@ -89,31 +89,29 @@ public class ResultsMenu: MonoBehaviour, IHistoryMenuChild
 
             int row = Mathf.FloorToInt(index / 5f);
 
-            newPlayer.transform.localPosition += new Vector3(1.65f * (index - (row * 5)), -row * 1.27f, 0);
+            newPlayer.transform.localPosition += new Vector3(1.65f * (index - (row * 5)), -row * 1.35f, 0);
 
-            
-            string bestStat = EligibleEndgameStats
-                .OrderByDescending(stat => stat.GetGenericValue(playerHistory.UniquePlayerId) as IComparable ?? -999)
-                .FirstOrOptional()
-                .Map(stat => $"{stat.Name()}: {stat.GetGenericValue(playerHistory.UniquePlayerId)}")
-                .OrElse("");
 
-            string historyName = $"{playerHistory.Name}\n{role.RoleColor.Colorize(role.RoleName)}\n<size=1.4>{bestStat}</size>";
+            string statText = playerHistory.Role.Statistics().FirstOrOptional().Map(t => $" <size=1.5>[{t.Name()}: {t.GetGenericValue(playerHistory.UniquePlayerId)}]</size>").OrElse("");
+
+            string historyName = $"{playerHistory.Name}\n{role.RoleColor.Colorize(role.RoleName)}\n<size=1.4>{statText}</size>";
             newPlayer.SetName(historyName);
 
             TextMeshPro aboveNameTmp = Instantiate(newPlayer.cosmetics.nameText, newPlayer.transform);
-            aboveNameTmp.transform.localPosition += new Vector3(0f, 2.45f, 0f);
+            aboveNameTmp.transform.localPosition += new Vector3(0f, 2.49f, 0f);
             aboveNameTmp.transform.localScale += new Vector3(1f, 1f, 0f);
 
+            string statusText = playerHistory.Status is PlayerStatus.Dead ? playerHistory.CauseOfDeath?.SimpleName() ?? playerHistory.Status.ToString() : playerHistory.Status.ToString();
+
             string aboveNameText = winners.Contains(playerHistory.PlayerId) ? new Color(1f, 0.83f, 0.24f).Colorize("Winner") : "";
-            aboveNameText += "\n<size=1.25>" + StatusColor(playerHistory.Status).Colorize(playerHistory.Status.ToString()) + "</size>";
+            aboveNameText += "\n<size=1.25>" + StatusColor(playerHistory.Status).Colorize(statusText) + "</size>";
             aboveNameTmp.text = aboveNameText;
         }
 
         playerPrefab.gameObject.SetActive(false);
         initialized = true;
     }
-    
+
     private static Color StatusColor(PlayerStatus status)
     {
         return status switch
@@ -125,12 +123,12 @@ public class ResultsMenu: MonoBehaviour, IHistoryMenuChild
             _ => throw new ArgumentOutOfRangeException(nameof(status), status, null)
         };
     }
-    
+
     private static List<Statistic> DisplayEligibleStats() => new()
     {
         VanillaStatistics.Kills, VanillaStatistics.BodiesReported, VanillaStatistics.SabotagesCalled,
         VanillaStatistics.SabotagesFixed, VanillaStatistics.PlayersExiled
     };
 
-    
+
 }

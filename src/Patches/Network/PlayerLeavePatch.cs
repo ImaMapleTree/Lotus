@@ -25,8 +25,14 @@ class OnPlayerLeftPatch
     public static void Postfix(AmongUsClient __instance, [HarmonyArgument(0)] ClientData data, [HarmonyArgument(1)] DisconnectReasons reason)
     {
         VentLogger.Debug($"{data.PlayerName} (ClientID={data.Id}) left the game. (Reason={reason})", "SessionEnd");
-        if (Game.State is GameState.InLobby) return;
-        Game.NameModels.Remove(data.Character.PlayerId);
+        if (Game.State is GameState.InLobby)
+        {
+            PlayerJoinPatch.CheckAutostart();
+            Hooks.PlayerHooks.PlayerDisconnectHook.Propagate(new PlayerHookEvent(data.Character));
+            return;
+        }
+
+        //Game.NameModels.Remove(data.Character.PlayerId);
 
         ActionHandle uselessHandle = ActionHandle.NoInit();
         if (Game.State is not (GameState.InLobby or GameState.InIntro))
@@ -36,6 +42,7 @@ class OnPlayerLeftPatch
             Game.MatchData.Roles.SubRoles.GetValueOrDefault(data.Character.PlayerId)?.ForEach(r => r.HandleDisconnect());
         }
         Hooks.PlayerHooks.PlayerDisconnectHook.Propagate(new PlayerHookEvent(data.Character));
+        data.Character.Data.PlayerName = data.Character.name;
         Game.CurrentGamemode.Trigger(GameAction.GameLeave, data);
     }
 }

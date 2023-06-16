@@ -1,7 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using AmongUs.GameOptions;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
@@ -14,17 +16,16 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
-using Lotus.API;
 using Lotus.Extensions;
-using Lotus.GUI.Name.Impl;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
-public class Transporter : Shapeshifter
+public class Transporter : Crewmate
 {
     private int totalTransports;
     private int transportsRemaining;
@@ -33,40 +34,25 @@ public class Transporter : Shapeshifter
     [UIComponent(UI.Cooldown)]
     private Cooldown transportCooldown;
 
-    private List<PlayerControl> transportList = new();
-
     [UIComponent(UI.Counter)]
     private string RemainingTransportCounter() => RoleUtils.Counter(transportsRemaining, totalTransports);
 
-    protected override void Setup(PlayerControl player)
+    protected override void PostSetup()
     {
-        transportList = new List<PlayerControl>();
         VentLogger.Fatal($"Total Transports: {totalTransports}");
         transportsRemaining = totalTransports;
-        ShapeshiftCooldown = 0.1f;
     }
 
-    [RoleAction(RoleActionType.RoundStart)]
-    private void ResetTransportTargets() => transportList.Clear();
-
-    [RoleAction(RoleActionType.Shapeshift)]
-    public void TransportSelect(PlayerControl target, ActionHandle handle)
+    [RoleAction(RoleActionType.OnPet)]
+    public void TransportSelect(ActionHandle handle)
     {
-        handle.Cancel();
         if (this.transportsRemaining == 0 || !transportCooldown.IsReady()) return;
-        transportList.Add(target);
-        textComponent = new TextComponent(new LiveString("Selected", Color.red), GameState.Roaming, viewers: MyPlayer);
-        target.NameModel().GetComponentHolder<TextHolder>().Add(textComponent);
-        Async.Schedule(() => Deselect(target), 8f);
 
-        VentLogger.Trace($"{MyPlayer.GetNameWithRole()} => Selected ({target.GetNameWithRole()})", "Transporter");
-        if (transportList.Count < 2) return;
+        List<PlayerControl> players = Players.GetPlayers(PlayerFilter.Alive).ToList();
+        if (players.Count < 2) return;
 
-        PlayerControl target1 = transportList[0];
-        PlayerControl target2 = transportList[1];
-        transportList.Clear();
-        Deselect(target1);
-        Deselect(target2);
+        PlayerControl target1 = players.PopRandom();
+        PlayerControl target2 = players.PopRandom();
 
         if (target1.PlayerId == target2.PlayerId) return;
 
@@ -100,12 +86,6 @@ public class Transporter : Shapeshifter
         Game.MatchData.GameHistory.AddEvent(new TransportedEvent(MyPlayer, target1, target2));
     }
 
-    private void Deselect(PlayerControl target)
-    {
-        transportList.RemoveAll(p => p.PlayerId == target.PlayerId);
-        target.NameModel().GetComponentHolder<TextHolder>().Remove(textComponent);
-    }
-
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .Tab(DefaultTabs.CrewmateTab)
@@ -119,7 +99,6 @@ public class Transporter : Shapeshifter
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier)
             .VanillaRole(RoleTypes.Crewmate)
-            .DesyncRole(RoleTypes.Shapeshifter)
             .RoleColor("#00EEFF");
 
 
@@ -143,7 +122,7 @@ public class Transporter : Shapeshifter
         public override string Message() => $"{Game.GetName(target1)} and {Game.GetName(target2)} were transported by {Game.GetName(Player())}.";
     }
 
-    public class TransportInteraction : DirectInteraction {
+    public class TransportInteraction : LotusInteraction {
         public TransportInteraction(PlayerControl actor) : base(new NeutralIntent(), actor.GetCustomRole()) { }
     }
 }

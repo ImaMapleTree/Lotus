@@ -21,7 +21,9 @@ public class Nimble: Subrole
     {
         CustomRole myRole = MyPlayer.GetCustomRole();
         myRole.BaseCanVent = true;
-        if (!myRole.IsImpostor()) myRole.VirtualRole = RoleTypes.Engineer;
+        myRole.RoleAbilityFlags &= ~RoleAbilityFlag.CannotVent;
+        if (!myRole.RealRole.IsImpostor()) myRole.VirtualRole = RoleTypes.Engineer;
+        if (myRole.DesyncRole is RoleTypes.Crewmate) myRole.DesyncRole = RoleTypes.Engineer;
         Game.MatchData.Roles.AddOverride(MyPlayer.PlayerId, new GameOptionOverride(Override.EngVentCooldown, VentCooldown));
         Game.MatchData.Roles.AddOverride(MyPlayer.PlayerId, new GameOptionOverride(Override.EngVentDuration, VentDuration));
     }

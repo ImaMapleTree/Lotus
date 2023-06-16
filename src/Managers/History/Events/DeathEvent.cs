@@ -1,6 +1,7 @@
 using Lotus.API.Odyssey;
 using Lotus.Roles;
 using Lotus.API;
+using Lotus.API.Player;
 using Lotus.Extensions;
 using VentLib.Utilities.Optionals;
 
@@ -10,7 +11,7 @@ public class DeathEvent : IDeathEvent
 {
     private PlayerControl deadPlayer;
     private CustomRole playerRole;
-    private Optional<PlayerControl> killer;
+    private Optional<FrozenPlayer> killer;
     private Optional<CustomRole> killerRole;
 
     private Timestamp timestamp = new();
@@ -19,8 +20,8 @@ public class DeathEvent : IDeathEvent
     {
         this.deadPlayer = deadPlayer;
         playerRole = this.deadPlayer.GetCustomRole();
-        this.killer = Optional<PlayerControl>.Of(killer);
-        this.killerRole = this.killer.Map(p => p.GetCustomRole());
+        this.killer = Optional<FrozenPlayer>.Of(Game.MatchData.FrozenPlayer(killer));
+        this.killerRole = this.killer.Map(p => Optional<CustomRole>.Of(p.MyPlayer.GetCustomRoleSafe()).OrElse(p.Role));
     }
 
     public PlayerControl Player() => deadPlayer;
@@ -34,10 +35,10 @@ public class DeathEvent : IDeathEvent
     public virtual string Message()
     {
         string baseMessage = $"{Game.GetName(deadPlayer)} was {SimpleName().ToLower()}";
-        return killer.Transform(klr => baseMessage + $" by {Game.GetName(klr)}.", () => baseMessage + ".");
+        return killer.Transform(klr => baseMessage + $" by {klr.Name}.", () => baseMessage + ".");
     }
 
-    public Optional<PlayerControl> Instigator() => killer;
+    public Optional<FrozenPlayer> Instigator() => killer;
 
     public Optional<CustomRole> InstigatorRole() => killerRole;
 

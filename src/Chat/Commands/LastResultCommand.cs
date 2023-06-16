@@ -2,12 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
-using Lotus.Logging;
+using Lotus.Extensions;
 using Lotus.Managers.History;
 using Lotus.Options;
+using Lotus.Roles;
+using Lotus.Roles.Extra;
+using Lotus.Victory;
 using Lotus.Victory.Conditions;
-using Microsoft.VisualBasic;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -41,10 +44,10 @@ public class LastResultCommand: CommandTranslations
         });
     }
 
-    [Command(CommandFlag.LobbyOnly, "last", "l")]
+    [Command(CommandFlag.LobbyOnly, "last", "l", "lastresult")]
     public static void LastGame(PlayerControl source, CommandContext context)
     {
-        if (PlayerHistories == null) ErrorHandler(source).Message(LRTranslations.NoPreviousGameText).Send();
+        if (PlayerHistories == null) ErrorHandler(source).Message(NoPreviousGameText).Send();
         else if (context.Args.Length == 0) GeneralResults(source);
         else PlayerResults(source, context.Join());
     }
@@ -59,8 +62,7 @@ public class LastResultCommand: CommandTranslations
             return;
         }
 
-
-        string coloredName = ((Color)Palette.PlayerColors[foundPlayer.Outfit.ColorId]).Colorize(ModConstants.ColorNames[foundPlayer.Outfit.ColorId]);
+        string coloredName = foundPlayer.ColorName;
 
         string statusText = foundPlayer.Status is PlayerStatus.Dead ? foundPlayer.CauseOfDeath?.SimpleName() ?? foundPlayer.Status.ToString() : foundPlayer.Status.ToString();
         string playerStatus = StatusColor(foundPlayer.Status).Colorize(statusText);
@@ -85,20 +87,35 @@ public class LastResultCommand: CommandTranslations
         HashSet<byte> winners = Game.MatchData.GameHistory.LastWinners.Select(p => p.MyPlayer.PlayerId).ToHashSet();
         string text = GeneralColor3.Colorize("<b>Translations.ResultsText</b>") + "\n";
 
-        text = PlayerHistories.OrderBy(StatusOrder).Select(p => CreateSmallPlayerResult(p, winners.Contains(p.PlayerId)))
-            .Fuse("<line-height=3.1>\n</line-height>");
+        text = PlayerHistories
+            .Where(ph => ph.Role is not GM)
+            .OrderBy(StatusOrder)
+            .Select(p => CreateSmallPlayerResult(p, winners.Contains(p.PlayerId)))
+            .Fuse("<line-height=4>\n</line-height>");
 
-        string winResult = new Optional<IWinCondition>(Game.GetWinDelegate().WinCondition()).Map(wc =>
+        WinDelegate winDelegate = Game.GetWinDelegate();
+        string winResult = new Optional<IWinCondition>(winDelegate.WinCondition()).Map(wc =>
         {
             string t;
-            if (wc is IFactionWinCondition factionWin) t = factionWin.Factions().Select(f => f.FactionColor().Colorize(f.Name())).Fuse();
-            else t = Game.MatchData.GameHistory.LastWinners.Select(lw => lw.Name).Fuse();
-            return $"\n\n<size=1.8>{LRTranslations.WinResultText.Formatted(t)}</size>";
+            if (wc is IFactionWinCondition factionWin)
+            {
+                t = factionWin.Factions().Select(f => f.Color.Colorize(f.Name())).Distinct().Fuse();
+                List<FrozenPlayer> additionalWinners = Game.MatchData.GameHistory.AdditionalWinners;
+                if (additionalWinners.Count > 0)
+                {
+                    string awText = additionalWinners.Select(fp => new List<CustomRole> {fp.Role}.Concat(fp.Subroles).MaxBy(r => r.DisplayOrder)).Fuse();
+                    t += $" + {awText}";
+                }
+            }
+            else t = Game.MatchData.GameHistory.LastWinners.Select(lw => lw.Role.ColoredRoleName()).Fuse();
+
+            string? wcText = wc.GetWinReason().ReasonText;
+            string reasonText = wcText == null ? "" : $"\n<size=1.45>{LRTranslations.WinReasonText.Formatted(wcText)}</size>";
+            return $"\n\n<size=1.6>{LRTranslations.WinResultText.Formatted(t)}{reasonText}</size>";
         }).OrElse("");
 
 
-        string content = text + winResult;
-        DevLogger.Log(content);
+        string content = $"<size=1.7>{text + winResult}</size>";
 
         ChatHandler.Of("\n".Repeat(PlayerHistories.Count - 1), content).LeftAlign().Send(source);
         return;
@@ -119,9 +136,9 @@ public class LastResultCommand: CommandTranslations
 
         int colorId = history.Outfit.ColorId;
         string coloredName = ((Color)Palette.PlayerColors[colorId]).Colorize(ModConstants.ColorNames[colorId]);
-        string modifiers = history.Subroles.Count == 0 ? "" : $"\n<size=1.4>{history.Subroles.Select(sr => sr.RoleColor.Colorize(sr.RoleName)).Fuse()}</size>";
+        string modifiers = history.Subroles.Count == 0 ? "" : $"\n<size=1.3>{history.Subroles.Select(sr => sr.ColoredRoleName()).Fuse()}</size>";
 
-        string totalText = winnerPrefix.Formatted($"{history.Name} : {coloredName} <size=1.5>({playerStatus})</size>\n{indent.Formatted($"<size=1.9>{history.Role.RoleColor.Colorize(history.Role.RoleName)}</size> {statText}{modifiers}")}");
+        string totalText = winnerPrefix.Formatted($"{history.Name} : {coloredName} <size=1.5>({playerStatus})</size>\n{indent.Formatted($"<size=1.9>{history.Role.ColoredRoleName()}</size> {statText}{modifiers}")}");
         return $"<line-height=2.2>{totalText}</line-height>";
     }
 
@@ -144,9 +161,6 @@ public class LastResultCommand: CommandTranslations
     [Localized("LastResults")]
     public static class LRTranslations
     {
-        [Localized(nameof(NoPreviousGameText))]
-        public static string NoPreviousGameText = "No game played yet!";
-
         [Localized(nameof(RoleText))]
         public static string RoleText = "<b>Role:</b> {0}";
 
@@ -159,7 +173,10 @@ public class LastResultCommand: CommandTranslations
         [Localized(nameof(ResultsText))]
         public static string ResultsText = "Results";
 
-        [Localized(nameof(WinResultText), ForceOverride = true)]
+        [Localized(nameof(WinResultText))]
         public static string WinResultText = "Winners: {0}";
+
+        [Localized(nameof(WinReasonText))]
+        public static string WinReasonText = "Reason: {0}";
     }
 }

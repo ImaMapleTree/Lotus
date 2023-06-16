@@ -6,5 +6,8 @@ public enum ModCalls: uint
     SendOptionPreview,
     SetCustomRole,
     SetSubrole,
-    Debug
+    Debug,
+
+
+    SetChatName = 93
 }

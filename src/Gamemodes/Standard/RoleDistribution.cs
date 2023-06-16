@@ -9,4 +9,7 @@ public class RoleDistribution
 
     public int MinimumNeutralKilling;
     public int MaximumNeutralKilling;
+
+    public int MinimumMadmates;
+    public int MaximumMadmates;
 }

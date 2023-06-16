@@ -1,3 +1,5 @@
+using System;
+using System.Collections.Generic;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
@@ -6,7 +8,10 @@ using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Utilities;
 using VentLib.Logging;
+using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Patches.Actions;
@@ -14,6 +19,8 @@ namespace Lotus.Patches.Actions;
 
 public static class MurderPatches
 {
+    public static Dictionary<byte, FixedUpdateLock> MurderLocks = new();
+    public static Func<FixedUpdateLock> TimeoutSupplier = () => new FixedUpdateLock(0.25f);
 
     [QuickPrefix(typeof(PlayerControl), nameof(PlayerControl.CheckMurder))]
     public static bool Prefix(PlayerControl __instance, PlayerControl target)
@@ -43,6 +50,8 @@ public static class MurderPatches
 
         if (__instance.PlayerId == target.PlayerId) return false;
 
+        if (!MurderLocks.GetOrCompute(__instance.PlayerId, TimeoutSupplier).IsUnlocked()) return false;
+
         ActionHandle handle = ActionHandle.NoInit();
         __instance.Trigger(RoleActionType.Attack, ref handle, target);
         return false;
@@ -53,6 +62,7 @@ public static class MurderPatches
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (!target.Data.IsDead) return;
+        MurderLocks.GetOrCompute(__instance.PlayerId, TimeoutSupplier).AcquireLock();
 
         VentLogger.Trace($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}{(target.protectedByGuardian ? "(Protected)" : "")}", "MurderPlayer");
 
@@ -70,9 +80,13 @@ public static class MurderPatches
         target.Trigger(RoleActionType.MyDeath, ref ignored, __instance, deathEvent.Instigator(), deathEvent);
         Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, __instance, deathEvent.Instigator(), deathEvent);
 
-
         PlayerMurderHookEvent playerMurderHookEvent = new(__instance, target, deathEvent);
         Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);
         Hooks.PlayerHooks.PlayerDeathHook.Propagate(playerMurderHookEvent);
+
+        Async.Schedule(() =>
+        {
+            if (target != null) target.SetChatName(target.name);
+        }, 0.1f);
     }
 }

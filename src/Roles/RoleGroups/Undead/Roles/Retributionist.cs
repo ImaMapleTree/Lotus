@@ -15,6 +15,7 @@ using Lotus.Utilities;
 using Lotus.API;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
@@ -64,19 +65,15 @@ public class Retributionist : NeutralKillingBase
     {
         if (retributionLimit != -1 && remainingRevenges == 0) return;
         if (revengeDuration.NotReady()) return;
-        if (interaction.Intent() is not IFatalIntent) return;
+        if (interaction.Intent is not (IFatalIntent or Unstoppable.UnstoppableIntent)) return;
 
         remainingRevenges--;
         switch (interaction)
         {
-            case IDelayedInteraction delayedInteraction:
-            case IIndirectInteraction indirectInteraction:
-            case IUnblockedInteraction unblockedInteraction:
+            case IDelayedInteraction:
+            case IIndirectInteraction:
+            case IUnblockedInteraction:
                 return;
-            case IManipulatedInteraction manipulatedInteraction:
-                break;
-            case IRangedInteraction rangedInteraction:
-                break;
         }
 
         handle.Cancel();
@@ -101,10 +98,10 @@ public class Retributionist : NeutralKillingBase
         Async.Schedule(() => RpcV3.Immediate(MyPlayer.MyPhysics.NetId, RpcCalls.BootFromVent).WritePacked(randomVent.Id).Send(MyPlayer.GetClientId()), NetUtils.DeriveDelay(1.1f));
     }
 
-    [RoleAction(RoleActionType.RoundEnd)]
+    [RoleAction(RoleActionType.MeetingCalled)]
     private void CheckRevenge()
     {
-        if (attacker == null) return;
+        if (!MyPlayer.IsAlive() || attacker == null) return;
         remote?.Delete();
         remote = null;
         attacker.InteractWith(MyPlayer, new UnblockedInteraction(new FatalIntent(true), attacker.GetCustomRole()));
@@ -117,7 +114,7 @@ public class Retributionist : NeutralKillingBase
                 .BindFloat(revengeDuration.SetDuration)
                 .Build())
             .SubOption(sub => sub.Name("Invisible During Revenge")
-                .AddOnOffValues()
+                .AddOnOffValues(false)
                 .BindBool(b => invisibleRevenge = b)
                 .Build())
             .SubOption(sub => sub.Name("Number of Revenges")

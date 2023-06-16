@@ -18,10 +18,10 @@ public class OptionShower
 {
     [QuickPostfix(typeof(GameOptionsManager), nameof(GameOptionsManager.SaveNormalHostOptions))]
     public static void VanillaUpdateShower() => GetOptionShower().Update();
-    
+
     private static Optional<OptionShower> Instance = Optional<OptionShower>.Null();
 
-    
+
     [Localized("ActiveRolesList")]
     private static string ActiveRolesList = "Active Role List";
     [Localized("NextPage")]
@@ -35,7 +35,7 @@ public class OptionShower
 
     private OptionShower()
     {
-        HotkeyManager.Bind(KeyCode.Tab, KeyCode.RightControl).If(p => p.State(GameState.InLobby)).Do(Previous);
+        HotkeyManager.Bind(KeyCode.RightControl, KeyCode.Tab).If(p => p.State(GameState.InLobby)).Do(Previous);
         HotkeyManager.Bind(KeyCode.Tab).If(p => p.State(GameState.InLobby)).Do(Next);
     }
 

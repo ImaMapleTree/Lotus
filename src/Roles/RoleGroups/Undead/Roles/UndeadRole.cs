@@ -7,15 +7,12 @@ using Lotus.Factions.Undead;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.GUI.Name.Impl;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Roles.RoleGroups.Undead.Events;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.API;
 using Lotus.Extensions;
 using Lotus.Roles.Internals;
 using UnityEngine;
-using VentLib.Utilities;
 
 namespace Lotus.Roles.RoleGroups.Undead.Roles;
 
@@ -31,16 +28,14 @@ public class UndeadRole : Impostor
 
         INameModel nameModel = target.NameModel();
 
-        string unalteredName = nameModel.Unaltered();
-        string fullName = UndeadColor.Colorize(unalteredName[..(unalteredName.Length / 2)] + Color.white.Colorize(unalteredName[(unalteredName.Length / 2)..]));
-        NameComponent nameComponent = new(new LiveString(fullName), new[] { GameState.Roaming, GameState.InMeeting }, ViewMode.Replace, () => viewers);
+        IndicatorComponent indicatorComponent = new(new LiveString("◎", new Color(0.46f, 0.58f, 0.6f)), new[] { GameState.Roaming, GameState.InMeeting }, ViewMode.Additive, () => viewers);
 
-        nameModel.GetComponentHolder<NameHolder>().Add(nameComponent);
+        nameModel.GetComponentHolder<IndicatorHolder>().Add(indicatorComponent);
         viewers.ForEach(v => nameModel.GetComponentHolder<RoleHolder>()[0].AddViewer(v));
 
         CustomRole role = target.GetCustomRole();
-        role.Faction = new TheUndead.Unconverted(role.Faction, nameComponent);
-        role.SpecialType = Internals.SpecialType.Undead;
+        role.Faction = new TheUndead.Unconverted(role.Faction, indicatorComponent);
+        role.SpecialType = SpecialType.Undead;
         Game.MatchData.GameHistory.AddEvent(new ConvertEvent(MyPlayer, target));
     }
 
@@ -49,16 +44,16 @@ public class UndeadRole : Impostor
         List<PlayerControl> undead = Game.GetAlivePlayers().Where(IsConvertedUndead).ToList();
         List<PlayerControl> viewers = new() { target };
 
-        LiveString undeadPlayerName = new(target.NameModel().Unaltered(), UndeadColor);
+        LiveString undeadPlayerName = new(target.name, UndeadColor);
 
         if (target.GetCustomRole().Faction is TheUndead.Unconverted unconverted)
         {
-            NameComponent oldComponent = unconverted.UnconvertedName;
+            IndicatorComponent oldComponent = unconverted.UnconvertedName;
             oldComponent.SetMainText(undeadPlayerName);
             oldComponent.AddViewer(target);
         } else {
-            NameComponent newComponent = new(undeadPlayerName, new[] { GameState.Roaming, GameState.InMeeting }, ViewMode.Replace, () => viewers);
-            target.NameModel().GetComponentHolder<NameHolder>().Add(newComponent);
+            IndicatorComponent newComponent = new(new LiveString("●", UndeadColor), new[] { GameState.Roaming, GameState.InMeeting }, ViewMode.Replace, () => viewers);
+            target.NameModel().GetComponentHolder<IndicatorHolder>().Add(newComponent);
         }
 
         target.GetCustomRole().Faction = FactionInstances.TheUndead;
@@ -74,10 +69,10 @@ public class UndeadRole : Impostor
                     converted.NameComponent.AddViewer(target);
                     break;
                 case TheUndead.Origin:
-                    nameModel.GetComponentHolder<NameHolder>()[0].AddViewer(target);
+                    nameModel.GetComponentHolder<IndicatorHolder>()[0].AddViewer(target);
                     break;
                 default:
-                    nameModel.GetComponentHolder<NameHolder>().Add(new NameComponent(new LiveString(nameModel.Unaltered, UndeadColor), new [] { GameState.Roaming, GameState.InMeeting}, ViewMode.Replace, viewers: () => viewers));
+                    nameModel.GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("●", UndeadColor), new [] { GameState.Roaming, GameState.InMeeting}, ViewMode.Replace, viewers: () => viewers));
                     break;
             }
         });

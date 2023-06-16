@@ -2,35 +2,91 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
-using VentLib.Utilities.Extensions;
+using Lotus.API.Odyssey;
+using Lotus.Logging;
+using Lotus.Managers.Models;
+using VentLib.Logging;
+using YamlDotNet.Serialization;
+using YamlDotNet.Serialization.NamingConventions;
 
 namespace Lotus.Managers;
 
 public class ChatManager
 {
     private readonly FileInfo filterFile;
-    internal List<String> BannedWords;
+
+    private IDeserializer deserializer = new DeserializerBuilder()
+        .IgnoreUnmatchedProperties()
+        .WithNamingConvention(PascalCaseNamingConvention.Instance)
+        .Build();
+
+    private ISerializer serializer = new SerializerBuilder()
+        .WithNamingConvention(PascalCaseNamingConvention.Instance)
+        .Build();
+
+
+    private List<string> globalBannedWords;
+    private List<string> lobbyBannedWords;
+
 
     public ChatManager(FileInfo filterFile)
     {
         this.filterFile = filterFile;
-        BannedWords = this.filterFile.ReadAll(true).Split("\n").Where(s => s.Length > 2).ToList();
+        try
+        {
+            BannedWordFile wordFile = Load();
+            globalBannedWords = wordFile.GlobalBannedWords;
+            lobbyBannedWords = wordFile.LobbyBannedWords;
+        }
+        catch (Exception e)
+        {
+            VentLogger.Exception(e, "Error loading banned words list: ");
+            globalBannedWords = new List<string>();
+            lobbyBannedWords = new List<string>();
+        }
     }
 
     public bool HasBannedWord(string message)
     {
-        return BannedWords.Any(pattern => Regex.IsMatch(message, pattern, RegexOptions.IgnoreCase));
+        bool CheckBannedWord(string pattern) => Regex.IsMatch(message, pattern, RegexOptions.IgnoreCase);
+        if (Game.State is GameState.InLobby && lobbyBannedWords.Any(CheckBannedWord)) return true;
+        return globalBannedWords.Any(CheckBannedWord);
     }
 
-    public void Reload()
+    public string? Reload()
     {
-        BannedWords = this.filterFile.ReadAll(true).Split("\n").Where(s => s.Length > 2).ToList();
+        try
+        {
+            BannedWordFile wordFile = Load();
+            globalBannedWords = wordFile.GlobalBannedWords;
+            lobbyBannedWords = wordFile.LobbyBannedWords;
+            return null;
+        }
+        catch (Exception exception)
+        {
+            VentLogger.Exception(exception, "Error loading banned words list");
+            return exception.ToString();
+        }
     }
 
-    public void AddWord(string word)
+    private BannedWordFile Load()
     {
-        BannedWords.Add(word);
-        File.WriteAllText(this.filterFile.FullName, String.Join("\n", BannedWords));
+        BannedWordFile wordFile;
+        if (!this.filterFile.Exists)
+        {
+            wordFile = new BannedWordFile();
+            string yaml = serializer.Serialize(wordFile);
+            FileStream writer = filterFile.Open(FileMode.Create);
+            writer.Write(Encoding.UTF8.GetBytes(yaml));
+            writer.Close();
+            return wordFile;
+        }
+
+        string content;
+        using (StreamReader reader = new(this.filterFile.Open(FileMode.Open))) content = reader.ReadToEnd();
+        DevLogger.Log($"Content: {content}");
+        return deserializer.Deserialize<BannedWordFile>(content);
     }
 }

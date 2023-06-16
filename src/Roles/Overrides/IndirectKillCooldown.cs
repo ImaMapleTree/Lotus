@@ -1,8 +1,6 @@
 using System;
-using System.Diagnostics;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
-using Lotus.Logging;
 
 namespace Lotus.Roles.Overrides;
 
@@ -40,5 +38,10 @@ public class IndirectKillCooldown: GameOptionOverride
     {
         float cooldown = cooldownSupplier();
         return DebugValue = doubled ? cooldown * 2 : cooldown;
+    }
+
+    public override string ToString()
+    {
+        return $"IndirectKillCooldown(override={Option}, value={GetValue()}, doubled={doubled})";
     }
 }

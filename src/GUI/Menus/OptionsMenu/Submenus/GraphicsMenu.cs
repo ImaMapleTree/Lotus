@@ -39,9 +39,13 @@ public class GraphicsMenu: MonoBehaviour, IBaseOptionMenuComponent
     public GraphicsMenu(IntPtr intPtr) : base(intPtr)
     {
         anchor = CreateGameObject("Anchor", transform);
-        graphicsTitle = Instantiate(FindObjectOfType<TextMeshPro>(), anchor.transform);
+
+        GameObject textGameObject = anchor.CreateChild("Title", new Vector3(8.6f, -1.8f));
+        graphicsTitle = textGameObject.AddComponent<TextMeshPro>();
         graphicsTitle.font = CustomOptionContainer.GetGeneralFont();
+        graphicsTitle.fontSize = 5.35f;
         graphicsTitle.transform.localPosition += new Vector3(0.95f, 1.75f);
+        graphicsTitle.gameObject.layer = LayerMask.NameToLayer("UI");
     }
 
     public void PassMenu(OptionsMenuBehaviour optionsMenuBehaviour)
@@ -76,11 +80,11 @@ public class GraphicsMenu: MonoBehaviour, IBaseOptionMenuComponent
         graphicsContent.Fullscreen.gameObject.SetActive(false);
 
 
-        resolutionSlider = graphicsContent.slider;
+        resolutionSlider = Instantiate(graphicsContent.slider, anchor.transform);
         resolutionSlider.transform.localScale = new Vector3(1.1f, 1.2f, 1f);
         resolutionSlider.transform.localPosition += new Vector3(0.31f, -0.35f);
         resolutionSlider.GetComponentInChildren<TextMeshPro>().transform.localPosition += new Vector3(1f, 0.2f);
-        resolutionText = graphicsContent.FindChild<TextMeshPro>("ResolutionText_TMP");
+        resolutionText = Instantiate(graphicsContent.FindChild<TextMeshPro>("ResolutionText_TMP"), anchor.transform);
         resolutionSlider.OnValueChange = new UnityEvent();
         resolutionSlider.OnValueChange.AddListener((Action)(() =>
         {
@@ -89,7 +93,8 @@ public class GraphicsMenu: MonoBehaviour, IBaseOptionMenuComponent
             resolutionText.text = $"{width} x {height}";
             if (!opening) applyGameObject.SetActive(true);
         }));
-        resolutionText.transform.localPosition += new Vector3(2f, 0.625f);
+        resolutionText.transform.localPosition = new Vector3(2f, 1.447f);
+        graphicsContent.slider.gameObject.SetActive(false);
 
 
         fpsSlider = Instantiate(resolutionSlider, anchor.transform);
@@ -106,8 +111,8 @@ public class GraphicsMenu: MonoBehaviour, IBaseOptionMenuComponent
             SetFpsText();
             if (!opening) applyGameObject.SetActive(true);
         }));
-        fpsText = Instantiate(resolutionText, fpsSlider.transform);
-        fpsText.transform.localPosition += new Vector3(2f, 0.625f);
+        fpsText = Instantiate(resolutionText, anchor.transform);
+        fpsText.transform.localPosition = new Vector3(2f, 0.847f);
 
         GameObject vsyncObject = anchor.CreateChild("VSync Button", new Vector3(0.5f, -0.25f));
         vsyncButton = vsyncObject.AddComponent<MonoToggleButton>();

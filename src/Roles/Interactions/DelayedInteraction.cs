@@ -2,7 +2,7 @@ using Lotus.Roles.Interactions.Interfaces;
 
 namespace Lotus.Roles.Interactions;
 
-public class DelayedInteraction : DirectInteraction, IDelayedInteraction
+public class DelayedInteraction : LotusInteraction, IDelayedInteraction
 {
     private readonly float delay;
 

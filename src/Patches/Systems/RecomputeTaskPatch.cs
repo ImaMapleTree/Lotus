@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using HarmonyLib;
+using Lotus.Extensions;
 using Lotus.Roles.Interfaces;
 using Lotus.Utilities;
 using Lotus.Roles.Legacy;

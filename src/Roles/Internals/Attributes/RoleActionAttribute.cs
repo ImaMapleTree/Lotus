@@ -2,6 +2,7 @@ extern alias JBAnnotations;
 using System;
 using System.Collections.Generic;
 using JBAnnotations::JetBrains.Annotations;
+using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Patches.Meetings;
@@ -37,17 +38,6 @@ public class RoleActionAttribute: Attribute
     }
 
     public override string ToString() => $"RoleAction(type={ActionType}, Priority={Priority}, Blockable={Blockable}, Subclassing={Subclassing}, Override={Override})";
-}
-
-public enum Priority
-{
-    First = 0,
-    VeryHigh = 200,
-    High = 400,
-    Normal = 600,
-    Low = 800,
-    VeryLow = 1000,
-    Last = int.MaxValue
 }
 
 public enum RoleActionType
@@ -198,8 +188,8 @@ public enum RoleActionType
     /// Triggers when the meeting ends, this does not pass the meeting delegate as at this point everything has been finalized.
     /// <param name="Exiled Player">><see cref="Optional{T}"/> the optional exiled player</param>
     /// <param name="isTie"><see cref="bool"/> a boolean representing if the meeting tied</param>
-    /// <param name="player vote counts"<see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, int) representing the amount of votes a player got</param>
-    /// <param name="playerVoteStatus"><see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, List[Optional[byte]] containing the voting statuses of all players)
+    /// <param name="player vote counts"><see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, int) representing the amount of votes a player got</param>
+    /// <param name="playerVoteStatus"><see cref="Dictionary{TKey,TValue}"/> a dictionary containing (byte, List[Optional[byte]] containing the voting statuses of all players)</param>
     /// </summary>
     MeetingEnd,
     /// <summary>

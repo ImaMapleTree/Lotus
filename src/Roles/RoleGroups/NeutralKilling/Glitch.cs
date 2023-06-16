@@ -46,7 +46,7 @@ public class Glitch: NeutralKillingBase
         if (!hackingMode) return base.TryKill(target);
         if (blockedPlayers.ContainsKey(target.PlayerId)) return false;
 
-        if (MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
+        if (MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         blockedPlayers[target.PlayerId] = Escort.BlockDelegate.Block(target, MyPlayer, roleblockDuration);
         MyPlayer.RpcMark(target);

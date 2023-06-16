@@ -13,6 +13,7 @@ public enum RoleFlag
     RemoveRoleMaximum = 32,
     CannotWinAlone = 64,
     IsSubrole = 128,
+    DoNotTranslate = 256,
 
     VariationRole = Hidden | Unassignable | IncrementChanceByFives | RemoveRoleMaximum | DontRegisterOptions,
     TransformationRole = Hidden | Unassignable | RemoveRolePercent | RemoveRoleMaximum | DontRegisterOptions,

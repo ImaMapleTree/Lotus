@@ -14,6 +14,7 @@ public class PlayerHistory
     public byte PlayerId;
     public UniquePlayerId UniquePlayerId;
     public string Name;
+    public string ColorName;
     public CustomRole Role;
     public List<CustomRole> Subroles;
     public uint Level;
@@ -26,6 +27,7 @@ public class PlayerHistory
     {
         PlayerId = frozenPlayer.PlayerId;
         Name = frozenPlayer.Name;
+        ColorName = frozenPlayer.ColorName;
         Role = frozenPlayer.Role;
         Subroles = frozenPlayer.Subroles;
         UniquePlayerId = UniquePlayerId.FromFriendCode(frozenPlayer.FriendCode);

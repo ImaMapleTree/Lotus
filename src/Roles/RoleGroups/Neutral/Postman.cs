@@ -45,6 +45,7 @@ public class Postman: Crewmate
     private bool completedDelivery = true;
     [NewOnSetup] private List<Remote<IndicatorComponent>> components;
 
+
     public override bool TasksApplyToTotal() => false;
 
     protected override void OnTaskComplete(Optional<NormalPlayerTask> _)
@@ -93,14 +94,14 @@ public class Postman: Crewmate
     private void AnnounceGameWin()
     {
         if (!completedDelivery || TasksComplete != TotalTasks) return;
-        Async.Schedule(() => ChatHandler.Of(_postmanAnnouncement).Send(), 1f); 
+        Async.Schedule(() => ChatHandler.Of(_postmanAnnouncement).Send(), 1f);
     }
 
     [RoleAction(RoleActionType.RoundStart)]
     private void CheckGameWin()
     {
         if (completedDelivery && TasksComplete == TotalTasks)
-            ManualWin.Activate(MyPlayer, WinReason.RoleSpecificWin, 999);
+            ManualWin.Activate(MyPlayer, ReasonType.RoleSpecificWin, 999);
     }
 
     private void AssignNewTarget()
@@ -138,5 +139,5 @@ public class Postman: Crewmate
     protected override RoleModifier Modify(RoleModifier roleModifier) => base.Modify(roleModifier)
         .RoleColor(new Color(0.6f, 0.6f, 0.6f))
         .SpecialType(SpecialType.Neutral)
-        .Faction(FactionInstances.Solo);
+        .Faction(FactionInstances.Neutral);
 }

@@ -56,7 +56,7 @@ public class Vulture : CustomRole
     {
         Game.MatchData.UnreportableBodies.Add(body.PlayerId);
 
-        if (++bodyCount >= bodyAmount) ManualWin.Activate(MyPlayer, WinReason.RoleSpecificWin, 100);
+        if (++bodyCount >= bodyAmount) ManualWin.Activate(MyPlayer, ReasonType.RoleSpecificWin, 100);
 
         handle.Cancel();
     }
@@ -98,7 +98,7 @@ public class Vulture : CustomRole
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier.RoleColor(new Color(0.64f, 0.46f, 0.13f))
-            .Faction(FactionInstances.Solo)
+            .Faction(FactionInstances.Neutral)
             .VanillaRole(canUseVents ? RoleTypes.Engineer : RoleTypes.Crewmate)
             .CanVent(canUseVents)
             .SpecialType(SpecialType.Neutral)

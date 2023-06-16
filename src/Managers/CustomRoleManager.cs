@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using Lotus.Factions;
 using Lotus.Options;
 using Lotus.Roles;
 using Lotus.Roles.Debugger;
@@ -21,6 +22,7 @@ using VentLib.Options.Game;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using Medium = Lotus.Roles.RoleGroups.Crew.Medium;
+using Pirate = Lotus.Roles.RoleGroups.Neutral.Pirate;
 
 namespace Lotus.Managers;
 
@@ -144,15 +146,15 @@ public static class CustomRoleManager
 
         //assassin
         //bomber
+        public Assassin Assassin = new Assassin();
         public Blackmailer Blackmailer = new Blackmailer();
         public BountyHunter BountyHunter = new BountyHunter();
         public Camouflager Camouflager = new Camouflager();
-        public Conman Conman = new Conman();
         public Consort Consort = new Consort();
         public Creeper Creeper = new Creeper();
         public Disperser Disperser = new Disperser();
         public Escapist Escapist = new Escapist();
-        public FireWorker FireWorker = new FireWorker();
+        /*public FireWorks FireWorks = new FireWorks();*/
         public Freezer Freezer = new Freezer();
         public Grenadier Grenadier = new Grenadier();
         public IdentityThief IdentityThief = new IdentityThief();
@@ -178,7 +180,7 @@ public static class CustomRoleManager
         public Witch Witch = new Witch();
         public YinYanger YinYanger = new YinYanger();
 
-        private CustomRole MADMATE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>★ Madmates ★</size>").Color(ModConstants.Palette.MadmateColor).Tab(DefaultTabs.ImpostorsTab).Build());
+        private CustomRole MADMATE_TITLE = new EnforceFunctionOrderingRole(() => RoleOptions.LoadMadmateOptions());
 
         public CrewPostor CrewPostor = new CrewPostor();
         public Madmate Madmate = new Madmate();
@@ -189,10 +191,10 @@ public static class CustomRoleManager
         //Crewmates
 
         public Alchemist Alchemist = new Alchemist();
-        public Charmer Charmer = new Charmer();
         public Bastion Bastion = new Bastion();
         public Bodyguard Bodyguard = new Bodyguard();
         public Chameleon Chameleon = new Chameleon();
+        public Charmer Charmer = new Charmer();
         public Crewmate Crewmate = new Crewmate();
         public Crusader Crusader = new Crusader();
         public Demolitionist Demolitionist = new Demolitionist();
@@ -234,6 +236,7 @@ public static class CustomRoleManager
         public AgiTater AgiTater = new AgiTater();
         public Arsonist Arsonist = new Arsonist();
         public BloodKnight BloodKnight = new BloodKnight();
+        public Demon Demon = new Demon();
         public Egoist Egoist = new Egoist();
         public Hitman Hitman = new Hitman();
         public Jackal Jackal = new Jackal();
@@ -241,8 +244,8 @@ public static class CustomRoleManager
         public Marksman Marksman = new Marksman();
         public Necromancer Necromancer = new Necromancer();
         public Occultist Occultist = new Occultist();
-        public PlagueBearer PlagueBearer = new PlagueBearer();
         public Pelican Pelican = new Pelican();
+        public PlagueBearer PlagueBearer = new PlagueBearer();
         public Retributionist Retributionist = new Retributionist();
         public Glitch Glitch = new Glitch();
         public Werewolf Werewolf = new Werewolf();
@@ -250,19 +253,22 @@ public static class CustomRoleManager
         private CustomRole NEUTRAL_PASSIVE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>❀ Neutral Passive ❀</size>").Color(ModConstants.Palette.PassiveColor).Tab(DefaultTabs.NeutralTab).Build());
 
         public Amnesiac Amnesiac = new Amnesiac();
-        public Archangel Archangel = new Archangel();
+        /*public Archangel Archangel = new Archangel();*/
         public Copycat Copycat = new Copycat();
         public Executioner Executioner = new Executioner();
-        public GuardianAngel GuardianAngel = new GuardianAngel();
+        /*public GuardianAngel GuardianAngel = new GuardianAngel();*/
         public Hacker Hacker = new Hacker();
         public Jester Jester = new Jester();
         public Opportunist Opportunist = new Opportunist();
         public Phantom Phantom = new Phantom();
+        public Pirate Pirate = new Pirate();
         public Postman Postman = new Postman();
+        public SchrodingersCat SchrodingersCat = new SchrodingersCat();
         public Survivor Survivor = new Survivor();
         public Terrorist Terrorist = new Terrorist();
         public Vulture Vulture = new Vulture();
 
+        /*public Guesser Guesser = new Guesser();*/
         public CustomRole LOAD_MODIFIER_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadSubroleOptions());
     }
 
@@ -274,6 +280,7 @@ public static class CustomRoleManager
         public Deadly Deadly = new Deadly();
         public Diseased Diseased = new Diseased();
         public Flash Flash = new Flash();
+        public Honed Honed = new Honed();
         public Nimble Nimble = new Nimble();
         public Oblivious Oblivious = new Oblivious();
         public Romantic Romantic = new Romantic();

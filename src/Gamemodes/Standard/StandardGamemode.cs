@@ -1,7 +1,8 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Factions;
@@ -12,14 +13,10 @@ using Lotus.Options.Roles;
 using Lotus.Roles.RoleGroups.Undead;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
-using Lotus.API;
-using Lotus.API.Player;
+using Lotus.Chat.Commands;
 using Lotus.Extensions;
-using Lotus.Factions.Interfaces;
-using Lotus.Roles.Internals;
 using VentLib.Logging;
 using VentLib.Options.Game.Tabs;
-using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Gamemodes.Standard;
@@ -55,7 +52,7 @@ public class StandardGamemode: Gamemode
 
     public override void Activate()
     {
-        Hooks.PlayerHooks.PlayerDeathHook.Bind(StandardGamemodeHookKey, ShowInformationToGhost);
+        Hooks.PlayerHooks.PlayerDeathHook.Bind(StandardGamemodeHookKey, ShowInformationToGhost, priority: Priority.VeryLow);
     }
 
     public override void Deactivate()
@@ -63,21 +60,32 @@ public class StandardGamemode: Gamemode
         Hooks.UnbindAll(StandardGamemodeHookKey);
     }
 
-    public static void ShowInformationToGhost(PlayerHookEvent hookEvent)
+    public static void ShowInformationToGhost(PlayerDeathHookEvent hookEvent)
     {
         PlayerControl player = hookEvent.Player;
+        ShowInformationToGhost(player);
+    }
+
+    public static void ShowInformationToGhost(PlayerControl player)
+    {
         if (player == null) return;
 
         VentLogger.Trace($"Showing all name components to ghost {player.name}", "GhostNameViewer");
+        if (GeneralOptions.MiscellaneousOptions.AutoDisplayCOD)
+        {
+            FrozenPlayer? fp = Game.MatchData.FrozenPlayers.GetValueOrDefault(player.GetGameID());
+            if (fp != null) DeathCommand.ShowMyDeath(player, fp);
+        }
+
 
         Game.GetAllPlayers().Where(p => p.PlayerId != player.PlayerId)
             .SelectMany(p => p.NameModel().ComponentHolders())
             .ForEach(holders =>
-            {
-                holders.AddListener(component => component.AddViewer(player));
-                holders.Components().ForEach(components => components.AddViewer(player));
-            }
-        );
+                {
+                    holders.AddListener(component => component.AddViewer(player));
+                    holders.Components().ForEach(components => components.AddViewer(player));
+                }
+            );
 
         player.NameModel().Render(force: true);
     }
@@ -88,7 +96,7 @@ public class StandardGamemode: Gamemode
         if (winDelegate.GetWinners().Count != 1) return;
         List<PlayerControl> winners = winDelegate.GetWinners();
         PlayerControl winner = winners[0];
-        if (winner.GetCustomRole().Faction is not Solo) return;
+        if (winner.GetCustomRole().Faction is not Neutral) return;
 
         winners.AddRange(Game.GetAllPlayers()
             .Where(p => p.PlayerId != winner.PlayerId)

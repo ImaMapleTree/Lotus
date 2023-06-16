@@ -6,6 +6,8 @@ namespace Lotus.Roles.Overrides;
 
 public class AdditiveOverride: GameOptionOverride
 {
+    private IGameOptions? lastOption;
+
     public AdditiveOverride(Override option, object? value, Func<bool>? condition = null) : base(option, value, condition)
     {
     }
@@ -17,10 +19,13 @@ public class AdditiveOverride: GameOptionOverride
     public override void ApplyTo(IGameOptions options)
     {
         if (!Condition?.Invoke() ?? false) return;
+        if (ReferenceEquals(lastOption, options)) return;
+        lastOption = options;
+
         object value = Option.GetValue(options);
         Option.SetValue(options, Add(value));
     }
-    
+
     private object? Add(dynamic? originalValue)
     {
         dynamic? myValue = GetValue();

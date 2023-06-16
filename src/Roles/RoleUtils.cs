@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using AmongUs.GameOptions;
 using Lotus.API.Odyssey;
 using Lotus.API.Vanilla.Sabotages;
 using Lotus.GUI;
@@ -11,11 +12,13 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.GUI.Name;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using Random = UnityEngine.Random;
 
 namespace Lotus.Roles;
 
@@ -32,7 +35,7 @@ public static class RoleUtils
     {
         Vector2 sourcePosition = source.GetTruePosition();
         float distance = Vector2.Distance(sourcePosition, target);
-        if (distance < ModConstants.ArrowActivationMin) return Arrows[8].ToString();
+        if (distance < ModConstants.ArrowActivationMin) return color == null ? Arrows[8].ToString() : color.Value.Colorize(Arrows[8].ToString());
 
         float deltaX = target.x - sourcePosition.x;
         float deltaY = target.y - sourcePosition.y;
@@ -112,6 +115,14 @@ public static class RoleUtils
         return "[" + color1.Value.Colorize("■".Repeat(current - 1) + color2.Value.Colorize("■".Repeat(diff - 1))) + "]";
     }
 
+    public static string HealthBar(int current, int max, Color? color1 = null, Color? color2 = null)
+    {
+        color1 ??= new Color(0.92f, 0.77f, 0.22f);
+        color2 ??= Color.gray;
+        int diff = max - current;
+        return TextUtils.ApplyMark("l".Repeat(current - 1), color1.Value) + TextUtils.ApplyMark("l".Repeat(diff - 1), color2.Value);
+    }
+
     public static InteractionResult InteractWith(this PlayerControl player, PlayerControl target, Interaction interaction)
     {
         if (++Game.RecursiveCallCheck > ModConstants.RecursiveDepthLimit)
@@ -123,9 +134,9 @@ public static class RoleUtils
         ActionHandle handle = ActionHandle.NoInit();
         PlayerControl.AllPlayerControls.ToArray().Where(p => p != null).Trigger(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
         if (player.PlayerId != target.PlayerId) target.Trigger(RoleActionType.Interaction, ref handle, player, interaction);
-        if (!handle.IsCanceled || interaction is IUnblockedInteraction) interaction.Intent().Action(player, target);
-        else if (handle.Cancellation is ActionHandle.CancelType.Normal) interaction.Intent().Halted(player, target);
-        return handle.IsCanceled ? InteractionResult.Halt : InteractionResult.Proceed;
+        if (!handle.IsCanceled || interaction.IsPromised) interaction.Intent.Action(player, target);
+        else if (handle.Cancellation is ActionHandle.CancelType.Normal) interaction.Intent.Halted(player, target);
+        return handle.IsCanceled && !interaction.IsPromised ? InteractionResult.Halt : InteractionResult.Proceed;
     }
 
     public static void ShowGuardianShield(PlayerControl target) {
@@ -168,5 +179,10 @@ public static class RoleUtils
             if (!b) list.Remove(obj);
             else if (!list.Contains(obj)) list.Add(obj);
         };
+    }
+
+    public static bool RandomSpawn(CustomRole role)
+    {
+        return Random.RandomRange(0, 100) < role.Chance;
     }
 }

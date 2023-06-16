@@ -9,11 +9,11 @@ namespace Lotus.Roles;
 
 public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
 {
-    private UuidList<CustomRole> roles = new();
-    private List<Ticket> tickets = new();
-    private List<Ticket> priorityTickets = new();
+    protected UuidList<CustomRole> Roles = new();
+    protected List<Ticket> Tickets = new();
+    protected List<Ticket> PriorityTickets = new();
+    protected uint BatchNumber;
 
-    private uint batchNumber;
     private CustomRole defaultRole;
     private CustomRole? current;
 
@@ -22,15 +22,15 @@ public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
     public RoleLottery(CustomRole defaultRole)
     {
         this.defaultRole = defaultRole;
-        roles.Add(defaultRole);
+        Roles.Add(defaultRole);
     }
 
-    public void AddRole(CustomRole role, bool useSubsequentChance = false)
+    public virtual void AddRole(CustomRole role, bool useSubsequentChance = false)
     {
         int chance = useSubsequentChance ? role.AdditionalChance : role.Chance;
         if (chance == 0 || role.RoleFlags.HasFlag(RoleFlag.Unassignable)) return;
-        uint id = roles.Add(role);
-        uint batch = batchNumber++;
+        uint id = Roles.Add(role);
+        uint batch = BatchNumber++;
 
         int roleId = CustomRoleManager.GetRoleId(role);
 
@@ -38,15 +38,15 @@ public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
         // If the role chance is at 100, we move it into the priority list
         if (chance >= 100)
         {
-            priorityTickets.Add(new Ticket { Id = id, Batch = batch, RoleId = roleId});
+            PriorityTickets.Add(new Ticket { Id = id, Batch = batch, RoleId = roleId});
             return;
         }
 
         // Add tickets for the new role first
-        for (int i = 0; i < chance; i++) tickets.Add(new Ticket { Id = id, Batch = batch, RoleId = roleId});
+        for (int i = 0; i < chance; i++) Tickets.Add(new Ticket { Id = id, Batch = batch, RoleId = roleId});
 
         // Add tickets for the new role second
-        for (int i = 0; i < 100 - chance; i++) tickets.Add(new Ticket { Id = 0, Batch = batch, RoleId = roleId});
+        for (int i = 0; i < 100 - chance; i++) Tickets.Add(new Ticket { Id = 0, Batch = batch, RoleId = roleId});
     }
 
 
@@ -58,7 +58,7 @@ public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
 
     public bool HasNext()
     {
-        return tickets.Count > 0 || priorityTickets.Count > 0;
+        return Tickets.Count > 0 || PriorityTickets.Count > 0;
     }
 
     public void Reset()
@@ -71,12 +71,12 @@ public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
         {
             current = null;
             // Infinite loop break condition (bc we'll exhaust the ticket pool eventually)
-            if (priorityTickets.Count == 0 && tickets.Count == 0) return defaultRole;
+            if (PriorityTickets.Count == 0 && Tickets.Count == 0) return defaultRole;
 
-            Ticket ticket = priorityTickets.Count > 0 ? priorityTickets.PopRandom() : tickets.PopRandom();
-            tickets.RemoveAll(t => t.Batch == ticket.Batch);
+            Ticket ticket = PriorityTickets.Count > 0 ? PriorityTickets.PopRandom() : Tickets.PopRandom();
+            Tickets.RemoveAll(t => t.Batch == ticket.Batch);
 
-            CustomRole associatedRole = roles.Get(ticket.Id);
+            CustomRole associatedRole = Roles.Get(ticket.Id);
             int count = roleLimitTracker.GetOrCompute(ticket.RoleId, () => 0);
             if (count >= associatedRole.Count) continue;
 
@@ -90,7 +90,7 @@ public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
 
     object IEnumerator.Current => Current;
 
-    private struct Ticket
+    protected struct Ticket
     {
         public uint Id;
         public uint Batch;

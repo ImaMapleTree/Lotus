@@ -1,4 +1,5 @@
 using HarmonyLib;
+using Lotus.API;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using UnityEngine;
@@ -15,8 +16,9 @@ class MeetingUpdatePatch
         if (Input.GetMouseButtonUp(1) && Input.GetKey(KeyCode.LeftControl))
             __instance.playerStates.DoIf(x => x.HighlightedFX.enabled, x =>
             {
-                var player = Utils.GetPlayerById(x.TargetPlayerId);
-                player.RpcExileV2();
+                PlayerControl? player = Utils.GetPlayerById(x.TargetPlayerId);
+                ProtectedRpc.CheckMurder(PlayerControl.LocalPlayer, player);
+
                 VentLogger.High($"Execute: {player.GetNameWithRole()}", "Execution");
             });
     }

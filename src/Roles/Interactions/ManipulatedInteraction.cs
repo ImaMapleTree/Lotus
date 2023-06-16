@@ -2,7 +2,7 @@ using Lotus.Roles.Interactions.Interfaces;
 
 namespace Lotus.Roles.Interactions;
 
-public class ManipulatedInteraction : DirectInteraction, IManipulatedInteraction
+public class ManipulatedInteraction : LotusInteraction, IManipulatedInteraction
 {
     private PlayerControl manipulator;
 

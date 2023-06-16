@@ -24,7 +24,7 @@ public class NameComponent : SimpleComponent
     {
     }
 
-    public NameComponent(PlayerControl player, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive, Func<List<PlayerControl>>? viewers = null) : base(new LiveString(player.NameModel().Unaltered), gameStates, viewMode, viewers)
+    public NameComponent(PlayerControl player, GameState[] gameStates, ViewMode viewMode = Name.ViewMode.Additive, Func<List<PlayerControl>>? viewers = null) : base(new LiveString(player.name), gameStates, viewMode, viewers)
     {
     }
 }

@@ -14,9 +14,18 @@ public class ManualWin: IWinCondition
     private WinReason winReason;
     private int priority;
 
-    public static void Activate(PlayerControl player, WinReason reason, int priority = 0) => new ManualWin(player, reason, priority).Activate();
+    public static void Activate(PlayerControl player, ReasonType reason, int priority = 0) => new ManualWin(player, reason, priority).Activate();
+
+    public ManualWin(PlayerControl player, ReasonType reason, int priority = 0) : this(new List<PlayerControl> { player }, reason, priority) {}
 
     public ManualWin(PlayerControl player, WinReason reason, int priority = 0) : this(new List<PlayerControl> { player }, reason, priority) {}
+
+    public ManualWin(List<PlayerControl> players, ReasonType reason, int priority = 0)
+    {
+        this.winners = players;
+        this.winReason = new WinReason(reason);
+        this.priority = priority;
+    }
 
     public ManualWin(List<PlayerControl> players, WinReason reason, int priority = 0)
     {
@@ -28,7 +37,7 @@ public class ManualWin: IWinCondition
     public void Activate()
     {
         Game.GetWinDelegate().AddWinCondition(this);
-        Game.GetWinDelegate().ForceGameWin(this.winners, winReason);
+        Game.GetWinDelegate().ForceGameWin(this.winners, winReason, this);
     }
 
     public bool IsConditionMet(out List<PlayerControl> winners)

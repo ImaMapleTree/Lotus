@@ -1,5 +1,8 @@
 using System.Collections.Generic;
+using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
+using Lotus.Extensions;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Interfaces;
@@ -7,11 +10,8 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Utilities;
-using Lotus.Extensions;
-using Lotus.Factions;
 using Lotus.Options;
-using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -28,10 +28,10 @@ public class Vampire : Impostor, IVariableRole
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
-        InteractionResult result = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this));
+        MyPlayer.RpcMark(target);
+        InteractionResult result = MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this));
         if (result is InteractionResult.Halt) return false;
 
-        MyPlayer.RpcMark(target);
         bitten.Add(target.PlayerId);
         Game.MatchData.GameHistory.AddEvent(new BittenEvent(MyPlayer, target));
 
@@ -47,8 +47,8 @@ public class Vampire : Impostor, IVariableRole
     [RoleAction(RoleActionType.RoundStart)]
     public void ResetBitten() => bitten.Clear();
 
-    [RoleAction(RoleActionType.RoundEnd)]
-    public void KillBitten() => bitten.Filter(b => Utils.PlayerById(b)).ForEach(p => MyPlayer.InteractWith(p, CreateInteraction(p)));
+    [RoleAction(RoleActionType.MeetingCalled)]
+    public void KillBitten() => bitten.Filter(Players.PlayerById).Where(p => p.IsAlive()).ForEach(p => MyPlayer.InteractWith(p, CreateInteraction(p)));
 
     private DelayedInteraction CreateInteraction(PlayerControl target)
     {
@@ -58,7 +58,7 @@ public class Vampire : Impostor, IVariableRole
 
     public CustomRole Variation() => _vampiress;
 
-    public bool AssignVariation() => Random.RandomRange(0, 100) < _vampiress.Chance;
+    public bool AssignVariation() => RoleUtils.RandomSpawn(_vampiress);
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
@@ -73,7 +73,14 @@ public class Vampire : Impostor, IVariableRole
             .OptionOverride(new IndirectKillCooldown(KillCooldown))
             .LinkedRoles(_vampiress);
 
-    /*case Vampire:
-                    __instance.KillButton.OverrideText($"{GetString("VampireBiteButtonText")}");
-                    break;*/
+    [Localized(nameof(Vampire))]
+    public static class VampireTranslations
+    {
+        [Localized(nameof(Options))]
+        public static class Options
+        {
+            [Localized(nameof(KillDelay))]
+            public static string KillDelay = "Kill Delay";
+        }
+    }
 }

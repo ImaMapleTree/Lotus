@@ -4,7 +4,6 @@ using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Extensions;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Debug.Profiling;
@@ -20,14 +19,21 @@ public class NameUpdateProcess
     internal static bool Paused;
     private static Queue<PlayerControl> _players = new();
 
+    private static int _forceFixCount;
+    private static readonly HashSet<byte> ForceFixedPlayers = new();
+
     static NameUpdateProcess()
     {
-        Hooks.GameStateHooks.GameStartHook.Bind(NameUpdateProcessHookKey, _ => Game.GetAllPlayers().ForEach(p => _players.Enqueue(p))
-        );
+        Hooks.GameStateHooks.GameStartHook.Bind(NameUpdateProcessHookKey, _ => Game.GetAllPlayers().ForEach(p => _players.Enqueue(p)));
         Hooks.GameStateHooks.RoundStartHook.Bind(NameUpdateProcessHookKey, _ =>
         {
             if (!AmongUsClient.Instance.AmHost) return;
             Paused = false;
+            Async.Schedule(() =>
+            {
+                ForceFixedPlayers.Clear();;
+                _forceFixCount = _players.Count;
+            }, 1f);
             NameUpdateLoop();
         });
         Hooks.GameStateHooks.RoundEndHook.Bind(NameUpdateProcessHookKey, _ => Paused = true);
@@ -57,10 +63,19 @@ public class NameUpdateProcess
         if (allPlayers.Length == 0) return;
 
         Profiler.Sample sample = Profilers.Global.Sampler.Sampled();
-        allPlayers.ForEach(p => nameModel.RenderFor(p));
+        bool updated = false;
+        allPlayers.ForEach(p =>
+        {
+            nameModel.RenderFor(p);
+            updated |= (nameModel.Updated() && !player.IsAlive());
+        });
         sample.Stop();
 
         Async.Schedule(NameUpdateLoop, 0.1f / allPlayers.Length);
+        if (!updated)
+            if (player.IsAlive() || _forceFixCount-- <= 0 || ForceFixedPlayers.Contains(player.PlayerId)) return;
+        ForceFixedPlayers.Add(player.PlayerId);
+        player.SetChatName(player.name);
     }
 
 }

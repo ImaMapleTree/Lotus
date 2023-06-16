@@ -3,6 +3,8 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
+using Lotus.API.Stats;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
@@ -16,6 +18,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using UnityEngine;
+using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
@@ -25,11 +28,22 @@ namespace Lotus.Roles.RoleGroups.NeutralKilling;
 
 public class Arsonist : NeutralKillingBase
 {
+    private static IAccumulativeStatistic<int> _dousedPlayers = Statistic<int>.CreateAccumulative($"Roles.{nameof(Arsonist)}.DousedPlayers", () => Translations.DousedPlayerStatistic);
+    private static IAccumulativeStatistic<int> _incineratedPlayers = Statistic<int>.CreateAccumulative($"Roles.{nameof(Arsonist)}.IncineratedPlayers", () => Translations.IncineratedPlayerStatistic);
+
+    public override List<Statistic> Statistics()
+    {
+        if (MyPlayer == null) return new List<Statistic> { _incineratedPlayers, _dousedPlayers };
+        if (_incineratedPlayers.GetValue(MyPlayer.UniquePlayerId()) >= _dousedPlayers.GetValue(MyPlayer.UniquePlayerId())) return new List<Statistic> { _incineratedPlayers, _dousedPlayers };
+        return new List<Statistic> { _dousedPlayers, _incineratedPlayers };
+    }
+
     private static string[] _douseProgressIndicators = { "◦", "◎", "◉", "●" };
 
     private int requiredAttacks;
     private bool canIgniteAnyitme;
 
+    private int backedAlivePlayers;
     private int knownAlivePlayers;
     [NewOnSetup] private HashSet<byte> dousedPlayers;
     [NewOnSetup] private Dictionary<byte, Remote<IndicatorComponent>> indicators;
@@ -39,12 +53,12 @@ public class Arsonist : NeutralKillingBase
     private string DouseCounter() => RoleUtils.Counter(dousedPlayers.Count, knownAlivePlayers);
 
     [UIComponent(UI.Text)]
-    private string DisplayWin() => dousedPlayers.Count >= knownAlivePlayers ? RoleColor.Colorize("Press Ignite to Win") : "";
+    private string DisplayWin() => dousedPlayers.Count >= backedAlivePlayers ? RoleColor.Colorize(Translations.PressIgniteToWinMessage) : "";
 
     [RoleAction(RoleActionType.Attack)]
     public new bool TryKill(PlayerControl target)
     {
-        bool douseAttempt = MyPlayer.InteractWith(target, DirectInteraction.HostileInteraction.Create(this)) is InteractionResult.Proceed;
+        bool douseAttempt = MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Proceed;
         if (!douseAttempt) return false;
 
         int progress = douseProgress[target.PlayerId] = douseProgress.GetValueOrDefault(target.PlayerId) + 1;
@@ -55,9 +69,11 @@ public class Arsonist : NeutralKillingBase
 
         dousedPlayers.Add(target.PlayerId);
         MyPlayer.RpcMark(target);
-        Game.MatchData.GameHistory.AddEvent(new PlayerDousedEvent(MyPlayer, target));
+        Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, target, Translations.DouseEventMessage.Formatted(MyPlayer.name, target.name)));
+        _dousedPlayers.Update(MyPlayer.UniquePlayerId(), i => i + 1);
 
         MyPlayer.NameModel().Render();
+        backedAlivePlayers = CountAlivePlayers();
 
         return false;
     }
@@ -77,18 +93,23 @@ public class Arsonist : NeutralKillingBase
     [RoleAction(RoleActionType.OnPet)]
     private void KillDoused() => dousedPlayers.Filter(p => Utils.PlayerById(p)).Where(p => p.IsAlive()).Do(p =>
     {
-        if (dousedPlayers.Count < knownAlivePlayers && !canIgniteAnyitme) return;
-        FatalIntent intent = new(true, () => new IncineratedDeathEvent(p, MyPlayer));
+        if (dousedPlayers.Count < CountAlivePlayers() && !canIgniteAnyitme) return;
+        FatalIntent intent = new(true, () => new CustomDeathEvent(p, MyPlayer, Translations.IncineratedDeathName));
         IndirectInteraction interaction = new(intent, this);
         MyPlayer.InteractWith(p, interaction);
+        _incineratedPlayers.Update(MyPlayer.UniquePlayerId(), i => i + 1);
     });
 
     [RoleAction(RoleActionType.RoundStart)]
-    private void UpdatePlayerCounts()
+    protected override void PostSetup()
     {
-        knownAlivePlayers = Game.GetAlivePlayers().Count(p => p.PlayerId != MyPlayer.PlayerId && Relationship(p) is not Relation.FullAllies);
+        knownAlivePlayers = CountAlivePlayers();
         dousedPlayers.RemoveWhere(p => Utils.PlayerById(p).Transform(pp => !pp.IsAlive(), () => true));
     }
+
+    [RoleAction(RoleActionType.Disconnect)]
+    [RoleAction(RoleActionType.AnyDeath)]
+    private int CountAlivePlayers() => backedAlivePlayers = Players.GetPlayers(PlayerFilter.Alive | PlayerFilter.NonPhantom).Count(p => p.PlayerId != MyPlayer.PlayerId && Relationship(p) is not Relation.FullAllies);
 
     [RoleAction(RoleActionType.MyDeath)]
     private void ArsonistDies() => indicators.Values.ForEach(v => v.Delete());
@@ -96,11 +117,11 @@ public class Arsonist : NeutralKillingBase
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
             .Color(RoleColor)
-            .SubOption(sub => sub.Name("Attacks to Complete Douse")
+            .SubOption(sub => sub.KeyName("Attacks to Complete Douse", Translations.Options.AttacksToCompleteDouse)
                 .AddIntRange(3, 100, defaultIndex: 16)
                 .BindInt(i => requiredAttacks = i)
                 .Build())
-            .SubOption(sub => sub.Name("Can Ignite Anytime")
+            .SubOption(sub => sub.KeyName("Can Ignite Anytime", Translations.Options.CanIgniteAnytime)
                 .AddOnOffValues(false)
                 .BindBool(b => canIgniteAnyitme = b)
                 .Build());
@@ -110,21 +131,32 @@ public class Arsonist : NeutralKillingBase
             .RoleColor(new Color(1f, 0.4f, 0.2f))
             .RoleAbilityFlags(RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.CannotVent);
 
-    class PlayerDousedEvent : TargetedAbilityEvent, IRoleEvent
+    [Localized(nameof(Arsonist))]
+    private static class Translations
     {
-        public PlayerDousedEvent(PlayerControl source, PlayerControl target, bool successful = true) : base(source, target, successful)
+        [Localized(nameof(IncineratedDeathName))]
+        public static string IncineratedDeathName = "Incinerated";
+
+        [Localized(nameof(DouseEventMessage))]
+        public static string DouseEventMessage = "{0} doused {1}.";
+
+        [Localized(nameof(PressIgniteToWinMessage))]
+        public static string PressIgniteToWinMessage = "Press Ignite to Win";
+
+        [Localized(nameof(DousedPlayerStatistic))]
+        public static string DousedPlayerStatistic = "Doused Players";
+
+        [Localized(nameof(IncineratedPlayerStatistic))]
+        public static string IncineratedPlayerStatistic = "Incinerated Players";
+
+        [Localized(ModConstants.Options)]
+        public static class Options
         {
+            [Localized(nameof(AttacksToCompleteDouse))]
+            public static string AttacksToCompleteDouse = "Attacks to Complete Douse";
+
+            [Localized(nameof(CanIgniteAnytime))]
+            public static string CanIgniteAnytime = "Can Ignite Anytime";
         }
-
-        public override string Message() => $"{Game.GetName(Player())} doused {Game.GetName(Target())}.";
-    }
-
-    class IncineratedDeathEvent : DeathEvent
-    {
-        public IncineratedDeathEvent(PlayerControl deadPlayer, PlayerControl? killer) : base(deadPlayer, killer)
-        {
-        }
-
-        public override string SimpleName() => ModConstants.DeathNames.Incinerated;
     }
 }

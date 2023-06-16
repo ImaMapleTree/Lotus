@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
+using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
@@ -25,9 +26,10 @@ public static class AntiBlackoutLogic
         foreach (PlayerControl player in players)
         {
             if (player.IsHost() || player.IsModded()) continue;
-            VentLogger.Trace($"Patching For: {player.name}", "AntiBlackout");
-            ReviveEveryone();
+            VentLogger.Trace($"Patching For: {player.name} ({player.GetCustomRole().RoleName})", "AntiBlackout");
+            ReviveEveryone(exiledPlayer);
 
+            bool wasImpostor = roleTracker.GetAllImpostorIds(player.PlayerId).Contains(0);
             HashSet<byte> impostorIds = roleTracker.GetAllImpostorIds(player.PlayerId).Where(id => exiledPlayer != id && id != 0).ToHashSet();
             PlayerInfo[] impostorInfo = allPlayers.Where(info => impostorIds.Contains(info.PlayerId)).ToArray();
             VentLogger.Trace($"Impostors: {impostorInfo.Select(i => i.Object).Where(o => o != null).Select(o => o.name).Fuse()}");
@@ -42,7 +44,7 @@ public static class AntiBlackoutLogic
             if (player.PlayerId == exiledPlayer) { }
             else if (player.IsAlive() && player.GetVanillaRole().IsImpostor()) aliveImpostorCount++;
             else if (player.IsAlive()) aliveCrewCount++;
-            if (PlayerControl.LocalPlayer.GetVanillaRole().IsImpostor() && PlayerControl.LocalPlayer.PlayerId != exiledPlayer) aliveImpostorCount++;
+            if (wasImpostor && PlayerControl.LocalPlayer.GetVanillaRole().IsImpostor() && PlayerControl.LocalPlayer.PlayerId != exiledPlayer) aliveImpostorCount++;
 
             VentLogger.Trace($"Alive Crew: {aliveCrewCount} | Alive Impostors: {aliveImpostorCount}");
 
@@ -76,11 +78,13 @@ public static class AntiBlackoutLogic
         return unpatchable;
     }
 
-    private static void ReviveEveryone() {
+    private static void ReviveEveryone(byte exiledPlayer) {
         foreach (var info in Instance.AllPlayers)
         {
             info.IsDead = false;
             info.Disconnected = false;
+            if (info.PlayerId != exiledPlayer && info.Object != null) info.PlayerName = info.Object.name;
+            else if (info.PlayerId != exiledPlayer) info.PlayerName = info.PlayerName.RemoveHtmlTags();
         }
     }
 }
