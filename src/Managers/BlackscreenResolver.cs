@@ -196,7 +196,7 @@ internal class BlackscreenResolver
         {
             (bool isDead, bool isDisconnected) = playerStates[player.PlayerId];
             if (isDead || isDisconnected) continue;
-            for (int i = 0; i < 20; i++) chatHandler.Send();
+            for (int i = 0; i < 20; i++) chatHandler.Send(player);
         }
     }
 }

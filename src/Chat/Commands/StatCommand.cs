@@ -25,7 +25,7 @@ public class StatCommand: ICommandReceiver
 
     private void GetPlayerStats(PlayerControl requester, string name)
     {
-        Optional<PlayerControl> searchedPlayer = PlayerControl.AllPlayerControls.ToArray().FirstOrOptional(p => p.Data.GetPlayerName(PlayerOutfitType.Default) == name);
+        Optional<PlayerControl> searchedPlayer = PlayerControl.AllPlayerControls.ToArray().FirstOrOptional(p => p.name == name);
         searchedPlayer.Handle(
             player => GetPlayerStats(requester, player),
             () => ChatHandler.Of(_playerNotFoundMessage.Formatted(name)).Send(requester)

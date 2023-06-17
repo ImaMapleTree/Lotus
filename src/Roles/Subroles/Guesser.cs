@@ -32,8 +32,8 @@ public class Guesser: CustomRole
     protected int CorrectGuesses;
     protected string? GuesserMessage;
 
-    [RoleAction((RoleActionType.RoundStart))]
-    [RoleAction((RoleActionType.RoundEnd))]
+    [RoleAction(RoleActionType.RoundStart, triggerAfterDeath: true)]
+    [RoleAction(RoleActionType.RoundEnd, triggerAfterDeath: true)]
     public void ResetPreppedPlayer()
     {
         hasMadeGuess = false;

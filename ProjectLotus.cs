@@ -22,7 +22,6 @@ using VentLib.Logging;
 using VentLib.Networking.Handshake;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
-using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Optionals;
 using VentLib.Version;

@@ -1,3 +1,4 @@
+/*
 using System;
 using Lotus.API.Odyssey;
 using Lotus.Roles;
@@ -55,6 +56,7 @@ public class CwPainter: SerialKillerModifier
         base.HookModifier(modifier)
             .RoleName("Painter");
 }
+*/
 
 
 

@@ -109,7 +109,7 @@ public class TemplateManager
         return true;
     }
 
-    public bool TryFormat(object? obj, string tag, out string formatted, bool ignoreWarning = false)
+    public bool TryFormat(object? obj, string tag, out string formatted, bool ignoreWarning = true)
     {
         formatted = "";
         if (!ignoreWarning && !registeredTags.ContainsKey(tag)) VentLogger.Warn($"Tag \"{tag}\" is not registered. Please ensure all template tags have been registered through TemplateManager.RegisterTag().", "TemplateManager");

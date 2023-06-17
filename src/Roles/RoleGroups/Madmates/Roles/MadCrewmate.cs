@@ -16,6 +16,8 @@ public abstract class MadCrewmate : Engineer
     private bool canVent;
     private bool impostorVision;
 
+    public override bool TasksApplyToTotal() => false;
+
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddTaskOverrideOptions(base.RegisterOptions(optionStream)
             .SubOption(sub => sub.Name("Has Impostor Vision")

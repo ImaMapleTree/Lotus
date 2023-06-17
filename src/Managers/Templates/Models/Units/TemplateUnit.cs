@@ -15,6 +15,7 @@ using Lotus.Roles;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Subroles;
 using VentLib.Options;
+using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -137,8 +138,21 @@ public class TemplateUnit
     {
         { "Option", (_, qualifier) => OptionManager.GetManager().GetOption(qualifier)?.GetValue().ToString() ?? $"Unknown Option \"{qualifier}\"" },
         { "Optionf", (_, qualifier) => OptionManager.GetManager().GetOption(qualifier)?.GetValueText() ?? $"Unknown Option \"{qualifier}\"" },
-        { "OptionName", (_, qualifier) => OptionManager.GetManager().GetOption(qualifier)?.Name() ?? $"Unknown Option \"{qualifier}\"" },
+        { "OptionName", (_, qualifier) =>
+            {
+                Option? option = OptionManager.GetManager().GetOption(qualifier);
+                return option is GameOption go ? go.Name() : option?.Name() ?? $"Unknown Option \"{qualifier}\"";
+            }
+        },
         { "Template", (obj, template) => PluginDataManager.TemplateManager.TryFormat(obj, template, out string text) ? text : "" },
+        { "TemplateTitle", (obj, template) =>
+            {
+                return PluginDataManager.TemplateManager.GetTemplates(template)?.FirstOrOptional()
+                    .FlatMap(t => new Optional<string>(t.Title))
+                    .Map(t => FormatStatic(t, obj))
+                    .OrElse(null!) ?? "";
+            }
+        }
     };
 
     private static string ModifierText(object obj)

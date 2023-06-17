@@ -3,14 +3,12 @@ using Lotus.API.Player;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
-using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Statuses;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
-using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.Subroles;

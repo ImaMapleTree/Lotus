@@ -17,6 +17,7 @@ public class TConditionalPlayerFlag: CommonConditionalUnit
             foreach (object o in collection)
                 if (!Enum.TryParse(o as string, true, out PlayerFlag state)) VentLogger.Warn($"Could not parse \"{o}\" as type \"{nameof(PlayerFlag)}\"");
                 else flags.Add(state);
+
         else if (!Enum.TryParse(input as string, true, out PlayerFlag state)) VentLogger.Warn($"Could not parse \"{input}\" as type \"{nameof(PlayerFlag)}\"");
         else flags.Add(state);
     }
@@ -37,6 +38,12 @@ public class TConditionalPlayerFlag: CommonConditionalUnit
                 case PlayerFlag.HasNoModifier:
                     if (player.GetSubroles().IsEmpty()) return true;
                     break;
+                case PlayerFlag.IsModded:
+                    if (player.IsModded()) return true;
+                    break;
+                case PlayerFlag.IsNotModded:
+                    if (!player.IsModded()) return true;
+                    break;
                 default:
                     VentLogger.Warn($"PlayerFlag {flag} is not properly setup and will not result in a proper conditional validation.", "VerifyPlayerFlags");
                     break;
@@ -48,6 +55,8 @@ public class TConditionalPlayerFlag: CommonConditionalUnit
     public enum PlayerFlag
     {
         HasModifier,
-        HasNoModifier
+        HasNoModifier,
+        IsModded,
+        IsNotModded
     }
 }

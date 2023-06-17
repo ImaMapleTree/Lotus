@@ -22,6 +22,7 @@ public static class ShapeshiftPatch
         string invokerName = new StackTrace(5)?.GetFrame(0)?.GetMethod()?.Name;
         VentLogger.Debug($"Shapeshift Cause (Invoker): {invokerName}", "ShapeshiftEvent");
         if (invokerName is "RpcShapeshiftV2" or "RpcRevertShapeshiftV2" or "<Shapeshift>b__0" or "<RevertShapeshift>b__0") return true;
+        if (invokerName is "CRpcShapeshift" or "CRpcRevertShapeshift" or "<Shapeshift>b__0" or "<RevertShapeshift>b__0") return true;
         VentLogger.Info($"{__instance?.GetNameWithRole()} => {target?.GetNameWithRole()}", "Shapeshift");
         if (!AmongUsClient.Instance.AmHost) return true;
 

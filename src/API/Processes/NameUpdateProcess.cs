@@ -4,6 +4,7 @@ using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Extensions;
+using Lotus.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Debug.Profiling;
@@ -31,7 +32,7 @@ public class NameUpdateProcess
             Paused = false;
             Async.Schedule(() =>
             {
-                ForceFixedPlayers.Clear();;
+                ForceFixedPlayers.Clear();
                 _forceFixCount = _players.Count;
             }, 1f);
             NameUpdateLoop();
@@ -72,8 +73,10 @@ public class NameUpdateProcess
         sample.Stop();
 
         Async.Schedule(NameUpdateLoop, 0.1f / allPlayers.Length);
-        if (!updated)
-            if (player.IsAlive() || _forceFixCount-- <= 0 || ForceFixedPlayers.Contains(player.PlayerId)) return;
+        if (player.IsAlive()) return;
+        if (_forceFixCount-- <= 0 || ForceFixedPlayers.Contains(player.PlayerId))
+            if (!updated) return;
+        DevLogger.Log($"Fixing for: {player.name}");
         ForceFixedPlayers.Add(player.PlayerId);
         player.SetChatName(player.name);
     }

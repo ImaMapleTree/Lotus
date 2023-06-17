@@ -6,6 +6,7 @@ using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Stats;
+using Lotus.API.Vanilla.Sabotages;
 using Lotus.Extensions;
 using Lotus.Factions;
 using Lotus.Factions.Crew;
@@ -16,6 +17,7 @@ using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Managers.History.Events;
 using Lotus.Options;
+using Lotus.Patches.Systems;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Interactions.Interfaces;
@@ -166,9 +168,8 @@ public class Charmer: Crewmate
                     .BindInt(i => tasksPerUsage = i)
                     .Build())
                 .Build())
-            .SubOption(sub2 => sub2.Name(Translations.Options.CharmingCooldown)
-                .Key("Charming Cooldown")
-                .Value(v => v.Text(GeneralOptionTranslations.GlobalText).Color(new Color(1f, 0.61f, 0.33f)).Value(-1).Build())
+            .SubOption(sub2 => sub2.KeyName("Charming Cooldown", Translations.Options.CharmingCooldown)
+                .Value(v => v.Text(GeneralOptionTranslations.GlobalText).Color(new Color(1f, 0.61f, 0.33f)).Value(-1f).Build())
                 .AddFloatRange(0, 120, 2.5f, 25, GeneralOptionTranslations.SecondsSuffix)
                 .BindFloat(charmingCooldown.SetDuration)
                 .Build())
@@ -183,7 +184,7 @@ public class Charmer: Crewmate
             .SubOption(sub => sub.KeyName("Max Charmed Players", Translations.Options.MaxCharmedPlayers)
                 .BindInt(i => maxCharmedPlayers = i)
                 .Value(v => v.Text(ModConstants.Infinity).Color(ModConstants.Palette.InfinityColor).Value(0).Build())
-                .AddIntRange(1, 15, 1, 0)
+                .AddIntRange(1, 15)
                 .Build());
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
@@ -192,6 +193,7 @@ public class Charmer: Crewmate
             .DesyncRole(usesKillButton ? RoleTypes.Impostor : RoleTypes.Crewmate)
             .RoleAbilityFlags(RoleAbilityFlag.CannotVent | RoleAbilityFlag.CannotSabotage)
             .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod())
+            .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod() / 5, () => SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Lights)
             .OptionOverride(new IndirectKillCooldown(() => charmingCooldown.Duration <= -1 ? AUSettings.KillCooldown() : charmingCooldown.Duration));
 
     private class Charmed : Faction<Charmed>

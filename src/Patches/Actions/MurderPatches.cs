@@ -13,6 +13,7 @@ using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Patches.Actions;
 
@@ -80,7 +81,8 @@ public static class MurderPatches
         target.Trigger(RoleActionType.MyDeath, ref ignored, __instance, deathEvent.Instigator(), deathEvent);
         Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, __instance, deathEvent.Instigator(), deathEvent);
 
-        PlayerMurderHookEvent playerMurderHookEvent = new(__instance, target, deathEvent);
+        PlayerControl killer = deathEvent.Instigator().FlatMap(k => new UnityOptional<PlayerControl>(k.MyPlayer)).OrElse(__instance);
+        PlayerMurderHookEvent playerMurderHookEvent = new(killer, target, deathEvent);
         Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);
         Hooks.PlayerHooks.PlayerDeathHook.Propagate(playerMurderHookEvent);
 

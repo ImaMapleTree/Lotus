@@ -1,4 +1,3 @@
-using System;
 using System.Collections;
 using System.Linq;
 using AmongUs.GameOptions;
@@ -12,9 +11,8 @@ using Lotus.Options;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.Roles.Overrides;
 using Lotus.Extensions;
-using Lotus.Options.General;
+using Lotus.GUI.Name.Interfaces;
 using Lotus.Roles;
 using Lotus.Roles.Extra;
 using Lotus.RPC;
@@ -41,21 +39,20 @@ class IntroDestroyPatch
         while (pet == "Random") pet = ModConstants.Pets.Values.ToList().GetRandom();
 
         Game.GetAllPlayers().ForEach(p => Async.Execute(PreGameSetup(p, pet)));
-        Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.6f));
-
-        Game.GetAllPlayers().Select(p => new FrozenPlayer(p)).ForEach(p => Game.MatchData.FrozenPlayers[p.GameID] = p);
 
         VentLogger.Trace("Intro Scene Ending", "IntroCutscene");
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.RoundStart, ref handle, true);
 
         Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
-        Game.SyncAll();
     }
 
     private static IEnumerator PreGameSetup(PlayerControl player, string pet)
     {
         if (player == null) yield break;
+
+        FrozenPlayer frozenPlayer = new(player);
+        Game.MatchData.FrozenPlayers[frozenPlayer.GameID] = frozenPlayer;
 
         if (player.GetVanillaRole().IsImpostor())
         {
@@ -85,11 +82,16 @@ class IntroDestroyPatch
         if (hasPet) VentLogger.Trace($"Player: {player.name} has pet: {player.cosmetics?.CurrentPet?.Data?.ProductId}. Skipping assigning pet: {pet}.", "PetAssignment");
         else if (player.AmOwner) player.SetPet(pet);
         else playerData.DefaultOutfit.PetId = pet;
+        playerData.PlayerName = player.name;
 
-        Players.SendPlayerData(playerData);
+        Players.SendPlayerData(playerData, autoSetName: false);
         yield return new WaitForSeconds(NetUtils.DeriveDelay(0.05f));
         if (player == null) yield break;
 
         if (!hasPet) player.CRpcShapeshift(player, false);
+
+        INameModel nameModel = player.NameModel();
+        Players.GetPlayers().ForEach(p => nameModel.RenderFor(p, force: true));
+        player.SyncAll();
     }
 }

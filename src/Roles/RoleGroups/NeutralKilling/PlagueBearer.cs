@@ -77,6 +77,7 @@ public class PlagueBearer: NeutralKillingBase
     [RoleAction(RoleActionType.RoundStart)]
     [RoleAction(RoleActionType.RoundEnd)]
     [RoleAction(RoleActionType.AnyDeath)]
+    [RoleAction(RoleActionType.Disconnect)]
     public void CheckPestilenceTransform(ActionHandle handle)
     {
         PlayerControl[] allCountedPlayers = GetAlivePlayers().ToArray();

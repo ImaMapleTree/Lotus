@@ -308,8 +308,9 @@ public static class PlayerControlExtensions
         deathEvent ??= new DeathEvent(target, player);
 
         ActionHandle ignored = ActionHandle.NoInit();
-        target.Trigger(RoleActionType.MyDeath, ref ignored, player, Optional<PlayerControl>.Null(), deathEvent);
-        Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, player, Optional<PlayerControl>.Null(), deathEvent);
+        Optional<FrozenPlayer> fp = Optional<FrozenPlayer>.Of(Game.MatchData.FrozenPlayer(player));
+        target.Trigger(RoleActionType.MyDeath, ref ignored, player, fp, deathEvent);
+        Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, player, fp, deathEvent);
 
         PlayerMurderHookEvent playerMurderHookEvent = new(player, target, deathEvent);
         Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);

@@ -85,11 +85,13 @@ public class Romantic: Subrole
         if (dead.PlayerId != partner) return;
         MyPlayer.GetSubroles().Remove(this);
         winDelegateRemote?.Delete();
-        if (Random.RandomRange(0, 100) < _ruthlessRomantic.Chance) MatchData.AssignSubrole(MyPlayer, _ruthlessRomantic);
+        if (RoleUtils.RandomSpawn(_ruthlessRomantic)) MatchData.AssignSubrole(MyPlayer, _ruthlessRomantic);
         else
         {
             MatchData.AssignSubrole(MyPlayer, _vengefulRomantic);
-            MyPlayer.GetCustomRole().Faction = FactionInstances.Neutral;
+            CustomRole playerRole = MyPlayer.GetCustomRole();
+            playerRole.Faction = FactionInstances.Neutral;
+            playerRole.RoleFlags |= RoleFlag.CannotWinAlone;
             MyPlayer.GetSubrole<VengefulRomantic>()?.SetupVengeful(killer, originalFaction);
         }
     }

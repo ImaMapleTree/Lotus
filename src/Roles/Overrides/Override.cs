@@ -12,6 +12,8 @@ public enum Override
 
     // Game override
     AnonymousVoting,
+    ConfirmEjects,
+
     DiscussionTime,
     VotingTime,
     PlayerSpeedMod,
@@ -41,6 +43,7 @@ public static class OverrideExtensions
         {
             Override.CanUseVent => true,
             Override.AnonymousVoting => gameOptions.GetBool(BoolOptionNames.AnonymousVotes),
+            Override.ConfirmEjects => gameOptions.GetBool(BoolOptionNames.ConfirmImpostor),
             Override.DiscussionTime => gameOptions.GetInt(Int32OptionNames.DiscussionTime),
             Override.VotingTime => gameOptions.GetInt(Int32OptionNames.VotingTime),
             Override.PlayerSpeedMod => gameOptions.GetFloat(FloatOptionNames.PlayerSpeedMod),
@@ -69,13 +72,13 @@ public static class OverrideExtensions
             gameOptions.SetBool(boolOptionNames, (bool)value);
             return value;
         }
-        
+
         object SetFloatOption(FloatOptionNames floatOptionNames, float min = 0, float max = float.MaxValue)
         {
             gameOptions.SetFloat(floatOptionNames, Mathf.Clamp((float)value, min, max));
             return value;
         }
-        
+
         object SetIntOption(Int32OptionNames int32OptionNames, int min = 0, int max = int.MaxValue)
         {
             gameOptions.SetInt(int32OptionNames, Mathf.Clamp((int)value, min, max));
@@ -86,6 +89,7 @@ public static class OverrideExtensions
         {
             Override.CanUseVent => false,
             Override.AnonymousVoting => SetBoolOption(BoolOptionNames.AnonymousVotes),
+            Override.ConfirmEjects => SetBoolOption(BoolOptionNames.ConfirmImpostor),
             Override.DiscussionTime => SetIntOption(Int32OptionNames.DiscussionTime),
             Override.VotingTime => SetIntOption(Int32OptionNames.VotingTime),
             Override.PlayerSpeedMod => SetFloatOption(FloatOptionNames.PlayerSpeedMod, 0, 3),

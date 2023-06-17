@@ -18,6 +18,7 @@ public class ReportDeadBodyPatch
     {
         VentLogger.Trace($"{__instance.GetNameWithRole()} => {target?.GetNameWithRole() ?? "null"}", "ReportDeadBody");
         if (!AmongUsClient.Instance.AmHost) return true;
+        if (__instance.Data.IsDead) return false;
 
         if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.ReportBody) && target != null) return false;
         if (target == null)

@@ -65,7 +65,7 @@ public class Dictator: Crewmate
         // Target relationship is not allied
         // Then: Return
         if (--currentDictates <= 0) shouldSuicide = true;
-        else if (suicideIfVoteCrewmate && Relationship(player) is not Relation.FullAllies)
+        else if (suicideIfVoteCrewmate && Relationship(player) is Relation.FullAllies)
         {
             shouldSuicide = true;
             return;

@@ -41,6 +41,9 @@ public class GameOptionOverride
             case Override.AnonymousVoting:
                 options.SetBool(BoolOptionNames.AnonymousVotes, (bool)(GetValue() ?? AUSettings.AnonymousVotes()));
                 break;
+            case Override.ConfirmEjects:
+                options.SetBool(BoolOptionNames.ConfirmImpostor, (bool)(GetValue() ?? AUSettings.ConfirmImpostor()));
+                break;
             case Override.DiscussionTime:
                 options.SetInt(Int32OptionNames.DiscussionTime, (int)(GetValue() ?? AUSettings.DiscussionTime()));
                 break;

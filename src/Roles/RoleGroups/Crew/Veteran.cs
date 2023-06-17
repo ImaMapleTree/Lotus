@@ -70,7 +70,7 @@ public class Veteran : Crewmate
         if (actor.GetCustomRole().Faction.Relationship(this.Faction) is Relation.FullAllies && !canKillCrewmates) return;
         handle.Cancel();
         Game.MatchData.GameHistory.AddEvent(new VettedEvent(MyPlayer, actor));
-        IDeathEvent deathEvent = new CustomDeathEvent(MyPlayer, actor, ModConstants.DeathNames.Parried);
+        IDeathEvent deathEvent = new CustomDeathEvent(actor, MyPlayer, ModConstants.DeathNames.Parried);
         MyPlayer.InteractWith(actor, new LotusInteraction(new FatalIntent(interaction is not LotusInteraction, () => deathEvent), this));
     }
 

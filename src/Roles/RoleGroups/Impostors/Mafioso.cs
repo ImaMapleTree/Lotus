@@ -207,7 +207,6 @@ public class Mafioso: Engineer
 
     private void HandleSelfVote(ActionHandle handle)
     {
-        if (!hasVoted) return;
         if (currentShopItems.Length == 0) return;
         handle.Cancel();
         if (selectedShopItem == byte.MaxValue) selectedShopItem = 0;
@@ -364,6 +363,6 @@ public class Mafioso: Engineer
             Action = action;
         }
 
-        public string ToDisplay() => $"{Color.Colorize(Name)} ({CashColor.Colorize(Cost.ToString())})";
+        public string ToDisplay() => $"<size=1.5>{Color.Colorize(Name)} ({CashColor.Colorize(Cost.ToString())})</size>";
     }
 }

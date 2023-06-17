@@ -32,12 +32,15 @@ public class MatchData
     public int MeetingsCalled;
     public int EmergencyButtonsUsed;
 
+    private static readonly Func<RemoteList<GameOptionOverride>> OptionOverrideListSupplier =
+        () => AUSettings.ConfirmImpostor() ? new RemoteList<GameOptionOverride> { new(Override.ConfirmEjects, false) } : new RemoteList<GameOptionOverride>();
+
 
     public RoleData Roles = new();
 
     public FrozenPlayer? FrozenPlayer(PlayerControl? player)
     {
-        return player == null ? null : FrozenPlayers[player.GetGameID()];
+        return player == null || !FrozenPlayers.ContainsKey(player.GetGameID()) ? null : FrozenPlayers[player.GetGameID()];
     }
 
     public void Cleanup()
@@ -56,12 +59,12 @@ public class MatchData
 
         public Remote<GameOptionOverride> AddOverride(byte playerId, GameOptionOverride @override)
         {
-            return rolePersistentOverrides.GetOrCompute(playerId, () => new RemoteList<GameOptionOverride>()).Add(@override);
+            return rolePersistentOverrides.GetOrCompute(playerId, OptionOverrideListSupplier).Add(@override);
         }
 
         public IEnumerable<GameOptionOverride> GetOverrides(byte playerId)
         {
-            return rolePersistentOverrides.GetOrCompute(playerId, () => new RemoteList<GameOptionOverride>());
+            return rolePersistentOverrides.GetOrCompute(playerId, OptionOverrideListSupplier);
         }
 
         public CustomRole AddMainRole(byte playerId, CustomRole role) => MainRoles[playerId] = role;
