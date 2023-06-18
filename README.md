@@ -3473,7 +3473,7 @@ __Ability__: Can Make Bodies Unreportable<br>
 __Win Condition__: Eat Bodies To Win<br>
 
 `Originally Developed by Discussions`<br>
-`Idea by Town of Us Reactivated`<br>
+`Idea by Goose Goose Duck`<br>
 
 #### Role Description
 Use the Report button to eat dead bodies and make them unreportable. The vulture can switch between eating bodies and reporting them using the Pet button. The Vulture wins when they've eaten a set amount of bodies, and they may also have an arrow pointing to dead bodies if enabled by host.<br>
