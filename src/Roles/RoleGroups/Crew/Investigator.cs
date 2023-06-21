@@ -1,67 +1,38 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
-using Lotus.Factions.Impostors;
-using Lotus.Managers;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.Internals.OptionBuilders;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
-using VentLib.Options;
 using VentLib.Options.Game;
-using VentLib.Utilities;
-using VentLib.Utilities.Extensions;
 using static Lotus.Roles.RoleGroups.Crew.Investigator.Translations.Options;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
 public class Investigator : Crewmate
 {
-
-    public static List<(Func<CustomRole, bool> predicate, GameOptionBuilder builder, bool allColored)> RoleTypeBuilders = new()
-    {
-        (r => r.SpecialType is SpecialType.NeutralKilling, new GameOptionBuilder()
-            .KeyName("Neutral Killing Are Red", TranslationUtil.Colorize(NeutralKillingRed, Color.red, ModConstants.Palette.NeutralColor, ModConstants.Palette.KillingColor))
-            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(1).Color(Color.green).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
-            .ShowSubOptionPredicate(i => (int)i == 2), false),
-        (r => r.SpecialType is SpecialType.Neutral, new GameOptionBuilder()
-            .KeyName("Neutral Passive Are Red", TranslationUtil.Colorize(NeutralPassiveRed, Color.red, ModConstants.Palette.NeutralColor, ModConstants.Palette.PassiveColor))
-            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(1).Color(Color.green).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
-            .ShowSubOptionPredicate(i => (int)i == 2), false),
-        (r => r.Faction is Factions.Impostors.Madmates, new GameOptionBuilder()
-            .KeyName("Madmates Are Red", TranslationUtil.Colorize(MadmateRed, Color.red, ModConstants.Palette.MadmateColor))
-            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(1).Color(Color.green).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
-            .ShowSubOptionPredicate(i => (int)i == 2), false)
-    };
-
-    // 2 = Color red, 1 = Color green
-    public static Dictionary<Type, int> RoleColoringDictionary = new();
     [NewOnSetup] private List<byte> investigated = null!;
+
+    public DynamicRoleOptionBuilder DynamicRoleOptionBuilder = new(new List<DynamicOptionPredicate>
+    {
+        new(r => r.SpecialType is SpecialType.NeutralKilling, "Neutral Killing Are Red", TranslationUtil.Colorize(NeutralKillingRed, Color.red, ModConstants.Palette.NeutralColor, ModConstants.Palette.KillingColor)),
+        new(r => r.SpecialType is SpecialType.Neutral, "Neutral Passive Are Red", TranslationUtil.Colorize(NeutralPassiveRed, Color.red, ModConstants.Palette.NeutralColor, ModConstants.Palette.PassiveColor)),
+        new(r => r.Faction is Factions.Impostors.Madmates, "Madmates Are Red", TranslationUtil.Colorize(MadmateRed, Color.red, ModConstants.Palette.MadmateColor))
+    });
 
     [UIComponent(UI.Cooldown)]
     private Cooldown abilityCooldown = null!;
-
-    public Investigator()
-    {
-        CustomRoleManager.AddOnFinishCall(PopulateInvestigatorOptions);
-    }
 
     [RoleAction(RoleActionType.OnPet)]
     private void Investigate()
@@ -76,57 +47,23 @@ public class Investigator : Crewmate
 
         investigated.Add(player.PlayerId);
         CustomRole role = player.GetCustomRole();
+        Color color =  DynamicRoleOptionBuilder.IsAllowed(role) ? Color.green : Color.red;
 
-        int setting = RoleTypeBuilders.FirstOrOptional(rtb => rtb.predicate(role)).Map(rtb => rtb.allColored ? 1 : 0).OrElse(0);
-        if (setting == 0)
-        {
-            setting = RoleColoringDictionary.GetValueOrDefault(role.GetType(), 0);
-            if (setting == 0) setting = role.Faction.GetType() == typeof(ImpostorFaction) ? 1 : 2;
-        }
-
-        Color color = setting == 2 ? Color.green : Color.red;
-
-        NameComponent nameComponent = new(new LiveString(player.name, color), GameStates.IgnStates, ViewMode.Replace, MyPlayer);
+        NameComponent nameComponent = new(new LiveString(player.name, color), Game.IgnStates, ViewMode.Replace, MyPlayer);
         player.NameModel().GetComponentHolder<NameHolder>().Add(nameComponent);
     }
 
     // This is the most complicated options because of all the individual settings
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
+        DynamicRoleOptionBuilder.Decorate(base.RegisterOptions(optionStream)
             .SubOption(sub => sub
                 .KeyName("Investigate Cooldown", InvestigateCooldown)
                 .BindFloat(abilityCooldown.SetDuration)
                 .AddFloatRange(2.5f, 120, 2.5f, 10, GeneralOptionTranslations.SecondsSuffix)
-                .Build());
+                .Build()));
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         base.Modify(roleModifier).RoleColor(new Color(1f, 0.79f, 0.51f));
-
-    private void PopulateInvestigatorOptions()
-    {
-        CustomRoleManager.AllRoles.OrderBy(r => r.EnglishRoleName).ForEach(r =>
-        {
-            RoleTypeBuilders.FirstOrOptional(b => b.predicate(r)).Map(i => i.builder)
-                .IfPresent(builder =>
-                {
-                    builder.SubOption(sub => sub.KeyName(r.EnglishRoleName, r.RoleColor.Colorize(r.RoleName))
-                        .AddEnableDisabledValues()
-                        .BindBool(b =>
-                        {
-                            if (b) RoleColoringDictionary[r.GetType()] = 1;
-                            else RoleColoringDictionary[r.GetType()] = 2;
-                        })
-                        .Build());
-                });
-        });
-        RoleTypeBuilders.ForEach(rtb =>
-        {
-            rtb.builder.BindInt(i => rtb.allColored = i == 1);
-            Option option = rtb.builder.Build();
-            RoleOptions.AddChild(option);
-            CustomRoleManager.RoleOptionManager.Register(option, OptionLoadMode.LoadOrCreate);
-        });
-    }
 
     [Localized(nameof(Investigator))]
     internal static class Translations

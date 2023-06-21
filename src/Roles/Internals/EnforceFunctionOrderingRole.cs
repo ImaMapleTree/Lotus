@@ -7,9 +7,16 @@ namespace Lotus.Roles.Internals;
 /// </summary>
 internal sealed class EnforceFunctionOrderingRole: CustomRole
 {
-    public EnforceFunctionOrderingRole(Action action) => action();
+    private readonly Action action;
+    public EnforceFunctionOrderingRole(Action action) => this.action = action;
+
+    internal override void Solidify()
+    {
+        action();
+        base.Solidify();
+    }
 
     protected override void Setup(PlayerControl player) => throw new InvalidOperationException("This role is for internal use only and cannot be assigned");
 
-    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier.RoleFlags(RoleFlag.Hidden | RoleFlag.DontRegisterOptions | RoleFlag.Unassignable);
+    protected override RoleModifier Modify(RoleModifier roleModifier) => roleModifier.RoleFlags(RoleFlag.Hidden | RoleFlag.DontRegisterOptions | RoleFlag.Unassignable | RoleFlag.DoNotTranslate);
 }

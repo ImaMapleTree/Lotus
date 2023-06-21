@@ -1,9 +1,6 @@
 using HarmonyLib;
-using Il2CppInterop.Runtime.InteropTypes.Arrays;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
-using Lotus.Logging;
 using Lotus.Options;
 using UnityEngine;
 
@@ -28,7 +25,7 @@ class HudManagerPatch
 
         if (Input.GetKeyDown(KeyCode.LeftControl))
         {
-            if ((!AmongUsClient.Instance.IsGameStarted || !GameStates.IsOnlineGame)
+            if ((!AmongUsClient.Instance.IsGameStarted || AmongUsClient.Instance.NetworkMode is not NetworkModes.OnlineGame)
                 && player.CanMove)
             {
                 player.Collider.offset = new Vector2(0f, 127f);
@@ -37,7 +34,7 @@ class HudManagerPatch
         //壁抜け解除
         if (player.Collider.offset.y == 127f)
         {
-            if (!Input.GetKey(KeyCode.LeftControl) || (AmongUsClient.Instance.IsGameStarted && GameStates.IsOnlineGame))
+            if (!Input.GetKey(KeyCode.LeftControl) || (AmongUsClient.Instance.IsGameStarted && AmongUsClient.Instance.NetworkMode is NetworkModes.OnlineGame))
             {
                 player.Collider.offset = new Vector2(0f, -0.3636f);
             }

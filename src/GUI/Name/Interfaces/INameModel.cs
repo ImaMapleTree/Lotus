@@ -13,6 +13,8 @@ public interface INameModel
 
     public string RenderFor(PlayerControl player, GameState? state = null, bool sendToPlayer = true, bool force = false);
 
+    public void RenderForAll(GameState? state = null, bool sendToPlayer = true, bool force = false);
+
     public List<IComponentHolder> ComponentHolders();
 
     public T GetComponentHolder<T>() where T : IComponentHolder;

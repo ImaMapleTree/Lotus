@@ -1,7 +1,5 @@
 using System.Collections.Generic;
 using Lotus.Extensions;
-using Lotus.GUI;
-using Lotus.Roles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;

@@ -1,4 +1,4 @@
-using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 
 namespace Lotus.Roles.Internals;
 
@@ -24,13 +24,14 @@ public class ActionHandle
 
     public override string ToString()
     {
-        return $"ActionHandle(type={ActionType}, cancelled={IsCanceled})";
+        return $"ActionHandle(type={ActionType}, cancellation={Cancellation})";
     }
 
     public enum CancelType
     {
         None,
         Normal,
+        Soft,
         Complete
     }
 }

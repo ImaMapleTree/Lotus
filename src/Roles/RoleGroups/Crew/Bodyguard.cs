@@ -12,6 +12,7 @@ using Lotus.Extensions;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -80,7 +81,7 @@ public class Bodyguard: Crewmate
         protectedIndicator?.Delete();
         guardedPlayer = player;
         protectedIndicator = voted.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent("<b>+</b>", CrossColor, Game.IgnStates, MyPlayer));
-        Game.GetDeadPlayers().ForEach(p => protectedIndicator?.Get().AddViewer(p));
+        Players.GetPlayers(PlayerFilter.Dead).ForEach(p => protectedIndicator?.Get().AddViewer(p));
 
         CHandler(SelectedPlayerMessage.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send(MyPlayer);
     }

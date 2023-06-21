@@ -7,7 +7,7 @@ using Lotus.Victory.Conditions;
 using Lotus.Extensions;
 using Lotus.Factions;
 using Lotus.Factions.Interfaces;
-using Lotus.Factions.Neutrals;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Options.Game;
 

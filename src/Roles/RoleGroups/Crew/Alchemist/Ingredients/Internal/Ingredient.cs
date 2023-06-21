@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 
-namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 
 [Localized("Roles.Alchemist.Ingredients")]
 public abstract class Ingredient: IAlchemyIngredient

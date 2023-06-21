@@ -2,9 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 
-namespace Lotus.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist;
 
 public partial class Alchemist
 {

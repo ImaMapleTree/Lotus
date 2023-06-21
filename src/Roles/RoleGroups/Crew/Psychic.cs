@@ -7,8 +7,9 @@ using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.API;
+using Lotus.API.Player;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -31,15 +32,15 @@ public class Psychic: Crewmate
     [RoleAction(RoleActionType.MeetingCalled)]
     private void MarkMeetingPlayers()
     {
-        List<PlayerControl> eligiblePlayers = Game.GetAlivePlayers().Where(IsEvil).ToList();
+        List<PlayerControl> eligiblePlayers = Players.GetPlayers(PlayerFilter.Alive).Where(IsEvil).ToList();
         if (eligiblePlayers.Count == 0) return;
 
         VentLogger.Trace($"Psychic Eligible Evil Players: {eligiblePlayers.Select(p => p.name).Fuse()}", "Psychic Ability");
         PlayerControl evilPlayer = eligiblePlayers.GetRandom();
         List<PlayerControl> targetPlayers = new() { evilPlayer };
-        List<PlayerControl> remainingPlayers = Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && p.PlayerId != evilPlayer.PlayerId).ToList();
+        List<PlayerControl> remainingPlayers = Players.GetPlayers(PlayerFilter.Alive).Where(p => p.PlayerId != MyPlayer.PlayerId && p.PlayerId != evilPlayer.PlayerId).ToList();
         VentLogger.Trace($"Psychic Remaining Players: {remainingPlayers.Select(p => p.name).Fuse()}", "Psychic Ability");
-        
+
         while (targetPlayers.Count < numberOfPlayers && remainingPlayers.Count != 0) targetPlayers.Add(remainingPlayers.PopRandom());
 
         targetPlayers.ForEach(p =>
@@ -52,7 +53,7 @@ public class Psychic: Crewmate
         remotes.ForEach(r => r.Delete());
         remotes.Clear();
     }
-    
+
     private bool IsEvil(PlayerControl player) => nonImpostorAreEvil
         ? Relationship(player) is Relation.None || player.GetCustomRole().Faction is ImpostorFaction
         : player.GetCustomRole().Faction is ImpostorFaction;

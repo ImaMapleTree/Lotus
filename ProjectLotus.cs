@@ -12,7 +12,6 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Gamemodes;
 using Lotus.GUI.Menus;
 using Lotus.GUI.Patches;
-using Lotus.Logging;
 using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
@@ -33,15 +32,17 @@ using Version = VentLib.Version.Version;
 [assembly: AssemblyVersion(ProjectLotus.CompileVersion)]
 namespace Lotus;
 
-[BepInPlugin(PluginGuid, "Lotus", $"{MajorVersion}.{MinorVersion}.0")]
+[BepInPlugin(PluginGuid, "Lotus", $"{MajorVersion}.{MinorVersion}.{PatchVersion}")]
 [BepInProcess("Among Us.exe")]
 public class ProjectLotus : BasePlugin, IGitVersionEmitter
 {
     public const string PluginGuid = "com.tealeaf.Lotus";
-    public const string CompileVersion = $"{MajorVersion}.{MinorVersion}.*";
+    public const string CompileVersion = $"{MajorVersion}.{MinorVersion}.{PatchVersion}.{BuildNumber}";
 
     public const string MajorVersion = "1";
     public const string MinorVersion = "0"; // Update with each release
+    public const string PatchVersion = "1";
+    public const string BuildNumber = "0620";
 
     public static string PluginVersion = typeof(ProjectLotus).Assembly.GetName().Version!.ToString();
 
@@ -52,15 +53,12 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
 
     public static bool DevVersion = false;
-    public static readonly string DevVersionStr = "Alpha 10.06.2023";
+    public static readonly string DevVersionStr = "Dev 18.06.2023";
 
     public Harmony Harmony { get; } = new(PluginGuid);
     public static string CredentialsText = null!;
 
     public static ModUpdater ModUpdater = null!;
-
-
-
 
 
     public ProjectLotus()
@@ -79,7 +77,9 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         ModUpdater.EstablishConnection();
         ModUpdater.RegisterReleaseCallback(BeginUpdate, true);
 
+#if !DEBUG
         Profilers.Global.SetActive(false);
+#endif
     }
 
     private void BeginUpdate(Release release)
@@ -95,7 +95,6 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
     public static NormalGameOptionsV07 NormalOptions => GameOptionsManager.Instance.currentNormalGameOptions;
 
 
-    public static float RefixCooldownDelay = 0f;
     public static List<byte> ResetCamPlayerList = null!;
 
     public static GamemodeManager GamemodeManager;
@@ -103,7 +102,6 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
     public override void Load()
     {
-        DevLogger.Log("Starting load()");
         //Profilers.Global.SetActive(false);
         GameOptionController.Enable();
         GamemodeManager = new GamemodeManager();
@@ -120,7 +118,6 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
         GamemodeManager.Setup();
         ShowerPages.InitPages();
-        DevLogger.Log("finsihing load()");
     }
 
     public GitVersion Version() => CurrentVersion;

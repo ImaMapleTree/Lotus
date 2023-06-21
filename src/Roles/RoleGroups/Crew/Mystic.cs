@@ -8,10 +8,9 @@ using Lotus.Extensions;
 using Lotus.Factions;
 using Lotus.Factions.Crew;
 using Lotus.GUI.Name.Holders;
-using Lotus.Logging;
-using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using UnityEngine;
@@ -36,7 +35,7 @@ public class Mystic : Crewmate, ISubrole
     private bool isSubrole;
     private bool restrictedToCrew;
 
-    public string? Identifier() => null;
+    public string? Identifier() => "ī";
 
     protected override void PostSetup()
     {

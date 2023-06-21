@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.Factions.Interfaces;
 using Lotus.Factions.Undead;
@@ -11,7 +12,7 @@ using Lotus.GUI.Name.Interfaces;
 using Lotus.Roles.RoleGroups.Undead.Events;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 
 namespace Lotus.Roles.RoleGroups.Undead.Roles;
@@ -24,7 +25,7 @@ public class UndeadRole : Impostor
 
     public void ConvertToUndead(PlayerControl target)
     {
-        List<PlayerControl> viewers = Game.GetAlivePlayers().Where(IsConvertedUndead).ToList();
+        List<PlayerControl> viewers = Players.GetPlayers(PlayerFilter.Alive).Where(IsConvertedUndead).ToList();
 
         INameModel nameModel = target.NameModel();
 
@@ -41,7 +42,7 @@ public class UndeadRole : Impostor
 
     public void InitiateUndead(PlayerControl target)
     {
-        List<PlayerControl> undead = Game.GetAlivePlayers().Where(IsConvertedUndead).ToList();
+        List<PlayerControl> undead = Players.GetPlayers(PlayerFilter.Alive).Where(IsConvertedUndead).ToList();
         List<PlayerControl> viewers = new() { target };
 
         LiveString undeadPlayerName = new(target.name, UndeadColor);

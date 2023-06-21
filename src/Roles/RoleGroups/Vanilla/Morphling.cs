@@ -1,4 +1,5 @@
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Options.Game;
 
 namespace Lotus.Roles.RoleGroups.Vanilla;

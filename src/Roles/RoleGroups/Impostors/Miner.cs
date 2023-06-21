@@ -2,6 +2,7 @@ using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using UnityEngine;

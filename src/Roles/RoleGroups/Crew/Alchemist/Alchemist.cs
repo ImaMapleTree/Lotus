@@ -6,18 +6,16 @@ using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.GUI;
 using Lotus.GUI.Name;
-using Lotus.GUI.Name.Impl;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
-using Lotus.Roles.RoleGroups.Crew.Potions;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Potions;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 
-namespace Lotus.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist;
 
 [Localized("Roles.Alchemist")]
 public partial class Alchemist: Crewmate

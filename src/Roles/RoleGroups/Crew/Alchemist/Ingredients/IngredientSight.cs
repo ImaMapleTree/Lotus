@@ -1,7 +1,8 @@
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 
-namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients;
 
 public class IngredientSight: Ingredient
 {

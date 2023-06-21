@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.GUI.Name.Impl;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Options;
@@ -17,7 +18,7 @@ public class SimpleComponent : INameModelComponent
 
     protected LiveString MainText;
     private Func<List<PlayerControl>> viewers;
-    private readonly List<PlayerControl> additionalViewers = GeneralOptions.GameplayOptions.GhostsSeeInfo ? Game.GetDeadPlayers().ToList() : new List<PlayerControl>();
+    private readonly List<PlayerControl> additionalViewers = GeneralOptions.GameplayOptions.GhostsSeeInfo ? Players.GetPlayers(PlayerFilter.Dead).ToList() : new List<PlayerControl>();
     private ViewMode viewMode;
     private GameState[] gameStates;
 

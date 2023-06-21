@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
@@ -12,6 +13,7 @@ using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -42,7 +44,7 @@ public class Pestilence: NeutralKillingBase
     protected override void PostSetup()
     {
         RoleComponent rc = MyPlayer.NameModel().GetComponentHolder<RoleHolder>()[0];
-        Game.GetAllPlayers().Where(p => !p.IsAlive() || Relationship(p) is Relation.FullAllies).ForEach(p => rc.AddViewer(p));
+        Players.GetPlayers().Where(p => !p.IsAlive() || Relationship(p) is Relation.FullAllies).ForEach(p => rc.AddViewer(p));
     }
 
     [RoleAction(RoleActionType.Attack)]

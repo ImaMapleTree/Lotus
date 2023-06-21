@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 using VentLib.Utilities;
 
-namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 
 public class IngredientInfo
 {

@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using Lotus.Roles.Internals.Attributes;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 

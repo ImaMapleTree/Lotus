@@ -1,16 +1,16 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Hazel;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Chat.Patches;
-using Lotus.Logging;
 using Lotus.Managers;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Networking;
 using VentLib.Networking.RPC;
+using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -101,7 +101,7 @@ public class ChatHandler
         PlayerControl? sender;
         Async.Schedule(() =>
         {
-            sender = Game.GetAlivePlayers().FirstOrDefault();
+            sender = Players.GetPlayers(PlayerFilter.Alive).FirstOrDefault();
             if (sender == null) return;
 
             string name = sender.name;
@@ -122,11 +122,11 @@ public class ChatHandler
         message = message.Replace("@n", "\n");
         title = title.Replace("@n", "\n");
         if (leftAligned) ChatBubblePatch.SetLeftQueue.Enqueue(0);
-        string name = sender.name;
-        sender.SetName(title);
+        string playerName = sender.Data.PlayerName;
+        sender.Data.PlayerName = title;
         OnChatPatch.UtilsSentList.Add(sender.PlayerId);
         DestroyableSingleton<HudManager>.Instance.Chat.AddChat(sender, message);
-        sender.SetName(name);
+        sender.Data.PlayerName = playerName;
     }
 
     private static void MassSend(PlayerControl sender, string message, string title, bool leftAligned)
@@ -145,6 +145,7 @@ public class ChatHandler
         int leftIndex = 0;
         int rightIndex = Math.Min(message.Length, _maxMessagePacketSize);
 
+        MassRpc massRpc;
         while (rightIndex < message.Length)
         {
             string subMessage = message[leftIndex..rightIndex];
@@ -153,32 +154,37 @@ public class ChatHandler
 
             subMessage = subMessage.Trim('\n').Replace("@n", "\n");
 
+
             RpcV3.Mass()
-                .Start(sender.NetId, RpcCalls.SetName)
-                .Write(title.Replace("@n", "\n"))
-                .End()
-                .Start(sender.NetId, RpcCalls.SendChat)
-                .Write(recipient.IsModded() ? subMessage : subMessage.RemoveHtmlTags())
-                .End()
-                .Start(sender.NetId, RpcCalls.SetName)
-                .Write(originalName)
-                .End()
-                .Send(recipient.GetClientId());
+                    .Start(sender.NetId, RpcCalls.SetName)
+                    .Write(title.Replace("@n", "\n"))
+                    .End()
+                    .Start(sender.NetId, RpcCalls.SendChat)
+                    .Write(recipient.IsModded() ? subMessage : subMessage.RemoveHtmlTags())
+                    .End()
+                    .Send(recipient.GetClientId());
         }
 
         message = message[leftIndex..rightIndex].Trim('\n').Replace("@n", "\n");
 
-        RpcV3.Mass()
-            .Start(sender.NetId, RpcCalls.SetName)
-            .Write(title.Replace("@n", "\n"))
-            .End()
-            .Start(sender.NetId, RpcCalls.SendChat)
-            .Write(recipient.IsModded() ? message : message.RemoveHtmlTags())
-            .End()
-            .Start(sender.NetId, RpcCalls.SetName)
-            .Write(originalName)
-            .End()
-            .Send(recipient.GetClientId());
+
+        massRpc = RpcV3.Mass()
+                .Start(sender.NetId, RpcCalls.SetName)
+                .Write(title.Replace("@n", "\n"))
+                .End()
+                .Start(sender.NetId, RpcCalls.SendChat)
+                .Write(recipient.IsModded() ? message : message.RemoveHtmlTags())
+                .End();
+        if (Game.State is not GameState.Roaming)
+            massRpc.Start(sender.NetId, RpcCalls.SetName)
+                .Write(originalName)
+                .End()
+                .Send(recipient.GetClientId());
+        else
+        {
+            massRpc.Send(recipient.GetClientId());
+            sender.NameModel().RenderFor(recipient);
+        }
     }
 
     // Large Title
@@ -202,25 +208,29 @@ public class ChatHandler
                 .Start(sender.NetId, RpcCalls.SendChat)
                 .Write(recipient.IsModded() ? message.Replace("@n", "\n") : message.RemoveHtmlTags().Replace("@n", "\n"))
                 .End()
-                .Start(sender.NetId, RpcCalls.SetName)
-                .Write(originalName)
-                .End()
                 .Send(recipient.GetClientId());
         }
 
         title = title[leftIndex..rightIndex].Trim('\n').Replace("@n", "\n");
 
-        RpcV3.Mass()
+        MassRpc massRpc = RpcV3.Mass()
             .Start(sender.NetId, RpcCalls.SetName)
             .Write(title)
             .End()
             .Start(sender.NetId, RpcCalls.SendChat)
             .Write(recipient.IsModded() ? message.Replace("@n", "\n") : message.RemoveHtmlTags().Replace("@n", "\n"))
-            .End()
-            .Start(sender.NetId, RpcCalls.SetName)
-            .Write(originalName)
-            .End()
-            .Send(recipient.GetClientId());
+            .End();
+
+        if (Game.State is not GameState.Roaming)
+            massRpc.Start(sender.NetId, RpcCalls.SetName)
+                .Write(originalName)
+                .End()
+                .Send(recipient.GetClientId());
+        else
+        {
+            massRpc.Send(recipient.GetClientId());
+            sender.NameModel().RenderFor(recipient);
+        }
     }
 
     private static int FindGoodSplitPoint(ref string message, int index)

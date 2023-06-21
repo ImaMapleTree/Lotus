@@ -3,6 +3,7 @@ using Lotus.API.Odyssey;
 using Lotus.Chat;
 using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;

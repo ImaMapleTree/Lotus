@@ -2,18 +2,19 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
-using Lotus.Roles.RoleGroups.Crew.Potions;
-using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Potions;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace Lotus.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist;
 
 public partial class Alchemist
 {

@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.GUI;
@@ -8,11 +7,11 @@ using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
 using Lotus.Managers.History.Events;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Statuses;
 using Lotus.Utilities;
 using UnityEngine;

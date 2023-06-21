@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Gamemodes;
 using Lotus.Managers;
 using Lotus.Roles.RoleGroups.NeutralKilling;
@@ -19,7 +20,7 @@ class SelectRolesPatch
     public static void Prefix()
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        List<PlayerControl> unassignedPlayers = Game.GetAllPlayers().ToList();
+        List<PlayerControl> unassignedPlayers = Players.GetPlayers().ToList();
         if (GeneralOptions.AdminOptions.HostGM)
         {
             MatchData.AssignRole(PlayerControl.LocalPlayer, CustomRoleManager.Special.GM, true);
@@ -32,17 +33,17 @@ class SelectRolesPatch
     {
         if (!AmongUsClient.Instance.AmHost) return;
 
-        Game.GetAllPlayers().Do(p => p.GetCustomRole().SyncOptions());
+        Players.GetPlayers().Do(p => p.GetCustomRole().SyncOptions());
 
         TextTable textTable = new("ID", "Color", "Player", "Role", "SubRoles");
-        Game.GetAllPlayers().Where(p => p != null).ForEach(p =>
+        Players.GetPlayers().Where(p => p != null).ForEach(p =>
         {
             textTable.AddEntry((object)p.PlayerId, ModConstants.ColorNames[p.cosmetics.ColorId], p.name, p.GetCustomRole().RoleName, p.GetSubroles().Fuse());
         });
         VentLogger.Debug($"Role Assignments\n{textTable}", "RoleManager::SelectRoles~Postfix");
 
 
-        ProjectLotus.ResetCamPlayerList.AddRange(Game.GetAllPlayers().Where(p => p.GetCustomRole() is Arsonist).Select(p => p.PlayerId));
+        ProjectLotus.ResetCamPlayerList.AddRange(Players.GetPlayers().Where(p => p.GetCustomRole() is Arsonist).Select(p => p.PlayerId));
         Game.RenderAllForAll(state: GameState.InIntro);
         Game.CurrentGamemode.Trigger(GameAction.GameStart);
     }

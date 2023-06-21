@@ -1,6 +1,7 @@
 using System.Reflection;
 using Lotus.API;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Logging;
 using VentLib.Utilities.Debug.Profiling;
 

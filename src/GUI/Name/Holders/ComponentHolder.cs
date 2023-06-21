@@ -4,7 +4,6 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.GUI.Name.Interfaces;
-using Lotus.Patches.Actions;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
@@ -41,7 +40,6 @@ public class ComponentHolder<T> : RemoteList<T>, IComponentHolder<T> where T: IN
 
     public virtual string Render(PlayerControl player, GameState state)
     {
-        if (player.IsShapeshifted() && this is not NameHolder) return "";
         List<string> endString = new();
         ViewMode lastMode = ViewMode.Absolute;
         // TODO: if laggy investigate ways to circumvent ToArray() call here

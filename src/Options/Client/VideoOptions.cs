@@ -1,5 +1,4 @@
 using System;
-using Lotus.Logging;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options;

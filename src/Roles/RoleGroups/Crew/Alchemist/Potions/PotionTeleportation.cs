@@ -1,14 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API.Odyssey;
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.API.Player;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 using Lotus.Utilities;
-using Lotus.API;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace Lotus.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Potions;
 
 public class PotionTeleportation: Potion
 {
@@ -25,7 +24,7 @@ public class PotionTeleportation: Potion
 
     public override bool Use(PlayerControl user)
     {
-        List<PlayerControl> players = Game.GetAlivePlayers().Where(p => p.PlayerId != user.PlayerId).ToList();
+        List<PlayerControl> players = Players.GetPlayers(PlayerFilter.Alive).Where(p => p.PlayerId != user.PlayerId).ToList();
         if (players.Count == 0) return true;
         PlayerControl randomPlayer = players.GetRandom();
         Vector2 myPosition = user.GetTruePosition();

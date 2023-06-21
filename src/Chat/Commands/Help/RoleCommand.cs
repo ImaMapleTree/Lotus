@@ -1,13 +1,12 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Managers;
 using Lotus.Managers.Hotkeys;
 using Lotus.Managers.Templates.Models.Backing;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
-using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -67,7 +66,7 @@ public class RoleCommand
         if (source.IsHost() && HotkeyManager.HoldingLeftShift)
             ChatHandler.Of(message).LeftAlign().Send();
         else if (source.IsHost() && HotkeyManager.HoldingRightShift)
-            Game.GetDeadPlayers().ForEach(p => ChatHandler.Of(message).LeftAlign().Send(p));
+            Players.GetPlayers(PlayerFilter.Dead).ForEach(p => ChatHandler.Of(message).LeftAlign().Send(p));
         else ChatHandler.Of(message).LeftAlign().Send(source);
     }
 }

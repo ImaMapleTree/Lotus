@@ -1,8 +1,6 @@
 using System;
 using Lotus.API.Odyssey;
 using Lotus.GUI.Counters;
-using Lotus.GUI.Name.Impl;
-using Lotus.API;
 
 namespace Lotus.GUI.Name.Components;
 

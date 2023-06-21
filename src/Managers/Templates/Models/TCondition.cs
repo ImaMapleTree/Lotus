@@ -12,7 +12,7 @@ public class TCondition: Dictionary<string, object>
 
     public bool Evaluate(object? data)
     {
-        ParsedConditions ??= this.Select(kv => ConditionalParsers.Parse(kv.Key, kv.Value)).ToList();
+        ParsedConditions ??= this.Select(kv => TConditionalParsers.Parse(kv.Key, kv.Value)).ToList();
         return ParsedConditions.All(c => c.Evaluate(data));
     }
 }

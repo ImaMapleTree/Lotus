@@ -1,4 +1,5 @@
 using Lotus.API;
+using Lotus.Roles.Internals.Enums;
 
 namespace Lotus.Roles.Internals.Attributes;
 

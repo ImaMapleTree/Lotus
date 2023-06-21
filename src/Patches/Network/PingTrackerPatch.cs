@@ -1,10 +1,7 @@
 using HarmonyLib;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Options;
 using Lotus.Utilities;
-using TMPro;
-using Lotus.Patches.Client;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
@@ -33,7 +30,7 @@ class PingTrackerPatch
         __instance.text.text += " " + fps + " fps";
         __instance.text.sortingOrder = -1;
 
-        
+
         __instance.text.text += ProjectLotus.CredentialsText;
         if (GeneralOptions.DebugOptions.NoGameEnd) __instance.text.text += $"\r\n" + Utils.ColorString(Color.red, Localizer.Translate("StaticOptions.NoGameEnd"));
         __instance.text.text += $"\r\n" + Game.CurrentGamemode.GetName();
@@ -44,7 +41,5 @@ class PingTrackerPatch
         if (HudManager.InstanceExists && HudManager._instance.Chat.ChatButton.active) offsetX += 0.8f; //チャットボタンがある場合の追加オフセット
         if (FriendsListManager.InstanceExists && FriendsListManager._instance.FriendsListButton.Button.active) offsetX += 0.8f; //フレンドリストボタンがある場合の追加オフセット
         __instance.GetComponent<AspectPosition>().DistanceFromEdge = new Vector3(offsetX, 0f, 0f);
-
-        if (!GameStates.IsLobby) return;
     }
 }

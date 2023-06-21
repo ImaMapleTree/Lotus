@@ -1,9 +1,12 @@
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Managers;
 using UnityEngine;
 using VentLib.Localization.Attributes;
+using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
+using VentLib.Utilities;
 using static Lotus.ModConstants.Palette;
 
 namespace Lotus.Options.Roles;
@@ -21,6 +24,7 @@ public class NeutralOptions
     public bool KnowAlliedRoles => NeutralTeamingMode is not NeutralTeaming.Disabled && knowAlliedRoles;
 
     private bool knowAlliedRoles;
+    private bool openGuessers;
 
     public NeutralOptions()
     {
@@ -41,14 +45,14 @@ public class NeutralOptions
                 .BindBool(b => knowAlliedRoles = b)
                 .Build())
             .BuildAndRegister();
-        
+
         Builder("Minimum Neutral Passive Roles")
             .IsHeader(true)
             .Name(GColor(NeutralOptionTranslations.MinimumNeutralPassiveRoles))
             .BindInt(i => MinimumNeutralPassiveRoles = i)
             .AddIntRange(0, 15)
             .BuildAndRegister();
-        
+
         Builder("Maximum Neutral Passive Roles")
             .Name(GColor(NeutralOptionTranslations.MaximumNeutralPassiveRoles))
             .BindInt(i => MaximumNeutralPassiveRoles = i)
@@ -60,11 +64,27 @@ public class NeutralOptions
             .BindInt(i => MinimumNeutralKillingRoles = i)
             .AddIntRange(0, 15)
             .BuildAndRegister();
-        
+
         Builder("Maximum Neutral Killing Roles")
             .Name(GColor(NeutralOptionTranslations.MaximumNeutralKillingRoles))
             .BindInt(i => MaximumNeutralKillingRoles = i)
             .AddIntRange(0, 15)
+            .BuildAndRegister();
+
+        Builder("Neutral Guessers")
+            .IsHeader(true)
+            .Name(TranslationUtil.Colorize(NeutralOptionTranslations.NeutralGuessers, NeutralColor))
+            .BindBool(b => openGuessers = b)
+            .AddOnOffValues(false)
+            .ShowSubOptionPredicate(b => (bool)b)
+            .SubOption(_ => CustomRoleManager.Special.NeutralKillerGuesser.GetGameOptionBuilder()
+                .IsHeader(false)
+                .KeyName("Neutral Killing Guessers", Color.white.Colorize(GColor(NeutralOptionTranslations.NeutralKillerGuesser)))
+                .Build())
+            .SubOption(_ => CustomRoleManager.Special.NeutralGuesser.GetGameOptionBuilder()
+                .IsHeader(false)
+                .KeyName("Neutral Guessers", Color.white.Colorize(GColor(NeutralOptionTranslations.NeutralPassiveGuesser)))
+                .Build())
             .BuildAndRegister();
     }
 
@@ -96,6 +116,16 @@ public class NeutralOptions
 
         [Localized(nameof(AlliedKnowRoles))]
         public static string AlliedKnowRoles = "Team Knows Everyone's Role";
+
+        [Localized(nameof(NeutralGuessers))]
+        public static string NeutralGuessers = "Neutral::0 Guessers";
+
+        [Localized(nameof(NeutralKillerGuesser))]
+        public static string NeutralKillerGuesser = "Neutral::0 Killing::2 Guessers";
+
+        [Localized(nameof(NeutralPassiveGuesser))]
+        public static string NeutralPassiveGuesser = "Neutral::0 Passive::1 Guessers";
+
     }
 }
 

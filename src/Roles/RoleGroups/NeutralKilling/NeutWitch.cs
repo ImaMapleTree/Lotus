@@ -2,16 +2,15 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Lotus.API;
 using Lotus.Factions;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -35,7 +34,7 @@ public class NeutWitch : NeutralKillingBase
 
         cursedPlayers.Add(target);
         remotes.GetValueOrDefault(target.PlayerId)?.Delete();
-        IndicatorComponent component = new SimpleIndicatorComponent("◆", new Color(0.36f, 0f, 0.58f), GameStates.IgnStates, MyPlayer);
+        IndicatorComponent component = new SimpleIndicatorComponent("◆", new Color(0.36f, 0f, 0.58f), Game.IgnStates, MyPlayer);
         remotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
         MyPlayer.RpcMark(target);
         return true;
@@ -59,7 +58,7 @@ public class NeutWitch : NeutralKillingBase
             player.RpcMurderPlayer(inRangePlayers.GetRandom());
             RemovePuppet(player);
         }
-        
+
 
         cursedPlayers.Where(p => p.Data.IsDead).ToArray().Do(RemovePuppet);
     }

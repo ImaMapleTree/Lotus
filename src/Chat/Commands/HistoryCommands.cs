@@ -1,8 +1,6 @@
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
-using Lotus.Utilities;
-using Lotus.API;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;

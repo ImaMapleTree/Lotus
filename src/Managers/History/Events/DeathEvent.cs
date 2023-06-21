@@ -1,6 +1,5 @@
 using Lotus.API.Odyssey;
 using Lotus.Roles;
-using Lotus.API;
 using Lotus.API.Player;
 using Lotus.Extensions;
 using VentLib.Utilities.Optionals;
@@ -20,7 +19,7 @@ public class DeathEvent : IDeathEvent
     {
         this.deadPlayer = deadPlayer;
         playerRole = this.deadPlayer.GetCustomRole();
-        this.killer = Optional<FrozenPlayer>.Of(Game.MatchData.FrozenPlayer(killer));
+        this.killer = Optional<FrozenPlayer>.Of(Game.MatchData.GetFrozenPlayer(killer));
         this.killerRole = this.killer.Map(p => Optional<CustomRole>.Of(p.MyPlayer.GetCustomRoleSafe()).OrElse(p.Role));
     }
 

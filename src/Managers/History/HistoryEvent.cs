@@ -1,6 +1,5 @@
 using System;
 using Lotus.API.Odyssey;
-using Lotus.API;
 
 namespace Lotus.Managers.History;
 

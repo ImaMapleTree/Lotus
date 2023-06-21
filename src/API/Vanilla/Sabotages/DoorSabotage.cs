@@ -3,7 +3,7 @@ using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;

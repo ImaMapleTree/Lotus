@@ -4,11 +4,11 @@ using AmongUs.GameOptions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 

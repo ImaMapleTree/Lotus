@@ -1,9 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AmongUs.GameOptions;
 using Lotus.API.Odyssey;
-using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Managers.History.Events;
@@ -15,20 +13,18 @@ using Lotus.API;
 using Lotus.API.Stats;
 using Lotus.API.Vanilla.Sabotages;
 using Lotus.Extensions;
-using Lotus.Factions.Impostors;
-using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Patches.Systems;
 using Lotus.Roles.Events;
+using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.Internals.OptionBuilders;
 using Lotus.Roles.Overrides;
+using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
-using VentLib.Options;
 using VentLib.Options.Game;
-using VentLib.Utilities;
-using VentLib.Utilities.Extensions;
 
 namespace Lotus.Roles.RoleGroups.Crew;
 
@@ -38,30 +34,15 @@ public class Sheriff : Crewmate
     public static readonly List<Statistic> SheriffStatistics = new() { VanillaStatistics.Kills, _misfires };
     public override List<Statistic> Statistics() => SheriffStatistics;
 
-    public static Dictionary<Type, int> RoleKillerDictionary = new();
+    public static HashSet<Type> SheriffBannedModifiers = new() { typeof(Bloodlust) };
+    public override HashSet<Type> BannedModifiers() => SheriffBannedModifiers;
 
-    public static List<(Func<CustomRole, bool> predicate, GameOptionBuilder builder, bool allKillable)> RoleTypeBuilders = new()
+    private DynamicRoleOptionBuilder dynamicRoleOptionBuilder = new(new List<DynamicOptionPredicate>
     {
-        (r => r.SpecialType is SpecialType.NeutralKilling, new GameOptionBuilder()
-            .KeyName("Neutral Killing Settings", TranslationUtil.Colorize(SheriffTranslations.NeutralKillingSetting, ModConstants.Palette.NeutralColor, ModConstants.Palette.KillingColor))
-            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(1).Color(Color.green).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
-            .ShowSubOptionPredicate(i => (int)i == 2), false),
-        (r => r.SpecialType is SpecialType.Neutral, new GameOptionBuilder()
-            .KeyName("Neutral Passive Settings", TranslationUtil.Colorize(SheriffTranslations.NeutralPassiveSetting, ModConstants.Palette.NeutralColor, ModConstants.Palette.PassiveColor))
-            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(1).Color(Color.green).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
-            .ShowSubOptionPredicate(i => (int)i == 2), false),
-        (r => r.Faction is Factions.Impostors.Madmates, new GameOptionBuilder()
-            .KeyName("Madmates Settings", TranslationUtil.Colorize(SheriffTranslations.MadmateSetting, ModConstants.Palette.MadmateColor))
-            .Value(v => v.Text(GeneralOptionTranslations.OffText).Value(0).Color(Color.red).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.AllText).Value(1).Color(Color.green).Build())
-            .Value(v => v.Text(GeneralOptionTranslations.CustomText).Value(2).Color(new Color(0.73f, 0.58f, 1f)).Build())
-            .ShowSubOptionPredicate(i => (int)i == 2), false)
-    };
-
+        new(r => r.SpecialType is SpecialType.NeutralKilling, "Neutral Killing Settings", TranslationUtil.Colorize(SheriffTranslations.NeutralKillingSetting, ModConstants.Palette.NeutralColor, ModConstants.Palette.KillingColor)),
+        new(r => r.SpecialType is SpecialType.Neutral, "Neutral Passive Settings", TranslationUtil.Colorize(SheriffTranslations.NeutralPassiveSetting, ModConstants.Palette.NeutralColor, ModConstants.Palette.PassiveColor)),
+        new(r => r.Faction is Factions.Impostors.Madmates, "Madmates Settings", TranslationUtil.Colorize(SheriffTranslations.MadmateSetting, ModConstants.Palette.MadmateColor))
+    });
 
     private int totalShots;
     private bool oneShotPerRound;
@@ -73,11 +54,6 @@ public class Sheriff : Crewmate
 
     [UIComponent(UI.Cooldown)]
     private Cooldown shootCooldown;
-
-    public Sheriff()
-    {
-        CustomRoleManager.AddOnFinishCall(PopulateSheriffOptions);
-    }
 
     protected override void Setup(PlayerControl player)
     {
@@ -118,14 +94,10 @@ public class Sheriff : Crewmate
 
 
         CustomRole role = target.GetCustomRole();
-        int setting = RoleTypeBuilders.FirstOrOptional(rtb => rtb.predicate(role)).Map(rtb => rtb.allKillable ? 1 : 0).OrElse(0);
-        if (setting == 0)
-        {
-            setting = RoleKillerDictionary.GetValueOrDefault(role.GetType(), 0);
-            if (setting == 0) setting = role.Faction.GetType() == typeof(ImpostorFaction) ? 1 : 2;
-        }
+        bool isAbleToKill = dynamicRoleOptionBuilder.IsAllowed(role);
+        VentLogger.Trace($"Sheriff {MyPlayer.name} attacking {target.name} (CanKill={isAbleToKill})", "SheriffTryKill");
 
-        if (setting == 2) return Suicide(target);
+        if (!isAbleToKill) return Suicide(target);
         return MyPlayer.InteractWith(target, LotusInteraction.FatalInteraction.Create(this)) is InteractionResult.Proceed;
     }
 
@@ -145,7 +117,7 @@ public class Sheriff : Crewmate
     // OPTIONS
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
-        base.RegisterOptions(optionStream)
+        dynamicRoleOptionBuilder.Decorate(base.RegisterOptions(optionStream)
             .Color(RoleColor)
             .SubOption(sub => sub
                 .Name("Kill On Misfire")
@@ -172,7 +144,7 @@ public class Sheriff : Crewmate
                 .Bind(v => isSheriffDesync = (bool)v)
                 .Value(v => v.Text("Kill Button (legacy)").Value(true).Color(Color.green).Build())
                 .Value(v => v.Text("Pet Button").Value(false).Color(Color.cyan).Build())
-                .Build());
+                .Build()));
 
     // Sheriff is not longer a desync role for simplicity sake && so that they can do tasks
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
@@ -183,32 +155,6 @@ public class Sheriff : Crewmate
             .OptionOverride(Override.KillCooldown, () => shootCooldown.Duration)
             .RoleAbilityFlags(RoleAbilityFlag.CannotVent | RoleAbilityFlag.CannotSabotage | RoleAbilityFlag.IsAbleToKill)
             .RoleColor(new Color(0.97f, 0.8f, 0.27f));
-
-    private void PopulateSheriffOptions()
-    {
-        CustomRoleManager.AllRoles.OrderBy(r => r.EnglishRoleName).ForEach(r =>
-        {
-            RoleTypeBuilders.FirstOrOptional(b => b.predicate(r)).Map(i => i.builder)
-                .IfPresent(builder =>
-                {
-                    builder.SubOption(sub => sub.KeyName(r.EnglishRoleName, r.RoleColor.Colorize(r.RoleName))
-                        .AddOnOffValues(r.SpecialType is not SpecialType.Neutral)
-                        .BindBool(b =>
-                        {
-                            if (b) RoleKillerDictionary[r.GetType()] = 1;
-                            else RoleKillerDictionary[r.GetType()] = 2;
-                        })
-                        .Build());
-                });
-        });
-        RoleTypeBuilders.ForEach(rtb =>
-        {
-            rtb.builder.BindInt(i => rtb.allKillable = i == 1);
-            Option option = rtb.builder.Build();
-            RoleOptions.AddChild(option);
-            CustomRoleManager.RoleOptionManager.Register(option, OptionLoadMode.LoadOrCreate);
-        });
-    }
 
     [Localized(nameof(Sheriff))]
     public static class SheriffTranslations

@@ -1,11 +1,11 @@
 using System;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Processes;
 using Lotus.API.Reactive;
 using Lotus.Victory;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
-using Lotus.RPC;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
@@ -52,7 +52,7 @@ internal class MeetingPrep
             Async.Schedule(() =>
             {
                 QuickStartMeeting(reporter);
-                /*Async.Schedule(() => Game.GetAllPlayers().ForEach(p => p.CRpcRevertShapeshift(false)), 0.1f);*/
+                /*Async.Schedule(() => Players.GetPlayers().ForEach(p => p.CRpcRevertShapeshift(false)), 0.1f);*/
             }, 0.1f);
 
         Game.RenderAllForAll(GameState.InMeeting, true);
@@ -76,5 +76,5 @@ internal class MeetingPrep
         reporter.RpcStartMeeting(Reported);
     }
 
-    private static void FixChatNames() => Game.GetAllPlayers().ForEach(p => p.RpcSetName(Color.white.Colorize(p.name)));
+    private static void FixChatNames() => Players.GetPlayers().ForEach(p => p.RpcSetName(Color.white.Colorize(p.name)));
 }

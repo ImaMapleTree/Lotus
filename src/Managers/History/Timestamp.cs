@@ -1,7 +1,6 @@
 using System;
 using System.Globalization;
 using Lotus.API.Odyssey;
-using Lotus.API;
 
 namespace Lotus.Managers.History;
 

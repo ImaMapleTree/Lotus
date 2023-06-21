@@ -78,7 +78,7 @@ public class StandardGamemode: Gamemode
         }
 
 
-        Game.GetAllPlayers().Where(p => p.PlayerId != player.PlayerId)
+        Players.GetPlayers().Where(p => p.PlayerId != player.PlayerId)
             .SelectMany(p => p.NameModel().ComponentHolders())
             .ForEach(holders =>
                 {
@@ -98,7 +98,7 @@ public class StandardGamemode: Gamemode
         PlayerControl winner = winners[0];
         if (winner.GetCustomRole().Faction is not Neutral) return;
 
-        winners.AddRange(Game.GetAllPlayers()
+        winners.AddRange(Players.GetPlayers()
             .Where(p => p.PlayerId != winner.PlayerId)
             .Where(p => winner.Relationship(p) is Relation.SharedWinners or Relation.FullAllies));
     }

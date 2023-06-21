@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
@@ -16,6 +17,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -27,7 +29,6 @@ namespace Lotus.Roles.RoleGroups.Impostors;
 
 public class Swooper: Impostor
 {
-    private bool canVentNormally;
     private bool canBeSeenByAllied;
     private bool remainInvisibleOnKill;
     private Optional<Vent> initialVent = null!;
@@ -61,7 +62,7 @@ public class Swooper: Impostor
     {
         if (swooperCooldown.NotReady() || swoopingDuration.NotReady())
         {
-            if (canVentNormally) return;
+            VentLogger.Trace("Swooper Entering Vent Early... Ignoring", "SwooperInvisible");
             if (swoopingDuration.IsReady()) handle.Cancel();
             return;
         }
@@ -90,7 +91,7 @@ public class Swooper: Impostor
         swooperCooldown.Start();
     }
 
-    private List<PlayerControl> GetUnaffected() => Game.GetAllPlayers().Where(p => !p.IsAlive() || canBeSeenByAllied && p.Relationship(MyPlayer) is Relation.FullAllies).AddItem(MyPlayer).ToList();
+    private List<PlayerControl> GetUnaffected() => Players.GetPlayers().Where(p => !p.IsAlive() || canBeSeenByAllied && p.Relationship(MyPlayer) is Relation.FullAllies).AddItem(MyPlayer).ToList();
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) => base.RegisterOptions(optionStream)
         .SubOption(sub => sub.Name("Invisibility Cooldown")

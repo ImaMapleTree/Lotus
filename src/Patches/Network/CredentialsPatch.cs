@@ -1,6 +1,5 @@
 using HarmonyLib;
 using Lotus.Addons;
-using Lotus.GUI.Patches;
 using Lotus.Managers.Date;
 using TMPro;
 using UnityEngine;

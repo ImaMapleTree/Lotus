@@ -33,7 +33,7 @@ public class CustomTitle
         prefix = prefix == null ? "" : prefix + (Prefix?.Spaced ?? false ? " " : "");
         suffix = suffix == null ? "" : (Suffix?.Spaced ?? false ? " " : "") + suffix;
 
-        playerName = Name?.GenerateName(playerName) ?? playerName;
+        playerName = Name?.GenerateName(playerName, nameOnly) ?? playerName;
 
         if (nameOnly) return $"{prefix}{playerName}{suffix}";
 
@@ -77,19 +77,19 @@ public class CustomTitle
             return ApplySize(InternalColor == UnityEngine.Color.white ? Text : InternalColor.Value.Colorize(modifiedText), tuples);
         }
 
-        internal string GenerateName(string name)
+        internal string GenerateName(string name, bool ignoreSize = false)
         {
             if (GradientDegree == -1) GradientDegree = Math.Max(1, name.Length / 9);
             if (InternalGradient == null && Gradient != null) InternalGradient = CreateGradient(Gradient);
             if (InternalColor == null && Color != null) InternalColor = ParseToColor(Color);
             if (InternalGradient != null) name = InternalGradient.Apply(name, GradientDegree);
             else if (InternalColor != null && InternalColor != UnityEngine.Color.white) name = InternalColor.Value.Colorize(name);
-            return ApplySize(name, new List<(string rich, string richValue, string text)>());
+            return ApplySize(name, new List<(string rich, string richValue, string text)>(), ignoreSize);
         }
 
-        private string ApplySize(string name, List<(string rich, string richValue, string text)> tuples)
+        private string ApplySize(string name, List<(string rich, string richValue, string text)> tuples, bool ignoreSize = false)
         {
-            string text = Size != null ? $"<size={Size}>{name}</size>" : name;
+            string text = Size != null && !ignoreSize ? $"<size={Size}>{name}</size>" : name;
             tuples.ForEach(t =>
             {
                 string html = $"<{t.rich}{t.richValue}>{t.text}</{t.rich}>";

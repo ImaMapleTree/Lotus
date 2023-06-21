@@ -6,8 +6,8 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Gamemodes;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using VentLib.Logging;
 using VentLib.Utilities;
@@ -20,8 +20,10 @@ namespace Lotus.Patches.Actions;
 
 public static class MurderPatches
 {
-    public static Dictionary<byte, FixedUpdateLock> MurderLocks = new();
-    public static Func<FixedUpdateLock> TimeoutSupplier = () => new FixedUpdateLock(0.25f);
+    private static readonly Dictionary<byte, FixedUpdateLock> MurderLocks = new();
+    private static readonly Func<FixedUpdateLock> TimeoutSupplier = () => new FixedUpdateLock(0.25f);
+
+    public static bool Lock(byte player) => MurderLocks.GetOrCompute(player, TimeoutSupplier).AcquireLock(NetUtils.DeriveDelay(0.25f));
 
     [QuickPrefix(typeof(PlayerControl), nameof(PlayerControl.CheckMurder))]
     public static bool Prefix(PlayerControl __instance, PlayerControl target)
@@ -63,7 +65,7 @@ public static class MurderPatches
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (!target.Data.IsDead) return;
-        MurderLocks.GetOrCompute(__instance.PlayerId, TimeoutSupplier).AcquireLock();
+        Lock(__instance.PlayerId);
 
         VentLogger.Trace($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}{(target.protectedByGuardian ? "(Protected)" : "")}", "MurderPlayer");
 

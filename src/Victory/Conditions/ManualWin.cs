@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Lotus.API.Odyssey;
-using Lotus.API;
 
 namespace Lotus.Victory.Conditions;
 

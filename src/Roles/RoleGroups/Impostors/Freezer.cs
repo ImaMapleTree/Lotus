@@ -4,6 +4,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Options.Game;
 
 namespace Lotus.Roles.RoleGroups.Impostors;

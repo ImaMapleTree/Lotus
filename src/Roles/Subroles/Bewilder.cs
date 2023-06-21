@@ -5,6 +5,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Extensions;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Statuses;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -27,10 +28,8 @@ public class Bewilder: Subrole
             ? new MultiplicativeOverride(Override.ImpostorLightMod, visionMultiplier)
             : new MultiplicativeOverride(Override.CrewLightMod, visionMultiplier);
 
-
         Game.MatchData.Roles.AddOverride(killer.PlayerId, optionOverride);
         killer.GetCustomRole().SyncOptions();
-        string name = killer.name;
         killer.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent(Identifier(), RoleColor, GameState.Roaming, killer));
 
         CustomStatus status = CustomStatus.Of(Translations.BewilderedStatus).Description(Translations.BewilderedDescription).Color(RoleColor).StatusFlags(StatusFlag.Hidden).Build();

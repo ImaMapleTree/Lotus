@@ -99,7 +99,7 @@ public class CTFGamemode: Gamemode
     public static void GrabFlag(PlayerControl grabber)
     {
         int myTeam = grabber.cosmetics.bodyMatProperties.ColorId;
-        Game.GetAllPlayers().Where(p => p.cosmetics.bodyMatProperties.ColorId != myTeam).Do(p =>
+        Players.GetPlayers().Where(p => p.cosmetics.bodyMatProperties.ColorId != myTeam).Do(p =>
         {
             RoleUtils.PlayReactorsForPlayer(p);
             Async.Schedule(() => RoleUtils.EndReactorsForPlayer(p), 0.3f);
@@ -117,7 +117,7 @@ public class CTFGamemode: Gamemode
 
     private void SetupNames()
     {
-        Game.GetAllPlayers().Do(p =>
+        Players.GetPlayers().Do(p =>
         {
             byte playerId = p.PlayerId;
             int team = p.cosmetics.bodyMatProperties.ColorId;
@@ -128,11 +128,11 @@ public class CTFGamemode: Gamemode
             name.AddRule(GameState.Roaming, UI.Misc);
             name.SetComponentValue(UI.Subrole, new DynamicString(() => RoleUtils.Counter(TeamPoints[team])));
             name.SetComponentValue(UI.Name, new DynamicString(() => playerId == Carriers[team] ? Color.green.Colorize(name.RawName) : Color.white.Colorize(name.RawName)));
-            Game.GetAllPlayers().Where(p2 => p2.cosmetics.bodyMatProperties.ColorId == team).Do(p2 =>
+            Players.GetPlayers().Where(p2 => p2.cosmetics.bodyMatProperties.ColorId == team).Do(p2 =>
             {
                 name.AddRule(GameState.Roaming, UI.Name, new DynamicString(() => playerId == Carriers[team] ? Color.green.Colorize("{0}") : ""), p2.PlayerId);
             });
-            Game.GetAllPlayers().Where(p2 => p2.cosmetics.bodyMatProperties.ColorId != team).Do(p2 =>
+            Players.GetPlayers().Where(p2 => p2.cosmetics.bodyMatProperties.ColorId != team).Do(p2 =>
             {
                 name.AddRule(GameState.Roaming, UI.Name, new DynamicString(() => playerId == Carriers[team] ? Color.red.Colorize("{0}") : ""), p2.PlayerId);
             });

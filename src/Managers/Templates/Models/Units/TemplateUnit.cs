@@ -10,32 +10,34 @@ using Lotus.Chat;
 using Lotus.Chat.Commands;
 using Lotus.Extensions;
 using Lotus.Factions.Interfaces;
+using Lotus.Logging;
 using Lotus.Managers.Templates.Models.Backing;
+using Lotus.Managers.Templates.Models.Units.Actions;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Subroles;
+using Lotus.Utilities;
 using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
+using Random = UnityEngine.Random;
 
 namespace Lotus.Managers.Templates.Models.Units;
 
 public class TemplateUnit
 {
     public static byte Triggerer = byte.MaxValue;
+    public static Dictionary<string, string> StoredData = new();
     protected static string? MetaVariable;
 
-    private static readonly Regex Regex = new(@"(?:\$)\{((?:[A-Za-z0-9_ ]|\.\S)*)\}");
+    private static readonly Regex Regex = new(@"\${(?>[^{}]+|(?<Open>{)|(?<Close-Open>}))*}");
     public string? Text { get; set; }
     public List<TCondition> Conditions { get; set; } = new();
     public List<TCondition> ConditionsAny { get; set; } = new();
 
-    protected bool Evaluate(object? data)
-    {
-        return Conditions.All(c => c.Evaluate(data)) || ConditionsAny.Any(c => c.Evaluate(data));
-    }
+    protected bool Evaluate(object? data) => Conditions.All(c => c.Evaluate(data)) && (ConditionsAny.IsEmpty() || ConditionsAny.Any(c => c.Evaluate(data)));
 
     public string Format(object? obj = null) => Text == null ? "" : Format(Text, obj);
 
@@ -45,7 +47,7 @@ public class TemplateUnit
     {
         return Regex.Replace(text, match =>
         {
-            string value = match.Groups[1].Value;
+            string value = match.Value[2..^1];
             var split = value.Split(".");
             if (split.Length > 1)
                 return VariableValues.TryGetValue(split[0], out var dynSupplier)
@@ -54,7 +56,7 @@ public class TemplateUnit
             return TemplateValues.TryGetValue(value, out var funcSupplier)
                 ? funcSupplier(obj!)
                 : PluginDataManager.TemplateManager.FormatVariable(value, obj) ?? match.Value;
-        }).Replace("\n", "@n");
+        });
     }
 
     public static readonly Dictionary<string, Func<object, String>> TemplateValues = new()
@@ -100,7 +102,7 @@ public class TemplateUnit
         { "Role", player =>((PlayerControl)player).GetCustomRole().ColoredRoleName() },
         { "Blurb", player => ((PlayerControl) player).GetCustomRole().Blurb },
         { "Description", player => ((PlayerControl) player).GetCustomRole().Description },
-        { "Status", player => Optional<FrozenPlayer>.Of(Game.MatchData.FrozenPlayer((PlayerControl)player)).Map(StatusCommand.GetPlayerStatus).OrElse("")},
+        { "Status", player => Optional<FrozenPlayer>.Of(Game.MatchData.GetFrozenPlayer((PlayerControl)player)).Map(StatusCommand.GetPlayerStatus).OrElse("")},
         { "Death", player => Game.MatchData.GameHistory.GetCauseOfDeath(((PlayerControl)player).PlayerId).Map(c => c.SimpleName()).OrElse("Unknown") },
         { "Killer", player => Game.MatchData.GameHistory.GetCauseOfDeath(((PlayerControl)player).PlayerId).FlatMap(c => c.Instigator()).Map(p => p.Name).OrElse("Unknown") },
         { "Options", player => OptionUtils.OptionText(((PlayerControl) player).GetCustomRole().RoleOptions) },
@@ -125,6 +127,7 @@ public class TemplateUnit
         { "Role_Faction", role => ((CustomRole) role).Faction.Name() },
         { "Role_Basis", role => ((CustomRole) role).RealRole.ToString() },
 
+        {"ActionMeta", _ => TAction.MetaVariable},
         {"TriggerMeta", _ => MetaVariable ?? "" },
         {"Triggerer", _ => Players.FindPlayerById(Triggerer)?.name ?? "Unknown"}
     };
@@ -144,16 +147,24 @@ public class TemplateUnit
                 return option is GameOption go ? go.Name() : option?.Name() ?? $"Unknown Option \"{qualifier}\"";
             }
         },
-        { "Template", (obj, template) => PluginDataManager.TemplateManager.TryFormat(obj, template, out string text) ? text : "" },
+        { "Template", (obj, template) => PluginDataManager.TemplateManager.TryFormat(obj, FormatStatic(template, obj), out string text) ? text : "" },
         { "TemplateTitle", (obj, template) =>
             {
-                return PluginDataManager.TemplateManager.GetTemplates(template)?.FirstOrOptional()
+                return PluginDataManager.TemplateManager.GetTemplates(FormatStatic(template, obj))?.FirstOrOptional()
                     .FlatMap(t => new Optional<string>(t.Title))
                     .Map(t => FormatStatic(t, obj))
                     .OrElse(null!) ?? "";
             }
+        },
+        { "Random", (obj, input) => RangeUtils.TryParseRange(FormatStatic(input, obj), out (int min, int max) range) ? Random.Range(range.min, range.max + 1).ToString() : "" },
+        { "Stored", (obj, input) =>
+            {
+                input = FormatStatic(input, obj);
+                return TActionStore.StoredVariables.GetValueOrDefault(input, $"No stored entry for \"{input}\"");
+            }
         }
     };
+
 
     private static string ModifierText(object obj)
     {

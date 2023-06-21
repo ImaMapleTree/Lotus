@@ -1,4 +1,5 @@
 using Lotus.Extensions;
+using Lotus.Patches.Actions;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
@@ -14,6 +15,7 @@ public class ProtectedRpc
         if (target == null) return;
         GameData.PlayerInfo data = target.Data;
         if (data == null) return;
+        if (!MurderPatches.Lock(killer.PlayerId)) return;
 
         if (MeetingHud.Instance != null)
         {

@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.Factions;
@@ -17,9 +16,9 @@ using Lotus.Roles.Overrides;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.Logging;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
-using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -66,7 +65,7 @@ public class PlagueBearer: NeutralKillingBase
 
         infectedPlayers.Add(target.PlayerId);
 
-        IndicatorComponent indicator = new SimpleIndicatorComponent("☀", RoleColor, GameStates.IgnStates, MyPlayer);
+        IndicatorComponent indicator = new SimpleIndicatorComponent("☀", RoleColor, Game.IgnStates, MyPlayer);
         indicatorRemotes.Add(target.NameModel().GetComponentHolder<IndicatorHolder>().Add(indicator));
 
         CheckPestilenceTransform(ActionHandle.NoInit());

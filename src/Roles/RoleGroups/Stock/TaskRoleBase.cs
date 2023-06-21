@@ -9,6 +9,7 @@ using Lotus.Managers.History.Events;
 using Lotus.Patches.Systems;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.RoleGroups.Vanilla;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;

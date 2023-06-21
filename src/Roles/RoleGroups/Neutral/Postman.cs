@@ -10,13 +10,11 @@ using Lotus.Options;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Utilities;
 using Lotus.Victory.Conditions;
-using Lotus.API;
+using Lotus.API.Player;
 using Lotus.Chat;
 using Lotus.Extensions;
-using Lotus.Roles.Interfaces;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -43,6 +41,7 @@ public class Postman: Crewmate
 
     private PlayerControl trackedPlayer;
     private bool completedDelivery = true;
+
     [NewOnSetup] private List<Remote<IndicatorComponent>> components;
 
 
@@ -108,7 +107,8 @@ public class Postman: Crewmate
     {
         components.ForEach(c => c.Delete());
         components.Clear();
-        List<PlayerControl> candidates = Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).ToList();
+        if (!MyPlayer.IsAlive()) return;
+        List<PlayerControl> candidates = Players.GetPlayers(PlayerFilter.Alive).Where(p => p.PlayerId != MyPlayer.PlayerId).ToList();
         if (candidates.Count == 0) return;
         completedDelivery = false; // Important
 

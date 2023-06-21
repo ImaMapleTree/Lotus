@@ -1,6 +1,4 @@
 using System.Collections.Generic;
-using HarmonyLib;
-using VentLib.Logging;
 using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Chat.Patches;

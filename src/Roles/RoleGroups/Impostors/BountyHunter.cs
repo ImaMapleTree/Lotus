@@ -5,8 +5,8 @@ using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
-using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
@@ -53,7 +53,7 @@ public class BountyHunter: Impostor
 
     private void BountyHunterAcquireTarget()
     {
-        List<PlayerControl> eligiblePlayers = Game.GetAlivePlayers()
+        List<PlayerControl> eligiblePlayers = Players.GetPlayers(PlayerFilter.Alive)
             .Where(p => p.Relationship(MyPlayer) is not Relation.FullAllies)
             .ToList();
         if (eligiblePlayers.Count == 0)
@@ -67,7 +67,7 @@ public class BountyHunter: Impostor
         while (eligiblePlayers.Count > 1 && bountyTarget?.PlayerId == newTarget.PlayerId)
             newTarget = eligiblePlayers.PopRandom();
 
-        bountyTarget = Game.MatchData.FrozenPlayer(newTarget);
+        bountyTarget = Game.MatchData.GetFrozenPlayer(newTarget);
         acquireNewTarget.Start();
     }
 

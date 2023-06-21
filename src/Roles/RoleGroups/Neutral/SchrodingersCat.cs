@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using AmongUs.GameOptions;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
 using Lotus.Factions;
@@ -14,6 +13,7 @@ using Lotus.Managers;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -49,7 +49,7 @@ public class SchrodingersCat: CustomRole
         OverridenRoleName = Translations.CatFactionChangeName.Formatted(role.RoleName);
 
         PlayerControl[] viewers = CustomRoleManager.Static.Copycat.KillerKnowsCopycat ? new[] { actor, MyPlayer } : new[] { MyPlayer };
-        MyPlayer.NameModel().GetComponentHolder<RoleHolder>().Add(new RoleComponent(new LiveString(OverridenRoleName, RoleColor), GameStates.IgnStates, ViewMode.Replace, viewers: viewers));
+        MyPlayer.NameModel().GetComponentHolder<RoleHolder>().Add(new RoleComponent(new LiveString(OverridenRoleName, RoleColor), Game.IgnStates, ViewMode.Replace, viewers: viewers));
         actor.NameModel().GCH<RoleHolder>().Last().AddViewer(MyPlayer);
     }
 

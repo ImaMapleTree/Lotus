@@ -10,7 +10,6 @@ using UnityEngine;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities;
-using GameStates = Lotus.API.GameStates;
 
 namespace Lotus.Patches;
 
@@ -130,7 +129,7 @@ class ResetStartStatePatch
 {
     public static void Prefix()
     {
-        if (GameStates.IsCountDown)
+        if (GameStartManager.InstanceExists && GameStartManager.Instance.startState == GameStartManager.StartingStates.Countdown)
         {
             PlayerControl.LocalPlayer.RpcSyncSettings(GameOptionsManager.Instance.gameOptionsFactory.ToBytes(GameOptionsManager.Instance.CurrentGameOptions));
         }

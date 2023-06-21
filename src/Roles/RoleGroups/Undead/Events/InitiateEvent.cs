@@ -1,7 +1,6 @@
 using Lotus.API.Odyssey;
 using Lotus.Roles.Events;
 using Lotus.Roles.RoleGroups.Undead.Roles;
-using Lotus.API;
 using VentLib.Utilities;
 
 namespace Lotus.Roles.RoleGroups.Undead.Events;

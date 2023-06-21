@@ -1,9 +1,8 @@
 using AmongUs.GameOptions;
 using Lotus.Factions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
-using UnityEngine;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Options.Game;
 
 namespace Lotus.Roles.RoleGroups.Madmates.Roles;

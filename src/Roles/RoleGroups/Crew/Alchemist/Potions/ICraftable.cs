@@ -1,8 +1,8 @@
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 using UnityEngine;
 using VentLib.Utilities.Collections;
 
-namespace Lotus.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Potions;
 
 public interface ICraftable
 {

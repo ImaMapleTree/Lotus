@@ -1,15 +1,14 @@
 using System.Collections.Generic;
-using Lotus.GUI.Name;
-using Lotus.GUI.Name.Holders;
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
+using Lotus.GUI.Name;
+using Lotus.GUI.Name.Holders;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
 
-namespace Lotus.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Potions;
 
 public class PotionRevealing: Potion
 {

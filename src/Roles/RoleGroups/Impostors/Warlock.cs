@@ -3,14 +3,12 @@ using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
-using Lotus.API;
 using Lotus.Extensions;
-using Lotus.Factions;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
 

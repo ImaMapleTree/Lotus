@@ -1,6 +1,3 @@
-using HarmonyLib;
-using Lotus.Utilities;
-
 namespace Lotus.Patches.Systems;
 
 // This is not a very fun patch

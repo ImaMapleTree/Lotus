@@ -1,13 +1,14 @@
 using System;
 using System.Linq;
 using HarmonyLib;
-using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Extensions;
 using Lotus.Options;
 using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using Lotus.RPC;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -30,7 +31,7 @@ public class Camouflager: Shapeshifter
     {
         if (camouflaged) return;
         camouflaged = true;
-        Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcShapeshift(target, true));
+        Players.GetPlayers(PlayerFilter.Alive).Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcShapeshift(target, true));
     }
 
     [RoleAction(RoleActionType.Unshapeshift)]
@@ -38,7 +39,7 @@ public class Camouflager: Shapeshifter
     {
         if (!camouflaged) return;
         camouflaged = false;
-        Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
+        Players.GetPlayers(PlayerFilter.Alive).Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
     }
 
     [RoleAction(RoleActionType.MeetingCalled)]
@@ -46,7 +47,7 @@ public class Camouflager: Shapeshifter
     {
         if (!camouflaged) return;
         camouflaged = false;
-        Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
+        Players.GetPlayers(PlayerFilter.Alive).Where(p => p.PlayerId != MyPlayer.PlayerId).Do(p => p.CRpcRevertShapeshift(true));
         handle.Cancel();
         Async.Schedule(() => MeetingPrep.PrepMeeting(reporter, reported.OrElse(null!)), 0.5f);
     }

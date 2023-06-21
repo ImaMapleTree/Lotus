@@ -1,6 +1,6 @@
 using Lotus.Factions;
 using Lotus.Roles.Interfaces;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 
 namespace Lotus.Roles.RoleGroups.NeutralKilling;

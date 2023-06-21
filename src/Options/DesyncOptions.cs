@@ -5,7 +5,7 @@ using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
 using Lotus.API;
-using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
 using VentLib.Logging;
@@ -16,7 +16,7 @@ namespace Lotus.Options;
 
 public static class DesyncOptions
 {
-    public static void SyncToAll(IGameOptions options) => Game.GetAllPlayers().Do(p => SyncToPlayer(options, p));
+    public static void SyncToAll(IGameOptions options) => Players.GetPlayers().Do(p => SyncToPlayer(options, p));
 
     public static void SyncToPlayer(IGameOptions options, PlayerControl player)
     {

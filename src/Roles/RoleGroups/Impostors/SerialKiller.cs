@@ -10,6 +10,7 @@ using Lotus.Logging;
 using Lotus.Options;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Interfaces;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;

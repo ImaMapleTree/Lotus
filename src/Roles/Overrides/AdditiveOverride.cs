@@ -1,6 +1,5 @@
 using System;
 using AmongUs.GameOptions;
-using Lotus.Logging;
 
 namespace Lotus.Roles.Overrides;
 

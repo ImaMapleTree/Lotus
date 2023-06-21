@@ -4,12 +4,13 @@ using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Stats;
 using Lotus.Factions;
+using Lotus.Logging;
 using Lotus.Managers.History.Events;
 using Lotus.Options;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Interfaces;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -38,6 +39,7 @@ public partial class Impostor : CustomRole, IModdable, ISabotagerRole
         set => killDistance = value;
         get
         {
+            DevLogger.Log($"Au KIll Distance: {AUSettings.KillDistance()}");
             int distance = killDistance ?? AUSettings.KillDistance();
             return distance < 0 ? AUSettings.KillDistance() : distance;
         }

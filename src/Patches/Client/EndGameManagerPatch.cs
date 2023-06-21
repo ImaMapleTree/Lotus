@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using HarmonyLib;
+﻿using HarmonyLib;
 using Lotus.GUI.Menus.OptionsMenu;
 using Lotus.Options;
 using TMPro;

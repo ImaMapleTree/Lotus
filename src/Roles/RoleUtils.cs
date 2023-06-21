@@ -2,17 +2,17 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using AmongUs.GameOptions;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Vanilla.Sabotages;
 using Lotus.GUI;
 using Lotus.Patches.Systems;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.GUI.Name;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -58,7 +58,7 @@ public static class RoleUtils
     {
         Dictionary<byte, float> distances = sorted ? new Dictionary<byte, float>() : null!;
 
-        IEnumerable<PlayerControl> distancePlayers = Game.GetAlivePlayers().Where(p =>
+        IEnumerable<PlayerControl> distancePlayers = Players.GetPlayers(PlayerFilter.Alive).Where(p =>
         {
             float distanceApart = Vector2.Distance(position, p.GetTruePosition());
             if (sorted) distances[p.PlayerId] = distanceApart;
@@ -71,7 +71,7 @@ public static class RoleUtils
     public static IEnumerable<PlayerControl> GetPlayersOutsideDistance(PlayerControl source, float distance)
     {
         Vector2 sourcePosition = source.GetTruePosition();
-        return Game.GetAlivePlayers().Where(p => Vector2.Distance(sourcePosition, p.GetTruePosition()) > distance);
+        return Players.GetPlayers(PlayerFilter.Alive).Where(p => Vector2.Distance(sourcePosition, p.GetTruePosition()) > distance);
     }
 
     public static void PlayReactorsForPlayer(PlayerControl player)
@@ -132,15 +132,15 @@ public static class RoleUtils
             return InteractionResult.Halt;
         }
         ActionHandle handle = ActionHandle.NoInit();
-        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null).Trigger(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
+        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null).TriggerOrdered(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
         if (player.PlayerId != target.PlayerId) target.Trigger(RoleActionType.Interaction, ref handle, player, interaction);
-        if (!handle.IsCanceled || interaction.IsPromised) interaction.Intent.Action(player, target);
+        if (handle.Cancellation is ActionHandle.CancelType.None or ActionHandle.CancelType.Soft || interaction.IsPromised) interaction.Intent.Action(player, target);
         else if (handle.Cancellation is ActionHandle.CancelType.Normal) interaction.Intent.Halted(player, target);
         return handle.IsCanceled && !interaction.IsPromised ? InteractionResult.Halt : InteractionResult.Proceed;
     }
 
     public static void ShowGuardianShield(PlayerControl target) {
-        PlayerControl? randomPlayer = Game.GetAllPlayers().FirstOrDefault(p => p.PlayerId != target.PlayerId);
+        PlayerControl? randomPlayer = Players.GetPlayers().FirstOrDefault(p => p.PlayerId != target.PlayerId);
         if (randomPlayer == null) return;
 
         RpcV3.Immediate(target.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).Send(target.GetClientId());

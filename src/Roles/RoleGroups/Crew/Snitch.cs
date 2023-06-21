@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions.Crew;
 using Lotus.Factions.Impostors;
 using Lotus.GUI.Name;
@@ -11,6 +11,7 @@ using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -45,8 +46,8 @@ public class Snitch : Crewmate
         int remainingTasks = TotalTasks - TasksComplete;
         if (remainingTasks == SnitchWarningTasks)
         {
-            PlayerControl[] trackablePlayers = Game.GetAllPlayers().Where(IsTrackable).ToArray();
-            MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), GameStates.IgnStates, viewers: trackablePlayers.AddItem(MyPlayer).ToArray()));
+            PlayerControl[] trackablePlayers = Players.GetPlayers().Where(IsTrackable).ToArray();
+            MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), Game.IgnStates, viewers: trackablePlayers.AddItem(MyPlayer).ToArray()));
             if (EvilHaveArrow)
                 trackablePlayers.ForEach(p =>
                 {
@@ -57,7 +58,7 @@ public class Snitch : Crewmate
         }
 
         if (remainingTasks != 0) return;
-        Game.GetAllPlayers().Where(IsTrackable).ForEach(p =>
+        Players.GetPlayers().Where(IsTrackable).ForEach(p =>
         {
             p.NameModel().GetComponentHolder<RoleHolder>().Components().ForEach(rc => rc.AddViewer(MyPlayer));
 

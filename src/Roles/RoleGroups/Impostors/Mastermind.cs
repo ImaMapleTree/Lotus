@@ -15,6 +15,7 @@ using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
@@ -47,7 +48,7 @@ public class Mastermind : Impostor
         if (!CanManipulate) return base.TryKill(target);
 
         PlayerControl[] viewers = impostorsCanSeeManipulated
-            ? Game.GetAllPlayers().Where(p => !p.IsAlive() || Relationship(p) is Relation.FullAllies).AddItem(MyPlayer).ToArray()
+            ? Players.GetPlayers().Where(p => !p.IsAlive() || Relationship(p) is Relation.FullAllies).AddItem(MyPlayer).ToArray()
             : new [] { MyPlayer };
         TextComponent alliedText = new(new LiveString(ManipulatedText, RoleColor), GameState.Roaming, ViewMode.Additive, viewers);
 

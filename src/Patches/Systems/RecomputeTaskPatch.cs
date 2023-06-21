@@ -4,7 +4,6 @@ using HarmonyLib;
 using Lotus.Extensions;
 using Lotus.Roles.Interfaces;
 using Lotus.Utilities;
-using Lotus.Roles.Legacy;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Patches.Systems;

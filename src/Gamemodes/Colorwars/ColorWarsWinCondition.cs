@@ -1,8 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API.Odyssey;
 using Lotus.Victory.Conditions;
-using Lotus.API;
+using Lotus.API.Player;
 
 namespace Lotus.Gamemodes.Colorwars;
 
@@ -12,10 +11,10 @@ public class ColorWarsWinCondition: IWinCondition
     {
         winners = null;
         // get the colors of all alive players, then get distinct color ids, then if there's 1 id remaining after all that it means a team has won
-        List<int> currentColors = Game.GetAlivePlayers().Select(p => p.cosmetics.bodyMatProperties.ColorId).Distinct().ToList();
+        List<int> currentColors = Players.GetPlayers(PlayerFilter.Alive).Select(p => p.cosmetics.bodyMatProperties.ColorId).Distinct().ToList();
         if (currentColors.Count != 1) return false;
         int winningColor = currentColors[0];
-        winners = Game.GetAllPlayers().Where(p => p.cosmetics.bodyMatProperties.ColorId == winningColor).ToList();
+        winners = Players.GetPlayers().Where(p => p.cosmetics.bodyMatProperties.ColorId == winningColor).ToList();
 
         return true;
     }

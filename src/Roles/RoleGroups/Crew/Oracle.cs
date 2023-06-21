@@ -1,16 +1,16 @@
 using System.Linq;
-using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Chat;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.GUI.Name.Impl;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
@@ -79,11 +79,11 @@ public class Oracle: Crewmate
     {
         if (!selectedPlayer.Exists()) return;
         PlayerControl target = Utils.GetPlayerById(selectedPlayer.Get())!;
-        target.NameModel().GetComponentHolder<RoleHolder>().LastOrDefault(c => c.ViewMode() is ViewMode.Replace)?.SetViewerSupplier(() => Game.GetAllPlayers().ToList());
+        target.NameModel().GetComponentHolder<RoleHolder>().LastOrDefault(c => c.ViewMode() is ViewMode.Replace)?.SetViewerSupplier(() => Players.GetPlayers().ToList());
 
         string roleName = _oracleGradient.Apply(target.GetCustomRole().RoleName);
 
-        target.NameModel().GetComponentHolder<RoleHolder>().Add(new RoleComponent(new LiveString(() => roleName), GameStates.IgnStates, ViewMode.Replace));
+        target.NameModel().GetComponentHolder<RoleHolder>().Add(new RoleComponent(new LiveString(() => roleName), Game.IgnStates, ViewMode.Replace));
         CHandler().Message(Translations.RevealMessage, target.name, roleName).Send();
     }
 

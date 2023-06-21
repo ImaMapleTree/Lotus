@@ -4,7 +4,6 @@ using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Options;
-using Lotus.Roles.Internals;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;

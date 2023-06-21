@@ -6,7 +6,7 @@ using Lotus.Extensions;
 using Lotus.Factions;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using Lotus.RPC;
 using VentLib.Localization.Attributes;

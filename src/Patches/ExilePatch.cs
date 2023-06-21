@@ -7,11 +7,11 @@ using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
 using Lotus.Managers.History.Events;
 using Lotus.Options;
 using Lotus.Options.General;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 

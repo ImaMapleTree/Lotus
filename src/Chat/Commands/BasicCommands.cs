@@ -8,7 +8,7 @@ using Lotus.Factions.Neutrals;
 using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Roles;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Commands;
@@ -193,7 +193,7 @@ public class BasicCommands: CommandTranslations
 
         PlayerControl? player = Players.FindPlayerById(id);
         if (player == null) ChatHandler.Of(PlayerNotFoundText.Formatted(id), CommandError).LeftAlign().Send(source);
-        else if (!BlackscreenResolver.PerformForcedReset(player)) ChatHandler.Of("Unable to perform forced Blackscreen Fix. No players have died yet.", CommandError).LeftAlign().Send();
+        else if (!BlackscreenResolver.PerformForcedReset(player)) ChatHandler.Of("Unable to perform forced Blackscreen Fix. No players have died yet.", CommandError).LeftAlign().Send(source);
         else ChatHandler.Of($"Successfully cleared blackscreen of \"{player.name}\"").LeftAlign().Send(source);
     }
 }

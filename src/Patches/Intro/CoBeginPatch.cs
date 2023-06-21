@@ -52,7 +52,5 @@ class CoBeginPatch
         VentLogger.Old("------------詳細設定------------", "Info");
         VentLogger.Old($"プレイヤー数: {PlayerControl.AllPlayerControls.Count}人", "Info");
         //PlayerControl.AllPlayerControls.ToArray().Do(x => TOHPlugin.PlayerStates[x.PlayerId].InitTask(x));
-
-        GameStates.InGame = true;
     }
 }

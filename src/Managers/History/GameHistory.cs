@@ -2,9 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.Managers.History.Events;
-using Lotus.API.Odyssey;
 using Lotus.API.Player;
-using Lotus.Roles;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
@@ -29,6 +27,8 @@ public class GameHistory
     }
 
     public void SetCauseOfDeath(byte playerId, IDeathEvent deathEvent) => causeOfDeath[playerId] = deathEvent;
+
+    public void ClearCauseOfDeath(byte playerId) => causeOfDeath.Remove(playerId);
 
     public Optional<IDeathEvent> GetCauseOfDeath(byte playerId) => causeOfDeath.GetOptional(playerId);
 

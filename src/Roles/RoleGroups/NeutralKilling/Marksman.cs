@@ -5,14 +5,12 @@ using Lotus.GUI.Name;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
-using Lotus.Logging;
 using Lotus.Managers.History.Events;
 using Lotus.Options;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Options.Game;
-using VentLib.Utilities;
 
 namespace Lotus.Roles.RoleGroups.NeutralKilling;
 

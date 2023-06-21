@@ -1,8 +1,6 @@
 using System.Collections.Generic;
 using HarmonyLib;
-using Lotus.API;
 using Lotus.API.Odyssey;
-using Lotus.Options;
 using VentLib.Logging;
 
 namespace Lotus.Patches;
@@ -16,7 +14,6 @@ class EndGamePatch
     public static void Postfix(AmongUsClient __instance, [HarmonyArgument(0)] ref EndGameResult endGameResult)
     {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        GameStates.InGame = false;
         Game.State = GameState.InLobby;
         Game.Cleanup();
 

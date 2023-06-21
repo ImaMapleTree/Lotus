@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using JBAnnotations::JetBrains.Annotations;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Gamemodes.Standard.Lotteries;
 using Lotus.Managers;
 using Lotus.Options;
@@ -13,7 +14,6 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
 using Lotus.Extensions;
 using Lotus.Factions.Impostors;
-using Lotus.Logging;
 using Lotus.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -141,7 +141,7 @@ public class StandardRoleAssignmentLogic
         AssignSubroles();
         // ================
 
-        Game.GetAllPlayers().Sorted(p => p.IsHost() ? 0 : 1).ForEach(p => p.GetCustomRole().Assign());
+        Players.GetPlayers().Sorted(p => p.IsHost() ? 0 : 1).ForEach(p => p.GetCustomRole().Assign());
     }
 
     private static void AssignSubroles()
@@ -161,12 +161,12 @@ public class StandardRoleAssignmentLogic
         {
             if (role is IllegalRole) continue;
             CustomRole variant = role is Subrole sr ? IVariantSubrole.PickAssignedRole(sr) : IVariableRole.PickAssignedRole(role);
-            List<PlayerControl> players = Game.GetAllPlayers().Where(CanAssignTo).ToList();
+            List<PlayerControl> players = Players.GetPlayers().Where(CanAssignTo).ToList();
             if (players.Count == 0)
             {
                 evenDistribution++;
                 if (!RoleOptions.SubroleOptions.UncappedModifiers && evenDistribution >= RoleOptions.SubroleOptions.ModifierLimits) break;
-                players = Game.GetAllPlayers().Where(p => p.GetSubroles().Count <= evenDistribution).ToList();;
+                players = Players.GetPlayers().Where(p => p.GetSubroles().Count <= evenDistribution).ToList();;
                 if (players.Count == 0) break;
             }
 

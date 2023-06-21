@@ -2,13 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
-using Lotus.Factions;
+using Lotus.Logging;
 using Lotus.Options;
 using Lotus.Roles;
 using Lotus.Roles.Debugger;
 using Lotus.Roles.Extra;
 using Lotus.Roles.Internals;
 using Lotus.Roles.RoleGroups.Crew;
+using Lotus.Roles.RoleGroups.Crew.Alchemist;
 using Lotus.Roles.RoleGroups.Impostors;
 using Lotus.Roles.RoleGroups.Madmates.Roles;
 using Lotus.Roles.RoleGroups.Neutral;
@@ -16,6 +17,7 @@ using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Roles.RoleGroups.Undead.Roles;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
+using Lotus.Roles.Subroles.Guessers;
 using Lotus.Roles.Subroles.Romantics;
 using VentLib.Options;
 using VentLib.Options.Game;
@@ -30,44 +32,55 @@ namespace Lotus.Managers;
 public static class CustomRoleManager
 {
     public static OptionManager RoleOptionManager = OptionManager.GetManager(file: "role_options.txt");
-    private static readonly List<Action> FinishedCallbacks = new();
 
-    public static StaticRoles Static = new();
-    public static Modifiers Mods = new();
-    public static ExtraRoles Special = new();
-    public static CustomRole Default = Static.Crewmate;
+    public static StaticRoles Static;
+    public static Modifiers Mods;
+    public static ExtraRoles Special;
+    public static CustomRole Default;
 
-    private static List<CustomRole>? _lazyInitializeList;
+    public static readonly List<CustomRole> MainRoles;
 
-    public static readonly List<CustomRole> MainRoles = Static.GetType()
-        .GetFields()
-        .Select(f => (CustomRole)f.GetValue(Static)!)
-        .ToList();
+    public static readonly List<CustomRole> ModifierRoles;
 
-    public static readonly List<CustomRole> ModifierRoles = Mods.GetType()
-        .GetFields()
-        .Select(f => (CustomRole)f.GetValue(Mods)!)
-        .ToList();
+    public static readonly List<CustomRole> SpecialRoles;
 
-    public static readonly List<CustomRole> SpecialRoles = Special.GetType()
-        .GetFields()
-        .Select(f => (CustomRole)f.GetValue(Special)!)
-        .ToList();
+    public static List<CustomRole> AllRoles;
 
-    public static readonly List<CustomRole> AllRoles = MainRoles.Concat(SpecialRoles).Concat(ModifierRoles).Concat(_lazyInitializeList!).ToList();
-
-    private static bool _initailized = FinishedCallbacks.All(fc =>
+    static CustomRoleManager()
     {
-        fc();
-        return true;
-    });
+        AllRoles = new List<CustomRole>();
+        Static = new StaticRoles();
+        Mods = new Modifiers();
+        Special = new ExtraRoles();
+        Default = Static.Crewmate;
 
-    public static void AddOnFinishCall(Action action) => FinishedCallbacks.Add(action);
+        MainRoles = Static.GetType()
+            .GetFields()
+            .Select(f => (CustomRole)f.GetValue(Static)!)
+            .ToList();
+
+        ModifierRoles = Mods.GetType()
+            .GetFields()
+            .Select(f => (CustomRole)f.GetValue(Mods)!)
+            .ToList();
+
+        SpecialRoles = Special.GetType()
+            .GetFields()
+            .Select(f => (CustomRole)f.GetValue(Special)!)
+            .ToList();
+
+        List<CustomRole> realAllRoleList = MainRoles;
+        realAllRoleList.AddRange(ModifierRoles);
+        realAllRoleList.AddRange(SpecialRoles);
+        realAllRoleList.AddRange(AllRoles);
+        AllRoles = realAllRoleList;
+        AllRoles.ForEach(r => r.Solidify());
+    }
+
 
     public static void AddRole(CustomRole staticRole)
     {
-        if (AllRoles == null!) (_lazyInitializeList ??= new List<CustomRole>()).Add(staticRole);
-        else AllRoles.Add(staticRole);
+        AllRoles.Add(staticRole);
     }
 
     public static int GetRoleId(CustomRole role) => role == null ? 0 : GetRoleId(role.GetType());
@@ -144,6 +157,7 @@ public static class CustomRoleManager
     {
         //Impostors
 
+        public CustomRole LOAD_IMPOSTOR_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadImpostorOptions());
         //assassin
         //bomber
         public Assassin Assassin = new Assassin();
@@ -180,7 +194,7 @@ public static class CustomRoleManager
         public Witch Witch = new Witch();
         public YinYanger YinYanger = new YinYanger();
 
-        private CustomRole MADMATE_TITLE = new EnforceFunctionOrderingRole(() => RoleOptions.LoadMadmateOptions());
+        public CustomRole MADMATE_TITLE = new EnforceFunctionOrderingRole(() => RoleOptions.LoadMadmateOptions());
 
         public CrewPostor CrewPostor = new CrewPostor();
         public Madmate Madmate = new Madmate();
@@ -189,6 +203,7 @@ public static class CustomRoleManager
         public Parasite Parasite = new Parasite();
 
         //Crewmates
+        public CustomRole LOAD_CREW_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadCrewmateOptions());
 
         public Alchemist Alchemist = new Alchemist();
         public Bastion Bastion = new Bastion();
@@ -229,9 +244,9 @@ public static class CustomRoleManager
         //Neutrals
 
         // ReSharper disable once InconsistentNaming
-        private CustomRole LOAD_NEUTRAL_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadNeutralOptions());
+        public CustomRole LOAD_NEUTRAL_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadNeutralOptions());
 
-        private CustomRole NEUTRAL_KILLING_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>★ Neutral Killing ★</size>").Color(ModConstants.Palette.KillingColor).Tab(DefaultTabs.NeutralTab).Build());
+        public CustomRole NEUTRAL_KILLING_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>★ Neutral Killing ★</size>").Color(ModConstants.Palette.KillingColor).Tab(DefaultTabs.NeutralTab).Build());
 
         public AgiTater AgiTater = new AgiTater();
         public Arsonist Arsonist = new Arsonist();
@@ -250,7 +265,7 @@ public static class CustomRoleManager
         public Glitch Glitch = new Glitch();
         public Werewolf Werewolf = new Werewolf();
 
-        private CustomRole NEUTRAL_PASSIVE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>❀ Neutral Passive ❀</size>").Color(ModConstants.Palette.PassiveColor).Tab(DefaultTabs.NeutralTab).Build());
+        public CustomRole NEUTRAL_PASSIVE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>❀ Neutral Passive ❀</size>").Color(ModConstants.Palette.PassiveColor).Tab(DefaultTabs.NeutralTab).Build());
 
         public Amnesiac Amnesiac = new Amnesiac();
         /*public Archangel Archangel = new Archangel();*/
@@ -297,6 +312,11 @@ public static class CustomRoleManager
         public IllegalRole IllegalRole = new IllegalRole();
         public GM GM = new GM();
         public Debugger Debugger = new Debugger();
+
+        public CrewGuesser CrewGuesser = new CrewGuesser();
+        public ImpGuesser ImpGuesser = new ImpGuesser();
+        public NeutralKillerGuesser NeutralKillerGuesser = new NeutralKillerGuesser();
+        public NeutralGuesser NeutralGuesser = new NeutralGuesser();
 
         //double shot
         //flash

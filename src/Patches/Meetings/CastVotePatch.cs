@@ -1,19 +1,17 @@
 using System.Linq;
 using HarmonyLib;
 using Hazel;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
-using Lotus.Options;
-using Lotus.Options.General;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Patches.Meetings;
@@ -34,18 +32,6 @@ public class CastVotePatch
 
         if (!handle.IsCanceled)
         {
-            /*switch (GeneralOptions.MeetingOptions.NoVoteMode)
-            {
-                case SkipVoteMode.Reverse:
-                    voted = Optional<PlayerControl>.Of(voter);
-                    break;
-                case SkipVoteMode.Explode:
-                    ProtectedRpc.CheckMurder(voter, voter);
-                    return true;
-                case SkipVoteMode.Negate:
-                    return true;
-            }*/
-
             Hooks.MeetingHooks.CastVoteHook.Propagate(new CastVoteHookEvent(voter, voted));
             MeetingDelegate.Instance.CastVote(voter, voted);
             return true;
@@ -59,9 +45,10 @@ public class CastVotePatch
         return false;
     }
 
-    private static void ClearVote(MeetingHud hud, PlayerControl target)
+    public static void ClearVote(MeetingHud hud, PlayerControl target)
     {
         VentLogger.Trace($"Clearing vote for: {target.GetNameWithRole()}");
+        hud.playerStates.Where(ps => ps.TargetPlayerId == target.PlayerId).ForEach(ps => ps.VotedFor = byte.MaxValue);
         MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
         writer.StartMessage(6);
         writer.Write(AmongUsClient.Instance.GameId);

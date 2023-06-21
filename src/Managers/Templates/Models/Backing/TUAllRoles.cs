@@ -1,10 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Lotus.Factions.Neutrals;
-using Lotus.Logging;
 using Lotus.Roles;
 using Lotus.Roles.Debugger;
 using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Subroles;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;

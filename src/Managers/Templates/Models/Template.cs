@@ -13,7 +13,8 @@ public class Template: TemplateUnit
     public string? Tag { get; set; }
     public List<string>? Aliases { get; set; }
     public List<TTrigger>? Triggers { get; set; }
-    public bool AliasOnly = false;
+    public List<TAction> Actions { get; set; } = new();
+    public bool AliasOnly { get; set; } = false;
 
     public Template()
     {
@@ -28,7 +29,8 @@ public class Template: TemplateUnit
 
     public void SendMessage(PlayerControl user, PlayerControl? viewer, object? data = null)
     {
-        if (viewer == null) Players.GetPlayers().ForEach(p => SendTo(p, data));
+        if (Text == null && !Actions.IsEmpty()) Actions.ForEach(a => a.Execute(data?.ToString() ?? "", data));
+        else if (viewer == null) Players.GetPlayers().ForEach(p => SendTo(p, data));
         else SendTo(viewer, data);
     }
 
@@ -39,6 +41,8 @@ public class Template: TemplateUnit
         if (!Evaluate(data)) return;
 
         string result = Format(data);
+        Actions.ForEach(a => a.Execute(result, data));
+        if (Text == null) return;
 
         string title = Title != null ? Format(Title, data) : PlayerControl.LocalPlayer.name;
         ChatHandler.Of(result, title.Replace("\\n", "\n")).LeftAlign().Send(UnityOptional<PlayerControl>.Of(player));

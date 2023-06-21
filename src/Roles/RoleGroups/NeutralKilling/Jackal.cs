@@ -2,8 +2,7 @@ using Lotus.API;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
-using Lotus.Options;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Options.Game;
 

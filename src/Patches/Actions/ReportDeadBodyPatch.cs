@@ -3,9 +3,9 @@ using Lotus.API.Odyssey;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Gamemodes;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using VentLib.Logging;
 

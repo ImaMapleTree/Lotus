@@ -4,7 +4,6 @@ using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.Utilities;
 using Lotus.Victory;
-using Lotus.API;
 using Lotus.Extensions;
 using Lotus.Options;
 using VentLib.Options;

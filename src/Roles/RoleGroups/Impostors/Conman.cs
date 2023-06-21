@@ -1,12 +1,13 @@
 using System;
 using System.Collections.Generic;
 using Lotus.API;
-using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities.Extensions;
@@ -44,7 +45,7 @@ public class Conman : Impostor
         if (affectAnonymousMeeting) overrides.Add(new GameOptionOverride(Override.AnonymousVoting, !AUSettings.AnonymousVotes()));
         overrides.Add(new GameOptionOverride(Override.DiscussionTime, Math.Max(AUSettings.DiscussionTime() - discussionTimeDecrease, 1)));
         overrides.Add(new GameOptionOverride(Override.VotingTime, Math.Max(AUSettings.DiscussionTime() - votingTimeDecrease, 1)));
-        Game.GetAllPlayers().ForEach(p => p.GetCustomRole().SyncOptions(overrides));
+        Players.GetPlayers().ForEach(p => p.GetCustomRole().SyncOptions(overrides));
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

@@ -23,6 +23,7 @@ using Lotus.Roles.Interactions;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
@@ -104,7 +105,7 @@ public class Charmer: Crewmate
         if (MyPlayer.InteractWith(player, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return true;
 
         LiveString charmString = new(Translations.CharmedText, _charmedColor);
-        NameComponent component = new(charmString, GameStates.IgnStates, ViewMode.Additive, MyPlayer, player);
+        NameComponent component = new(charmString, Game.IgnStates, ViewMode.Additive, MyPlayer, player);
 
         CustomRole playerRole = player.GetCustomRole();
         IStatus status = CustomStatus.Of(Translations.CharmedText).Description(Translations.CharmedDescription).Color(_charmedColor).Build();

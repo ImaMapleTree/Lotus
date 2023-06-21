@@ -10,6 +10,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;

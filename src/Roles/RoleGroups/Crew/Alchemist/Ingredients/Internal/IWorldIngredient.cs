@@ -1,6 +1,6 @@
 using UnityEngine;
 
-namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 
 public interface IWorldIngredient : IAlchemyIngredient
 {

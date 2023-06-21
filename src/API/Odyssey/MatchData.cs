@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
@@ -11,7 +10,6 @@ using Lotus.Roles;
 using Lotus.Roles.Overrides;
 using Lotus.RPC;
 using Lotus.Statuses;
-using MonoMod.RuntimeDetour;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -20,6 +18,7 @@ namespace Lotus.API.Odyssey;
 
 public class MatchData
 {
+    public static MatchData Instance;
     internal ulong MatchID;
 
     public GameHistory GameHistory = new();
@@ -38,7 +37,7 @@ public class MatchData
 
     public RoleData Roles = new();
 
-    public FrozenPlayer? FrozenPlayer(PlayerControl? player)
+    public FrozenPlayer? GetFrozenPlayer(PlayerControl? player)
     {
         return player == null || !FrozenPlayers.ContainsKey(player.GetGameID()) ? null : FrozenPlayers[player.GetGameID()];
     }
@@ -72,16 +71,13 @@ public class MatchData
 
         public CustomRole GetMainRole(byte playerId) => MainRoles.GetValueOrDefault(playerId, CustomRoleManager.Default);
         public List<CustomRole> GetSubroles(byte playerId) => SubRoles.GetOrCompute(playerId, () => new List<CustomRole>());
-
     }
 
-
-    public static List<CustomRole> GetEnabledRoles() => CustomRoleManager.AllRoles.Where(r => r.IsEnabled()).ToList();
 
     [ModRPC((uint) ModCalls.SetCustomRole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
     public static void AssignRole(PlayerControl player, CustomRole role, bool sendToClient = false)
     {
-        CustomRole assigned = Game.MatchData.Roles.AddMainRole(player.PlayerId, role.Instantiate(player));
+        CustomRole assigned = Game.MatchData.Roles.AddMainRole(player.PlayerId, role = role.Instantiate(player));
         Game.MatchData.FrozenPlayers.GetOptional(player.GetGameID()).IfPresent(fp => fp.Role = assigned);
         if (Game.State is GameState.InLobby or GameState.InIntro) player.GetTeamInfo().MyRole = role.RealRole;
         if (sendToClient) assigned.Assign();

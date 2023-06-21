@@ -9,6 +9,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;

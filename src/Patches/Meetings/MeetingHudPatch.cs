@@ -1,5 +1,7 @@
+using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Options;
 using VentLib.Logging;
@@ -29,8 +31,18 @@ class MeetingHudOnDestroyPatch
     {
         if (!AmongUsClient.Instance.AmHost) return;
         VentLogger.Debug("------------End of Meeting------------", "Phase");
+        MeetingDelegate meetingDelegate = MeetingDelegate.Instance;
 
-        MeetingDelegate.Instance.BlackscreenResolver.BeginProcess();
+        if (meetingDelegate.ExiledPlayer != null && meetingDelegate.ExiledPlayer.Object != null)
+            meetingDelegate.CheckAndSetConfirmEjectText(meetingDelegate.ExiledPlayer.Object);
+
+        Players.GetPlayers().Where(p =>
+        {
+            p.RpcRevertShapeshift(false);
+            return p.PlayerId != meetingDelegate.ExiledPlayer?.PlayerId;
+        }).ForEach(p => p.RpcSetName(p.name));
+
+        meetingDelegate.BlackscreenResolver.BeginProcess();
         Async.Schedule(PostMeetingSetups, NetUtils.DeriveDelay(0.5f));
     }
 
@@ -39,7 +51,7 @@ class MeetingHudOnDestroyPatch
     {
         bool randomSpawn = GeneralOptions.MayhemOptions.RandomSpawn;
 
-        Game.GetAllPlayers().ForEach(p =>
+        Players.GetPlayers().ForEach(p =>
         {
             if (randomSpawn) Game.RandomSpawn.Spawn(p);
         });

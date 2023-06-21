@@ -5,9 +5,10 @@ using Lotus.API.Odyssey;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Logging;
 using Lotus.Patches.Actions;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
@@ -33,13 +34,14 @@ public class FatalIntent : IFatalIntent
         Optional<IDeathEvent> deathEvent = CauseOfDeath();
         actor.GetCustomRole().SyncOptions();
 
-        Optional<IDeathEvent> currentDeathEvent = Game.MatchData.GameHistory.GetCauseOfDeath(target.PlayerId);
-        deathEvent.IfPresent(death => Game.MatchData.GameHistory.SetCauseOfDeath(target.PlayerId, death));
+        deathEvent.IfPresent(ev => Game.MatchData.GameHistory.SetCauseOfDeath(target.PlayerId, ev));
         KillTarget(actor, target);
 
         ActionHandle ignored = ActionHandle.NoInit();
-        if (target.IsAlive()) Game.TriggerForAll(RoleActionType.SuccessfulAngelProtect, ref ignored, target, actor);
-        else currentDeathEvent.IfPresent(de => Game.MatchData.GameHistory.SetCauseOfDeath(target.PlayerId, de));
+        if (!target.IsAlive()) return;
+        DevLogger.Log("Target was still alive :O");
+        Game.TriggerForAll(RoleActionType.SuccessfulAngelProtect, ref ignored, target, actor);
+        Game.MatchData.GameHistory.ClearCauseOfDeath(target.PlayerId);
     }
 
     public void KillTarget(PlayerControl actor, PlayerControl target)
@@ -50,7 +52,6 @@ public class FatalIntent : IFatalIntent
     public void Halted(PlayerControl actor, PlayerControl target)
     {
         actor.RpcMark(target);
-        MurderPatches.MurderLocks.GetOrCompute(actor.PlayerId, MurderPatches.TimeoutSupplier).AcquireLock();
     }
 
     private Dictionary<string, object?>? meta;

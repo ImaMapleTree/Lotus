@@ -6,11 +6,11 @@ using Lotus.Extensions;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Interfaces;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -37,6 +37,7 @@ public class Vampire : Impostor, IVariableRole
 
         Async.Schedule(() =>
         {
+            if (!target.IsAlive()) return;
             MyPlayer.InteractWith(target, CreateInteraction(target));
             bitten.Remove(target.PlayerId);
         }, killDelay);

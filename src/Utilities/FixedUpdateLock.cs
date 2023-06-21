@@ -1,5 +1,4 @@
 using System;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Internals.Interfaces;
 using VentLib.Utilities.Debug.Profiling;
@@ -28,6 +27,13 @@ public class FixedUpdateLock: ICloneOnSetup<FixedUpdateLock>
     {
         bool acquirable = IsUnlocked();
         if (acquirable) lastAcquire = DateTime.Now;
+        return acquirable;
+    }
+
+    public bool AcquireLock(double duration)
+    {
+        bool acquirable = IsUnlocked();
+        if (acquirable) lastAcquire = TimeUnit is TimeUnit.Seconds ? DateTime.Now.AddSeconds(duration - LockDuration) : DateTime.Now.AddMilliseconds(duration - LockDuration);
         return acquirable;
     }
 

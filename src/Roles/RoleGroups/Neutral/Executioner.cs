@@ -1,12 +1,11 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.Factions.Impostors;
 using Lotus.Factions.Interfaces;
-using Lotus.Factions.Neutrals;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Managers;
@@ -14,7 +13,7 @@ using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
@@ -34,7 +33,7 @@ public class Executioner : CustomRole
     private void OnGameStart(bool gameStart)
     {
         if (!gameStart) return;
-        target = Game.GetAllPlayers().Where(p =>
+        target = Players.GetPlayers().Where(p =>
         {
             if (p.PlayerId == MyPlayer.PlayerId) return false;
             IFaction faction = p.GetCustomRole().Faction;
@@ -43,7 +42,7 @@ public class Executioner : CustomRole
         }).ToList().GetRandom();
         VentLogger.Trace($"Executioner ({MyPlayer.name}) Target: {target}");
 
-        target.NameModel().GetComponentHolder<NameHolder>().Add(new ColoredNameComponent(target, RoleColor, GameStates.IgnStates, MyPlayer));
+        target.NameModel().GetComponentHolder<NameHolder>().Add(new ColoredNameComponent(target, RoleColor, Game.IgnStates, MyPlayer));
     }
 
     [RoleAction(RoleActionType.AnyExiled)]

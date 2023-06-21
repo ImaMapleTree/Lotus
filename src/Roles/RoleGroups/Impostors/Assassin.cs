@@ -4,14 +4,14 @@ using Lotus.Factions;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Interfaces;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.Roles.Subroles;
+using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.RoleGroups.Stock;
 using UnityEngine;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
 
-public class Assassin: Guesser, ISabotagerRole
+public class Assassin: GuesserRoleBase, ISabotagerRole
 {
     public bool CanSabotage() => true;
 
@@ -24,16 +24,9 @@ public class Assassin: Guesser, ISabotagerRole
     }
 
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
-        base.Modify(roleModifier)
+        roleModifier
             .RoleColor(Color.red)
             .Faction(FactionInstances.Impostors)
             .RoleAbilityFlags(RoleAbilityFlag.IsAbleToKill)
             .VanillaRole(RoleTypes.Impostor);
-
-    private static class Translations
-    {
-        public static class Options
-        {
-        }
-    }
 }

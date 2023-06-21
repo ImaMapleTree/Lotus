@@ -1,5 +1,4 @@
 using Lotus.Options;
-using VentLib.Options;
 using VentLib.Options.Game;
 
 namespace Lotus.Extensions;
@@ -20,15 +19,17 @@ public static class GameOptionBuilderExtensions
                         .Build());
     }
 
-    public static GameOptionBuilder AddEnableDisabledValues(this GameOptionBuilder builder, bool defaultOn = true)
+    public static GameOptionBuilder AddEnableDisabledValues(this GameOptionBuilder builder, bool defaultOn = true, string? onText = null, string? offText = null)
     {
+        onText ??= GeneralOptionTranslations.EnabledText;
+        offText ??= GeneralOptionTranslations.DisabledText;
         return builder.Value(val =>
-                val.Text(defaultOn ? GeneralOptionTranslations.EnabledText : GeneralOptionTranslations.DisabledText)
+                val.Text(defaultOn ? onText : offText)
                     .Value(defaultOn)
                     .Color(defaultOn ? UnityEngine.Color.cyan : UnityEngine.Color.red)
                     .Build())
             .Value(val =>
-                val.Text(defaultOn ? GeneralOptionTranslations.DisabledText : GeneralOptionTranslations.EnabledText)
+                val.Text(defaultOn ? offText : onText)
                     .Value(!defaultOn)
                     .Color(defaultOn ? UnityEngine.Color.red : UnityEngine.Color.cyan)
                     .Build());

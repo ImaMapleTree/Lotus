@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Factions;
 using Lotus.GUI.Name;
@@ -9,11 +8,10 @@ using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
-using Lotus.Logging;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Utilities.Collections;
@@ -31,16 +29,16 @@ public class Puppeteer: Vanilla.Impostor
     [RoleAction(RoleActionType.Attack)]
     public override bool TryKill(PlayerControl target)
     {
+        MyPlayer.RpcMark(target);
         if (MyPlayer.InteractWith(target, LotusInteraction.HostileInteraction.Create(this)) is InteractionResult.Halt) return false;
 
         Game.MatchData.GameHistory.AddEvent(new ManipulatedEvent(MyPlayer, target));
         cursedPlayers.Add(target);
 
         playerRemotes!.GetValueOrDefault(target.PlayerId, null)?.Delete();
-        IndicatorComponent component = new(new LiveString("◆", new Color(0.36f, 0f, 0.58f)), GameStates.IgnStates, viewers: MyPlayer);
+        IndicatorComponent component = new(new LiveString("◆", new Color(0.36f, 0f, 0.58f)), Game.IgnStates, viewers: MyPlayer);
         playerRemotes[target.PlayerId] = target.NameModel().GetComponentHolder<IndicatorHolder>().Add(component);
 
-        MyPlayer.RpcMark(target);
         return true;
     }
 
@@ -81,7 +79,7 @@ public class Puppeteer: Vanilla.Impostor
         cursedPlayers.ToArray().ForEach(RemovePuppet);
         cursedPlayers.Clear();
     }
-    
+
     [RoleAction(RoleActionType.AnyDeath)]
     [RoleAction(RoleActionType.Disconnect)]
     private void RemovePuppet(PlayerControl puppet)

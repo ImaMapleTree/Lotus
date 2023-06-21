@@ -1,59 +1,12 @@
 using HarmonyLib;
 using InnerNet;
 using Lotus.Managers;
-using Lotus.Utilities;
-using UnityEngine;
-using VentLib.Localization.Attributes;
-using VentLib.Logging;
-using VentLib.Utilities;
 
 // ReSharper disable FieldCanBeMadeReadOnly.Local
 // ReSharper disable InconsistentNaming
 
 
 namespace Lotus.Patches.Client;
-
-/*[Localized(Group = "ModUpdater")]
-[HarmonyPatch(typeof(GameStartManager), nameof(GameStartManager.MakePublic))]
-class MakePublicPatch
-{
-    [Localized("ModBrokenMessage")]
-    public static string ModBrokenMessage = null!;
-    [Localized("ModUpdateMessage")]
-    public static string ModUpdateMessage = null!;
-
-    public static bool Prefix(GameStartManager __instance)
-    {
-        if ((!(ModUpdater.isBroken | ModUpdater.hasUpdate)) || ModUpdater.ForceAccept) return true;
-        var message = "";
-        if (ModUpdater.isBroken) message = ModBrokenMessage;
-        if (ModUpdater.hasUpdate) message = ModUpdateMessage;
-        VentLogger.Old(message, "MakePublicPatch");
-        VentLogger.SendInGame(message);
-        return false;
-    }
-}*/
-
-/*[HarmonyPatch(typeof(MMOnlineManager), nameof(MMOnlineManager.Start))]
-class MMOnlineManagerStartPatch
-{
-    public static void Postfix(MMOnlineManager __instance)
-    {
-        /*if (!(ModUpdater.hasUpdate || ModUpdater.isBroken)) return;
-        if (ModUpdater.ForceAccept) return;#1#
-        var obj = GameObject.Find("FindGameButton");
-        if (!obj) return;
-
-        obj?.SetActive(false);
-        var parentObj = obj.transform.parent.gameObject;
-        var textObj = Object.Instantiate<TMPro.TextMeshPro>(obj.transform.FindChild("Text_TMP").GetComponent<TMPro.TextMeshPro>());
-        textObj.transform.position = new Vector3(1f, -0.3f, 0);
-        textObj.name = "CanNotJoinPublic";
-        /*var message = ModUpdater.isBroken ? $"<size=2>{Utils.ColorString(Color.red, MakePublicPatch.ModBrokenMessage)}</size>"
-            : $"<size=2>{Utils.ColorString(Color.red, MakePublicPatch.ModUpdateMessage)}</size>";
-        Async.Schedule(() => { textObj.text = message; }, 0.01f);#1#
-    }
-}*/
 
 [HarmonyPatch(typeof(BanMenu), nameof(BanMenu.SetVisible))]
 class BanMenuSetVisiblePatch

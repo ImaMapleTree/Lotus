@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Lotus.API;
 using Lotus.Managers;
 using Lotus.API.Odyssey;
 using VentLib.Networking.RPC;

@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
@@ -12,7 +11,6 @@ using Lotus.Utilities;
 using Lotus.Victory;
 using Lotus.Extensions;
 using Lotus.Logging;
-using Lotus.Roles.Legacy;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
@@ -23,13 +21,13 @@ namespace Lotus.Managers;
 
 internal class BlackscreenResolver
 {
-    private byte resetCameraPlayer;
+    private byte resetCameraPlayer = byte.MaxValue;
     private Vector2 resetCameraPosition;
     private MeetingDelegate meetingDelegate;
     private Dictionary<byte, (bool isDead, bool isDisconnected)> playerStates = null!;
     private HashSet<byte> unpatchable;
 
-    private bool patching;
+    public bool Patching;
 
     private BlackscreenResolver(byte blackscreened)
     {
@@ -39,9 +37,9 @@ internal class BlackscreenResolver
     internal BlackscreenResolver(MeetingDelegate meetingDelegate)
     {
         this.meetingDelegate = meetingDelegate;
-        resetCameraPlayer = Game.GetDeadPlayers().FirstOrOptional().Map(p => p.PlayerId).OrElse(byte.MaxValue);
+        resetCameraPlayer = Players.GetPlayers(PlayerFilter.Dead).FirstOrOptional().Map(p => p.PlayerId).OrElse(byte.MaxValue);
         Hooks.PlayerHooks.PlayerMessageHook.Bind(nameof(BlackscreenResolver), _ => BlockLavaChat(), true);
-        Hooks.GameStateHooks.GameEndHook.Bind(nameof(BlackscreenResolver), _ => patching = false, true);
+        Hooks.GameStateHooks.GameEndHook.Bind(nameof(BlackscreenResolver), _ => Patching = false, true);
     }
 
     public static bool PerformForcedReset(PlayerControl player)
@@ -100,7 +98,7 @@ internal class BlackscreenResolver
 
     private HashSet<byte> StoreAndSendFallbackData()
     {
-        patching = true;
+        Patching = true;
         byte exiledPlayer = meetingDelegate.ExiledPlayer?.PlayerId ?? byte.MaxValue;
         GameData.PlayerInfo[] playerInfos = GameData.Instance.AllPlayers.ToArray().Where(p => p != null).ToArray();
         playerInfos.FirstOrOptional(p => p.PlayerId == exiledPlayer).IfPresent(info => info.IsDead = true);
@@ -120,7 +118,7 @@ internal class BlackscreenResolver
             info.Disconnected = val.isDisconnected;
             if (info.Object != null) info.PlayerName = info.Object.name;
         });
-        patching = false;
+        Patching = false;
         GeneralRPC.SendGameData();
         CheckEndGamePatch.Deferred = false;
         callback();
@@ -139,7 +137,7 @@ internal class BlackscreenResolver
         if (deadPlayer != null) return true;
 
         // Second we check all the currently dead players
-        deadPlayer = Game.GetDeadPlayers().FirstOrDefault();
+        deadPlayer = Players.GetPlayers(PlayerFilter.Dead).FirstOrDefault();
         if (deadPlayer != null) return ReturnPlayer(deadPlayer);
 
         // Lastly we check the exiled player
@@ -185,10 +183,10 @@ internal class BlackscreenResolver
 
     private void BlockLavaChat()
     {
-        if (!patching) return;
+        if (!Patching) return;
         if (Game.State is GameState.InLobby)
         {
-            patching = false;
+            Patching = false;
             return;
         }
         ChatHandler chatHandler = ChatHandler.Of("", "- Lava Chat Fix -");

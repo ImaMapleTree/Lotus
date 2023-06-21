@@ -1,25 +1,23 @@
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Chat;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
-using VentLib.Utilities.Optionals;
 using static Lotus.Roles.RoleGroups.Impostors.Blackmailer.Translations;
 
 namespace Lotus.Roles.RoleGroups.Impostors;
@@ -27,7 +25,7 @@ namespace Lotus.Roles.RoleGroups.Impostors;
 public class Blackmailer: Shapeshifter
 {
     private Remote<TextComponent>? blackmailingText;
-    private Optional<PlayerControl> blackmailedPlayer = Optional<PlayerControl>.Null();
+    private byte blackmailedPlayer = byte.MaxValue;
 
     private bool showBlackmailedToAll;
 
@@ -42,16 +40,17 @@ public class Blackmailer: Shapeshifter
     {
         if (target.PlayerId == MyPlayer.PlayerId) return;
         handle.Cancel();
+        currentWarnings = 0;
         blackmailingText?.Delete();
-        blackmailedPlayer = Optional<PlayerControl>.NonNull(target);
-        TextComponent textComponent = new(new LiveString(BlackmailedText, Color.red), GameStates.IgnStates, viewers: MyPlayer);
+        blackmailedPlayer = target.PlayerId;
+        TextComponent textComponent = new(new LiveString(BlackmailedText, Color.red), Game.IgnStates, viewers: MyPlayer);
         blackmailingText = target.NameModel().GetComponentHolder<TextHolder>().Add(textComponent);
     }
 
     [RoleAction(RoleActionType.RoundStart, triggerAfterDeath: true)]
     public void ClearBlackmail()
     {
-        blackmailedPlayer = Optional<PlayerControl>.Null();
+        blackmailedPlayer = byte.MaxValue;
         currentWarnings = 0;
         blackmailingText?.Delete();
     }
@@ -59,23 +58,23 @@ public class Blackmailer: Shapeshifter
     [RoleAction(RoleActionType.MeetingCalled)]
     public void NotifyBlackmailed()
     {
-        List<PlayerControl> allPlayers = showBlackmailedToAll
-            ? Game.GetAllPlayers().ToList()
-            : blackmailedPlayer.Transform(p => new List<PlayerControl> { p, MyPlayer }, () => new List<PlayerControl> { MyPlayer });
-        if (!blackmailingText?.IsDeleted() ?? false) blackmailingText?.Get().SetViewerSupplier(() => allPlayers);
-        blackmailedPlayer.IfPresent(p =>
+        PlayerControl? blackmailed = Players.FindPlayerById(blackmailedPlayer);
+        if (blackmailed == null)
         {
-            string message = $"{RoleColor.Colorize(MyPlayer.name)} blackmailed {p.GetRoleColor().Colorize(p.name)}.";
-            Game.MatchData.GameHistory.AddEvent(new GenericTargetedEvent(MyPlayer, p, message));
-            ChatHandler.Of(BlackmailedMessage, RoleColor.Colorize(RoleName)).Send(p);
-        });
+            ClearBlackmail();
+            return;
+        }
+
+        List<PlayerControl> allPlayers = showBlackmailedToAll ? Players.GetPlayers().ToList() : new List<PlayerControl> { blackmailed, MyPlayer };
+        if (blackmailingText != null && !blackmailingText.IsDeleted()) blackmailingText.Get().SetViewerSupplier(() => allPlayers);
+        Async.Schedule(() => ChatHandler.Of(BlackmailedMessage, RoleColor.Colorize(BlackmailedText)).Send(blackmailed), 3f);
     }
 
     [RoleAction(RoleActionType.SelfExiled)]
     [RoleAction(RoleActionType.MyDeath)]
     private void BlackmailerDies()
     {
-        blackmailedPlayer = Optional<PlayerControl>.Null();
+        blackmailedPlayer = byte.MaxValue;
         blackmailingText?.Delete();
     }
 
@@ -83,7 +82,7 @@ public class Blackmailer: Shapeshifter
     public void InterceptChat(PlayerControl speaker, GameState state, bool isAlive)
     {
         if (!isAlive || state is not GameState.InMeeting) return;
-        if (!blackmailedPlayer.Exists() || speaker.PlayerId != blackmailedPlayer.Get().PlayerId) return;
+        if (blackmailedPlayer != speaker.PlayerId) return;
         if (currentWarnings++ < warnsUntilKick)
         {
             ChatHandler.Of(WarningMessage, RoleColor.Colorize(RoleName)).Send(speaker);

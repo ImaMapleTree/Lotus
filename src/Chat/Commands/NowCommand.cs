@@ -7,7 +7,7 @@ using Lotus.Factions.Impostors;
 using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Roles;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;

@@ -4,6 +4,7 @@ using Lotus.API.Player;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Chat;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;

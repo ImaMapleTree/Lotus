@@ -26,6 +26,7 @@ using Lotus.Roles.Subroles;
 using Lotus.API.Stats;
 using Lotus.Extensions;
 using Lotus.Logging;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Internals.Interfaces;
 using Lotus.Utilities;
 using UnityEngine;
@@ -45,20 +46,8 @@ namespace Lotus.Roles;
 public abstract class AbstractBaseRole
 {
     public PlayerControl MyPlayer { get; protected set; } = null!;
-    private static bool ROLE_DEBUG = true;
-
-    public static T Ref<T>() where T : CustomRole
-    {
-        int roleId = CustomRoleManager.GetRoleId(typeof(T));
-        if (roleId != -1) return (T)CustomRoleManager.GetRoleFromId(roleId);
-        if (ROLE_DEBUG)
-            VentLogger.Warn($"Illegally Constructing Role for {typeof(T)}", "RoleWarning");
-        return (T)typeof(T).GetConstructor(Array.Empty<Type>()).Invoke(null);
-    }
-
     public RoleEditor? Editor { get; internal set; }
     private static List<RoleEditor> _editors = new();
-
 
     public string Description => Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.Description");
     public string Blurb => Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.Blurb");
@@ -108,14 +97,13 @@ public abstract class AbstractBaseRole
         this.EnglishRoleName = this.GetType().Name.Replace("CRole", "").Replace("Role", "");
         VentLogger.Debug($"Role Name: {EnglishRoleName}");
         CreateInstanceBasedVariables();
-        // Why? Modify may reference uncreated options, yet when setting up options developers may try to reference
-        // RoleColor (which is white until after Modify)
-        // To solve this we call Modify to TRY to setup the role color, crashing once it requires uncreated options
-        // The modify at the end of this method is the "real" modify
-        RoleModifier _;
-        try {
-            _ = _editors.Aggregate(Modify(new RoleModifier(this)), (current, editor) => editor.HookModifier(current));
-        } catch { }
+        RoleModifier _ = _editors.Aggregate(Modify(new RoleModifier(this)), (current, editor) => editor.HookModifier(current));
+        LinkedRoles.ForEach(CustomRoleManager.AddRole);
+        SetupRoleActions();
+    }
+
+    internal virtual void Solidify()
+    {
         this.RoleSpecificGameOptionOverrides.Clear();
 
         GameOptionBuilder optionBuilder = _editors.Aggregate(GetGameOptionBuilder(), (current, editor) => editor.HookOptions(current));
@@ -123,49 +111,38 @@ public abstract class AbstractBaseRole
         LinkedRoles.ForEach(r =>
         {
             optionBuilder.SubOption(_ => r.GetGameOptionBuilder().IsHeader(false).Build());
-            CustomRoleManager.AddRole(r);
         });
 
         RoleOptions = optionBuilder.Build();
 
-        if (!RoleFlags.HasFlag(RoleFlag.DontRegisterOptions) && RoleOptions.GetValueText() != "N/A")
+        if (RoleFlags.HasFlag(RoleFlag.DontRegisterOptions) || RoleOptions.GetValueText() == "N/A") return;
+
+        if (!RoleFlags.HasFlag(RoleFlag.Hidden) && RoleOptions.Tab == null)
         {
-            if (!RoleFlags.HasFlag(RoleFlag.Hidden) && RoleOptions.Tab == null)
+            if (GetType() == typeof(Impostor)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+            else if (GetType() == typeof(Engineer)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+            else if (GetType() == typeof(Scientist)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+            else if (GetType() == typeof(Crewmate)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+            else if (GetType() == typeof(GuardianAngel)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+            else
             {
-                if (GetType() == typeof(Impostor)) RoleOptions.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(Engineer)) RoleOptions.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(Scientist)) RoleOptions.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(Crewmate)) RoleOptions.Tab = DefaultTabs.HiddenTab;
-                else if (GetType() == typeof(GuardianAngel)) RoleOptions.Tab = DefaultTabs.HiddenTab;
+
+                if (this is GM) { /*ignored*/ }
+                else if (this is Subrole)
+                    RoleOptions.Tab = DefaultTabs.MiscTab;
+                else if (this.Faction is ImpostorFaction)
+                    RoleOptions.Tab = DefaultTabs.ImpostorsTab;
+                else if (this.Faction is Crewmates)
+                    RoleOptions.Tab = DefaultTabs.CrewmateTab;
+                else if (this.Faction is TheUndead)
+                    RoleOptions.Tab = DefaultTabs.NeutralTab;
+                else if (this.SpecialType is SpecialType.NeutralKilling or SpecialType.Neutral)
+                    RoleOptions.Tab = DefaultTabs.NeutralTab;
                 else
-                {
-
-                    if (this is GM)
-                    {
-                        /*ignored*/
-                    }
-
-                    else if (this is Subrole)
-                        RoleOptions.Tab = DefaultTabs.MiscTab;
-                    else if (this.Faction is ImpostorFaction)
-                        RoleOptions.Tab = DefaultTabs.ImpostorsTab;
-                    else if (this.Faction is Crewmates)
-                        RoleOptions.Tab = DefaultTabs.CrewmateTab;
-                    else if (this.Faction is TheUndead)
-                        RoleOptions.Tab = DefaultTabs.NeutralTab;
-                    else if (this.SpecialType is SpecialType.NeutralKilling or SpecialType.Neutral)
-                        RoleOptions.Tab = DefaultTabs.NeutralTab;
-                    else
-                        RoleOptions.Tab = DefaultTabs.MiscTab;
-                }
+                    RoleOptions.Tab = DefaultTabs.MiscTab;
             }
-            RoleOptions.Register(CustomRoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
         }
-
-        SetupRoleActions();
-        //options.valueHolder?.UpdateBinding();
-        _ = _editors.Aggregate(Modify(new RoleModifier(this)), (current, editor) => editor.HookModifier(current));
-        //options. = RoleName;
+        RoleOptions.Register(CustomRoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
     }
 
     private void SetupRoleActions()
@@ -224,7 +201,7 @@ public abstract class AbstractBaseRole
 
         foreach (var action in roleActions[actionType].Sorted(a => (int)a.Priority))
         {
-            if (handle.IsCanceled) continue;
+            if (handle.Cancellation is not (ActionHandle.CancelType.None or ActionHandle.CancelType.Soft)) continue;
             if (MyPlayer == null || !MyPlayer.IsAlive() && !action.TriggerWhenDead) continue;
 
             try
@@ -237,7 +214,7 @@ public abstract class AbstractBaseRole
 
                 handle.ActionType = actionType;
 
-                if (handle.IsCanceled) continue;
+                if (handle.Cancellation is not (ActionHandle.CancelType.None or ActionHandle.CancelType.Soft)) continue;
 
                 action.Execute(this, parameters);
             }

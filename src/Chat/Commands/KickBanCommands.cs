@@ -1,7 +1,5 @@
 using Lotus.Extensions;
 using Lotus.Managers;
-using Lotus.Roles;
-using Lotus.Roles.Interactions;
 using Lotus.Utilities;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;

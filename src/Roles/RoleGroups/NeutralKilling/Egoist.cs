@@ -8,7 +8,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Factions.Interfaces;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
 using UnityEngine;

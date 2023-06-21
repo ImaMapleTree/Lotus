@@ -15,6 +15,7 @@ using Lotus.Roles.Interactions;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Vanilla;
@@ -242,11 +243,11 @@ public class Mafioso: Engineer
                 .BindBool(b => modifyShopCosts = b)
                 .ShowSubOptionPredicate(b => (bool)b)
                 .SubOption(sub2 => sub2.KeyName("Gun Cost", GunCost)
-                    .AddIntRange(0, 20, 1, 3)
+                    .AddIntRange(0, 20, 1, 5)
                     .BindInt(i => gunCost = i)
                     .Build())
                 .SubOption(sub2 => sub2.KeyName("Bullet Cost", BulletCost)
-                    .AddIntRange(0, 20, 1, 0)
+                    .AddIntRange(0, 20, 1, 1)
                     .BindInt(i => bulletCost = i)
                     .Build())
                 .SubOption(sub2 => sub2.KeyName("Vest Cost", VestCost)

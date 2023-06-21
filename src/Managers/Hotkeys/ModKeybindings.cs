@@ -4,6 +4,7 @@ using Lotus.API.Vanilla.Meetings;
 using Lotus.Chat.Commands;
 using Lotus.Roles.Interactions;
 using Lotus.Extensions;
+using Lotus.GUI.Menus.OptionsMenu.Patches;
 using Lotus.Options;
 using Lotus.Patches.Client;
 using Lotus.Roles;
@@ -47,7 +48,7 @@ public class ModKeybindings
 
         // Restart countdown timer
         Bind(KeyCode.C)
-            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown))
+            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown && !HudManager.Instance.Chat.IsOpen))
             .Do(() =>
             {
                 GeneralOptions.AdminOptions.AutoStartMaxTime = -1;
@@ -80,6 +81,10 @@ public class ModKeybindings
         Bind(KeyCode.F7)
             .If(p => p.State(GameState.InLobby, GameState.Roaming).Predicate(() => MeetingHud.Instance == null))
             .Do(() => HudManager.Instance.gameObject.SetActive(hudActive = !hudActive));
+
+        Bind(KeyCode.Escape)
+            .If(p => p.Predicate(() => GameOptionMenuOpenPatch.MenuBehaviour != null && GameOptionMenuOpenPatch.MenuBehaviour.IsOpen))
+            .Do(() => GameOptionMenuOpenPatch.MenuBehaviour.Close());
     }
 
     private static void DumpLog()

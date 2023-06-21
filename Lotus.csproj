@@ -2,8 +2,9 @@
   <PropertyGroup>
     <TargetFramework>net6.0</TargetFramework>
     <Description>Project Lotus</Description>
-    <Authors>Discussions, Tealeaf</Authors>
+    <Authors>Tealeaf, Discussions</Authors>
     <langVersion>latest</langVersion>
+    <AmongUs>E:\SteamLibrary\steamapps\common\Among Us</AmongUs>
     <RootNamespace>Lotus</RootNamespace>
     <Nullable>enable</Nullable>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
@@ -18,6 +19,7 @@
   
   
   <ItemGroup>
+    <!--<Reference Include="E:\SteamLibrary\steamapps\common\Among Us - LOTUS\dump\Assembly-CSharp-2023.6.13.dll" />-->
     <PackageReference Include="AmongUs.GameLibs.Steam" Version="2023.6.13" />
     <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" PrivateAssets="all" />
     <PackageReference Include="JetBrains.Annotations" Version="2023.2.0-eap2">
@@ -54,4 +56,10 @@
     <Content Remove="./SourceGenerators/**/*" />
     <Compile Remove="./SourceGenerators/**/*" />
   </ItemGroup>
+  
+  
+  <Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" Condition="'$(Configuration)' == 'Debug'" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs) - Copy/BepInEx/plugins/" Condition="'$(Configuration)' == 'Debug'" />
+  </Target>
 </Project>

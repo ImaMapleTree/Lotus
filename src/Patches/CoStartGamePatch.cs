@@ -2,6 +2,7 @@
 using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Managers;
 using Lotus.Options;
 using VentLib.Utilities.Extensions;
@@ -13,7 +14,7 @@ class CoStartGamePatch
 {
     public static void Prefix(AmongUsClient __instance)
     {
-        if (GeneralOptions.MiscellaneousOptions.ColorNameMode) Game.GetAllPlayers().ForEach(player =>
+        if (GeneralOptions.MiscellaneousOptions.ColorNameMode) Players.GetPlayers().ForEach(player =>
         {
             if (player == null) return;
             string colorName = player.Data.ColorName.Trim('(', ')');
@@ -30,7 +31,7 @@ class CoStartGamePatch
         FallFromLadder.Reset();
 
         Game.State = GameState.InIntro;
-        Game.GetAllPlayers().Do(p => Game.MatchData.Roles.MainRoles[p.PlayerId] = CustomRoleManager.Default);
+        Players.GetPlayers().Do(p => Game.MatchData.Roles.MainRoles[p.PlayerId] = CustomRoleManager.Default);
         Game.CurrentGamemode.Setup();
     }
 }

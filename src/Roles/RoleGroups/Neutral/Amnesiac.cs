@@ -13,8 +13,7 @@ using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Interfaces;
-using Lotus.Roles.Legacy;
-using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -59,9 +58,9 @@ public class Amnesiac : CustomRole, IVariableRole
 
         if (!stealExactRole)
         {
-            if (targetRole.SpecialType == SpecialType.NeutralKilling)
+            if (targetRole.SpecialType is SpecialType.NeutralKilling)
                 targetRole = CustomRoleManager.Static.Hitman;
-            else if (targetRole.SpecialType == SpecialType.Neutral)
+            else if (targetRole.SpecialType is SpecialType.Neutral)
                 targetRole = CustomRoleManager.Static.Opportunist;
             else if (targetRole.Faction is Crewmates)
                 targetRole = CustomRoleManager.Static.Sheriff;
@@ -74,6 +73,7 @@ public class Amnesiac : CustomRole, IVariableRole
         MatchData.AssignRole(MyPlayer, newRole);
 
         CustomRole role = MyPlayer.GetCustomRole();
+        if (role.RealRole is RoleTypes.Crewmate or RoleTypes.Scientist) role.RoleAbilityFlags |= RoleAbilityFlag.CannotVent;
         role.DesyncRole = RoleTypes.Impostor;
         arrowComponent?.Delete();
         handle.Cancel();

@@ -11,6 +11,7 @@ using Lotus.Chat;
 using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Subroles;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;

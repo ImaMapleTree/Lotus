@@ -60,6 +60,7 @@ public class MeetingOptions
 
     private GameOptionBuilder Builder(string key) => new GameOptionBuilder().Key(key).Tab(DefaultTabs.GeneralTab).Color(_optionColor);
 
+    [Localized("Meetings")]
     public static class MeetingOptionTranslations
     {
         [Localized(nameof(ButtonsRemainingMessage))]

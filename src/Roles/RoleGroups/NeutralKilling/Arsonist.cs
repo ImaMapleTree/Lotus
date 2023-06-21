@@ -1,7 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Stats;
@@ -13,10 +12,10 @@ using Lotus.GUI.Name.Holders;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -83,7 +82,7 @@ public class Arsonist : NeutralKillingBase
         if (progress > requiredAttacks) return;
         string indicator = _douseProgressIndicators[Mathf.Clamp(Mathf.FloorToInt(progress / (requiredAttacks / (float)_douseProgressIndicators.Length) - 1), 0, 3)];
 
-        Remote<IndicatorComponent> IndicatorSupplier() => target.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent("", GameStates.IgnStates, viewers: MyPlayer));
+        Remote<IndicatorComponent> IndicatorSupplier() => target.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent("", Game.IgnStates, viewers: MyPlayer));
 
         Remote<IndicatorComponent> component = indicators.GetOrCompute(target.PlayerId, IndicatorSupplier);
         component.Get().SetMainText(new LiveString(indicator, RoleColor));

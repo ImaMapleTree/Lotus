@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using Lotus.Utilities;
-using Lotus.Managers;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.API.Odyssey;
@@ -11,7 +10,10 @@ public class VanillaRoleTracker
 {
     private Dictionary<byte, TeamInfo> roleDictionary = new();
 
-    public TeamInfo GetInfo(byte player) => roleDictionary.GetOrCompute(player, () => new TeamInfo(player));
+    public TeamInfo GetInfo(byte player)
+    {
+        return roleDictionary.GetOrCompute(player, () => new TeamInfo(player));
+    }
 
     public IEnumerable<PlayerControl> GetAllImpostors(byte playerId)
     {
@@ -59,6 +61,11 @@ public class VanillaRoleTracker
             if (playerId == myPlayer) return;
             if (isImpostor) AddVanillaImpostor(playerId);
             else AddVanillaCrewmate(playerId);
+        }
+
+        public override string ToString()
+        {
+            return $"TeamInfo(player={myPlayer}, role={MyRole})";
         }
     }
 }

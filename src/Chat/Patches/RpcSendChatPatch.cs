@@ -4,7 +4,6 @@ using Hazel;
 using Lotus.Managers.Hotkeys;
 using UnityEngine;
 using VentLib.Networking.RPC;
-using VentLib.Utilities.Collections;
 using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Chat.Patches;

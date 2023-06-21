@@ -1,11 +1,11 @@
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Factions;
-using Lotus.API;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 
-namespace Lotus.Roles.RoleGroups.Crew.Ingredients;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients;
 
 public class IngredientDeath: Ingredient, IWorldIngredient
 {

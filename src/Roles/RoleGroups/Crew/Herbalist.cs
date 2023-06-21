@@ -12,6 +12,7 @@ using Lotus.GUI.Name.Holders;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Localization.Attributes;

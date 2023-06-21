@@ -1,4 +1,5 @@
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 
 namespace Lotus.Roles.Subroles;
@@ -25,7 +26,7 @@ public class LoversReal: Subrole
 
         if (!originalLovers) return;
 
-        List<PlayerControl> matchCandidates = Game.GetAllPlayers().Where(p => p.PlayerId != player.PlayerId && p.GetSubrole<Lovers>() == null).ToList();
+        List<PlayerControl> matchCandidates = Players.GetPlayers().Where(p => p.PlayerId != player.PlayerId && p.GetSubrole<Lovers>() == null).ToList();
         if (!matchCandidates.Any()) return;
         Partner = matchCandidates.GetRandom();
         Partner.GetDynamicName().AddRule(GameState.Roaming, UI.Subrole, new DynamicString(RoleColor.Colorize("♡")), MyPlayer.PlayerId);

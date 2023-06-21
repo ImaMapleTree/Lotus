@@ -2,7 +2,6 @@ using System.Collections;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
@@ -10,16 +9,17 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Options;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Roles;
-using Lotus.Roles.Extra;
+using Lotus.Roles.Internals.Enums;
 using Lotus.RPC;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
+using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
+using static VentLib.Utilities.Debug.Profiling.Profilers;
 
 namespace Lotus.Patches.Intro;
 
@@ -29,22 +29,30 @@ class IntroDestroyPatch
 {
     public static void Postfix(IntroCutscene __instance)
     {
+        Profiler.Sample destroySample = Global.Sampler.Sampled();
         Game.State = GameState.Roaming;
-        if (!GameStates.IsInGame) return;
         if (!AmongUsClient.Instance.AmHost) return;
-
-        if (PlayerControl.LocalPlayer.GetCustomRole() is GM) PlayerControl.LocalPlayer.RpcExileV2(false);
 
         string pet = GeneralOptions.MiscellaneousOptions.AssignedPet;
         while (pet == "Random") pet = ModConstants.Pets.Values.ToList().GetRandom();
 
-        Game.GetAllPlayers().ForEach(p => Async.Execute(PreGameSetup(p, pet)));
+        Profiler.Sample fullSample = Global.Sampler.Sampled("Setup ALL Players");
+        Players.GetPlayers().ForEach(p =>
+        {
+            Profiler.Sample executeSample = Global.Sampler.Sampled("Execution Pregame Setup");
+            Async.Execute(PreGameSetup(p, pet));
+            executeSample.Stop();
+        });
+        fullSample.Stop();
 
+        Profiler.Sample propSample = Global.Sampler.Sampled("Propagation Sample");
         VentLogger.Trace("Intro Scene Ending", "IntroCutscene");
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.RoundStart, ref handle, true);
+        propSample.Stop();
 
         Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
+        destroySample.Stop();
     }
 
     private static IEnumerator PreGameSetup(PlayerControl player, string pet)
@@ -65,7 +73,7 @@ class IntroDestroyPatch
         if (GeneralOptions.MayhemOptions.RandomSpawn) Game.RandomSpawn.Spawn(player);
 
         player.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3);
-        yield return new WaitForSeconds(0.15f);
+        yield return new WaitForSeconds(200f);
         if (player == null) yield break;
 
         GameData.PlayerInfo playerData = player.Data;

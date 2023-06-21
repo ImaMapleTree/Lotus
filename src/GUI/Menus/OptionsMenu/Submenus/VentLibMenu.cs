@@ -4,7 +4,6 @@ using TMPro;
 using Lotus.Utilities;
 using UnityEngine;
 using UnityEngine.Events;
-using VentLib.Logging;
 using VentLib.Networking;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;

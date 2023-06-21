@@ -1,14 +1,13 @@
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.Factions.Undead;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
-using Lotus.GUI.Name.Impl;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Interactions.Interfaces;
@@ -17,12 +16,11 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Victory;
 using Lotus.Extensions;
-using Lotus.Managers;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;
-using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Roles.RoleGroups.Undead.Roles;
@@ -103,7 +101,7 @@ public class Necromancer : UndeadRole
         MatchData.AssignRole(target, _deathknight);
         myDeathknight = target.GetCustomRole<Deathknight>();
         target.NameModel().GetComponentHolder<RoleHolder>()[^1]
-            .SetViewerSupplier(() => Game.GetAllPlayers().Where(p => p.PlayerId == target.PlayerId || p.Relationship(target) is Relation.FullAllies).ToList());
+            .SetViewerSupplier(() => Players.GetPlayers().Where(p => p.PlayerId == target.PlayerId || p.Relationship(target) is Relation.FullAllies).ToList());
 
         VentLogger.Fatal($"Indicator count 22: {target.NameModel().GetComponentHolder<IndicatorHolder>().Count}");
         Game.MatchData.GameHistory.AddEvent(new RoleChangeEvent(target, _deathknight));

@@ -10,6 +10,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -75,6 +76,7 @@ public class Crusader: Crewmate, ISabotagerRole
         base.Modify(roleModifier)
             .DesyncRole(RoleTypes.Impostor)
             .RoleFlags(RoleFlag.CannotWinAlone)
+            .RoleAbilityFlags(RoleAbilityFlag.CannotVent)
             .RoleColor(new Color(0.78f, 0.36f, 0.22f))
             .OptionOverride(new IndirectKillCooldown(() => AUSettings.KillCooldown()))
             .OptionOverride(Override.ImpostorLightMod, () => AUSettings.CrewLightMod());

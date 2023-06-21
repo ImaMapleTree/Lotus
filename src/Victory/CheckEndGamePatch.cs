@@ -5,7 +5,6 @@ using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
-using Lotus.Logging;
 using Lotus.Managers.History;
 using Lotus.Managers.Hotkeys;
 using Lotus.Options;

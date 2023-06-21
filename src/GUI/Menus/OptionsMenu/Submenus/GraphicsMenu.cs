@@ -7,7 +7,6 @@ using Lotus.Utilities;
 using TMPro;
 using UnityEngine;
 using UnityEngine.Events;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;

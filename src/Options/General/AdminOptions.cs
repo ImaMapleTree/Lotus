@@ -2,7 +2,6 @@ using System.Collections.Generic;
 using Lotus.Managers;
 using Lotus.Extensions;
 using Lotus.GUI;
-using Lotus.Logging;
 using Lotus.Patches.Network;
 using UnityEngine;
 using VentLib.Localization.Attributes;

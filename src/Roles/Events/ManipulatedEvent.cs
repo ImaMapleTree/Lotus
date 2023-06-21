@@ -1,6 +1,5 @@
 using Lotus.API.Odyssey;
 using Lotus.Managers.History.Events;
-using Lotus.API;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.Events;

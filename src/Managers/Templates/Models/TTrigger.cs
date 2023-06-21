@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using System.Linq;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
+using Lotus.Logging;
 using Lotus.Managers.Templates.Models.Units;
 using VentLib.Logging;
 using VentLib.Utilities.Debug.Profiling;
@@ -22,9 +22,12 @@ public class TTrigger: TemplateUnit
         Events?.ForEach(ev =>
         {
             string key = $"{nameof(TTrigger)}~{TemplateManager.GlobalTriggerCount++}";
-            VentLogger.Trace($"Binding Template Trigger \"{key}\"", "TemplateTriggers");
             Hook? hook = TemplateTriggers.BindTrigger(key, ev, tr => RunTemplateCallback(ev, tr));
-            if (hook != null) BoundHooks[key] = hook;
+            if (hook != null)
+            {
+                VentLogger.Trace($"Successfully bound Template Trigger \"{key}\" for \"{ev}\"", "TemplateTriggers");
+                BoundHooks[key] = hook;
+            } else VentLogger.Trace($"Could not bind Template Trigger \"{key}\" for \"{ev}\"", "TemplateTriggers");
         });
     }
 
@@ -35,9 +38,11 @@ public class TTrigger: TemplateUnit
         else
         {
             MetaVariable = result.Data;
+            DevLogger.Log($"Meta Variable: {MetaVariable}");
             if (result.Player != null) Triggerer = result.Player.PlayerId;
 
-            if (Conditions.All(c => c.Evaluate(result.Player)))
+            DevLogger.Log($"Result: {Evaluate(result.Player)}");
+            if (Evaluate(result.Player))
                 Players.GetPlayers().ForEach(p => Parent.SendMessage(p, p, p));
 
             MetaVariable = null;

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Lotus.API.Odyssey;
 using Lotus.GUI.Name.Impl;
-using Lotus.API;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.GUI.Name.Interfaces;

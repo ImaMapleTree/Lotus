@@ -1,6 +1,7 @@
 using AmongUs.GameOptions;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using UnityEngine;
 using VentLib.Options.Game;

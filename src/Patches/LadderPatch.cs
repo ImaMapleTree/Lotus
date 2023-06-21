@@ -4,10 +4,8 @@ using Lotus.Extensions;
 using Lotus.Options;
 using Lotus.Roles;
 using Lotus.Roles.Interactions;
-using Lotus.RPC;
 using Lotus.Utilities;
 using UnityEngine;
-using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
 namespace Lotus.Patches

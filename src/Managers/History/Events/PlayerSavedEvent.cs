@@ -1,6 +1,5 @@
 using Lotus.API.Odyssey;
 using Lotus.Roles;
-using Lotus.API;
 using Lotus.API.Player;
 using Lotus.Extensions;
 using VentLib.Utilities.Optionals;
@@ -22,7 +21,7 @@ public class PlayerSavedEvent : IRecipientEvent
     {
         this.savedPlayer = savedPlayer;
         playerRole = Optional<CustomRole>.Of(this.savedPlayer.GetCustomRole());
-        this.savior = Optional<FrozenPlayer>.Of(Game.MatchData.FrozenPlayer(savior));
+        this.savior = Optional<FrozenPlayer>.Of(Game.MatchData.GetFrozenPlayer(savior));
         this.saviorRole = this.savior.FlatMap(p => new UnityOptional<PlayerControl>(p.MyPlayer)).Map(p => p.GetCustomRole());
         this.killer = Optional<PlayerControl>.Of(killer);
         this.killerRole = this.killer.Map(p => p.GetCustomRole());

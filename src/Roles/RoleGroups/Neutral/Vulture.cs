@@ -13,6 +13,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -37,8 +38,6 @@ public class Vulture : CustomRole
     private bool canSwitchMode;
     private bool hasArrowsToBodies;
     private bool isEatMode = true;
-
-
 
     [UIComponent(UI.Counter)]
     private string BodyCounter() => RoleUtils.Counter(bodyCount, bodyAmount, RoleColor);

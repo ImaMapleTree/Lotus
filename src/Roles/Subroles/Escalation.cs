@@ -2,6 +2,7 @@
 using Lotus.Extensions;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using UnityEngine;
 using VentLib.Localization.Attributes;

@@ -1,16 +1,16 @@
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API.Odyssey;
-using Lotus.Roles.Internals.Attributes;
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
-using Lotus.API;
+using Lotus.API.Player;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
-namespace Lotus.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist;
 
 public partial class Alchemist
 {
@@ -31,7 +31,7 @@ public partial class Alchemist
     private static void CheckDiscussionSpawn()
     {
         if (Random.RandomRangeInt(0, IngredientTinkering.SpawnOdds + 1) != IngredientTinkering.SpawnOdds) return;
-        List<PlayerControl> alivePlayers = Game.GetAlivePlayers().ToList();
+        List<PlayerControl> alivePlayers = Players.GetPlayers(PlayerFilter.Alive).ToList();
         if (alivePlayers.Count < 3) return;
         PlayerControl randomAlivePlayer = alivePlayers.GetRandom();
         if (randomAlivePlayer.GetPlayersInAbilityRangeSorted().Count >= 2)

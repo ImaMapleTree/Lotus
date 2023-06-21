@@ -2,7 +2,6 @@ using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Roles;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.API;
 using Lotus.Extensions;
 using VentLib.Utilities.Optionals;
 

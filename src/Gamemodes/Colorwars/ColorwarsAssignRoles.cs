@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Lotus.API;
 using Lotus.Managers;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
 using VentLib.Networking.RPC;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities;
-using SerialKiller = Lotus.Roles.RoleGroups.Impostors.SerialKiller;
 
 namespace Lotus.Gamemodes.Colorwars;
 

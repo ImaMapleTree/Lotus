@@ -19,13 +19,13 @@ public class TemplateManager
 {
     public static int GlobalTriggerCount;
 
-    private IDeserializer deserializer = new DeserializerBuilder()
+    public static IDeserializer TemplateDeserializer = new DeserializerBuilder()
         .IgnoreUnmatchedProperties()
         .WithDuplicateKeyChecking()
         .WithNamingConvention(PascalCaseNamingConvention.Instance)
         .Build();
 
-    private ISerializer serializer = new SerializerBuilder()
+    public static ISerializer TemplateSerializer = new SerializerBuilder()
         .ConfigureDefaultValuesHandling(DefaultValuesHandling.OmitNull)
         .WithNamingConvention(PascalCaseNamingConvention.Instance)
         .Build();
@@ -147,7 +147,7 @@ public class TemplateManager
             string result;
             using (StreamReader reader = new(templateFileInfo.Open(FileMode.OpenOrCreate))) result = reader.ReadToEnd();
             if (result == null!) tFile = new TemplateFile();
-            else tFile = deserializer.Deserialize<TemplateFile>(result);
+            else tFile = TemplateDeserializer.Deserialize<TemplateFile>(result);
             if (tFile == null!) tFile = new TemplateFile();
 
             allTemplates = tFile.Templates;
@@ -170,7 +170,7 @@ public class TemplateManager
 
     public void SaveTemplates()
     {
-        string yaml = serializer.Serialize(tFile);
+        string yaml = TemplateSerializer.Serialize(tFile);
         using FileStream stream = templateFileInfo.Open(FileMode.Create);
         stream.Write(Encoding.UTF8.GetBytes(yaml));
     }

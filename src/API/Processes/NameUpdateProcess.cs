@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Extensions;
-using Lotus.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Debug.Profiling;
@@ -20,12 +20,13 @@ public class NameUpdateProcess
     internal static bool Paused;
     private static Queue<PlayerControl> _players = new();
 
+    private static int _forceRenderCounter;
     private static int _forceFixCount;
     private static readonly HashSet<byte> ForceFixedPlayers = new();
 
     static NameUpdateProcess()
     {
-        Hooks.GameStateHooks.GameStartHook.Bind(NameUpdateProcessHookKey, _ => Game.GetAllPlayers().ForEach(p => _players.Enqueue(p)));
+        Hooks.GameStateHooks.GameStartHook.Bind(NameUpdateProcessHookKey, _ => Players.GetPlayers().ForEach(p => _players.Enqueue(p)));
         Hooks.GameStateHooks.RoundStartHook.Bind(NameUpdateProcessHookKey, _ =>
         {
             if (!AmongUsClient.Instance.AmHost) return;
@@ -34,6 +35,7 @@ public class NameUpdateProcess
             {
                 ForceFixedPlayers.Clear();
                 _forceFixCount = _players.Count;
+                _forceRenderCounter = 0;
             }, 1f);
             NameUpdateLoop();
         });
@@ -43,7 +45,12 @@ public class NameUpdateProcess
 
     public static void NameUpdateLoop()
     {
-        if (_players.Count == 0) _players = new Queue<PlayerControl>(PlayerControl.AllPlayerControls.ToArray());
+        if (_players.Count == 0)
+        {
+            _players = new Queue<PlayerControl>(PlayerControl.AllPlayerControls.ToArray());
+            _forceRenderCounter++;
+            if (_forceRenderCounter > 100) _forceRenderCounter = 0;
+        }
 
         if (Paused || Game.State is GameState.InMeeting)
         {
@@ -67,7 +74,7 @@ public class NameUpdateProcess
         bool updated = false;
         allPlayers.ForEach(p =>
         {
-            nameModel.RenderFor(p);
+            nameModel.RenderFor(p, force: _forceRenderCounter == 100);
             updated |= (nameModel.Updated() && !player.IsAlive());
         });
         sample.Stop();
@@ -76,7 +83,6 @@ public class NameUpdateProcess
         if (player.IsAlive()) return;
         if (_forceFixCount-- <= 0 || ForceFixedPlayers.Contains(player.PlayerId))
             if (!updated) return;
-        DevLogger.Log($"Fixing for: {player.name}");
         ForceFixedPlayers.Add(player.PlayerId);
         player.SetChatName(player.name);
     }

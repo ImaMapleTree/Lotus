@@ -163,15 +163,16 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
         bool isStartOfGame = Game.State is GameState.InIntro or GameState.InLobby;
 
-        PlayerControl[] alliedPlayers = Game.GetAllPlayers().Where(p => Relationship(p) is Relation.FullAllies).ToArray();
+        PlayerControl[] alliedPlayers = Players.GetPlayers().Where(p => Relationship(p) is Relation.FullAllies).ToArray();
 
         if (RealRole.IsCrewmate())
         {
+            DevLogger.Log($"Real Role: {RealRole}");
             MyPlayer.RpcSetRole(RealRole);
 
             if (!isStartOfGame) goto finishAssignment;
 
-            Game.GetAllPlayers().ForEach(p => p.GetTeamInfo().AddPlayer(MyPlayer.PlayerId, MyPlayer.GetVanillaRole().IsImpostor()));
+            Players.GetPlayers().ForEach(p => p.GetTeamInfo().AddPlayer(MyPlayer.PlayerId, MyPlayer.GetVanillaRole().IsImpostor()));
 
             goto finishAssignment;
         }
@@ -185,7 +186,11 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         HashSet<byte> alliedPlayerIds = alliedPlayers.Where(p => Faction.CanSeeRole(p)).Select(p => p.PlayerId).ToHashSet();
         int[] alliedPlayerClientIds = alliedPlayers.Where(p => Faction.CanSeeRole(p)).Select(p => p.GetClientId()).ToArray();
 
-        PlayerControl[] crewmates = Game.GetAllPlayers().Where(p => p.GetVanillaRole().IsCrewmate()).ToArray();
+        PlayerControl[] crewmates = Players.GetPlayers().Where(p =>
+        {
+            DevLogger.Log($"Checking: {p.name} ({p.GetVanillaRole()})");
+            return p.GetVanillaRole().IsCrewmate();
+        }).ToArray();
         int[] crewmateClientIds = crewmates.Select(p => p.GetClientId()).ToArray();
         VentLogger.Trace($"Current Crewmates: [{crewmates.Select(p => p.name).Fuse()}]");
 
@@ -250,7 +255,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         if (this is ISubrole subrole)
         {
             if (subrole.Identifier() != null) nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(subrole, gameStates, viewers: MyPlayer));
-            else nameModel.GetComponentHolder<RoleHolder>().Insert(0, new RoleComponent(this, gameStates, ViewMode.Additive, MyPlayer));
+            else nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(this, gameStates, ViewMode.Additive, MyPlayer));
         }
         else nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(this, gameStates, ViewMode.Overriden, MyPlayer));
         SetupUiFields(nameModel);

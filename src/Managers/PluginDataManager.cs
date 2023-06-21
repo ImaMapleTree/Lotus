@@ -27,7 +27,6 @@ public static class PluginDataManager
     private const string BannedPlayerFile = "BannedPlayers.yaml";
 
     private const string FriendListFile = "Friends.txt";
-    private const string LastKnownAsFile = "LastKnownAs.json";
     private const string TemplateCommandFile = "TemplateCommands.txt";
 
     public static readonly DirectoryInfo LegacyDataDirectoryTOH;

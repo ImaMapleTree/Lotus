@@ -6,7 +6,9 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Logging;
 using Lotus.Managers.Templates.Models;
 using VentLib.Logging;
+using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
+using VentLib.Utilities.Optionals;
 
 namespace Lotus.Managers.Templates;
 
@@ -14,6 +16,11 @@ public class TemplateTriggers
 {
     public static Dictionary<string, TriggerBinder> TriggerHooks = new()
     {
+        { "LobbyStart", (key, action) => Hooks.NetworkHooks.GameJoinHook.Bind(key, ev => Async.WaitUntil(() => { }, () => ev.Loaded, () =>
+        {
+            if (AmongUsClient.Instance.AmHost) action(ev);
+        }, maxRetries: 30), true) },
+
         { "PlayerDeath", (key, action) => Hooks.PlayerHooks.PlayerDeathHook.Bind(key, action, true) },
         { "PlayerDisconnect", (key, action) => Hooks.PlayerHooks.PlayerDisconnectHook.Bind(key, action, true) },
         { "PlayerChat", (key, action) => Hooks.PlayerHooks.PlayerMessageHook.Bind(key, action, true) },
@@ -26,15 +33,22 @@ public class TemplateTriggers
     {
         { typeof(PlayerMessageHookEvent), he => ResultFromPlayerMessageHook((PlayerMessageHookEvent)he) },
 
+        { typeof(GameJoinHookEvent), he => ResultFromGameJoinHook((GameJoinHookEvent)he) },
+
         { typeof(PlayerStatusReceivedHook), he => ResultFromPlayerStatusHook((PlayerStatusReceivedHook)he) },
 
         { typeof(PlayerTaskHookEvent), he => ResultFromPlayerTaskHook((PlayerTaskHookEvent)he) },
 
-        { typeof(PlayerMurderHookEvent), he => ResultFromPlayerHook((PlayerDeathHookEvent)he) },
+        { typeof(PlayerMurderHookEvent), he => ResultFromPlayerDeathHook((PlayerDeathHookEvent)he) },
         { typeof(PlayerDeathHookEvent), he => ResultFromPlayerHook((PlayerDeathHookEvent)he) },
         { typeof(PlayerHookEvent), he => ResultFromPlayerHook((PlayerHookEvent)he) },
         { typeof(EmptyHookEvent), he => ResultFromEmptyHook((EmptyHookEvent)he) },
     };
+
+    public static ResolvedTrigger ResultFromGameJoinHook(GameJoinHookEvent gje)
+    {
+        return new ResolvedTrigger { Player = PlayerControl.LocalPlayer, Data = gje.IsNewLobby.ToString() };
+    }
 
     public static ResolvedTrigger ResultFromEmptyHook(EmptyHookEvent _)
     {
@@ -54,6 +68,11 @@ public class TemplateTriggers
     public static ResolvedTrigger ResultFromPlayerMessageHook(PlayerMessageHookEvent playerHookEvent)
     {
         return new ResolvedTrigger { Player = playerHookEvent.Player, Data = playerHookEvent.Message };
+    }
+
+    public static ResolvedTrigger ResultFromPlayerDeathHook(PlayerDeathHookEvent playerHookEvent)
+    {
+        return new ResolvedTrigger { Player = playerHookEvent.Player, Data = playerHookEvent.CauseOfDeath.Instigator().FlatMap(fp => new UnityOptional<PlayerControl>(fp.MyPlayer)).Map(p => p.name).OrElse("Unknown") };
     }
 
     public static ResolvedTrigger ResultFromPlayerHook(PlayerHookEvent playerHookEvent)

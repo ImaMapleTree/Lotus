@@ -3,6 +3,7 @@ using AmongUs.GameOptions;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Stats;
+using Lotus.API.Vanilla.Sabotages;
 using Lotus.Factions;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
@@ -11,7 +12,9 @@ using Lotus.Victory.Conditions;
 using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
+using Lotus.Patches.Systems;
 using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -30,7 +33,7 @@ public class Jester : CustomRole
 
 
     [UIComponent(UI.Counter)]
-    public string MeetingCounter() => meetingThreshold > 0 ? RoleUtils.Counter(Game.MatchData.MeetingsCalled, meetingThreshold, RoleColor) : "";
+    public string MeetingCounter() => meetingThreshold > 0 ? RoleUtils.Counter(Mathf.Min(Game.MatchData.MeetingsCalled, meetingThreshold), meetingThreshold, RoleColor) : "";
 
     [RoleAction(RoleActionType.SelfExiled)]
     public void JesterWin()
@@ -77,6 +80,7 @@ public class Jester : CustomRole
             .RoleFlags(RoleFlag.CannotWinAlone)
             .RoleColor(new Color(0.93f, 0.38f, 0.65f))
             .OptionOverride(Override.CrewLightMod, () => AUSettings.ImpostorLightMod(), () => impostorVision)
+            .OptionOverride(Override.CrewLightMod, () => AUSettings.ImpostorLightMod() * 5, () => impostorVision && SabotagePatch.CurrentSabotage?.SabotageType() is SabotageType.Lights)
             .OptionOverride(Override.EngVentDuration, 100f)
             .OptionOverride(Override.EngVentCooldown, 0.1f);
     }

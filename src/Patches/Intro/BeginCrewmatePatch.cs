@@ -4,13 +4,13 @@ using HarmonyLib;
 using Lotus.Managers;
 using Lotus.Roles;
 using Lotus.Roles.Extra;
-using Lotus.Roles.Legacy;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Impostors;
 using Lotus.Roles.RoleGroups.Neutral;
 using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Extensions;
-using Lotus.Roles.Internals;
+using Lotus.Logging;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
@@ -23,6 +23,7 @@ class BeginCrewmatePatch
     public static void Postfix(IntroCutscene __instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> teamToDisplay)
     {
         //チーム表示変更
+        DevLogger.Log("Begin Crewmate");
         CustomRole role = PlayerControl.LocalPlayer.GetCustomRole();
 
         switch (role.SpecialType)
@@ -100,6 +101,7 @@ class BeginCrewmatePatch
         int milliseconds = 0;
         while (true)
         {
+            DevLogger.Log("???");
             await System.Threading.Tasks.Task.Delay(20);
             milliseconds += 20;
             float time = milliseconds / (float)500;

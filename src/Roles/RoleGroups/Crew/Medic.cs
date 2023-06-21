@@ -1,5 +1,4 @@
 using System.Diagnostics.CodeAnalysis;
-using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.Chat;
@@ -10,6 +9,7 @@ using Lotus.Managers.History.Events;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -87,7 +87,7 @@ public class Medic: Crewmate
         protectedIndicator?.Delete();
         guardedPlayer = player;
         protectedIndicator = voted.NameModel().GCH<IndicatorHolder>().Add(new SimpleIndicatorComponent("<b>+</b>", CrossColor, Game.IgnStates, MyPlayer));
-        Game.GetDeadPlayers().ForEach(p => protectedIndicator?.Get().AddViewer(p));
+        Players.GetPlayers(PlayerFilter.Dead).ForEach(p => protectedIndicator?.Get().AddViewer(p));
 
         CHandler(SelectedPlayerMessage.Formatted(Players.FindPlayerById(guardedPlayer)?.name)).Send(MyPlayer);
     }

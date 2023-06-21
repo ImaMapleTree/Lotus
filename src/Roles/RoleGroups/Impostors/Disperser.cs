@@ -1,15 +1,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Lotus.API.Odyssey;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
-using Lotus.API;
+using Lotus.API.Player;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -34,7 +34,7 @@ public class Disperser: Impostor
         abilityCooldown.Start();
         List<Vent> vents = Object.FindObjectsOfType<Vent>().ToList();
         if (vents.Count == 0) return;
-        Game.GetAlivePlayers()
+        Players.GetPlayers(PlayerFilter.Alive)
             .Where(p => disperserDispersed || p.PlayerId != MyPlayer.PlayerId)
             .Do(p =>
             {

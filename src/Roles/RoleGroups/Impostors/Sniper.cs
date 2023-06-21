@@ -1,15 +1,15 @@
 using System.Linq;
-using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Options;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Logging;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -60,7 +60,7 @@ public class Sniper: Shapeshifter
         DevLogger.Log($"Target Position: {targetPosition}");
         int kills = 0;
 
-        foreach (PlayerControl target in Game.GetAllPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && p.Relationship(MyPlayer) is not Relation.FullAllies))
+        foreach (PlayerControl target in Players.GetPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId && p.Relationship(MyPlayer) is not Relation.FullAllies))
         {
             DevLogger.Log(target.name);
             Vector3 targetPos = target.transform.position - (Vector3)MyPlayer.GetTruePosition();

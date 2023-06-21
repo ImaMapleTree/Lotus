@@ -1,6 +1,5 @@
 #nullable enable
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
@@ -11,7 +10,6 @@ using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
-using Lotus.Gamemodes.Standard;
 using Lotus.Logging;
 using Lotus.Managers;
 using Lotus.Managers.History.Events;
@@ -19,6 +17,7 @@ using Lotus.Patches.Actions;
 using Lotus.Roles;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.Subroles;
 using UnityEngine;
@@ -28,7 +27,6 @@ using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Optionals;
-using GameStates = Lotus.API.GameStates;
 
 namespace Lotus.Extensions;
 
@@ -60,7 +58,7 @@ public static class PlayerControlExtensions
         {
             DevLogger.Log(roleAction);
             PlayerControl myPlayer = abstractBaseRole.MyPlayer;
-            if (handle.IsCanceled) continue;
+            if (handle.Cancellation is not (ActionHandle.CancelType.None or ActionHandle.CancelType.Soft)) continue;
             if (myPlayer == null || !myPlayer.IsAlive() && !roleAction.TriggerWhenDead) continue;
 
             try
@@ -73,7 +71,7 @@ public static class PlayerControlExtensions
 
                 handle.ActionType = action;
 
-                if (handle.IsCanceled) continue;
+                if (handle.Cancellation is not (ActionHandle.CancelType.None or ActionHandle.CancelType.Soft)) continue;
 
                 roleAction.Execute(abstractBaseRole, parameters);
             }
@@ -142,7 +140,7 @@ public static class PlayerControlExtensions
 
     public static List<CustomRole> GetSubroles(this PlayerControl player)
     {
-        return Game.MatchData.Roles.SubRoles.GetValueOrDefault(player.PlayerId, new List<CustomRole>());
+        return Game.MatchData.Roles.SubRoles.GetOrCompute(player.PlayerId, () => new List<CustomRole>());
     }
 
     public static void SyncAll(this PlayerControl player)
@@ -168,6 +166,7 @@ public static class PlayerControlExtensions
     public static void RpcMark(this PlayerControl killer, PlayerControl? target = null, int colorId = 0)
     {
         if (target == null) target = killer;
+        MurderPatches.Lock(killer.PlayerId);
 
         // Host
         if (killer.AmOwner)
@@ -251,7 +250,7 @@ public static class PlayerControlExtensions
     public static string GetNameWithRole(this PlayerControl? player)
     {
         if (player == null) return "";
-        return $"{player.name}" + (GameStates.IsInGame ? $"({player.GetAllRoleName()})" : "");
+        return $"{player.name}" + (Game.State is GameState.Roaming ? $"({player.GetAllRoleName()})" : "");
     }
 
     public static Color GetRoleColor(this PlayerControl player)
@@ -303,12 +302,12 @@ public static class PlayerControlExtensions
         VentLogger.Trace($"{player.name} vaporize => {target.name}");
         target.RpcExileV2(false, false);
 
-        MurderPatches.MurderLocks.GetOrCompute(player.PlayerId, MurderPatches.TimeoutSupplier).AcquireLock();
+        MurderPatches.Lock(player.PlayerId);
 
         deathEvent ??= new DeathEvent(target, player);
 
         ActionHandle ignored = ActionHandle.NoInit();
-        Optional<FrozenPlayer> fp = Optional<FrozenPlayer>.Of(Game.MatchData.FrozenPlayer(player));
+        Optional<FrozenPlayer> fp = Optional<FrozenPlayer>.Of(Game.MatchData.GetFrozenPlayer(player));
         target.Trigger(RoleActionType.MyDeath, ref ignored, player, fp, deathEvent);
         Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, player, fp, deathEvent);
 

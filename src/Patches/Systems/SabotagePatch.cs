@@ -9,14 +9,13 @@ using Lotus.Gamemodes;
 using Lotus.Options;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.API;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Extensions;
 using Lotus.Roles;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Logging;
 using VentLib.Utilities.Attributes;
-using Impostor = Lotus.Roles.RoleGroups.Vanilla.Impostor;
 
 namespace Lotus.Patches.Systems;
 

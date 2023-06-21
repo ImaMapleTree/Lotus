@@ -4,7 +4,6 @@ using System.Linq;
 using AmongUs.GameOptions;
 using Lotus.API;
 using Lotus.API.Odyssey;
-using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
@@ -17,6 +16,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.NeutralKilling;
 using Lotus.Extensions;
 using Lotus.GUI.Name;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Impostors;
 using Lotus.Roles.Subroles;
@@ -67,6 +67,7 @@ public class Copycat: CustomRole
         CustomRole attackerRole = attacker.GetCustomRole();
         FallbackTypes.GetOptional(attackerRole.GetType()).IfPresent(r => attackerRole = r());
         CustomRole role = copyRoleProgress ? attackerRole : CustomRoleManager.GetCleanRole(attackerRole);
+        if (role.RealRole is RoleTypes.Crewmate or RoleTypes.Scientist) role.RoleAbilityFlags |= RoleAbilityFlag.CannotVent;
 
         VentLogger.Trace($"Copycat ({MyPlayer.name}) copying role of {attacker.name} : {role.RoleName}", "Copycat::AssignRole");
         MatchData.AssignRole(MyPlayer, role);

@@ -8,6 +8,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Options;
 using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Localization.Attributes;

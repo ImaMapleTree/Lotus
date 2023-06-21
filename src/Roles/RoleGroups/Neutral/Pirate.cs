@@ -3,8 +3,9 @@ using Lotus.Extensions;
 using Lotus.Factions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.RoleGroups.Stock;
 using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using Lotus.Victory.Conditions;
@@ -14,7 +15,7 @@ using VentLib.Options.Game;
 
 namespace Lotus.Roles.RoleGroups.Neutral;
 
-public class Pirate: Guesser
+public class Pirate: GuesserRoleBase
 {
     private int pirateGuessesToWin;
     private bool pirateDiesOnMissguess;

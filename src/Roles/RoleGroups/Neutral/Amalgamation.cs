@@ -14,7 +14,7 @@ using Lotus.Managers;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
-using Lotus.Roles.Legacy;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using UnityEngine;
@@ -92,7 +92,7 @@ public class Amalgamation: CustomRole
 
         CustomRole role = MyPlayer.GetCustomRole();
         role.DesyncRole = RoleTypes.Impostor;
-        handle.Cancel();
+        handle.Cancel(ActionHandle.CancelType.Soft);
     }
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>

@@ -142,9 +142,9 @@ public class VanillaStatistics
         Hooks.GameStateHooks.GameEndHook.Bind(StatisticsHookKey, gameStateEvent =>
         {
             MatchData matchData = gameStateEvent.MatchData;
-            Game.GetAllPlayers().ForEach(p => Games.Update(p.PlayerId, i => i + 1));
-            Game.GetAllPlayers().ForEach(p => TotalTime.Update(p.PlayerId, DateTime.Now.Subtract(matchData.StartTime).TotalSeconds));
-            HashSet<byte> allPlayerIds = Game.GetAllPlayers().Select(p => p.PlayerId).ToHashSet();
+            Players.GetPlayers().ForEach(p => Games.Update(p.PlayerId, i => i + 1));
+            Players.GetPlayers().ForEach(p => TotalTime.Update(p.PlayerId, DateTime.Now.Subtract(matchData.StartTime).TotalSeconds));
+            HashSet<byte> allPlayerIds = Players.GetPlayers().Select(p => p.PlayerId).ToHashSet();
             allPlayerIds.Except(DeathTimes.Keys).ForEach(ap => TimeAlive.Update(ap, DateTime.Now.Subtract(matchData.StartTime).TotalSeconds));
             DeathTimes.ForEach(dt => TimeDead.Update(dt.Key, DateTime.Now.Subtract(dt.Value).TotalSeconds));
         });

@@ -1,12 +1,12 @@
 using System.Linq;
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
 using Lotus.Extensions;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
-namespace Lotus.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Potions;
 
 public class PotionRandom: Potion
 {

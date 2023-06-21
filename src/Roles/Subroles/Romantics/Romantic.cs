@@ -14,6 +14,7 @@ using Lotus.Options;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using Lotus.Victory;
 using UnityEngine;

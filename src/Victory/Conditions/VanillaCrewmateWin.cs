@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.Factions.Interfaces;
 using Lotus.Roles;
@@ -35,7 +36,7 @@ public class VanillaCrewmateWin: IFactionWinCondition
 
         bool hasAliveEnemy = false;
         bool hasOneTaskDoer = false;
-        foreach (CustomRole role in Game.GetAllPlayers().Select(p => p.GetCustomRole()))
+        foreach (CustomRole role in Players.GetPlayers().Select(p => p.GetCustomRole()))
         {
             if (role is ITaskHolderRole taskHolder && taskHolder.TasksApplyToTotal() && taskHolder.HasTasks()) hasOneTaskDoer = true;
             if (IsEligibleEnemy(role)) hasAliveEnemy = true;

@@ -1,7 +1,7 @@
 using System.Linq;
 using Lotus.Managers;
 using Lotus.Roles;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Gamemodes.Standard.Lotteries;

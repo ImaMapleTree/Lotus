@@ -1,6 +1,7 @@
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities.Optionals;

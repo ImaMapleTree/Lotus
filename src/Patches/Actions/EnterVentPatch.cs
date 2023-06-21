@@ -1,21 +1,17 @@
 using System.Collections.Generic;
-using AmongUs.GameOptions;
 using HarmonyLib;
 using Hazel;
 using Lotus.API.Odyssey;
 using Lotus.Gamemodes;
 using Lotus.Roles;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
-using Lotus.API;
 using Lotus.API.Stats;
 using Lotus.Extensions;
-using Lotus.Logging;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
-using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Patches.Actions;
 

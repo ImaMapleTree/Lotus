@@ -1,8 +1,6 @@
 using System;
 using System.Collections.Generic;
 using Lotus.API.Odyssey;
-using Lotus.API;
-using Lotus.Extensions;
 using UnityEngine;
 
 namespace Lotus.GUI.Name.Components;

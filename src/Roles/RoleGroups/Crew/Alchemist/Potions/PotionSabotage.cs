@@ -1,9 +1,9 @@
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
 using Lotus.Extensions;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 
-namespace Lotus.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Potions;
 
 public class PotionSabotage: Potion
 {

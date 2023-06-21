@@ -3,8 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
 using Lotus.Victory.Conditions;
-using Lotus.Extensions;
-using Lotus.Options;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
 using VentLib.Utilities.Collections;

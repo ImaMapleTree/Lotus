@@ -3,9 +3,10 @@ using Lotus.API.Vanilla.Sabotages;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Utilities.Optionals;
 
-namespace Lotus.Roles.RoleGroups.Crew;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist;
 
 public partial class Alchemist
 {

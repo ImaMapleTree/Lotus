@@ -5,13 +5,12 @@ using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -40,6 +39,7 @@ public class Vampiress : Impostor
         bitten.Add(target.PlayerId);
         Async.Schedule(() =>
         {
+            if (!target.IsAlive()) return;
             FatalIntent intent = new(true, () => new BittenDeathEvent(target, MyPlayer));
             DelayedInteraction interaction = new(intent, killDelay, this);
             MyPlayer.InteractWith(target, interaction);

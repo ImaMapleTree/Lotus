@@ -1,6 +1,7 @@
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 
 namespace Lotus.Roles.RoleGroups.Madmates.Roles;
 

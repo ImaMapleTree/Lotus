@@ -3,6 +3,7 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.GUI.Name.Interfaces;
@@ -79,7 +80,6 @@ public class SimpleNameModel : INameModel
 
         didUpdate = true;
         cacheString = renders.Select(s => s.Join(delimiter: " ".Repeat(spacing - 1))).Join(delimiter: "\n").TrimStart('\n').TrimEnd('\n').Replace("\n\n", "\n");
-        if (Game.State is GameState.InMeeting) cacheString = $"<nobr>{cacheString}</nobr>";
         if (sendToPlayer)
         {
             if (rPlayer.IsHost()) Api.Local.SetName(player, cacheString);
@@ -91,6 +91,11 @@ public class SimpleNameModel : INameModel
         }
         Profilers.Global.Sampler.Stop(id);
         return cacheString;
+    }
+
+    public void RenderForAll(GameState? state = null, bool sendToPlayer = true, bool force = false)
+    {
+        Players.GetPlayers().ForEach(p => RenderFor(p, state, sendToPlayer, force));
     }
 
     public List<IComponentHolder> ComponentHolders() => componentHolders;

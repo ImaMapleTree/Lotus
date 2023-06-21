@@ -4,6 +4,7 @@ using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.RoleGroups.Vanilla;
 using UnityEngine;
 using VentLib.Options.Game;

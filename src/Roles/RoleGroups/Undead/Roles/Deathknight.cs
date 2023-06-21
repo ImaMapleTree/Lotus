@@ -11,6 +11,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.API;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;

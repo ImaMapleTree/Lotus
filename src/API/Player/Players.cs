@@ -8,7 +8,7 @@ using Lotus.Factions.Crew;
 using Lotus.Factions.Impostors;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Roles.Interfaces;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -20,7 +20,7 @@ public static class Players
 {
     public static IEnumerable<PlayerControl> GetPlayers(PlayerFilter filter = PlayerFilter.None)
     {
-        IEnumerable<PlayerControl> players = Game.GetAllPlayers();
+        IEnumerable<PlayerControl> players = PlayerControl.AllPlayerControls.ToArray();
         if (filter.HasFlag(PlayerFilter.NonPhantom)) players = players.Where(p => p.GetCustomRole() is not IPhantomRole pr || pr.IsCountedAsPlayer());
         if (filter.HasFlag(PlayerFilter.Alive)) players = players.Where(p => p.IsAlive());
         if (filter.HasFlag(PlayerFilter.Dead)) players = players.Where(p => !p.IsAlive());
@@ -34,7 +34,7 @@ public static class Players
     public static void SendPlayerData(GameData.PlayerInfo playerInfo, int clientId = -1, bool autoSetName = true)
     {
         INameModel? nameModel = playerInfo.Object != null ? playerInfo.Object.NameModel() : null;
-        Game.GetAllPlayers().ForEach(p =>
+        GetPlayers().ForEach(p =>
         {
             int playerClientId = p.GetClientId();
             if (clientId != -1 && playerClientId != clientId) return;

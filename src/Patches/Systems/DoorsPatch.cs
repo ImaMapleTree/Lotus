@@ -6,8 +6,7 @@ using Lotus.API.Vanilla.Sabotages;
 using Lotus.Gamemodes;
 using Lotus.Options;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
-using Lotus.API;
+using Lotus.Roles.Internals.Enums;
 
 namespace Lotus.Patches.Systems;
 

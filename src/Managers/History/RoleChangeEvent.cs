@@ -1,6 +1,4 @@
 using Lotus.Roles;
-using Lotus.Extensions;
-using Lotus.Options;
 using VentLib.Localization.Attributes;
 
 namespace Lotus.Managers.History;

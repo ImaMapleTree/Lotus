@@ -8,6 +8,7 @@ using Lotus.Options;
 using Lotus.Roles.Events;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using UnityEngine;

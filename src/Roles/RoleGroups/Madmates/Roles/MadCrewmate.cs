@@ -1,11 +1,11 @@
 using AmongUs.GameOptions;
 using Lotus.API;
 using Lotus.Factions;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Overrides;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Options.Game;
 

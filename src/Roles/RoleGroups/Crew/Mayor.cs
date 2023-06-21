@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.GUI;
 using Lotus.GUI.Name;
@@ -12,6 +13,7 @@ using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Utilities;
 using Lotus.Chat;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -65,7 +67,7 @@ public class Mayor: Crewmate
             handle.Cancel();
             revealed = true;
             ChatHandler.Of(MayorRevealMessage.Formatted(MyPlayer.name)).Title(t => t.Color(RoleColor).Text(MayorRevealTitle).Build()).Send();
-            List<PlayerControl> allPlayers = Game.GetAllPlayers().ToList();
+            List<PlayerControl> allPlayers = Players.GetPlayers().ToList();
             MyPlayer.NameModel().GetComponentHolder<RoleHolder>().Last().SetViewerSupplier(() => allPlayers);
             return;
         }

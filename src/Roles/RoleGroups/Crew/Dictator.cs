@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using Lotus.API;
 using Lotus.API.Odyssey;
@@ -10,7 +11,10 @@ using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.Internals.OptionBuilders;
 using Lotus.Roles.RoleGroups.Vanilla;
+using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization.Attributes;
@@ -27,11 +31,20 @@ public class Dictator: Crewmate
     private static IAccumulativeStatistic<int> _playersEjected = Statistic<int>.CreateAccumulative("Roles.Dictator.PlayersEjected", () => PlayersEjectedStat);
     public override List<Statistic> Statistics() => new() { _playersEjected };
 
+    public static HashSet<Type> DictatorBannedModifiers = new() { typeof(TieBreaker) };
+    public override HashSet<Type> BannedModifiers() => DictatorBannedModifiers;
+
+    private DynamicRoleOptionBuilder roleOptionBuilder = DynamicRoleOptionBuilder.Standard(
+        TranslationUtil.Colorize(NeutralKillingSetting, ModConstants.Palette.NeutralColor, ModConstants.Palette.KillingColor),
+        TranslationUtil.Colorize(NeutralPassiveSetting, ModConstants.Palette.NeutralColor, ModConstants.Palette.PassiveColor),
+        TranslationUtil.Colorize(MadmateSetting, ModConstants.Palette.MadmateColor));
+
     private bool suicideIfVoteCrewmate;
     private int totalDictates;
 
     private int currentDictates;
     private bool showDictatorVoteAtEnd;
+    private bool customRoleSettings;
 
     private GameData.PlayerInfo? dictatedPlayer;
     private ChatHandler? dictateMessage;
@@ -70,13 +83,18 @@ public class Dictator: Crewmate
             shouldSuicide = true;
             return;
         }
+        else if (customRoleSettings && roleOptionBuilder.IsAllowed(player.GetCustomRole()))
+        {
+            shouldSuicide = true;
+            return;
+        }
         else return;
 
         FinalizeDictate();
         meetingDelegate.EndVoting(dictatedPlayer);
     }
 
-    [RoleAction(RoleActionType.VotingComplete, priority: Priority.High)]
+    [RoleAction(RoleActionType.VotingComplete, priority: Priority.Last)]
     private void OverrideDictatedPlayer(MeetingDelegate meetingDelegate)
     {
         if (showDictatorVoteAtEnd && dictatedPlayer != null && currentDictates > 0)
@@ -113,6 +131,11 @@ public class Dictator: Crewmate
             .SubOption(sub => sub.KeyName("Suicide if Crewmate Executed", TranslationUtil.Colorize(SuicideIfVoteCrewmate, ModConstants.Palette.CrewmateColor))
                 .AddOnOffValues(false)
                 .BindBool(b => suicideIfVoteCrewmate = b)
+                .Build())
+            .SubOption(sub => roleOptionBuilder.Decorate(sub.KeyName("Custom Die on Dictate Settings", CustomDieOnDictateSettings)
+                .AddOnOffValues(false)
+                .BindBool(b => customRoleSettings = b)
+                .ShowSubOptionPredicate(b => (bool)b))
                 .Build());
 
 
@@ -151,6 +174,18 @@ public class Dictator: Crewmate
 
             [Localized(nameof(ShowDictatorVoteAtMeetingEnd))]
             public static string ShowDictatorVoteAtMeetingEnd = "Show Dictate at End of Meeting";
+
+            [Localized(nameof(NeutralKillingSetting))]
+            public static string NeutralKillingSetting = "Neutral::0 Killing::1 Settings";
+
+            [Localized(nameof(NeutralPassiveSetting))]
+            public static string NeutralPassiveSetting = "Neutral::0 Passive::1 Settings";
+
+            [Localized(nameof(MadmateSetting))]
+            public static string MadmateSetting = "Madmates::0 Settings";
+
+            [Localized(nameof(CustomDieOnDictateSettings))]
+            public static string CustomDieOnDictateSettings = "Custom Die on Dictate Settings";
         }
     }
 }

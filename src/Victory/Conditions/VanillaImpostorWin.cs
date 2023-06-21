@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.Factions.Interfaces;
 using Lotus.Roles;
@@ -24,7 +25,7 @@ public class VanillaImpostorWin: IFactionWinCondition
         int aliveKillers = 0;
         int aliveOthers = 0;
 
-        foreach (CustomRole role in Game.GetAlivePlayers().Select(p => p.GetCustomRole()))
+        foreach (CustomRole role in Players.GetPlayers(PlayerFilter.Alive).Select(p => p.GetCustomRole()))
         {
             if (role.Faction.Relationship(FactionInstances.Impostors) is Relation.FullAllies or Relation.SharedWinners) aliveImpostors++;
             else

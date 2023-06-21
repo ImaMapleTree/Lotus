@@ -108,11 +108,9 @@ public class CustomOptionContainer: MonoBehaviour
         menuBehaviour.GetComponentsInChildren<PassiveButton>().Where(pb => pb.name.Contains("Background")).ForEach(pb => pb.OnClick = new Button.ButtonClickedEvent());
         menuBehaviour.Background.enabled = false;
 
-
         menuBehaviour.Tabs.ForEach(t => t.gameObject.SetActive(false));
         menuBehaviour.Tabs[0].Content.SetActive(false);
         menuBehaviour.Tabs[0].Content.transform.localPosition += new Vector3(0f, 1000f);
-
 
         menuBehaviour.BackButton.transform.localPosition += new Vector3(-1.2f, 0.17f);
         CreateButtonBehaviour();

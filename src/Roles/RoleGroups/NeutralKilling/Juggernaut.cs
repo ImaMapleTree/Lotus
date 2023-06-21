@@ -5,6 +5,7 @@ using Lotus.Roles.Overrides;
 using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;

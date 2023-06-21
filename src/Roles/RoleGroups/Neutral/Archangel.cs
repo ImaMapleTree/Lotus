@@ -1,18 +1,18 @@
 #nullable enable
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Managers;
 using Lotus.Options;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -38,7 +38,7 @@ public class Archangel : CustomRole
     protected override void Setup(PlayerControl player)
     {
         // Since "MyPlayer" is ALWAYS an Archangel we don't need to check for playerId
-        List<PlayerControl> eligiblePlayers = Game.GetAllPlayers().Where(p => p.GetCustomRole() is not Archangel).ToList();
+        List<PlayerControl> eligiblePlayers = Players.GetPlayers().Where(p => p.GetCustomRole() is not Archangel).ToList();
         if (eligiblePlayers.Any())
             target = eligiblePlayers.GetRandom();
         protectCooldown.Start(10f);

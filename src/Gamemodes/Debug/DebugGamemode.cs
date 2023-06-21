@@ -1,13 +1,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using HarmonyLib;
-using Lotus.API;
 using Lotus.Managers;
 using Lotus.Roles;
 using Lotus.Utilities;
 using Lotus.Victory;
 using Lotus.API.Odyssey;
-using Lotus.Extensions;
 using VentLib.Options;
 using VentLib.Logging;
 using VentLib.Options.Game;

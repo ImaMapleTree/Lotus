@@ -12,6 +12,7 @@ using Lotus.Roles.RoleGroups.Crew;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
 using Lotus.Options;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Options.Game;
 using VentLib.Utilities;

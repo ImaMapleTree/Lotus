@@ -16,7 +16,7 @@ public class CTFMostPointWinCondition: IWinCondition
         winningTeam = CTFGamemode.TeamPoints[0] == CTFGamemode.TeamPoints[1] ? 2 : winningTeam;
 
         if (winningTeam == 2) winners = new List<PlayerControl>();
-        else winners = Game.GetAllPlayers().Where(p => p.cosmetics.bodyMatProperties.ColorId == winningTeam).ToList();
+        else winners = Players.GetPlayers().Where(p => p.cosmetics.bodyMatProperties.ColorId == winningTeam).ToList();
 
         return true;
     }

@@ -12,6 +12,7 @@ using Lotus.Roles.Interactions;
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
 using UnityEngine;
 using VentLib.Localization.Attributes;

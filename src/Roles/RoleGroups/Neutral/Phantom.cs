@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API;
 using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Factions;
 using Lotus.GUI.Name;
@@ -16,6 +17,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -76,9 +78,9 @@ public class Phantom : Crewmate, IPhantomRole
 
     private void PhantomReveal()
     {
-        MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), GameStates.IgnStates));
+        MyPlayer.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(new LiveString("⚠", RoleColor), Game.IgnStates));
 
-        Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId).ForEach(p =>
+        Players.GetPlayers(PlayerFilter.Alive).Where(p => p.PlayerId != MyPlayer.PlayerId).ForEach(p =>
         {
             LiveString liveString = new(() => RoleUtils.CalculateArrow(p, MyPlayer, RoleColor));
             var remote = p.NameModel().GetComponentHolder<IndicatorHolder>().Add(new IndicatorComponent(liveString, GameState.Roaming, viewers: p));

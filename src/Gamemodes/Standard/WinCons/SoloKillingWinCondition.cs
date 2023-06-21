@@ -1,9 +1,8 @@
 using System.Collections.Generic;
 using System.Linq;
-using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Factions;
 using Lotus.Factions.Neutrals;
-using Lotus.Logging;
 using Lotus.Roles;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
@@ -25,7 +24,7 @@ public class SoloKillingWinCondition : IWinCondition
         int alivePlayers = 0;
         List<CustomRole> aliveKillers = new();
 
-        Game.GetAliveRoles().ForEach(r => {
+        Players.GetPlayers(PlayerFilter.Alive | PlayerFilter.NonPhantom).Select(p => p.GetCustomRole()).ForEach(r => {
             alivePlayers++;
             if (r.RoleFlags.HasFlag(RoleFlag.CannotWinAlone)) return;
             if (r.RoleAbilityFlags.HasFlag(RoleAbilityFlag.IsAbleToKill)) aliveThatCanKill++;

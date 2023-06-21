@@ -2,15 +2,14 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using AmongUs.GameOptions;
-using Lotus.API;
-using Lotus.API.Odyssey;
+using Lotus.API.Player;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Victory.Conditions;
 using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
-using Lotus.Managers;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Logging;
@@ -29,10 +28,6 @@ public class Debugger: CustomRole
 
     private Component progressTracker;
 
-    static Debugger()
-    {
-        CustomRoleManager.AddRole(new Debugger());
-    }
 
 
     [UIComponent(UI.Name)]
@@ -59,7 +54,7 @@ public class Debugger: CustomRole
     private void RangeTest()
     {
         Vector2 location = MyPlayer.GetTruePosition();
-        foreach (PlayerControl player in Game.GetAlivePlayers().Where(p => p.PlayerId != MyPlayer.PlayerId))
+        foreach (PlayerControl player in Players.GetPlayers(PlayerFilter.Alive).Where(p => p.PlayerId != MyPlayer.PlayerId))
             VentLogger.Old($"Distance from {MyPlayer.name} to {player.name} :: {Vector2.Distance(location, player.GetTruePosition())}", "DebuggerDistance");
     }
 
@@ -71,9 +66,9 @@ public class Debugger: CustomRole
     private void LogStats()
     {
         VentLogger.Old($"{MyPlayer.GetNameWithRole()} | Dead? {MyPlayer.Data.IsDead} | AURole: {MyPlayer.Data.Role.name} | Custom Role: {MyPlayer.GetCustomRole().RoleName.RemoveHtmlTags()} | Subrole: {MyPlayer.GetSubrole()?.RoleName}", "DebuggerStats");
-        VentLogger.Old($"Stats | Total Players: {Game.GetAllPlayers().Count()} | Alive Players: {Game.GetAlivePlayers().Count()} | Impostors: {GameStates.CountAliveImpostors()}", "DebuggerStats");
+        VentLogger.Old($"Stats | Total Players: {Players.GetPlayers().Count()} | Alive Players: {Players.GetPlayers(PlayerFilter.Alive).Count()}", "DebuggerStats");
         VentLogger.Old("-=-=-=-=-=-=-=-=-=-=-=-= Other Players =-=-=-=-=-=-=-=-=-=-=-=-", "DebuggerStats");
-        foreach (PlayerControl player in Game.GetAllPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId))
+        foreach (PlayerControl player in Players.GetPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId))
             VentLogger.Old($"{player.GetNameWithRole()} | Dead? {player.Data.IsDead} | AURole: {player.Data.Role.name} | Custom Role: {player.GetCustomRole().RoleName.RemoveHtmlTags()} | Subrole: {player.GetSubrole()?.RoleName}", "DebuggerStats");
 
         VentLogger.Old("-=-=-=-=-=-=-=-= End Of Debugger =-=-=-=-=-=-=-=-", "DebuggerStats");

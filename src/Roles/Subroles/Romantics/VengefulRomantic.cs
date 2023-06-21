@@ -3,12 +3,14 @@ using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
 using Lotus.Factions.Interfaces;
+using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.Roles.Interactions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
@@ -28,6 +30,9 @@ public class VengefulRomantic: Subrole
     private IRemote? remote;
 
     public override string Identifier() => "♥";
+
+    [UIComponent(UI.Text)]
+    public string AvengeText() => killerId != byte.MaxValue ? RoleColor.Colorize(Translations.AvengeText) : "";
 
     protected override void PostSetup()
     {
@@ -106,6 +111,9 @@ public class VengefulRomantic: Subrole
     {
         [Localized(nameof(Adjective))]
         public static string Adjective = "Vengeful";
+
+        [Localized(nameof(AvengeText))]
+        public static string AvengeText = "Avenge Your Partner";
 
         [Localized(ModConstants.Options)]
         public static class Options

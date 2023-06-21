@@ -2,7 +2,6 @@ using HarmonyLib;
 using Lotus.Roles;
 using Lotus.Utilities;
 using Lotus.Extensions;
-using Lotus.Roles.Legacy;
 using VentLib.Utilities;
 
 namespace Lotus.Patches.Intro;

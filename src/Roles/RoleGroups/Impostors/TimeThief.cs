@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
@@ -9,7 +8,7 @@ using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Options;
-using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Options.Game;

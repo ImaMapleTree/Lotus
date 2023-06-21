@@ -9,12 +9,12 @@ using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Meetings;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Options;
 using Lotus.Options.General;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
@@ -64,7 +64,7 @@ public class CheckForEndVotingPatch
 
 
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.VotingComplete, ref handle, meetingDelegate);
+        Players.GetPlayers().TriggerOrdered(RoleActionType.VotingComplete, ref handle, meetingDelegate);
 
         // WE DO NOT RECALCULATE THE EXILED PLAYER!
         // This means its up to roles that modify the meeting delegate to properly update the exiled player
@@ -80,16 +80,13 @@ public class CheckForEndVotingPatch
             // Kinda weird logic here, we take the existing List<Optional<>> and filter it to only existing votes
             // Then we filter all votes to only the votes of the exiled player
             // Finally we transform the exiled player votes into the player's playerID
-            .SelectMany(kv => kv.Value.Filter().Where(i => i == exiledPlayer).Select(i => kv.Key)).ToList();
+            .SelectMany(kv => kv.Value.Filter().Where(i => i == exiledPlayer).Select(_ => kv.Key)).ToList();
 
 
 
-        if (meetingDelegate.ExiledPlayer != null)
-        {
-            Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(meetingDelegate.ExiledPlayer, playerVotes));
-            meetingDelegate.CheckAndSetConfirmEjectText(meetingDelegate.ExiledPlayer.Object);
-        }
+        if (meetingDelegate.ExiledPlayer != null) Hooks.MeetingHooks.ExiledHook.Propagate(new ExiledHookEvent(meetingDelegate.ExiledPlayer, playerVotes));
         __instance.RpcVotingComplete(votingStates.ToArray(), meetingDelegate.ExiledPlayer, meetingDelegate.IsTie);
+        DevLogger.GameInfo();
         return false;
     }
 
@@ -119,14 +116,12 @@ public class CheckForEndVotingPatch
     {
         if (!AmongUsClient.Instance.AmHost) return;
 
-
-
         MeetingDelegate meetingDelegate = MeetingDelegate.Instance;
         meetingDelegate.ExiledPlayer = playerInfo;
 
         ActionHandle noCancel = ActionHandle.NoInit();
         Game.TriggerForAll(RoleActionType.MeetingEnd, ref noCancel, Optional<GameData.PlayerInfo>.Of(playerInfo),
             meetingDelegate.IsTie, new Dictionary<byte, int>(meetingDelegate.CurrentVoteCount()), new Dictionary<byte, List<Optional<byte>>>(meetingDelegate.CurrentVotes()));
-
+        DevLogger.GameInfo();
     }
 }

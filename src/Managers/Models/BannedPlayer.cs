@@ -5,6 +5,7 @@ public class BannedPlayer
     public string FriendCode { get; set; } = null!;
     public string Name { get; set; } = null!;
     public string? Reason { get; set; } = "None Specified";
+    public long Identifier { get; set; }
 
     public BannedPlayer()
     {

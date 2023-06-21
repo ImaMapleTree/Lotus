@@ -5,8 +5,8 @@ using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using Lotus.RPC;
 using VentLib.Logging;
 using VentLib.Utilities;
@@ -58,11 +58,12 @@ public static class ShapeshiftFixPatch
 
     public static void Postfix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
     {
-        if (target.PlayerId == __instance.PlayerId)
-            _shapeshifted.Remove(__instance.PlayerId);
+        if (target.PlayerId == __instance.PlayerId) _shapeshifted.Remove(__instance.PlayerId);
         else _shapeshifted[__instance.PlayerId] = target.PlayerId;
-
-        Async.Schedule(() => Game.RenderAllForAll(force: true), NetUtils.DeriveDelay(0.1f));
+        Async.Schedule(() =>
+        {
+            if (Game.State is not GameState.InMeeting) __instance.NameModel().Render(force: true);
+        }, 1.2f);
     }
 
     public static bool IsShapeshifted(this PlayerControl player) => _shapeshifted.ContainsKey(player.PlayerId);

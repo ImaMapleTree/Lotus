@@ -24,7 +24,7 @@ public class Silencer: Impostor
         handle.Cancel();
         blackmailingText?.Delete();
         blackmailedPlayer = Optional<PlayerControl>.NonNull(target);
-        TextComponent textComponent = new(new LiveString("BLACKMAILED", Color.red), GameStates.IgnStates, viewers: MyPlayer);
+        TextComponent textComponent = new(new LiveString("BLACKMAILED", Color.red), Game.IgnStates, viewers: MyPlayer);
         blackmailingText = target.NameModel().GetComponentHolder<TextHolder>().Add(textComponent);
     }
 
@@ -40,7 +40,7 @@ public class Silencer: Impostor
     public void NotifyBlackmailed()
     {
         List<PlayerControl> allPlayers = showBlackmailedToAll
-            ? Game.GetAllPlayers().ToList()
+            ? Players.GetPlayers().ToList()
             : blackmailedPlayer.Transform(p => new List<PlayerControl> { p, MyPlayer }, () => new List<PlayerControl> { MyPlayer });
         blackmailingText?.Get()?.SetViewerSupplier(() => allPlayers);
         blackmailedPlayer.IfPresent(p =>

@@ -1,14 +1,14 @@
 using System;
 using Lotus.API.Reactive;
 using Lotus.API.Vanilla.Sabotages;
-using Lotus.Patches.Systems;
-using Lotus.Roles.RoleGroups.Crew.Ingredients;
 using Lotus.Extensions;
+using Lotus.Patches.Systems;
+using Lotus.Roles.RoleGroups.Crew.Alchemist.Ingredients.Internal;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities;
 
-namespace Lotus.Roles.RoleGroups.Crew.Potions;
+namespace Lotus.Roles.RoleGroups.Crew.Alchemist.Potions;
 
 public class PotionSeeing: Potion
 {

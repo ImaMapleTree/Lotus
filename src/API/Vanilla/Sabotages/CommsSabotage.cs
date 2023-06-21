@@ -4,8 +4,8 @@ using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Patches.Systems;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Extensions;
+using Lotus.Roles.Internals.Enums;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.API.Vanilla.Sabotages;
