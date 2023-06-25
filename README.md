@@ -671,17 +671,17 @@ __Output__:<br>
 
 | Impostor                               | Crewmate                        | Neutral Killing                   | Neutral Passive                        | Modifier                  |
 | -------------------------------------- | ------------------------------- | --------------------------------- | -------------------------------------- | ------------------------- |
-| [Assassin](#assassin)                   | [Alchemist](#alchemist)         | [Agitater](#agitater)             | [Amnesiac](#amnesiac)                  | [Bait](#bait)             |
-| [Blackmailer](#blackmailer)             | [Bastion](#bastion)             | [Arsonist](#arsonist)             | [Archangel](#archangel)                | [Bewilder](#bewilder)     |
-| [Camouflager](#camouflager)             | [Bodyguard](#bodyguard)         | [Blood Knight](#blood-knight)     | [Copy-Cat](#copy-cat)                  | [Bloodlust](#bloodlust)   |
-| [Consort](#consort)                     | [Charmer](#charmer)             | [Egoist](#egoist)                 | [Hacker](#hacker)                      | [Diseased](#diseased)     |
-| [Creeper](#creeper)                     | [Crusader](#crusader)           | [Hitman](#hitman)                 | [Jester](#jester)                      | [Flash](#flash)           |
-| [Disperser](#disperser)                 | [Demolitionist](#demolitionist) | [Jackal](#jackal)                 | [Opportunist](#opportunist)            | [Nimble](#nimble)         |
-| [Escapist](#escapist)                   | [Dictator](#dictator)           | [Juggernaut](#juggernaut)         | [Phantom](#phantom)                    | [Oblivious](#oblivious)   |
-| [FireWorker](#fireworker)               | [Doctor](#doctor)               | [Marksman](#marksman)             | [Postman](#postman)                    | [Romantic](#romantic)     |
-| [Freezer](#freezer)                     | [Escort](#escort)               | [Necromancer](#necromancer)       | [Schrodinger's Cat](#schrodingers-cat) | [Sleuth](#sleuth)         |
-| [Grenadier](#grenadier)                 | [Ex-Convict](#ex-convict)       | [Occultist](#occultist)           | [Survivor](#survivor)                  | [Tiebreaker](#tiebreaker) |
-| [Identity Thief](#identity-thief)       | [Herbalist](#herbalist)         | [Pelican](#pelican)               | [Terrorist](#terrorist)                | [Torch](#torch)           |
+| [Assassin](#assassin)                   | [Alchemist](#alchemist)         | [AgiTater](#agitater)             | [Amnesiac](#amnesiac)                  | [Bait](#bait)             |
+| [Blackmailer](#blackmailer)             | [Bastion](#bastion)             | [Arsonist](#arsonist)             | [Copycat](#copycat)                    | [Bewilder](#bewilder)     |
+| [Camouflager](#camouflager)             | [Bodyguard](#bodyguard)         | [Blood Knight](#blood-knight)     | [Hacker](#hacker)                      | [Bloodlust](#bloodlust)   |
+| [Consort](#consort)                     | [Charmer](#charmer)             | [Egoist](#egoist)                 | [Jester](#jester)                      | [Diseased](#diseased)     |
+| [Creeper](#creeper)                     | [Crusader](#crusader)           | [Hitman](#hitman)                 | [Opportunist](#opportunist)            | [Flash](#flash)           |
+| [Disperser](#disperser)                 | [Demolitionist](#demolitionist) | [Jackal](#jackal)                 | [Phantom](#phantom)                    | [Nimble](#nimble)         |
+| [Escapist](#escapist)                   | [Dictator](#dictator)           | [Juggernaut](#juggernaut)         | [Postman](#postman)                    | [Oblivious](#oblivious)   |
+| [FireWorks](#fireworks)                 | [Doctor](#doctor)               | [Marksman](#marksman)             | [Schrödinger's Cat](#schrödingers-cat) | [Romantic](#romantic)     |
+| [Freezer](#freezer)                     | [Escort](#escort)               | [Necromancer](#necromancer)       | [Survivor](#survivor)                  | [Sleuth](#sleuth)         |
+| [Grenadier](#grenadier)                 | [Ex-Convict](#ex-convict)       | [Occultist](#occultist)           | [Terrorist](#terrorist)                | [Tiebreaker](#tiebreaker) |
+| [Identity Thief](#identity-thief)       | [Herbalist](#herbalist)         | [Pelican](#pelican)               |                                        | [Torch](#torch)           |
 | [Janitor](#janitor)                     | [Investigator](#investigator)   | [Retributionist](#retributionist) |                                        | [Watcher](#watcher)       |
 | [Mafioso](#mafioso)                     | [Mayor](#mayor)                 | [The Glitch](#the-glitch)         |                                        | [Workhorse](#workhorse)   |
 | [Mare](#mare)                           | [Mechanic](#mechanic)           | [Werewolf](#werewolf)             |                                        |                           |
@@ -699,11 +699,11 @@ __Output__:<br>
 | [Warlock](#warlock)                     | [Swapper](#swapper)             |                                   |                                        |                           |
 | [Witch](#witch)                         | [Tracker](#tracker)             |                                   |                                        |                           |
 | [Yin Yanger](#yin-yanger)               | [Transporter](#transporter)     |                                   |                                        |                           |
-|                                        | [Trapster](#trapster)           |                                   |                                        |                           |
-| [Crewposter (Madmate)](#crewposter)     | [Veteran](#veteran)             |                                   |                                        |                           |
-| [Mad Guardian (Madmate)](#madguardian) | [Vigilante](#vigilante)         |                                   |                                        |                           |
+|                                         | [Trapster](#trapster)           |                                   |                                        |                           |
+| [Crewpostor (Madmate)](#crewpostor)     | [Veteran](#veteran)             |                                   |                                        |                           |
+| [Mad Guardian (Madmate)](#mad-guardian) | [Vigilante](#vigilante)         |                                   |                                        |                           |
 | [Madmate (Madmate)](#madmate)           |                                 |                                   |                                        |                           |
-| [Mad Snitch (Madmate)](#madsnitch)      |                                 |                                   |                                        |                           |
+| [Mad Snitch (Madmate)](#mad-snitch)     |                                 |                                   |                                        |                           |
 | [Parasite (MadMate)](#parasite)         |                                 |                                   |                                        |                           |
 
 
@@ -926,7 +926,7 @@ First use Pet button to mark a location. Then, after a set cooldown, you can re-
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-## FireWorker
+## FireWorks
 
 <img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1108944832493277264/1108959650709245972/image.png?width=1193&height=671">
 
@@ -942,20 +942,20 @@ __Indicatior/Symbols__: None<br>
 Use Pet button to plant a fireworks (i.e. bombs) around the map until Max Firework Count has been reached. Make sure you have enough room for the pet animation. Shapeshift to detonate all of the Fireworks, killing everyone within radius of each one. <br><br>
 
 Note: The explosion goes through walls.<br>
-The FireWorker can also kill normally between placing fireworks.<br>
+The FireWorks can also kill normally between placing fireworks.<br>
 
 ### Game Options
 |              Name               |                                                Description                                                |      Type      |  Default   | 
 | ------------------------------- | --------------------------------------------------------------------------------------------------------- | :------------: | :--------: |
-| Fireworker                      | The probability of the FireWorkers appearing                                                              |   Percentage   |     0%     |
-| Maximum                         | How many FireWorkers should spawn                                                                         |     Number     |      1     |
+| FireWorks                       | The probability of the FireWorks appearing                                                                |   Percentage   |     0%     |
+| Maximum                         | How many FireWorks should spawn                                                                           |     Number     |      1     |
 | Total Firework Count            | How many fireworks can be placed on the map                                                               |     Number     |      3     |
 | Fireworks Per Round             | How many fireworks can be placed per round                                                                |  Number/Limit  |  No Limit  |
-| ┗ Fireworks Ability Cooldown    | The cooldown of the Fireworker's ability to plant fireworks (bombs)                                       |      Time      |     20s    |
+| ┗ Fireworks Ability Cooldown    | The cooldown of the FireWorks's ability to plant fireworks (bombs)                                        |      Time      |     20s    |
 | Firework Explosion Radius       | The Distance a player can be from a Firework and be affected by it's explosion                            |      Number    |     0.8    |
 | Firework Delay                  | The amount of time it takes from shapeshift for the fireworks to explode                                  |      Time      |     1s     |
 | ┗ Warn Players Before Explosion | All players within radius get a reactor alarm and text letting them know the firework is about to explode |     Toggle     |     ON     |
-| Must Be Last Impostor           | Whether the Fireworker can detonate fireworks before they are Last Impostor                               |     Toggle     |     ON     |
+| Must Be Last Impostor           | Whether the FireWorks can detonate fireworks before they are Last Impostor                                |     Toggle     |     ON     |
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -2081,7 +2081,7 @@ __Indicatior/Symbols__: Player's Name Changes Based On "Good" or "Bad"<br>
 `Idea By: Town of Us Reactivated`<br>
 
 #### Role Description
-Use the Kill button to investigate if the player is good or bad. In general, red is bad & green is good. Be wary of how 'bad' the player with the red name is. The Sheriff or Veteran can end up with a red name in some lobbies!<br>
+Use the Pet button to investigate if the player is good or bad. In general, red is bad & green is good.<br>
 
 __*Red = Bad*__ <br>
  - __Impostors__ (always)<br>
@@ -2125,7 +2125,6 @@ __*Green = Good*__ <br>
 | Neutral Passive are Red  | Whether Neutral Passive roles appear red when investigated       |   Toggle   |    OFF    |
 | ┣ Amalgamation           | Whether Amalgamation will show a red name when investigated      |   Toggle   |  Enabled  |
 | ┣ Amnesiac               | Whether Amnesiac will show a red name when investigated          |   Toggle   |  Enabled  |
-| ┣ Archangel              | Whether Archangel will show a red name when investigated         |   Toggle   |  Enabled  |
 | ┣ Copycat                | Whether Copycat will show a red name when investigated           |   Toggle   |  Enabled  | 
 | ┣ Executioner            | Whether Executioner will show a red name when investigated       |   Toggle   |  Enabled  |
 | ┣ Hacker                 | Whether Hacker will show a red name when investigated            |   Toggle   |  Enabled  |
@@ -2133,7 +2132,7 @@ __*Green = Good*__ <br>
 | ┣ Opportunist            | Whether Opporttunist will show a red name when investigated      |   Toggle   |  Enabled  | 
 | ┣ Phantom                | Whether Phantom will show a red name when investigated           |   Toggle   |  Enabled  |
 | ┣ Postman                | Whether Postman will show a red name when investigated           |   Toggle   |  Enabled  |
-| ┣ Schrodinger's Cat      | Whether Schrodinger's Cat will show a red name when investigated |   Toggle   |  Enabled  |
+| ┣ Schrödinger's Cat      | Whether Schrödinger's Cat will show a red name when investigated |   Toggle   |  Enabled  |
 | ┣ Survivor               | Whether Survivor will show a red name when investigated          |   Toggle   |  Enabled  |
 | ┣ Terrorist              | Whether Terrorist will show a red name when investigated         |   Toggle   |  Enabled  | 
 | ┗ Vulture                | Whether Vulture will show a red name when investigated           |   Toggle   |  Enabled  |
@@ -2391,7 +2390,7 @@ Repairman can fast-fix sabotages that typically require two players (e.g. reacto
 ### Game Options
 |            Name           |                   Description                 |     Type     |  Default  | 
 | ------------------------- | --------------------------------------------- | :----------: | :-------: |
-| Sabotage Master           | The probability of the Repairman appearing    |  Percentage  |    0%     |
+| Repairman                 | The probability of the Repairman appearing    |  Percentage  |    0%     |
 | Maximum                   | How many Repairmans should spawn              |    Number    |     1     |
 | Repairman Can Vent        | Whether the Repairman can vent                |    Toggle    |    ON     | 
 | ┣ Vent Cooldown           | The cooldown of the Repairman's vent button   |     Time     |    40s    | 
@@ -2770,7 +2769,7 @@ __Win Condition__: Must Be Final Impostor<br>
 `Original Idea by しゅー`<br>
 
 #### Role Description
-Kill as a normal Impostor on the Impostor team . . . but Egoist is a traitor to the Impostors. Use Impostor-Seeing attribute to get them voted out (end game) and achieve a solo win. Impostors and Egoist cannot kill each other.<br>
+Kill as a normal Impostor on the Impostor team . . . but the Egoist is a traitor to the Impostors. Use Impostor-Seeing attribute to get them voted out (end game) and achieve a solo win. Impostors can kill but cannot see Egoist, Egoist can see but cannot kill Impostors.<br>
 
 ### Game Options
 |            Name              |                          Description                       |     Type     |  Default  | 
@@ -3058,7 +3057,7 @@ The Retributionist is a Neutral Killer with a twist. If the Retributionist were 
 
 __Faction__: Neutral Killing<br>
 __Base__: Impostor<br>
-__Ability__: Shapeshift & Roleblock Players<br>
+__Ability__: Roleblock & Kill Players<br>
 __Win Condition__: Be The Last Player Alive<br>
 
 `Originally Developed by Discussions`<br>
@@ -3070,7 +3069,7 @@ Use the Kill button to Hack or Kill players. The Pet button can be used to switc
 ### Game Options
 |            Name              |                          Description                       |     Type     |    Default    | 
 | ---------------------------- | ---------------------------------------------------------- | :----------: | :-----------: |
-| Glitch                       | The probability of the Glitch appearing                    |  Percentage  |      0%       |
+| The Glitch                   | The probability of the Glitch appearing                    |  Percentage  |      0%       |
 | Maximum                      | How many Glitches should spawn                             |    Number    |       1       |
 | Hacking Duration             | The amount of time a player is hacked                      |     Time     | Until Meeting |
 
@@ -3161,34 +3160,6 @@ The Amalgamation gains (becomes) the abilities of every player they report.<br>
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-## Archangel
-
-<img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1108944832493277264/1118401552089104384/image.png?width=1193&height=671">
-
-__Faction__: Neutral Passive<br>
-__Base__: Engineer <br>
-__Ability__: Protects Their Target <br>
-__Win Condition__: Win With Their Target <br>
-
-`Originally Developed by Discussions`<br>
-`Idea by Town of Us Reactivated`<br>
-
-#### Role Description 
-The Archangel’s Target is marked by a light blue diamond next to their name. Vent to temporarily protect your target from getting killed. If they win, you win.<br>				
-
-### Game Options
-|                Name                 |                              Description                          |     Type     |  Default  | 
-| ----------------------------------- | ----------------------------------------------------------------- | :----------: | :-------: |
-| Archangel                           | The probability of the Archangel appearing                        |  Percentage  |    0%     |
-| Maximum                             | How many Archangels should spawn                                  |    Number    |     1     |
-| Protect Duration                    | The amount of time the Archangel's Target is protected from kills |     Time     |   2.5s    |
-| Protect Cooldown                    | The cooldown for the Archangel's Vent button                      |     Time     |   2.5s    |
-| Target Knows They Have An Archangel | Whether the Archangel's Target knows they have a protector or not |    ON/OFF    |    ON     |
-| Archangel Knows Target Role         | Whether the Archangel knows the role of their Target or not       |    ON/OFF    |    ON     |
-| Role Change When Target Dies        | Role options for when the Archangel's target dies                 | Role Options |  Jester   |
-
-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-
 ## Copycat
 
 <img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1108944832493277264/1110842666305990666/image.png?width=1193&height=671">
@@ -3254,7 +3225,7 @@ __Win Condition__: Fix Sabotages to Win<br>
 `Idea by The Other Roles`<br>
 
 #### Role Description
-As a Hacker, your goal is earn a number of points by fixing sabotages. Has powers of Sabotage Master. Each sabotage fixed earns you one point. Hacker can be killed by Sheriff.<br>
+As a Hacker, your goal is earn a number of points by fixing sabotages. You have the powers of a Repairman. Each sabotage fixed earns you one point.<br>
 
 ### Game Options (incomplete)
 |            Name              |                          Description                       |     Type     |  Default  | 
@@ -3384,7 +3355,7 @@ Complete tasks to receive Target information (arrows pointing to Target is an op
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-## Schrodinger's Cat
+## Schrödinger's Cat
 
 <img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1034687568643641354/1118624014739456170/image.png?width=1193&height=671">
 
@@ -3402,9 +3373,9 @@ The Schrödinger's Cat changes their affiliation with each attack against them! 
 ### Game Options
 |                 Name                   |                                     Description                                 |     Type     | Default | 
 | -------------------------------------- | ------------------------------------------------------------------------------- | :----------: | :-----: |
-| Schrodinger's Cat                      | The probability of the Schrodinger's Cat appearing                              |  Percentage  |    0%   |
-| Maximum                                | How many Schrodinger's Cats should spawn                                        |    Number    |    1    |
-| Number of Lives                        | How many attacks the Schrodinger's Cat can receive before death                 |    Number    |    9    | 
+| Schrödinger's Cat                      | The probability of the Schrödinger's Cat appearing                              |  Percentage  |    0%   |
+| Maximum                                | How many Schrödinger's Cats should spawn                                        |    Number    |    1    |
+| Number of Lives                        | How many attacks the Schrödinger's Cat can receive before death                 |    Number    |    9    | 
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
@@ -3415,7 +3386,7 @@ The Schrödinger's Cat changes their affiliation with each attack against them! 
 __Faction__: Neutral Passive<br>
 __Base__: Crewmate<br>
 __Ability__: Can Protect Self From Attacks<br>
-__Win Condition__:Survive Until The End To Win<br>
+__Win Condition__: Survive Until The End To Win<br>
 
 `Originally Developed by Discussions`<br>
 `Idea by Town of Us Reactivated`<br>
@@ -3648,6 +3619,7 @@ Oblivious cannot report bodies.
 | ---------------------------- | ------------------------------------------------------------------------- | :----------: | :-------: |
 | Oblivious                    | The probability of the Oblivious modifier appearing                       |  Percentage  |    0%     |
 | Maximum                      | How many Oblivious modifiers should spawn                                 |    Number    |     1     |
+| Pass on Death                | Whether the Oblivious modifier can be passed to a killer                  |    Toggle    |    OFF    |
 
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
