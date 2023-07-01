@@ -5,8 +5,6 @@ using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Sabotages;
-using Lotus.Gamemodes;
-using Lotus.Options;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.API;
@@ -42,7 +40,6 @@ public static class SabotagePatch
         switch (systemType)
         {
             case SystemTypes.Sabotage:
-                if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.CallSabotage)) return false;
                 if (player.GetCustomRole() is not ISabotagerRole sabotager || !sabotager.CanSabotage()) return false;
                 if (player.GetCustomRole().RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotSabotage)) return false;
                 if (MeetingPrep.Prepped) return false;
@@ -58,11 +55,11 @@ public static class SabotagePatch
                     _ => throw new Exception("Invalid Sabotage Type")
                 };
 
-                if (GeneralOptions.SabotageOptions.DisabledSabotages.HasFlag(sabotage)) return false;
-
                 ISabotage sabo = ISabotage.From(sabotage, player);
-                Game.TriggerForAll(RoleActionType.SabotageStarted, ref handle, sabo, player);
+                Game.TriggerForAll(LotusActionType.SabotageStarted, ref handle, sabo, player);
                 if (!handle.IsCanceled) CurrentSabotage = sabo;
+                else return false;
+
                 Hooks.SabotageHooks.SabotageCalledHook.Propagate(new SabotageHookEvent(sabo));
                 VentLogger.Debug($"Sabotage Started: {sabo}");
                 Game.SyncAll();
@@ -79,12 +76,12 @@ public static class SabotagePatch
                     currentSwitches ^= (byte) (1U << amount);
                 if (currentSwitches != electrical.ExpectedSwitches)
                 {
-                    Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
+                    Game.TriggerForAll(LotusActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
                     Hooks.SabotageHooks.SabotagePartialFixHook.Propagate(new SabotageHookEvent(CurrentSabotage));
                     break;
                 }
                 VentLogger.Info($"Electrical Sabotage Fixed by {player.name}", "SabotageFix");
-                Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
+                Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
                 break;
@@ -93,8 +90,8 @@ public static class SabotagePatch
                 if (!__instance.TryGetSystem(systemType, out systemInstance)) break;
                 if (systemInstance.TryCast<HudOverrideSystemType>() != null && amount == 0)
                 {
-                    Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
-                    Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
+                    Game.TriggerForAll(LotusActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
+                    Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                     Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                     CurrentSabotage = null;
                 } else if (systemInstance.TryCast<HqHudSystemType>() != null) // Mira has a special communications which requires two people
@@ -104,11 +101,11 @@ public static class SabotagePatch
                     if (miraComms.CompletedConsoles.Contains(commsNum)) break; // Negative check if console has already been fixed (refreshes periodically)
 
                     // Send partial fix action
-                    Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
+                    Game.TriggerForAll(LotusActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
                     Hooks.SabotageHooks.SabotagePartialFixHook.Propagate(new SabotageHookEvent(CurrentSabotage));
                     // If there's more than 1 already fixed then comms is fixed totally
                     if (miraComms.NumComplete == 0) break;
-                    Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
+                    Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                     Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                     CurrentSabotage = null;
                 }
@@ -121,10 +118,10 @@ public static class SabotagePatch
                 LifeSuppSystemType oxygen = systemInstance!.Cast<LifeSuppSystemType>();
                 int o2Num = amount & 3;
                 if (oxygen.CompletedConsoles.Contains(o2Num)) break;
-                Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
+                Game.TriggerForAll(LotusActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotagePartialFixHook.Propagate(new SabotageHookEvent(CurrentSabotage));
                 if (oxygen.UserCount == 0) break;
-                Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
+                Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
                 VentLogger.Info($"Oxygen Sabotage Fixed by {player.name}", "SabotageFix");
@@ -134,10 +131,10 @@ public static class SabotagePatch
                 HeliSabotageSystem heliSabotage = systemInstance!.Cast<HeliSabotageSystem>();
                 int heliNum = amount & 3;
                 if (heliSabotage.CompletedConsoles.Contains((byte)heliNum)) break;
-                Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
+                Game.TriggerForAll(LotusActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotagePartialFixHook.Propagate(new SabotageHookEvent(CurrentSabotage));
                 if (heliSabotage.UserCount == 0) break;
-                Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
+                Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
                 VentLogger.Info($"Helicopter Sabotage Fixed by {player.name}", "SabotageFix");
@@ -150,10 +147,10 @@ public static class SabotagePatch
                 if (reactor == null) break;
                 int reactNum = amount & 3;
                 if (reactor.UserConsolePairs.ToList().Any(p => p.Item2 == reactNum)) break;
-                Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
+                Game.TriggerForAll(LotusActionType.SabotagePartialFix, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotagePartialFixHook.Propagate(new SabotageHookEvent(CurrentSabotage));
                 if (reactor.UserCount == 0) break;
-                Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, CurrentSabotage, player);
+                Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
                 VentLogger.Info($"Reactor Sabotage Fixed by {player.name}", "SabotageFix");
@@ -161,8 +158,8 @@ public static class SabotagePatch
             case SystemTypes.Doors:
                 int doorIndex = amount & 31;
                 DoorSabotage doorSabotage = new(null, doorIndex);
-                Game.TriggerForAll(RoleActionType.SabotagePartialFix, ref handle, doorSabotage, player);
-                Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, doorSabotage, player);
+                Game.TriggerForAll(LotusActionType.SabotagePartialFix, ref handle, doorSabotage, player);
+                Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, doorSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, doorSabotage));
                 break;
             default:

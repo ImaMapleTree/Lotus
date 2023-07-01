@@ -1,8 +1,8 @@
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Roles;
-using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Extensions;
+using Lotus.Roles.Interfaces;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Managers.History.Events;
@@ -20,8 +20,8 @@ public class TaskCompleteEvent : IHistoryEvent
         this.player = player;
         playerRole = Optional<CustomRole>.Of(player.GetCustomRole());
 
-        tasksRemaining = this.player.GetCustomRole() is Crewmate crew
-            ? crew.TotalTasks - crew.TasksComplete
+        tasksRemaining = this.player.GetCustomRole() is ITaskHolderRole taskHolderRole
+            ? taskHolderRole.TotalTasks - taskHolderRole.CompleteTasks
             : player.Data.Tasks.ToArray().Count(t => !t.Complete);
     }
 

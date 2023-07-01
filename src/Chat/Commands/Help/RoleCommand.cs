@@ -21,7 +21,7 @@ public class RoleCommand
     [Command("mod", "modifier", "mods")]
     public static void Modifiers(PlayerControl source)
     {
-        string message = CustomRoleManager.AllRoles.Where(r => r.RoleFlags.HasFlag(RoleFlag.IsSubrole)).OrderBy(r => r.RoleName).Select(m =>
+        string message = ProjectLotus.RoleManager.AllRoles.Where(r => r.RoleFlags.HasFlag(RoleFlag.IsSubrole)).OrderBy(r => r.RoleName).DistinctBy(r => r.RoleName).Select(m =>
         {
             string identifierText = m is ISubrole subrole ? m.RoleColor.Colorize(subrole.Identifier()!) + " " : "";
             return $"{identifierText}{m.RoleColor.Colorize(m.RoleName)}\n{m.Description}";
@@ -38,12 +38,10 @@ public class RoleCommand
         else
         {
             string roleName = context.Args.Join(delimiter: " ").ToLower().Trim().Replace("[", "").Replace("]", "");
-            CustomRole? matchingRole = CustomRoleManager.AllRoles.FirstOrDefault(r => localizer.GetAllTranslations($"Roles.{r.EnglishRoleName}.RoleName").Select(s => s.ToLowerInvariant()).Contains(roleName.ToLowerInvariant()));
-
-            if (matchingRole == null && roleName.Contains("schro")) matchingRole = CustomRoleManager.Static.SchrodingersCat;
+            CustomRole? matchingRole = ProjectLotus.RoleManager.AllRoles.FirstOrDefault(r => localizer.GetAllTranslations($"Roles.{r.EnglishRoleName}.RoleName").Select(s => s.ToLowerInvariant()).Contains(roleName.ToLowerInvariant()));
 
             if (matchingRole == null) {
-                List<CustomRole> matchingRoles = CustomRoleManager.AllRoles.Where(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(roleName)).ToList();
+                List<CustomRole> matchingRoles = ProjectLotus.RoleManager.AllRoles.Where(r => r.RoleName.RemoveHtmlTags().ToLower().StartsWith(roleName)).ToList();
                 if (matchingRoles.Count == 0) ChatHandler.Of(Localizer.Translate("Commands.Help.Roles.RoleNotFound").Formatted(roleName)).Send(source);
                 else matchingRoles.ForEach(r => ShowRole(source, r));
                 return;

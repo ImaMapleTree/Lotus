@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
-using Lotus.Gamemodes;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
@@ -20,6 +19,7 @@ namespace Lotus.Patches.Actions;
 
 public static class MurderPatches
 {
+    public static PlayerControl LastAttacker = null!;
     private static readonly Dictionary<byte, FixedUpdateLock> MurderLocks = new();
     private static readonly Func<FixedUpdateLock> TimeoutSupplier = () => new FixedUpdateLock(0.25f);
 
@@ -32,7 +32,6 @@ public static class MurderPatches
         if (__instance == null || target == null) return false;
 
         VentLogger.Debug($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}", "CheckMurder");
-        if (Game.CurrentGamemode.IgnoredActions().HasFlag(GameAction.KillPlayers)) return false;
 
 
         if (target.Data == null || target.inVent || target.inMovingPlat)
@@ -56,8 +55,14 @@ public static class MurderPatches
         if (!MurderLocks.GetOrCompute(__instance.PlayerId, TimeoutSupplier).IsUnlocked()) return false;
 
         ActionHandle handle = ActionHandle.NoInit();
-        __instance.Trigger(RoleActionType.Attack, ref handle, target);
+        __instance.Trigger(LotusActionType.Attack, ref handle, target);
         return false;
+    }
+
+    [QuickPrefix(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
+    public static void SaveAttacker(PlayerControl __instance)
+    {
+        LastAttacker = __instance;
     }
 
     [QuickPostfix(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
@@ -80,8 +85,8 @@ public static class MurderPatches
 
 
         ActionHandle ignored = ActionHandle.NoInit();
-        target.Trigger(RoleActionType.MyDeath, ref ignored, __instance, deathEvent.Instigator(), deathEvent);
-        Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, __instance, deathEvent.Instigator(), deathEvent);
+        target.Trigger(LotusActionType.MyDeath, ref ignored, __instance, deathEvent.Instigator(), deathEvent);
+        Game.TriggerForAll(LotusActionType.AnyDeath, ref ignored, target, __instance, deathEvent.Instigator(), deathEvent);
 
         PlayerControl killer = deathEvent.Instigator().FlatMap(k => new UnityOptional<PlayerControl>(k.MyPlayer)).OrElse(__instance);
         PlayerMurderHookEvent playerMurderHookEvent = new(killer, target, deathEvent);

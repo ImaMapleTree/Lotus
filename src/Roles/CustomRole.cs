@@ -8,7 +8,6 @@ using AmongUs.GameOptions;
 using Hazel;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
-using Lotus.API.Reactive;
 using Lotus.Factions;
 using Lotus.Factions.Neutrals;
 using Lotus.GUI;
@@ -17,15 +16,15 @@ using Lotus.GUI.Name;
 using Lotus.GUI.Name.Components;
 using Lotus.GUI.Name.Holders;
 using Lotus.GUI.Name.Interfaces;
-using Lotus.Managers;
 using Lotus.Options;
-using Lotus.Options.Roles;
 using Lotus.Roles.Overrides;
-using Lotus.Roles.Subroles;
 using Lotus.Extensions;
 using Lotus.Factions.Impostors;
 using Lotus.Logging;
+using Lotus.Options.LotusImpl.Roles;
+using Lotus.Roles.Builtins.Base;
 using Lotus.Roles.Interfaces;
+using LotusTrigger.Options;
 using VentLib.Localization.Attributes;
 using VentLib.Logging;
 using VentLib.Networking;
@@ -40,17 +39,14 @@ namespace Lotus.Roles;
 [Localized("Roles")]
 public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 {
-    private static int evenOddNumber;
     protected HashSet<Type> RelatedRoles = new();
 
     static CustomRole()
     {
-        AbstractConstructors.Register(typeof(CustomRole), r => CustomRoleManager.GetRoleFromId(r.ReadInt32()));
-        Hooks.GameStateHooks.GameEndHook.Bind(nameof(CustomRole) + "TeeterTotter", _ => evenOddNumber = 0);
+        AbstractConstructors.Register(typeof(CustomRole), r => ProjectLotus.RoleManager.GetRole(r.ReadString()));
     }
 
-
-    public virtual bool CanVent() => (BaseCanVent && !RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotVent)) || GeneralOptions.MayhemOptions.AllRolesCanVent;
+    public virtual bool CanVent() => (BaseCanVent && !RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotVent));
 
     public virtual void HandleDisconnect() {}
 
@@ -78,7 +74,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     /// Utilized for "live" instances of the class AKA when the game is actually being played
     /// </summary>
     /// <returns>Shallow clone of this class (except for certain fields such as roleOptions being a deep clone)</returns>
-    public CustomRole Instantiate(PlayerControl player, bool asSubrole = false)
+    public CustomRole Instantiate(PlayerControl player)
     {
         CustomRole cloned = Clone();
         cloned.RelatedRoles.Add(this.GetType());
@@ -91,8 +87,6 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         cloned.Setup(player);
         cloned.SetupUI2(player.NameModel());
         player.NameModel().Render(force: true);
-        if (GeneralOptions.MayhemOptions.AllRolesCanVent && cloned.VirtualRole == RoleTypes.Crewmate)
-            cloned.VirtualRole = RoleTypes.Engineer;
 
         cloned.PostSetup();
         return cloned;
@@ -130,6 +124,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
     public List<GameOptionOverride> CurrentRoleOverrides(IEnumerable<GameOptionOverride>? newOverrides = null)
     {
+        DevLogger.Log($"My player: {MyPlayer}");
         List<GameOptionOverride> thisList = new(this.RoleSpecificGameOptionOverrides);
 
         thisList.AddRange(currentOverrides);
@@ -361,12 +356,16 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
     public CustomRole Read(MessageReader reader)
     {
-        return CustomRoleManager.GetRoleFromId(reader.ReadInt32());
+        string qualifier = reader.ReadString();
+        DevLogger.Log($"Qualifier: {qualifier}");
+        return ProjectLotus.RoleManager.GetRole(qualifier);
     }
 
     public void Write(MessageWriter writer)
     {
-        writer.Write(CustomRoleManager.GetRoleId(this));
+        string qualifier = ProjectLotus.RoleManager.GetIdentifier(this);
+        DevLogger.Log($"Qualifier: {qualifier}");
+        writer.Write(qualifier);
     }
 
 

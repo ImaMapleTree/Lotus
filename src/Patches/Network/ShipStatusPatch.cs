@@ -1,6 +1,6 @@
 using HarmonyLib;
 using Lotus.API.Odyssey;
-using Lotus.Options;
+using LotusTrigger.Options;
 using VentLib.Logging;
 
 namespace Lotus.Patches.Network;
@@ -31,7 +31,7 @@ class CheckTaskCompletionPatch
 {
     public static bool Prefix(ref bool __result)
     {
-        if (!GeneralOptions.GameplayOptions.DisableTaskWin && !GeneralOptions.DebugOptions.NoGameEnd) return true;
+        if (!GeneralOptions.DebugOptions.NoGameEnd) return true;
 
         __result = false;
 

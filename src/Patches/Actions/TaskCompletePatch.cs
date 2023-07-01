@@ -22,7 +22,7 @@ class TaskCompletePatch
         VentLogger.Info($"Task Complete => {__instance.GetNameWithRole()} ({npt?.Length})", "CompleteTask");
 
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.TaskComplete, ref handle, __instance, Optional<NormalPlayerTask>.Of(npt));
+        Game.TriggerForAll(LotusActionType.TaskComplete, ref handle, __instance, Optional<NormalPlayerTask>.Of(npt));
         Hooks.PlayerHooks.PlayerTaskCompleteHook.Propagate(new PlayerTaskHookEvent(__instance, npt));
     }
 }

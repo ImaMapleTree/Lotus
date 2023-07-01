@@ -1,12 +1,14 @@
 ﻿using System.Collections.Generic;
 using Lotus.API.Player;
 using Lotus.Chat;
+using Lotus.Logging;
 using Lotus.Managers.Templates.Models.Units;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Managers.Templates.Models;
 
+// ReSharper disable once CollectionNeverUpdated.Global
 public class Template: TemplateUnit
 {
     public string? Title { get; set; }
@@ -41,6 +43,7 @@ public class Template: TemplateUnit
         if (!Evaluate(data)) return;
 
         string result = Format(data);
+        DevLogger.Log($"Actions: {Actions.Count}");
         Actions.ForEach(a => a.Execute(result, data));
         if (Text == null) return;
 

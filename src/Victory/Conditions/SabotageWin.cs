@@ -7,6 +7,7 @@ using Lotus.Factions;
 using Lotus.Factions.Impostors;
 using Lotus.Patches.Systems;
 using Lotus.Extensions;
+using Lotus.Roles.Interfaces;
 using VentLib.Localization.Attributes;
 using VentLib.Utilities.Extensions;
 
@@ -24,7 +25,7 @@ public class SabotageWin: IWinCondition
         ISabotage sabotage = SabotagePatch.CurrentSabotage;
         if (sabotage.SabotageType() is SabotageType.Lights or SabotageType.Communications or SabotageType.Door) return false;
 
-        List<PlayerControl> eligiblePlayers = Players.GetPlayers().Where(p => p.GetCustomRole() is Roles.RoleGroups.Vanilla.Impostor i && i.CanSabotage()).ToList();
+        List<PlayerControl> eligiblePlayers = Players.GetPlayers().Where(p => p.GetCustomRole() is ISabotagerRole sr && sr.CanSabotage()).ToList();
         List<PlayerControl> impostors = eligiblePlayers.Where(p => p.GetCustomRole().Faction is ImpostorFaction).ToList();
         List<PlayerControl> others = eligiblePlayers.Except(impostors).ToList();
 

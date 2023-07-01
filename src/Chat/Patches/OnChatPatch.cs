@@ -5,10 +5,11 @@ using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers;
-using Lotus.Options;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
+using Lotus.Logging;
 using Lotus.Roles.Internals.Enums;
+using LotusTrigger.Options;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -16,10 +17,10 @@ using VentLib.Utilities.Extensions;
 namespace Lotus.Chat.Patches;
 
 [HarmonyPatch(typeof(ChatController), nameof(ChatController.AddChat))]
-internal static class OnChatPatch
+public static class OnChatPatch
 {
     internal static List<byte> UtilsSentList = new();
-    internal static bool EatMessage;
+    public static bool EatMessage;
 
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static bool Prefix(ChatController __instance, PlayerControl sourcePlayer, string chatText)
@@ -38,7 +39,7 @@ internal static class OnChatPatch
             EatMessage = false;
             if (Game.State is GameState.InLobby) return !eat;
             ActionHandle handle = ActionHandle.NoInit();
-            Game.TriggerForAll(RoleActionType.Chat, ref handle, sourcePlayer, chatText, Game.State, sourcePlayer.IsAlive());
+            Game.TriggerForAll(LotusActionType.Chat, ref handle, sourcePlayer, chatText, Game.State, sourcePlayer.IsAlive());
             return !eat;
         }
         AmongUsClient.Instance.KickPlayer(sourcePlayer.GetClientId(), false);

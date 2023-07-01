@@ -50,23 +50,44 @@ public static class Game
 
     public static void SyncAll() => Players.GetPlayers().Do(p => p.SyncAll());
 
-    public static void TriggerForAll(RoleActionType action, ref ActionHandle handle, params object[] parameters)
+    public static void TriggerForAll(LotusActionType action, ref ActionHandle handle, params object[] parameters)
     {
+        if (!AmongUsClient.Instance.AmHost) return;
+
+        if (action is not LotusActionType.FixedUpdate)
+        {
+            CurrentGamemode.Trigger(action, ref handle, parameters);
+            if (handle.Cancellation is not (ActionHandle.CancelType.Soft or ActionHandle.CancelType.None)) return;
+        }
+
         foreach (PlayerControl player in PlayerControl.AllPlayerControls) player.Trigger(action, ref handle, parameters);
     }
 
-    public static void TriggerForAll(this IEnumerable<PlayerControl> players, RoleActionType action, ref ActionHandle handle, params object[] parameters)
+    public static void TriggerForAll(this IEnumerable<PlayerControl> players, LotusActionType action, ref ActionHandle handle, params object[] parameters)
     {
+        if (!AmongUsClient.Instance.AmHost) return;
+
+        if (action is not LotusActionType.FixedUpdate)
+        {
+            CurrentGamemode.Trigger(action, ref handle, parameters);
+            if (handle.Cancellation is not (ActionHandle.CancelType.Soft or ActionHandle.CancelType.Soft)) return;
+        }
+
         foreach (PlayerControl player in players) player.Trigger(action, ref handle, parameters);
     }
 
-    public static void TriggerOrdered(this IEnumerable<PlayerControl> players, RoleActionType action, ref ActionHandle handle, params object[] parameters)
+    public static void TriggerOrdered(this IEnumerable<PlayerControl> players, LotusActionType action, ref ActionHandle handle, params object[] parameters)
     {
-        if (action is RoleActionType.FixedUpdate)
+        if (!AmongUsClient.Instance.AmHost) return;
+
+        if (action is LotusActionType.FixedUpdate)
             foreach (PlayerControl player in players) player.Trigger(action, ref handle, parameters);
         // Using a new Trigger algorithm to deal with ordering of triggers
         else
         {
+            CurrentGamemode.Trigger(action, ref handle, parameters);
+            if (handle.Cancellation is not (ActionHandle.CancelType.Soft or ActionHandle.CancelType.Soft)) return;
+
             List<PlayerControl> allPlayers = players.ToList();
             handle.ActionType = action;
             parameters = parameters.AddToArray(handle);

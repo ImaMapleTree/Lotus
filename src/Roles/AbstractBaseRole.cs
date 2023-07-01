@@ -15,17 +15,16 @@ using Lotus.Factions.Impostors;
 using Lotus.Factions.Interfaces;
 using Lotus.Factions.Undead;
 using Lotus.GUI;
-using Lotus.Managers;
 using Lotus.Options;
-using Lotus.Roles.Extra;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Overrides;
-using Lotus.Roles.RoleGroups.Vanilla;
-using Lotus.Roles.Subroles;
 using Lotus.API.Stats;
 using Lotus.Extensions;
 using Lotus.Logging;
+using Lotus.Roles.Builtins;
+using Lotus.Roles.Builtins.Base;
+using Lotus.Roles.Builtins.Vanilla;
 using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Internals.Interfaces;
 using Lotus.Utilities;
@@ -46,7 +45,7 @@ namespace Lotus.Roles;
 public abstract class AbstractBaseRole
 {
     public PlayerControl MyPlayer { get; protected set; } = null!;
-    public RoleEditor? Editor { get; internal set; }
+    public RoleEditor? Editor { get; set; }
     private static List<RoleEditor> _editors = new();
 
     public string Description => Localizer.Translate($"Roles.{EnglishRoleName.RemoveHtmlTags()}.Description");
@@ -81,24 +80,26 @@ public abstract class AbstractBaseRole
     public RoleFlag RoleFlags;
     public readonly List<CustomRole> LinkedRoles = new();
 
+    internal virtual LotusRoleType LotusRoleType { get; set; } = LotusRoleType.Unknown;
     internal GameOption RoleOptions;
-    internal Assembly DeclaringAssembly = Assembly.GetCallingAssembly();
+    internal readonly Assembly DeclaringAssembly;
 
     public virtual List<Statistic> Statistics() => new();
     public virtual HashSet<Type> BannedModifiers() => new();
 
     public string EnglishRoleName { get; private set; }
-    private readonly Dictionary<RoleActionType, List<RoleAction>> roleActions = new();
+    private readonly Dictionary<LotusActionType, List<RoleAction>> roleActions = new();
 
     protected List<GameOptionOverride> RoleSpecificGameOptionOverrides = new();
 
     protected AbstractBaseRole()
     {
+        DeclaringAssembly = this.GetType().Assembly;
         this.EnglishRoleName = this.GetType().Name.Replace("CRole", "").Replace("Role", "");
         VentLogger.Debug($"Role Name: {EnglishRoleName}");
         CreateInstanceBasedVariables();
         RoleModifier _ = _editors.Aggregate(Modify(new RoleModifier(this)), (current, editor) => editor.HookModifier(current));
-        LinkedRoles.ForEach(CustomRoleManager.AddRole);
+        LinkedRoles.ForEach(ProjectLotus.RoleManager.AddRole);
         SetupRoleActions();
     }
 
@@ -127,7 +128,7 @@ public abstract class AbstractBaseRole
             else
             {
 
-                if (this is GM) { /*ignored*/ }
+                if (this is GameMaster) { /*ignored*/ }
                 else if (this is Subrole)
                     RoleOptions.Tab = DefaultTabs.MiscTab;
                 else if (this.Faction is ImpostorFaction)
@@ -142,12 +143,13 @@ public abstract class AbstractBaseRole
                     RoleOptions.Tab = DefaultTabs.MiscTab;
             }
         }
-        RoleOptions.Register(CustomRoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
+        //RoleOptions.Register(OptionManager.GetManager(DeclaringAssembly, "role_options.txt"), OptionLoadMode.LoadOrCreate);
+        RoleOptions.Register(ProjectLotus.RoleManager.RoleOptionManager, OptionLoadMode.LoadOrCreate);
     }
 
     private void SetupRoleActions()
     {
-        Enum.GetValues<RoleActionType>().Do(action => this.roleActions.Add(action, new List<RoleAction>()));
+        Enum.GetValues<LotusActionType>().Do(action => this.roleActions.Add(action, new List<RoleAction>()));
         this.GetType().GetMethods(AccessFlags.InstanceAccessFlags)
             .SelectMany(method => method.GetCustomAttributes<RoleActionAttribute>().Select(a => (a, method)))
             .Where(t => t.a.Subclassing || t.method.DeclaringType == this.GetType())
@@ -159,15 +161,8 @@ public abstract class AbstractBaseRole
     {
         List<RoleAction> currentActions = this.roleActions.GetValueOrDefault(action.ActionType, new List<RoleAction>());
 
-        if (action.Attribute.Override != null) {
-            int overrideIndex = currentActions.FindIndex(m => m.Method.Name == action.Attribute.Override);
-            if (overrideIndex != -1) currentActions[overrideIndex] = action;
-            this.roleActions[action.ActionType] = currentActions;
-            return;
-        }
-
         VentLogger.Log(LogLevel.All, $"Registering Action {action.ActionType} => {action.Method.Name} (from: \"{action.Method.DeclaringType}\")", "RegisterAction");
-        if (action.ActionType is RoleActionType.FixedUpdate &&
+        if (action.ActionType is LotusActionType.FixedUpdate &&
             currentActions.Count > 0)
             throw new ConstraintException("RoleActionType.FixedUpdate is limited to one per class. If you're inheriting a class that uses FixedUpdate you can add Override=METHOD_NAME to your annotation to override its Update method.");
 
@@ -177,14 +172,14 @@ public abstract class AbstractBaseRole
         this.roleActions[action.ActionType] = currentActions;
     }
 
-    public void Trigger(RoleActionType actionType, ref ActionHandle handle, params object[] parameters)
+    public void Trigger(LotusActionType actionType, ref ActionHandle handle, params object[] parameters)
     {
         if (!AmongUsClient.Instance.AmHost || Game.State is GameState.InLobby) return;
 
         uint id = Profilers.Global.Sampler.Start("Action: " + actionType);
-        if (actionType == RoleActionType.FixedUpdate)
+        if (actionType == LotusActionType.FixedUpdate)
         {
-            List<RoleAction> methods = roleActions[RoleActionType.FixedUpdate];
+            List<RoleAction> methods = roleActions[LotusActionType.FixedUpdate];
             if (methods.Count == 0)
             {
                 Profilers.Global.Sampler.Discard(id);
@@ -209,7 +204,7 @@ public abstract class AbstractBaseRole
                 if (actionType.IsPlayerAction())
                 {
                     Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(MyPlayer, action, parameters));
-                    Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, MyPlayer, action, parameters);
+                    Game.TriggerForAll(LotusActionType.AnyPlayerAction, ref handle, MyPlayer, action, parameters);
                 }
 
                 handle.ActionType = actionType;
@@ -227,7 +222,7 @@ public abstract class AbstractBaseRole
     }
 
     // lol this method is such a hack it's funny
-    public IEnumerable<(RoleAction, AbstractBaseRole)> GetActions(RoleActionType actionType) => roleActions[actionType].Select(action => (action, this));
+    public IEnumerable<(RoleAction, AbstractBaseRole)> GetActions(LotusActionType actionType) => roleActions[actionType].Select(action => (action, this));
 
     protected void CreateInstanceBasedVariables()
     {
@@ -585,7 +580,7 @@ public abstract class AbstractBaseRole
             this.GetType().GetMethods(BindingFlags.Default | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)
                 .SelectMany(method => method.GetCustomAttributes<RoleActionAttribute>().Select(a => (a, method)))
                 .Where(t => t.a.Subclassing || t.method.DeclaringType == this.GetType())
-                .Select(t => t.Item1 is ModifiedActionAttribute modded ? new ModifiedAction(modded, t.method) : new RoleAction(t.Item1!, t.method))
+                .Select(t => t.Item1 is ModifiedLotusActionAttribute modded ? new ModifiedAction(modded, t.method) : new RoleAction(t.Item1!, t.method))
                 .Do(action =>
                 {
                     if (action is not ModifiedAction modded) ModdedRole.AddRoleAction(action);

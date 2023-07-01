@@ -1,4 +1,6 @@
 using System.Collections.Generic;
+using Lotus.Roles.Internals;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Victory;
 using VentLib.Options.Game;
 using VentLib.Options.Game.Tabs;
@@ -8,9 +10,7 @@ namespace Lotus.Gamemodes;
 
 public interface IGamemode
 {
-    string GetName();
-
-    GameAction IgnoredActions();
+    public string Name { get; set; }
 
     IEnumerable<GameOptionTab> EnabledTabs();
 
@@ -38,5 +38,5 @@ public interface IGamemode
         EnabledTabs().ForEach(GameOptionController.RemoveTab);
     }
 
-    public void Trigger(GameAction action, params object[] args);
+    void Trigger(LotusActionType action, ref ActionHandle handle, params object[] arguments);
 }

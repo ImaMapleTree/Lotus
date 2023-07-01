@@ -5,9 +5,10 @@ using Lotus.Addons;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers;
+using LotusTrigger.Options;
+using LotusTrigger.Options.General;
 using VentLib.Logging;
 using VentLib.Utilities;
-using static Lotus.Options.GeneralOptions;
 
 namespace Lotus.Patches.Network;
 
@@ -18,8 +19,6 @@ class GameJoinPatch
 
     public static void Postfix(AmongUsClient __instance)
     {
-        /*Async.Schedule(FriendsListButtonPatch.FixFriendListPosition, 0.1f);*/
-
         VentLogger.High($"Joining Lobby (GameID={__instance.GameId})", "GameJoin");
         SoundManager.Instance.ChangeMusicVolume(DataManager.Settings.Audio.MusicVolume);
 
@@ -35,10 +34,10 @@ class GameJoinPatch
 
         Async.Schedule(() => AddonManager.VerifyClientAddons(AddonManager.Addons.Select(AddonInfo.From).ToList()), NetUtils.DeriveDelay(0.5f));
 
-        if (AdminOptions.AutoStartMaxTime != -1)
+        if (GeneralOptions.AdminOptions.AutoStartMaxTime != -1)
         {
-            AdminOptions.AutoCooldown.SetDuration(AdminOptions.AutoStartMaxTime);
-            AdminOptions.AutoCooldown.Start();
+            GeneralOptions.AdminOptions.AutoCooldown.SetDuration(GeneralOptions.AdminOptions.AutoStartMaxTime);
+            GeneralOptions.AdminOptions.AutoCooldown.Start();
         }
 
         Async.Schedule(PlayerJoinPatch.CheckAutostart, 1f);

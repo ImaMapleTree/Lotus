@@ -109,7 +109,7 @@ public class MeetingDelegate
         MeetingHud.RpcVotingComplete(voterStates, exiledPlayer, isTie);
     }
 
-    internal bool IsForceEnd() => isForceEnd;
+    public bool IsForceEnd() => isForceEnd;
 
     public void CalculateExiledPlayer()
     {

@@ -31,7 +31,7 @@ public static class ShapeshiftPatch
 
 
         ActionHandle handle = ActionHandle.NoInit();
-        __instance.Trigger(shapeshifting ? RoleActionType.Shapeshift : RoleActionType.Unshapeshift, ref handle, target);
+        __instance.Trigger(shapeshifting ? LotusActionType.Shapeshift : LotusActionType.Unshapeshift, ref handle, target);
 
         if (handle.IsCanceled)
         {
@@ -39,7 +39,7 @@ public static class ShapeshiftPatch
             return false;
         }
 
-        Game.TriggerForAll(shapeshifting ? RoleActionType.AnyShapeshift : RoleActionType.AnyUnshapeshift, ref handle, __instance, target);
+        Game.TriggerForAll(shapeshifting ? LotusActionType.AnyShapeshift : LotusActionType.AnyUnshapeshift, ref handle, __instance, target);
         if (!handle.IsCanceled)
         {
             Hooks.PlayerHooks.PlayerShapeshiftHook.Propagate(new PlayerShapeshiftHookEvent(__instance, target.Data, !shapeshifting));

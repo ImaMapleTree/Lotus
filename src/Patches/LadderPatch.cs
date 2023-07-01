@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using Lotus.Extensions;
-using Lotus.Options;
 using Lotus.Roles;
 using Lotus.Roles.Interactions;
 using Lotus.Utilities;
+using LotusTrigger.Options;
 using UnityEngine;
 using VentLib.Utilities;
 

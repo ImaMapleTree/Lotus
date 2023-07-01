@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.Extensions;
-using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Roles.Internals.Enums;
 using UnityEngine;
@@ -17,25 +16,27 @@ public class DynamicRoleOptionBuilder
     private readonly Dictionary<DynamicOptionPredicate, EnabledType> enabledTypes = new();
     private List<DynamicOptionPredicate>? predicates;
 
-    public DynamicRoleOptionBuilder(List<DynamicOptionPredicate>? predicates = null)
+    private Func<CustomRole, bool> defaultPredicate;
+    public DynamicRoleOptionBuilder(List<DynamicOptionPredicate>? predicates = null, Func<CustomRole, bool>? defaultPredicate = null)
     {
         this.predicates = predicates;
+        this.defaultPredicate = defaultPredicate ?? (_ => false);
     }
 
-    public static DynamicRoleOptionBuilder Standard(string neutralKillingName, string neutralPassiveName, string madmateName)
+    public static DynamicRoleOptionBuilder Standard(string neutralKillingName, string neutralPassiveName, string madmateName, Func<CustomRole, bool>? defaultPredicate = null)
     {
         return new DynamicRoleOptionBuilder(new List<DynamicOptionPredicate>
         {
             new(r => r.SpecialType is SpecialType.NeutralKilling, "Neutral Killing Settings", neutralKillingName, false),
             new(r => r.SpecialType is SpecialType.Neutral, "Neutral Passive Settings", neutralPassiveName, false),
             new(r => r.Faction is Factions.Impostors.Madmates, "Madmates Settings", madmateName, false)
-        });
+        }, defaultPredicate);
     }
 
     public bool IsAllowed(CustomRole role)
     {
         Type roleType = role.GetType();
-        if (!roleValues.TryGetValue(roleType, out bool allowed)) return false;
+        if (!roleValues.TryGetValue(roleType, out bool allowed)) return defaultPredicate(role);
         EnabledType enabledType = enabledTypes.Where(et => et.Key.Predicate(role)).Select(et => et.Value).FirstOrDefault();
         return enabledType switch
         {
@@ -56,7 +57,7 @@ public class DynamicRoleOptionBuilder
         offText ??= GeneralOptionTranslations.OffText;
 
         Dictionary<DynamicOptionPredicate, GameOptionBuilder> builders = new();
-        CustomRoleManager.AllRoles.OrderBy(r => r.RoleName).ForEach(r =>
+        ProjectLotus.RoleManager.AllRoles.OrderBy(r => r.RoleName).ForEach(r =>
         {
             Type roleType = r.GetType();
             predicates.FirstOrOptional(p => p.Predicate(r)).IfPresent(np =>

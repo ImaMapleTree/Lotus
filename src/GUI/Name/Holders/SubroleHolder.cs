@@ -4,8 +4,9 @@ using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.GUI.Name.Components;
 using Lotus.Options;
-using Lotus.Options.General;
+using Lotus.Options.LotusImpl;
 using Lotus.Patches.Actions;
+using LotusTrigger.Options;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.GUI.Name.Holders;

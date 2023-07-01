@@ -6,7 +6,7 @@ using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.GUI.Name.Impl;
 using Lotus.GUI.Name.Interfaces;
-using Lotus.Options;
+using LotusTrigger.Options;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.GUI.Name.Components;

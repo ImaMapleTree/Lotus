@@ -1,9 +1,8 @@
-using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Vanilla.Meetings;
-using Lotus.Options;
+using LotusTrigger.Options;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -36,11 +35,11 @@ class MeetingHudOnDestroyPatch
         if (meetingDelegate.ExiledPlayer != null && meetingDelegate.ExiledPlayer.Object != null)
             meetingDelegate.CheckAndSetConfirmEjectText(meetingDelegate.ExiledPlayer.Object);
 
-        Players.GetPlayers().Where(p =>
+        /*Players.GetPlayers().Where(p =>
         {
             p.RpcRevertShapeshift(false);
             return p.PlayerId != meetingDelegate.ExiledPlayer?.PlayerId;
-        }).ForEach(p => p.RpcSetName(p.name));
+        }).ForEach(p => p.RpcSetName(p.name));*/
 
         meetingDelegate.BlackscreenResolver.BeginProcess();
         Async.Schedule(PostMeetingSetups, NetUtils.DeriveDelay(0.5f));
@@ -53,6 +52,7 @@ class MeetingHudOnDestroyPatch
 
         Players.GetPlayers().ForEach(p =>
         {
+            /*p.RpcProtectPlayer(p, 0);*/ // Used for fixing the kill button with an authoritive model
             if (randomSpawn) Game.RandomSpawn.Spawn(p);
         });
     }

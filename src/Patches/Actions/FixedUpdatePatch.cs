@@ -1,9 +1,9 @@
 using HarmonyLib;
 using Lotus.API.Odyssey;
-using Lotus.Options;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
+using LotusTrigger.Options;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Extensions;
@@ -28,7 +28,7 @@ static class FixedUpdatePatch
 
         var player = __instance;
         ActionHandle handle = null;
-        __instance.Trigger(RoleActionType.FixedUpdate, ref handle);
+        __instance.Trigger(LotusActionType.FixedUpdate, ref handle);
 
         if (player.IsAlive() && GeneralOptions.GameplayOptions.EnableLadderDeath) FallFromLadder.FixedUpdate(player);
         Profilers.Global.Sampler.Stop(id);

@@ -4,10 +4,9 @@ using System.Text.RegularExpressions;
 using Lotus.Factions;
 using Lotus.Factions.Crew;
 using Lotus.Factions.Impostors;
-using Lotus.Managers;
-using Lotus.Options;
 using Lotus.Roles;
 using Lotus.Roles.Internals.Enums;
+using LotusTrigger.Options;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Commands.Interfaces;
@@ -36,35 +35,35 @@ public class NowCommand: ICommandReceiver
     public void ListCrewmateOptions(PlayerControl source)
     {
         string title = FactionInstances.Crewmates.Color.Colorize($"★ {FactionInstances.Crewmates.Name()} ★");
-        ListRoleGroup(source, title, CustomRoleManager.AllRoles.Where(r => r.Faction is Crewmates));
+        ListRoleGroup(source, title, ProjectLotus.RoleManager.AllRoles.Where(r => r.Faction is Crewmates));
     }
     [Command("impostors", "imp")]
     public void ListImpostorOptions(PlayerControl source)
     {
         string title = FactionInstances.Impostors.Color.Colorize($"★ {FactionInstances.Impostors.Name()} ★");
-        ListRoleGroup(source, title, CustomRoleManager.AllRoles.Where(r => r.Faction is ImpostorFaction));
+        ListRoleGroup(source, title, ProjectLotus.RoleManager.AllRoles.Where(r => r.Faction is ImpostorFaction));
     }
 
     [Command("nk", "neutral-killers", "nks")]
     public void ListNeutralKillers(PlayerControl source)
     {
         string title = ModConstants.Palette.KillingColor.Colorize("★ Neutral Killing ★");
-        ListRoleGroup(source, title, CustomRoleManager.AllRoles.Where(r => r.SpecialType is SpecialType.NeutralKilling));
+        ListRoleGroup(source, title, ProjectLotus.RoleManager.AllRoles.Where(r => r.SpecialType is SpecialType.NeutralKilling));
     }
 
     [Command("neutral", "neutrals", "np")]
     public void ListNeutralPassive(PlayerControl source)
     {
         string title = ModConstants.Palette.PassiveColor.Colorize("★ Neutrals ★");
-        ListRoleGroup(source, title, CustomRoleManager.AllRoles.Where(r => r.SpecialType is SpecialType.Neutral));
+        ListRoleGroup(source, title, ProjectLotus.RoleManager.AllRoles.Where(r => r.SpecialType is SpecialType.Neutral));
     }
 
     [Command("mods", "mod", "subroles", "modifiers", "modifier")]
     public void ListModifiers(PlayerControl source)
     {
         string title = ModConstants.Palette.ModifierColor.Colorize("★ Modifiers ★");
-        ListRoleGroup(source, title, CustomRoleManager.ModifierRoles);
-    } 
+        ListRoleGroup(source, title, ProjectLotus.RoleManager.All(LotusRoleType.Modifiers));
+    }
 
     public void ListNormalOptions(PlayerControl source)
     {
@@ -84,7 +83,7 @@ public class NowCommand: ICommandReceiver
             title = $"★ {option.Name()} ★";
             content = "";
         }
-        
+
         ChatHandler.Of(content[..^1], title).LeftAlign().Send(source);
     }
 

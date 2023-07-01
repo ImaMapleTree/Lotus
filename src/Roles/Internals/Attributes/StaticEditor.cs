@@ -1,12 +1,6 @@
-using System;
-using System.Linq;
-using System.Reflection;
-using HarmonyLib;
-using Lotus.Managers;
-
 namespace Lotus.Roles.Internals.Attributes;
 
-/// <summary>
+/*/// <summary>
 /// Marks any role editor class for automatically linking at the start of the runtime.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class)]
@@ -18,4 +12,4 @@ public class StaticEditor : Attribute
             .Where(type => type.GetCustomAttribute<StaticEditor>() != null)
             .Do(CustomRoleManager.LinkEditor);
     }
-}
+}*/

@@ -57,6 +57,16 @@
     <Compile Remove="./SourceGenerators/**/*" />
   </ItemGroup>
   
+  <ItemGroup>
+    <Folder Include="src\Gamemodes\Attributes\" />
+    <Folder Include="src\Roles\Extra\" />
+  </ItemGroup>
+  
+  
+  
+  
+  
+  
   
   <Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" Condition="'$(Configuration)' == 'Debug'" />

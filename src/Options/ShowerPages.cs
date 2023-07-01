@@ -2,9 +2,12 @@ using System;
 using System.Linq;
 using HarmonyLib;
 using Lotus.API.Odyssey;
-using Lotus.Managers;
+using Lotus.Logging;
 using Lotus.Roles;
+using Lotus.Roles.Builtins;
+using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
+using LotusTrigger.Options;
 using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options;
@@ -40,11 +43,12 @@ public class ShowerPages
     {
         return () =>
         {
-            string content = $"Gamemode: {Game.CurrentGamemode.GetName()}\n\n";
-            content += $"{CustomRoleManager.Special.GM.RoleColor.Colorize("GM")}: {Utils.GetOnOffColored(GeneralOptions.AdminOptions.HostGM)}\n\n";
+            DevLogger.Log("Enabled Role Page");
+            string content = $"Gamemode: {Game.CurrentGamemode.Name}\n\n";
+            content += $"{GameMaster.GMColor.Colorize("GM")}: {Utils.GetOnOffColored(GeneralOptions.AdminOptions.HostGM)}\n\n";
             content += ActiveRolesList + "\n";
 
-            CustomRoleManager.MainRoles.Where(role => role.IsEnabled()).ForEach(role =>
+            ProjectLotus.RoleManager.Not(LotusRoleType.Internals).Where(role => role.IsEnabled()).ForEach(role =>
             {
                 Color color = role.RoleColor;
                 content += $"{color.Colorize(role.RoleName)}: {role.Chance}% x {role.Count}\n";
@@ -57,8 +61,9 @@ public class ShowerPages
     {
         return () =>
         {
+            DevLogger.Log("Role Option Page");
             var content = "";
-            CustomRoleManager.MainRoles.Where(role => role.IsEnabled()).ForEach(role =>
+            ProjectLotus.RoleManager.Not(LotusRoleType.Internals).Where(role => role.IsEnabled()).ForEach(role =>
             {
                 var opt = role.RoleOptions;
                 content += $"{opt.Name()}: {opt.GetValueText()}\n";
@@ -79,7 +84,7 @@ public class ShowerPages
 
             optionManager.GetOptions().Where(opt => opt.GetType() == typeof(GameOption)).Cast<GameOption>().Do(opt =>
             {
-                CustomRole? matchingRole = CustomRoleManager.AllRoles.FirstOrDefault(r => r.RoleOptions == opt);
+                CustomRole? matchingRole = ProjectLotus.RoleManager.AllRoles.FirstOrDefault(r => r.RoleOptions == opt);
 
                 if (matchingRole != null) return;
 

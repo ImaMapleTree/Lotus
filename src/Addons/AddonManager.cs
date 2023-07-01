@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using HarmonyLib;
-using Lotus.Managers;
 using Lotus.RPC;
 using Lotus.Extensions;
 using VentLib;
@@ -18,7 +17,7 @@ namespace Lotus.Addons;
 public class AddonManager
 {
     public static LogLevel AddonLL = LogLevel.Info.Similar("ADDON", ConsoleColor.Magenta);
-    public static List<TOHAddon> Addons = new();
+    public static List<LotusAddon> Addons = new();
 
     public static void ImportAddons()
     {
@@ -33,19 +32,16 @@ public class AddonManager
         try
         {
             Assembly assembly = Assembly.LoadFile(file.FullName);
-            Type tohType = assembly.GetTypes().FirstOrDefault(t => t.IsAssignableTo(typeof(TOHAddon)));
-            if (tohType == null)
-                throw new ConstraintException("Lotus Addons requires ONE class file that extends TOHAddon");
-            TOHAddon addon = (TOHAddon)tohType.GetConstructor(new Type[] { })!.Invoke(null);
-            VentLogger.Log(AddonLL,$"Loading Addon [{addon.AddonName()} {addon.AddonVersion()}]", "AddonManager");
+            Type? lotusType = assembly.GetTypes().FirstOrDefault(t => t.IsAssignableTo(typeof(LotusAddon)));
+            if (lotusType == null)
+                throw new ConstraintException($"Lotus Addons requires ONE class file that extends {nameof(LotusAddon)}");
+            LotusAddon addon = (LotusAddon)AccessTools.Constructor(lotusType).Invoke(Array.Empty<object>());
+
+            VentLogger.Log(AddonLL,$"Loading Addon [{addon.Name} {addon.Version}]", "AddonManager");
             Vents.Register(assembly);
 
             Addons.Add(addon);
             addon.Initialize();
-
-            //addon.Factions.Do(f => FactionConstraintValidator.ValidateAndAdd(f, file.Name));
-            CustomRoleManager.AllRoles.AddRange(addon.CustomRoles);
-            ProjectLotus.GamemodeManager.GamemodeTypes.AddRange(addon.Gamemodes);
         }
         catch (Exception e)
         {

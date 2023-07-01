@@ -6,7 +6,6 @@ using Lotus.API.Reactive;
 using Lotus.Victory;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
-using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -14,7 +13,7 @@ using VentLib.Utilities.Optionals;
 
 namespace Lotus.API.Vanilla.Meetings;
 
-internal class MeetingPrep
+public class MeetingPrep
 {
     internal static DateTime MeetingCalledTime = DateTime.Now;
     internal static GameData.PlayerInfo? Reported;
@@ -41,7 +40,7 @@ internal class MeetingPrep
         if (!Prepped) _meetingDelegate = new MeetingDelegate();
         if (Prepped || !AmongUsClient.Instance.AmHost) return _meetingDelegate;
         ActionHandle handle = ActionHandle.NoInit();
-        if (reporter != null) Game.TriggerForAll(RoleActionType.MeetingCalled, ref handle, reporter, Optional<GameData.PlayerInfo>.Of(deadBody));
+        if (reporter != null) Game.TriggerForAll(LotusActionType.MeetingCalled, ref handle, reporter, Optional<GameData.PlayerInfo>.Of(deadBody));
         if (handle.IsCanceled) return null;
 
         Game.State = GameState.InMeeting;
@@ -76,5 +75,5 @@ internal class MeetingPrep
         reporter.RpcStartMeeting(Reported);
     }
 
-    private static void FixChatNames() => Players.GetPlayers().ForEach(p => p.RpcSetName(Color.white.Colorize(p.name)));
+    private static void FixChatNames() => Players.GetPlayers().ForEach(p => p.RpcSetName(p.name));
 }

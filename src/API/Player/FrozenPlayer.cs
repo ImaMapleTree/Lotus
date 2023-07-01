@@ -20,7 +20,7 @@ public class FrozenPlayer
     public string ColorName;
     public CustomRole Role;
     public List<CustomRole> Subroles;
-    public RemoteList<IStatus> Statuses = new RemoteList<IStatus>();
+    public RemoteList<IStatus> Statuses = new();
     public uint Level;
     public PlayerOutfit Outfit;
     public ulong GameID;

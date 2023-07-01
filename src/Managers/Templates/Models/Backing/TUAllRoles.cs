@@ -2,10 +2,10 @@
 using System.Linq;
 using Lotus.Factions.Neutrals;
 using Lotus.Roles;
+using Lotus.Roles.Builtins;
+using Lotus.Roles.Builtins.Base;
 using Lotus.Roles.Debugger;
-using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
-using Lotus.Roles.Subroles;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
@@ -37,7 +37,7 @@ internal class TUAllRoles
         }
 
 
-        CustomRoleManager.AllRoles.ForEach(r => rolesByFaction.GetOrCompute(FactionName(r), () => new List<CustomRole>()).Add(r));
+        ProjectLotus.RoleManager.AllRoles.ForEach(r => rolesByFaction.GetOrCompute(FactionName(r), () => new List<CustomRole>()).Add(r));
 
         string text = "";
 

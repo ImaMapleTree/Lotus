@@ -6,11 +6,11 @@ using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.Extensions;
 using Lotus.Managers.History;
-using Lotus.Options;
 using Lotus.Roles;
-using Lotus.Roles.Extra;
+using Lotus.Roles.Builtins;
 using Lotus.Victory;
 using Lotus.Victory.Conditions;
+using LotusTrigger.Options;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -30,7 +30,7 @@ public class LastResultCommand: CommandTranslations
     {
         Hooks.NetworkHooks.ReceiveVersionHook.Bind(nameof(LastResultCommand), versionEvent =>
         {
-            if (!GeneralOptions.MiscellaneousOptions.AutoDisplayResults) return;
+            if (!GeneralOptions.MiscellaneousOptions.AutoDisplayLastResults) return;
             if (versionEvent.Player == null) return;
             if (PlayerHistories == null) return;
             if (AmongUsClient.Instance.NetworkMode is not NetworkModes.LocalGame && PlayerHistories.All(p => p.UniquePlayerId.ToFriendcode() != versionEvent.Player.FriendCode)) return;
@@ -38,7 +38,7 @@ public class LastResultCommand: CommandTranslations
         });
         Hooks.NetworkHooks.GameJoinHook.Bind(nameof(LastResultCommand), gameJoinEvent =>
         {
-            if (!GeneralOptions.MiscellaneousOptions.AutoDisplayResults) return;
+            if (!GeneralOptions.MiscellaneousOptions.AutoDisplayLastResults) return;
             if (gameJoinEvent.IsNewLobby) return;
             Async.WaitUntil(() => PlayerControl.LocalPlayer, p => p != null, GeneralResults, 0.1f, 30);
         });
@@ -85,10 +85,9 @@ public class LastResultCommand: CommandTranslations
         if (PlayerHistories == null) return;
 
         HashSet<byte> winners = Game.MatchData.GameHistory.LastWinners.Select(p => p.MyPlayer.PlayerId).ToHashSet();
-        string text = GeneralColor3.Colorize("<b>Translations.ResultsText</b>") + "\n";
 
-        text = PlayerHistories
-            .Where(ph => ph.Role is not GM)
+        string text = PlayerHistories
+            .Where(ph => ph.Role is not GameMaster)
             .OrderBy(StatusOrder)
             .Select(p => CreateSmallPlayerResult(p, winners.Contains(p.PlayerId)))
             .Fuse("<line-height=4>\n</line-height>");

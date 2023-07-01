@@ -10,7 +10,7 @@ using Lotus.Chat;
 using Lotus.Roles;
 using Lotus.Extensions;
 using Lotus.Managers.Templates.Models;
-using Lotus.Roles.Subroles;
+using Lotus.Roles.Interfaces;
 using VentLib.Options;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -74,7 +74,7 @@ public class TemplateLegacy
         { "$AUVersion", _ => UnityEngine.Application.version },
         { "$ModVersion", _ => ProjectLotus.PluginVersion + (ProjectLotus.DevVersion ? " " + ProjectLotus.DevVersionStr : "") },
         { "$Map", _ => Constants.MapNames[GameOptionsManager.Instance.CurrentGameOptions.MapId] },
-        { "$Gamemode", _ => Game.CurrentGamemode.GetName() },
+        { "$Gamemode", _ => Game.CurrentGamemode.Name },
         { "$Date", _ => DateTime.Now.ToShortDateString() },
         { "$Time", _ => DateTime.Now.ToShortTimeString() },
         { "$Players", _ => PlayerControl.AllPlayerControls.ToArray().Select(p => p.name).Join() },
@@ -146,7 +146,7 @@ public class TemplateLegacy
 
         return player.GetSubroles().Select(sr =>
         {
-            string identifierText = sr is Subrole subrole ? sr.RoleColor.Colorize(subrole.Identifier()!) + " " : "";
+            string identifierText = sr is ISubrole subrole ? sr.RoleColor.Colorize(subrole.Identifier() ?? "") + " " : "";
             return $"{identifierText}{sr.RoleColor.Colorize(sr.RoleName)}\n{sr.Description}";
         }).Fuse("\n\n");
     }

@@ -7,9 +7,7 @@ using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Logging;
-using Lotus.Patches.Actions;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.Interactions;
@@ -40,7 +38,7 @@ public class FatalIntent : IFatalIntent
         ActionHandle ignored = ActionHandle.NoInit();
         if (!target.IsAlive()) return;
         DevLogger.Log("Target was still alive :O");
-        Game.TriggerForAll(RoleActionType.SuccessfulAngelProtect, ref ignored, target, actor);
+        Game.TriggerForAll(LotusActionType.SuccessfulAngelProtect, ref ignored, target, actor);
         Game.MatchData.GameHistory.ClearCauseOfDeath(target.PlayerId);
     }
 

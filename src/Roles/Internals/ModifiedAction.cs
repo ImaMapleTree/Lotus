@@ -7,18 +7,18 @@ public class ModifiedAction: RoleAction
 {
     public ModifiedBehaviour Behaviour { get; }
 
-    public ModifiedAction(ModifiedActionAttribute attribute, MethodInfo method) : base(attribute, method)
+    public ModifiedAction(ModifiedLotusActionAttribute attribute, MethodInfo method) : base(attribute, method)
     {
         Behaviour = attribute.Behaviour;
     }
 
-    public override void Execute(AbstractBaseRole role, object[] args)
+    public override void Execute(object role, object[] args)
     {
-        Method.InvokeAligned(role.Editor!, args);
+        Method.InvokeAligned(((AbstractBaseRole)role).Editor!, args);
     }
 
-    public override void ExecuteFixed(AbstractBaseRole role)
+    public override void ExecuteFixed(object role)
     {
-        Method.Invoke(role.Editor!, null);
+        Method.Invoke(((AbstractBaseRole)role).Editor!, null);
     }
 }

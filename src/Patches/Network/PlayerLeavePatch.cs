@@ -4,7 +4,6 @@ using InnerNet;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
-using Lotus.Gamemodes;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
 using VentLib.Logging;
@@ -37,12 +36,11 @@ class OnPlayerLeftPatch
         ActionHandle uselessHandle = ActionHandle.NoInit();
         if (Game.State is not (GameState.InLobby or GameState.InIntro))
         {
-            Game.TriggerForAll(RoleActionType.Disconnect, ref uselessHandle, data.Character);
+            Game.TriggerForAll(LotusActionType.Disconnect, ref uselessHandle, data.Character);
             Game.MatchData.Roles.MainRoles.GetValueOrDefault(data.Character.PlayerId)?.HandleDisconnect();
             Game.MatchData.Roles.SubRoles.GetValueOrDefault(data.Character.PlayerId)?.ForEach(r => r.HandleDisconnect());
         }
         Hooks.PlayerHooks.PlayerDisconnectHook.Propagate(new PlayerHookEvent(data.Character));
         data.Character.Data.PlayerName = data.Character.name;
-        Game.CurrentGamemode.Trigger(GameAction.GameLeave, data);
     }
 }

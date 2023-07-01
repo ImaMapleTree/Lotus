@@ -36,15 +36,15 @@ public class AddonInfo: IRpcSendable<AddonInfo>
         writer.Write((int)Mismatches);
     }
 
-    public static AddonInfo From(TOHAddon addon)
+    public static AddonInfo From(LotusAddon addon)
     {
         return new AddonInfo
         {
             UUID = addon.Uuid,
             AssemblyShortName = addon.BundledAssembly.GetName().Name,
             AssemblyFullName = addon.BundledAssembly.GetName().FullName,
-            Name = addon.AddonName(),
-            Version = addon.AddonVersion()
+            Name = addon.Name,
+            Version = addon.Version.ToSimpleName()
         };
     }
 

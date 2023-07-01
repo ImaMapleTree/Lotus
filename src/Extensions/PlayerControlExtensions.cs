@@ -11,7 +11,6 @@ using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Logging;
-using Lotus.Managers;
 using Lotus.Managers.History.Events;
 using Lotus.Patches.Actions;
 using Lotus.Roles;
@@ -19,7 +18,6 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
-using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
@@ -34,12 +32,12 @@ public static class PlayerControlExtensions
 {
     public static UniquePlayerId UniquePlayerId(this PlayerControl player) => API.Player.UniquePlayerId.From(player);
 
-    public static void Trigger(this PlayerControl player, RoleActionType action, ref ActionHandle handle, params object[] parameters)
+    public static void Trigger(this PlayerControl player, LotusActionType action, ref ActionHandle handle, params object[] parameters)
     {
         if (player == null) return;
         CustomRole role = player.GetCustomRole();
         List<CustomRole> subroles = player.GetSubroles();
-        if (action is RoleActionType.FixedUpdate)
+        if (action is LotusActionType.FixedUpdate)
         {
             role.Trigger(action, ref handle, parameters);
             if (handle is { IsCanceled: true }) return;
@@ -66,7 +64,7 @@ public static class PlayerControlExtensions
                 if (action.IsPlayerAction())
                 {
                     Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(myPlayer, roleAction, parameters));
-                    Game.TriggerForAll(RoleActionType.AnyPlayerAction, ref handle, myPlayer, roleAction, parameters);
+                    Game.TriggerForAll(LotusActionType.AnyPlayerAction, ref handle, myPlayer, roleAction, parameters);
                 }
 
                 handle.ActionType = action;
@@ -91,21 +89,11 @@ public static class PlayerControlExtensions
             string callerMethodName = callerMethod.Name;
             string? callerClassName = callerMethod.DeclaringType.FullName;
             VentLogger.Warn(callerClassName + "." + callerMethodName + " Invalid Custom Role", "GetCustomRole");
-            return CustomRoleManager.Static.Crewmate;
+            return ProjectLotus.RoleManager.Default;
         }
 
         CustomRole? role = Game.MatchData.Roles.MainRoles.GetValueOrDefault(player.PlayerId);
-        return role ?? (player.Data.Role == null ? CustomRoleManager.Default
-            : player.Data.Role.Role switch
-            {
-                RoleTypes.Crewmate => CustomRoleManager.Static.Crewmate,
-                RoleTypes.Engineer => CustomRoleManager.Static.Mechanic,
-                RoleTypes.Scientist => CustomRoleManager.Static.Physicist,
-                /*RoleTypes.GuardianAngel => CustomRoleManager.Static.GuardianAngel,*/
-                RoleTypes.Impostor => CustomRoleManager.Static.Impostor,
-                RoleTypes.Shapeshifter => CustomRoleManager.Static.Morphling,
-                _ => CustomRoleManager.Default,
-            });
+        return role ?? ProjectLotus.RoleManager.Default;
     }
 
     public static CustomRole? GetCustomRoleSafe(this PlayerControl player)
@@ -113,24 +101,14 @@ public static class PlayerControlExtensions
         if (player == null) return null;
 
         CustomRole? role = Game.MatchData.Roles.MainRoles.GetValueOrDefault(player.PlayerId);
-        return role ?? (player.Data.Role == null ? CustomRoleManager.Default
-            : player.Data.Role.Role switch
-            {
-                RoleTypes.Crewmate => CustomRoleManager.Static.Crewmate,
-                RoleTypes.Engineer => CustomRoleManager.Static.Mechanic,
-                RoleTypes.Scientist => CustomRoleManager.Static.Physicist,
-                /*RoleTypes.GuardianAngel => CustomRoleManager.Static.GuardianAngel,*/
-                RoleTypes.Impostor => CustomRoleManager.Static.Impostor,
-                RoleTypes.Shapeshifter => CustomRoleManager.Static.Morphling,
-                _ => CustomRoleManager.Default,
-            });
+        return role ?? ProjectLotus.RoleManager.Default;
     }
 
     public static CustomRole? GetSubrole(this PlayerControl player)
     {
         List<CustomRole>? role = Game.MatchData.Roles.SubRoles.GetValueOrDefault(player.PlayerId);
         if (role == null || role.Count == 0) return null;
-        return role[0] as Subrole;
+        return role[0];
     }
 
     public static T? GetSubrole<T>(this PlayerControl player) where T: CustomRole
@@ -166,6 +144,7 @@ public static class PlayerControlExtensions
     public static void RpcMark(this PlayerControl killer, PlayerControl? target = null, int colorId = 0)
     {
         if (target == null) target = killer;
+        // In case of 7.11 comment out all below
         MurderPatches.Lock(killer.PlayerId);
 
         // Host
@@ -289,8 +268,8 @@ public static class PlayerControlExtensions
         }
 
         ActionHandle uselessHandle = ActionHandle.NoInit();
-        player.Trigger(RoleActionType.SelfExiled, ref uselessHandle);
-        Game.TriggerForAll(RoleActionType.AnyExiled, ref uselessHandle, player);
+        player.Trigger(LotusActionType.SelfExiled, ref uselessHandle);
+        Game.TriggerForAll(LotusActionType.AnyExiled, ref uselessHandle, player);
 
         Hooks.PlayerHooks.PlayerExiledHook.Propagate(new PlayerHookEvent(player));
         Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerDeathHookEvent(player, new ExiledEvent(player, new List<PlayerControl>(), new List<PlayerControl>())));
@@ -308,8 +287,8 @@ public static class PlayerControlExtensions
 
         ActionHandle ignored = ActionHandle.NoInit();
         Optional<FrozenPlayer> fp = Optional<FrozenPlayer>.Of(Game.MatchData.GetFrozenPlayer(player));
-        target.Trigger(RoleActionType.MyDeath, ref ignored, player, fp, deathEvent);
-        Game.TriggerForAll(RoleActionType.AnyDeath, ref ignored, target, player, fp, deathEvent);
+        target.Trigger(LotusActionType.MyDeath, ref ignored, player, fp, deathEvent);
+        Game.TriggerForAll(LotusActionType.AnyDeath, ref ignored, target, player, fp, deathEvent);
 
         PlayerMurderHookEvent playerMurderHookEvent = new(player, target, deathEvent);
         Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);
@@ -323,7 +302,7 @@ public static class PlayerControlExtensions
 
     public static CustomRole GetCustomRole(this GameData.PlayerInfo? playerInfo)
     {
-        if (playerInfo == null) return CustomRoleManager.Default;
+        if (playerInfo == null) return ProjectLotus.RoleManager.Default;
         return Game.MatchData.Roles.GetMainRole(playerInfo.PlayerId);
     }
 

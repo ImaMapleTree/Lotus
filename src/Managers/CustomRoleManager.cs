@@ -1,3 +1,4 @@
+/*
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,6 +15,7 @@ using Lotus.Roles.RoleGroups.Impostors;
 using Lotus.Roles.RoleGroups.Madmates.Roles;
 using Lotus.Roles.RoleGroups.Neutral;
 using Lotus.Roles.RoleGroups.NeutralKilling;
+using Lotus.Roles.RoleGroups.Stock;
 using Lotus.Roles.RoleGroups.Undead.Roles;
 using Lotus.Roles.RoleGroups.Vanilla;
 using Lotus.Roles.Subroles;
@@ -52,7 +54,7 @@ public static class CustomRoleManager
         Static = new StaticRoles();
         Mods = new Modifiers();
         Special = new ExtraRoles();
-        Default = Static.Crewmate;
+        Default = Special.EmptyRole;
 
         MainRoles = Static.GetType()
             .GetFields()
@@ -86,6 +88,16 @@ public static class CustomRoleManager
     public static int GetRoleId(CustomRole role) => role == null ? 0 : GetRoleId(role.GetType());
     public static CustomRole GetRoleFromType(Type roleType) => GetRoleFromId(GetRoleId(roleType));
     public static CustomRole GetCleanRole(CustomRole role) => GetRoleFromId(GetRoleId(role));
+
+    public static CustomRole RoleFromQualifier(string qualifier)
+    {
+        return AllRoles.FirstOrDefault(r => QualifierFromRole(r) == qualifier, Default);
+    }
+
+    public static string QualifierFromRole(CustomRole role)
+    {
+        return $"{role.DeclaringAssembly.GetName().Name ?? "Unknown"}.{role.GetType().Name}.{role.EnglishRoleName}";
+    }
 
     public static int GetRoleId(Type roleType)
     {
@@ -168,7 +180,7 @@ public static class CustomRoleManager
         public Creeper Creeper = new Creeper();
         public Disperser Disperser = new Disperser();
         public Escapist Escapist = new Escapist();
-        /*public FireWorks FireWorks = new FireWorks();*/
+        /*public FireWorks FireWorks = new FireWorks();#1#
         public Freezer Freezer = new Freezer();
         public Grenadier Grenadier = new Grenadier();
         public IdentityThief IdentityThief = new IdentityThief();
@@ -268,10 +280,9 @@ public static class CustomRoleManager
         public CustomRole NEUTRAL_PASSIVE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>❀ Neutral Passive ❀</size>").Color(ModConstants.Palette.PassiveColor).Tab(DefaultTabs.NeutralTab).Build());
 
         public Amnesiac Amnesiac = new Amnesiac();
-        /*public Archangel Archangel = new Archangel();*/
+        /*public Archangel Archangel = new Archangel();#1#
         public Copycat Copycat = new Copycat();
         public Executioner Executioner = new Executioner();
-        /*public GuardianAngel GuardianAngel = new GuardianAngel();*/
         public Hacker Hacker = new Hacker();
         public Jester Jester = new Jester();
         public Opportunist Opportunist = new Opportunist();
@@ -283,7 +294,7 @@ public static class CustomRoleManager
         public Terrorist Terrorist = new Terrorist();
         public Vulture Vulture = new Vulture();
 
-        /*public Guesser Guesser = new Guesser();*/
+        /*public Guesser Guesser = new Guesser();#1#
         public CustomRole LOAD_MODIFIER_OPTIONS = new EnforceFunctionOrderingRole(() => RoleOptions.LoadSubroleOptions());
     }
 
@@ -312,6 +323,7 @@ public static class CustomRoleManager
         public IllegalRole IllegalRole = new IllegalRole();
         public GM GM = new GM();
         public Debugger Debugger = new Debugger();
+        public EmptyRole EmptyRole = new EmptyRole();
 
         public CrewGuesser CrewGuesser = new CrewGuesser();
         public ImpGuesser ImpGuesser = new ImpGuesser();
@@ -327,3 +339,4 @@ public static class CustomRoleManager
         //watcher
     }
 }
+*/

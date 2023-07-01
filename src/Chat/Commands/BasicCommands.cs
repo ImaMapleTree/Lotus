@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
@@ -6,10 +5,9 @@ using Lotus.API.Player;
 using Lotus.Chat.Patches;
 using Lotus.Factions.Neutrals;
 using Lotus.Managers;
-using Lotus.Options;
 using Lotus.Roles;
+using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals.Enums;
-using Lotus.Roles.Subroles;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -24,7 +22,6 @@ namespace Lotus.Chat.Commands;
 [Localized("Commands")]
 public class BasicCommands: CommandTranslations
 {
-    [Localized("Color.NotInRange")] public static string ColorNotInRangeMessage = "{0} is not in range of valid colors.";
     [Localized(nameof(Winners))] public static string Winners = "Winners";
     [Localized("Dump.Success")] public static string DumpSuccess = "Successfully dumped log. Check your logs folder for a \"dump.log!\"";
     [Localized("Ids.PlayerIdMessage")] public static string PlayerIdMessage = "{0}'s player ID is {1}";
@@ -39,12 +36,12 @@ public class BasicCommands: CommandTranslations
 
         string FactionName(CustomRole role)
         {
-            if (role is Subrole) return "Modifiers";
+            if (role is ISubrole) return "Modifiers";
             if (role.Faction is not Neutral) return role.Faction.Name();
             return role.SpecialType is SpecialType.NeutralKilling ? "Neutral Killers" : "Neutral";
         }
 
-        CustomRoleManager.AllRoles.ForEach(r => rolesByFaction.GetOrCompute(FactionName(r), () => new List<CustomRole>()).Add(r));
+        ProjectLotus.RoleManager.AllRoles.ForEach(r => rolesByFaction.GetOrCompute(FactionName(r), () => new List<CustomRole>()).Add(r));
 
         rolesByFaction.GetValues().SelectMany(s => s).ForEach(r =>
         {
@@ -77,36 +74,6 @@ public class BasicCommands: CommandTranslations
         OnChatPatch.EatMessage = true;
     }
 
-    [Command(CommandFlag.LobbyOnly, "name")]
-    public static void Name(PlayerControl source, string name)
-    {
-        if (name.IsNullOrWhiteSpace()) return;
-        int allowedUsers = GeneralOptions.MiscellaneousOptions.ChangeNameUsers;
-        bool permitted = allowedUsers switch
-        {
-            0 => source.IsHost(),
-            1 => source.IsHost() || PluginDataManager.FriendManager.IsFriend(source),
-            2 => true,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        if (!permitted)
-        {
-            ChatHandlers.NotPermitted().Send(source);
-            return;
-        }
-
-        if (name.Length > 25)
-        {
-            ChatHandler.Of($"Name too long ({name.Length} > 25).", CommandError).LeftAlign().Send(source);
-            return;
-        }
-
-        OnChatPatch.EatMessage = true;
-
-        source.RpcSetName(name);
-    }
-
     [Command(CommandFlag.LobbyOnly, "winner", "w")]
     public static void ListWinners(PlayerControl source)
     {
@@ -123,33 +90,6 @@ public class BasicCommands: CommandTranslations
 
     }
 
-    [Command(CommandFlag.LobbyOnly, "color", "colour")]
-    public static void SetColor(PlayerControl source, int color)
-    {
-        int allowedUsers = GeneralOptions.MiscellaneousOptions.ChangeColorAndLevelUsers;
-        bool permitted = allowedUsers switch
-        {
-            0 => source.IsHost(),
-            1 => source.IsHost() || PluginDataManager.FriendManager.IsFriend(source),
-            2 => true,
-            _ => throw new ArgumentOutOfRangeException()
-        };
-
-        if (!permitted)
-        {
-            ChatHandlers.NotPermitted().Send(source);
-            return;
-        }
-
-        if (color > Palette.PlayerColors.Length - 1)
-        {
-            ChatHandler.Of($"{ColorNotInRangeMessage.Formatted(color)} (0-{Palette.PlayerColors.Length - 1})", ModConstants.Palette.InvalidUsage.Colorize(InvalidUsage)).LeftAlign().Send(source);
-            return;
-        }
-
-        source.RpcSetColor((byte)color);
-    }
-
     private static readonly ColorGradient HostGradient = new(new Color(1f, 0.93f, 0.98f), new Color(1f, 0.57f, 0.73f));
 
     [Command(CommandFlag.HostOnly, "say", "s")]
@@ -158,7 +98,7 @@ public class BasicCommands: CommandTranslations
         ChatHandler.Of(message).Title(HostGradient.Apply(HostMessage)).Send();
     }
 
-    [Command(CommandFlag.HostOnly, "id", "ids", "pid", "pids")] // eur mom is 😣
+    [Command("id", "ids", "pid", "pids")] // eur mom is 😣
     public static void PlayerIds(PlayerControl source, CommandContext context)
     {
         if (context.Args.Length == 0)

@@ -4,8 +4,8 @@ using AmongUs.GameOptions;
 using HarmonyLib;
 using InnerNet;
 using Lotus.API;
-using Lotus.Options;
-using Lotus.Options.General;
+using Lotus.Options.LotusImpl;
+using LotusTrigger.Options;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 using VentLib.Logging;
@@ -108,14 +108,19 @@ public class GameStartRandomMap
     }
     public static bool Prefix(GameStartRandomMap __instance)
     {
+        AUSettings.StaticOptions.SetFloat(FloatOptionNames.ProtectionDurationSeconds, 3600f);
+        AUSettings.StaticOptions.SetBool(BoolOptionNames.ImpostorsCanSeeProtect, false);
         if (!GeneralOptions.MayhemOptions.UseRandomMap) return true;
 
         List<byte> randomMaps = new();
+
         AuMap map = GeneralOptions.MayhemOptions.RandomMaps;
         if (map.HasFlag(AuMap.Skeld)) randomMaps.Add(0);
         if (map.HasFlag(AuMap.Mira)) randomMaps.Add(1);
         if (map.HasFlag(AuMap.Polus)) randomMaps.Add(2);
         if (map.HasFlag(AuMap.Airship)) randomMaps.Add(4);
+
+
 
         if (randomMaps.Count == 0) return true;
 

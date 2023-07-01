@@ -6,11 +6,11 @@ public class ActionHandle
 {
     public static ActionHandle NoInit() => new();
 
-    public RoleActionType ActionType;
+    public LotusActionType ActionType;
     public bool IsCanceled => Cancellation is not CancelType.None;
     public CancelType Cancellation;
 
-    public ActionHandle(RoleActionType type)
+    public ActionHandle(LotusActionType type)
     {
         this.ActionType = type;
     }

@@ -1,10 +1,10 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Extensions;
-using Lotus.Managers;
 using Lotus.Managers.History;
 using Lotus.Roles;
 using Lotus.Roles.Overrides;
@@ -30,6 +30,9 @@ public class MatchData
     public HashSet<byte> UnreportableBodies = new();
     public int MeetingsCalled;
     public int EmergencyButtonsUsed;
+
+    /*private static readonly Func<RemoteList<GameOptionOverride>> OptionOverrideListSupplier =
+        () => AUSettings.ConfirmImpostor() ? new RemoteList<GameOptionOverride> { new(Override.ConfirmEjects, false), new(Override.GuardianAngelDuration, 1000f) } : new RemoteList<GameOptionOverride> {  new(Override.GuardianAngelDuration, 1000f) };*/
 
     private static readonly Func<RemoteList<GameOptionOverride>> OptionOverrideListSupplier =
         () => AUSettings.ConfirmImpostor() ? new RemoteList<GameOptionOverride> { new(Override.ConfirmEjects, false) } : new RemoteList<GameOptionOverride>();
@@ -69,7 +72,7 @@ public class MatchData
         public CustomRole AddMainRole(byte playerId, CustomRole role) => MainRoles[playerId] = role;
         public void AddSubrole(byte playerId, CustomRole subrole) => SubRoles.GetOrCompute(playerId, () => new List<CustomRole>()).Add(subrole);
 
-        public CustomRole GetMainRole(byte playerId) => MainRoles.GetValueOrDefault(playerId, CustomRoleManager.Default);
+        public CustomRole GetMainRole(byte playerId) => MainRoles.GetValueOrDefault(playerId, ProjectLotus.RoleManager.Default);
         public List<CustomRole> GetSubroles(byte playerId) => SubRoles.GetOrCompute(playerId, () => new List<CustomRole>());
     }
 
@@ -86,7 +89,7 @@ public class MatchData
     [ModRPC((uint) ModCalls.SetSubrole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
     public static void AssignSubrole(PlayerControl player, CustomRole role, bool sendToClient = false)
     {
-        CustomRole instantiated = role.Instantiate(player, true);
+        CustomRole instantiated = role.Instantiate(player);
         Game.MatchData.Roles.AddSubrole(player.PlayerId, instantiated);
         if (sendToClient) role.Assign();
     }
@@ -100,6 +103,7 @@ public class MatchData
     {
         return Game.MatchData.FrozenPlayers.GetOptional(player.GetGameID()).Map(fp => fp.Statuses).Transform(statuses =>
         {
+            if (statuses.Any(s => s.Name == status.Name)) return null!;
             Remote<IStatus> remote = statuses.Add(status);
             Hooks.ModHooks.StatusReceivedHook.Propagate(new PlayerStatusReceivedHook(player, status, infector));
             return remote;

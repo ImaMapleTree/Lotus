@@ -1,7 +1,6 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using Lotus.Managers;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
@@ -17,7 +16,7 @@ public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
     private CustomRole defaultRole;
     private CustomRole? current;
 
-    private Dictionary<int, int> roleLimitTracker = new();
+    private Dictionary<string, int> roleLimitTracker = new();
 
     public RoleLottery(CustomRole defaultRole)
     {
@@ -32,7 +31,7 @@ public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
         uint id = Roles.Add(role);
         uint batch = BatchNumber++;
 
-        int roleId = CustomRoleManager.GetRoleId(role);
+        string roleId = ProjectLotus.RoleManager.GetIdentifier(role);
 
 
         // If the role chance is at 100, we move it into the priority list
@@ -94,7 +93,7 @@ public class RoleLottery: IEnumerator<CustomRole>, IEnumerable<CustomRole>
     {
         public uint Id;
         public uint Batch;
-        public int RoleId;
+        public string RoleId;
 
         public override bool Equals(object? obj)
         {

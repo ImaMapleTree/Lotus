@@ -28,15 +28,6 @@ class PlayerStartPatch
     }
 }
 
-[HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.RemoveProtection))]
-class PlayerControlRemoveProtectionPatch
-{
-    public static void Postfix(PlayerControl __instance)
-    {
-        VentLogger.Old($"{__instance.GetNameWithRole()}", "RemoveProtection");
-    }
-}
-
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ResetForMeeting))]
 public static class ResetForMeetingPatch
 {

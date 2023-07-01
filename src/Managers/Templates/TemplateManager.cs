@@ -4,7 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Lotus.API.Player;
-using Lotus.Logging;
+using Lotus.API.Reactive;
+using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers.Hotkeys;
 using Lotus.Managers.Templates.Models;
 using Lotus.Managers.Templates.Models.Units;
@@ -67,13 +68,19 @@ public class TemplateManager
     {
         if (input.Length < 2 || !input.StartsWith("/")) return false;
         input = input[1..];
-        List<Template>? templates = Commands.GetValueOrDefault(input);
+
+        string[] splitCommand = input.Split(" ");
+        List<Template>? templates = Commands.GetValueOrDefault(splitCommand[0]);
         if (templates == null) return false;
+
+        string[] arguments = splitCommand.Length > 0 ? splitCommand[1..] : Array.Empty<string>();
+        Hooks.ModHooks.CustomCommandHook.Propagate(new CustomCommandHookEvent(source, splitCommand[0], arguments));
+        TemplateUnit.Arguments = arguments;
+
         templates.ForEach(template =>
         {
             if (source.IsHost())
             {
-                DevLogger.Log(input);
                 if (HotkeyManager.HoldingRightShift) ShowAll(template, source, Players.GetPlayers(PlayerFilter.Dead));
                 else ShowAll(template, source);
             }

@@ -49,11 +49,11 @@ public class PetPatch
 
         VentLogger.Trace($"{player.name} => Pet", "PetPatch");
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.AnyPet, ref handle, player);
-        player.Trigger(RoleActionType.OnPet, ref handle, __instance);
+        Game.TriggerForAll(LotusActionType.AnyPet, ref handle, player);
+        player.Trigger(LotusActionType.OnPet, ref handle, __instance);
 
         handle = ActionHandle.NoInit();
-        player.Trigger(RoleActionType.OnHoldPet, ref handle, __instance, timesPet);
+        player.Trigger(LotusActionType.OnHoldPet, ref handle, __instance, timesPet);
 
     }
 
@@ -64,6 +64,6 @@ public class PetPatch
 
         TimesPet[player.PlayerId] = 0;
         ActionHandle handle = ActionHandle.NoInit();
-        player.Trigger(RoleActionType.OnPetRelease, ref handle, timesHeld);
+        player.Trigger(LotusActionType.OnPetRelease, ref handle, timesHeld);
     }
 }

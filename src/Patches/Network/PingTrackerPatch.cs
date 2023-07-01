@@ -1,7 +1,7 @@
 using HarmonyLib;
 using Lotus.API.Odyssey;
-using Lotus.Options;
 using Lotus.Utilities;
+using LotusTrigger.Options;
 using UnityEngine;
 using VentLib.Localization;
 using VentLib.Logging;
@@ -33,7 +33,7 @@ class PingTrackerPatch
 
         __instance.text.text += ProjectLotus.CredentialsText;
         if (GeneralOptions.DebugOptions.NoGameEnd) __instance.text.text += $"\r\n" + Utils.ColorString(Color.red, Localizer.Translate("StaticOptions.NoGameEnd"));
-        __instance.text.text += $"\r\n" + Game.CurrentGamemode.GetName();
+        __instance.text.text += $"\r\n" + Game.CurrentGamemode.Name;
 
 
 

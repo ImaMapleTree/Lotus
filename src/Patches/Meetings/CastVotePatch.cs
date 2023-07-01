@@ -27,8 +27,8 @@ public class CastVotePatch
         VentLogger.Trace($"{voter.GetNameWithRole()} voted for {voted.Map(v => v.name)}");
 
         ActionHandle handle = ActionHandle.NoInit();
-        voter.Trigger(RoleActionType.MyVote, ref handle,MeetingDelegate.Instance, voted);
-        Game.TriggerForAll(RoleActionType.AnyVote, ref handle, MeetingDelegate.Instance, voter, voted);
+        voter.Trigger(LotusActionType.MyVote, ref handle,MeetingDelegate.Instance, voted);
+        Game.TriggerForAll(LotusActionType.AnyVote, ref handle, MeetingDelegate.Instance, voter, voted);
 
         if (!handle.IsCanceled)
         {

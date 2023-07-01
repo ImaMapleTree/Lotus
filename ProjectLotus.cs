@@ -14,7 +14,7 @@ using Lotus.GUI.Menus;
 using Lotus.GUI.Patches;
 using Lotus.Managers;
 using Lotus.Options;
-using Lotus.Roles.Internals.Attributes;
+using Lotus.Roles;
 using UnityEngine;
 using VentLib;
 using VentLib.Logging;
@@ -60,6 +60,8 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
     public static ModUpdater ModUpdater = null!;
 
+    public static LotusRoleManager RoleManager = null!;
+
 
     public ProjectLotus()
     {
@@ -69,6 +71,10 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 #endif
         Instance = this;
         Vents.Initialize();
+
+        RoleManager = new LotusRoleManager();
+        RoleManager.Load();
+
         VersionControl versionControl = ModVersion.VersionControl = VersionControl.For(this);
         versionControl.AddVersionReceiver(ReceiveVersion);
         PluginDataManager.TemplateManager.RegisterTag("lobby-join", "Tag for the template shown to players joining the lobby.");
@@ -111,11 +117,11 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
         // Setup, order matters here
 
-        int _ = CustomRoleManager.AllRoles.Count;
-        StaticEditor.Register(Assembly.GetExecutingAssembly());
+        /*StaticEditor.Register(Assembly.GetExecutingAssembly());*/
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
         AddonManager.ImportAddons();
 
+        RoleManager.Freeze();
         GamemodeManager.Setup();
         ShowerPages.InitPages();
     }

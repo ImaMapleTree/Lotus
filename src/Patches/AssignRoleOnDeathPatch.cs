@@ -18,7 +18,7 @@ public class AssignRoleOnDeathPatch
     public static void Postfix(RoleManager __instance, [HarmonyArgument(0)] PlayerControl player, [HarmonyArgument(1)] bool specialRolesAllowed)
     {
         RpcV3.Immediate(player.NetId, RpcCalls.SetRole)
-            .Write((byte)(player.GetVanillaRole().IsImpostor() ? RoleTypes.ImpostorGhost : RoleTypes.CrewmateGhost))
+            .Write((ushort)(player.GetVanillaRole().IsImpostor() ? RoleTypes.ImpostorGhost : RoleTypes.CrewmateGhost))
             .Send(player.GetClientId());
         player.Data.DefaultOutfit.PetId = "pet_EmptyPet";
         VentLogger.Debug($"Dead Player {player.name} => {player.Data.Role.Role}");

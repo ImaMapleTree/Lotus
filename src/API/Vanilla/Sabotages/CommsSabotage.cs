@@ -25,7 +25,7 @@ public class CommsSabotage : ISabotage
     {
 
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.SabotageFixed, ref handle, this, fixer == null ? PlayerControl.LocalPlayer : fixer);
+        Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, this, fixer == null ? PlayerControl.LocalPlayer : fixer);
         if (handle.IsCanceled) return false;
         fixer = fixer == null ? PlayerControl.LocalPlayer : fixer;
 
@@ -55,7 +55,7 @@ public class CommsSabotage : ISabotage
     public void CallSabotage(PlayerControl sabotageCaller)
     {
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.SabotageStarted, ref handle, this, sabotageCaller);
+        Game.TriggerForAll(LotusActionType.SabotageStarted, ref handle, this, sabotageCaller);
         if (handle.IsCanceled) return;
 
         ShipStatus.Instance.RepairSystem(SabotageType().ToSystemType(), sabotageCaller, 128);

@@ -31,7 +31,6 @@ public class GameOptionOverride
         this.Condition = condition;
     }
 
-
     public virtual void ApplyTo(IGameOptions options)
     {
         if (!Condition?.Invoke() ?? false) return;

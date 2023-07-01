@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
-using Lotus.Gamemodes.Standard;
-using VentLib.Options;
 using VentLib.Logging;
+using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Options.Game.Events;
 using VentLib.Options.Game.Tabs;
@@ -33,24 +32,20 @@ public class GamemodeManager
 
     private IGamemode? currentGamemode;
     private Option gamemodeOption = null!;
-    internal readonly List<Type> GamemodeTypes = new() { typeof(StandardGamemode)};
 
     public GamemodeManager()
     {
         Hooks.GameStateHooks.GameStartHook.Bind(GamemodeManagerStartHook, _ => CurrentGamemode.SetupWinConditions(Game.GetWinDelegate()));
     }
 
-
     public void SetGamemode(int id)
     {
         CurrentGamemode = Gamemodes[id];
-        VentLogger.High($"Setting Gamemode {CurrentGamemode.GetName()}", "Gamemode");
+        VentLogger.High($"Setting Gamemode {CurrentGamemode.Name}", "Gamemode");
     }
 
     public void Setup()
     {
-        Gamemodes = GamemodeTypes.Select(g => (IGamemode)g.GetConstructor(Array.Empty<Type>())!.Invoke(null)).ToList();
-
         GameOptionBuilder builder = new GameOptionBuilder()
             .Name("Gamemode")
             .IsHeader(true)
@@ -61,7 +56,7 @@ public class GamemodeManager
         {
             IGamemode gamemode = Gamemodes[i];
             var index = i;
-            builder.Value(v => v.Text(gamemode.GetName()).Value(index).Build());
+            builder.Value(v => v.Text(gamemode.Name).Value(index).Build());
         }
 
         gamemodeOption = builder.BuildAndRegister();
@@ -69,7 +64,7 @@ public class GamemodeManager
         {
             if (ce is not OptionOpenEvent) return;
             GameOptionController.ClearTabs();
-            currentGamemode.EnabledTabs().ForEach(GameOptionController.AddTab);
+            currentGamemode?.EnabledTabs().ForEach(GameOptionController.AddTab);
         });
     }
 }

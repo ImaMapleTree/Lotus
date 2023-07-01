@@ -1,5 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
-using Lotus.Roles.Subroles;
+using Lotus.Roles.Builtins.Base;
 
 namespace Lotus.Roles.Interfaces;
 

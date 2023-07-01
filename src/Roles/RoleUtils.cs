@@ -132,8 +132,8 @@ public static class RoleUtils
             return InteractionResult.Halt;
         }
         ActionHandle handle = ActionHandle.NoInit();
-        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null).TriggerOrdered(RoleActionType.AnyInteraction, ref handle, player, target, interaction);
-        if (player.PlayerId != target.PlayerId) target.Trigger(RoleActionType.Interaction, ref handle, player, interaction);
+        PlayerControl.AllPlayerControls.ToArray().Where(p => p != null).TriggerOrdered(LotusActionType.AnyInteraction, ref handle, player, target, interaction);
+        if (player.PlayerId != target.PlayerId) target.Trigger(LotusActionType.Interaction, ref handle, player, interaction);
         if (handle.Cancellation is ActionHandle.CancelType.None or ActionHandle.CancelType.Soft || interaction.IsPromised) interaction.Intent.Action(player, target);
         else if (handle.Cancellation is ActionHandle.CancelType.Normal) interaction.Intent.Halted(player, target);
         return handle.IsCanceled && !interaction.IsPromised ? InteractionResult.Halt : InteractionResult.Proceed;

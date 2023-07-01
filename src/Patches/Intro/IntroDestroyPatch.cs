@@ -6,7 +6,6 @@ using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
-using Lotus.Options;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
@@ -14,6 +13,7 @@ using Lotus.GUI.Name.Interfaces;
 using Lotus.Roles;
 using Lotus.Roles.Internals.Enums;
 using Lotus.RPC;
+using LotusTrigger.Options;
 using UnityEngine;
 using VentLib.Logging;
 using VentLib.Utilities;
@@ -48,7 +48,7 @@ class IntroDestroyPatch
         Profiler.Sample propSample = Global.Sampler.Sampled("Propagation Sample");
         VentLogger.Trace("Intro Scene Ending", "IntroCutscene");
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(RoleActionType.RoundStart, ref handle, true);
+        Game.TriggerForAll(LotusActionType.RoundStart, ref handle, true);
         propSample.Stop();
 
         Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
@@ -73,7 +73,7 @@ class IntroDestroyPatch
         if (GeneralOptions.MayhemOptions.RandomSpawn) Game.RandomSpawn.Spawn(player);
 
         player.RpcSetRoleDesync(RoleTypes.Shapeshifter, -3);
-        yield return new WaitForSeconds(200f);
+        yield return new WaitForSeconds(0.15f);
         if (player == null) yield break;
 
         GameData.PlayerInfo playerData = player.Data;
@@ -101,5 +101,6 @@ class IntroDestroyPatch
         INameModel nameModel = player.NameModel();
         Players.GetPlayers().ForEach(p => nameModel.RenderFor(p, force: true));
         player.SyncAll();
+        //player.RpcProtectPlayer(player, 0); Used for server authoritive fix
     }
 }

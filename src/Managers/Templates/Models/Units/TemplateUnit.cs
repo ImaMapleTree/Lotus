@@ -10,12 +10,10 @@ using Lotus.Chat;
 using Lotus.Chat.Commands;
 using Lotus.Extensions;
 using Lotus.Factions.Interfaces;
-using Lotus.Logging;
 using Lotus.Managers.Templates.Models.Backing;
 using Lotus.Managers.Templates.Models.Units.Actions;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
-using Lotus.Roles.Subroles;
 using Lotus.Utilities;
 using VentLib.Options;
 using VentLib.Options.Game;
@@ -26,11 +24,12 @@ using Random = UnityEngine.Random;
 
 namespace Lotus.Managers.Templates.Models.Units;
 
+// ReSharper disable once CollectionNeverUpdated.Global
 public class TemplateUnit
 {
     public static byte Triggerer = byte.MaxValue;
-    public static Dictionary<string, string> StoredData = new();
     protected static string? MetaVariable;
+    public static string[] Arguments = Array.Empty<string>();
 
     private static readonly Regex Regex = new(@"\${(?>[^{}]+|(?<Open>{)|(?<Close-Open>}))*}");
     public string? Text { get; set; }
@@ -67,7 +66,7 @@ public class TemplateUnit
         { "ModName" , _ => ProjectLotus.ModName },
         { "ModVersion", _ => ProjectLotus.PluginVersion + (ProjectLotus.DevVersion ? " " + ProjectLotus.DevVersionStr : "") },
         { "Map", _ => Constants.MapNames[GameOptionsManager.Instance.CurrentGameOptions.MapId] },
-        { "Gamemode", _ => Game.CurrentGamemode.GetName() },
+        { "Gamemode", _ => Game.CurrentGamemode.Name },
         { "Date", _ => DateTime.Now.ToShortDateString() },
         { "Time", _ => DateTime.Now.ToShortTimeString() },
         { "Players", _ => PlayerControl.AllPlayerControls.ToArray().Select(p => p.name).Fuse() },
@@ -129,7 +128,8 @@ public class TemplateUnit
 
         {"ActionMeta", _ => TAction.MetaVariable},
         {"TriggerMeta", _ => MetaVariable ?? "" },
-        {"Triggerer", _ => Players.FindPlayerById(Triggerer)?.name ?? "Unknown"}
+        {"Triggerer", _ => Players.FindPlayerById(Triggerer)?.name ?? "Unknown"},
+        {"Arguments", _ => Arguments.Fuse(" ")}
     };
 
     private static string ShowModifiers(object obj)
@@ -162,7 +162,8 @@ public class TemplateUnit
                 input = FormatStatic(input, obj);
                 return TActionStore.StoredVariables.GetValueOrDefault(input, $"No stored entry for \"{input}\"");
             }
-        }
+        },
+        { "Argument", (_, index) => int.TryParse(index, out int v) ? Arguments.Length > v ? Arguments[v] : "" : ""}
     };
 
 
@@ -175,7 +176,7 @@ public class TemplateUnit
 
         return subroles.Select(sr =>
         {
-            string identifierText = sr is Subrole subrole ? sr.RoleColor.Colorize(subrole.Identifier()) + " " : "";
+            string identifierText = sr is ISubrole subrole ? sr.RoleColor.Colorize(subrole.Identifier() ?? "") + " " : "";
             return $"{identifierText}{sr.RoleColor.Colorize(sr.RoleName)}\n{sr.Description}";
         }).Fuse("\n\n");
     }

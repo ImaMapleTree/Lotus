@@ -33,7 +33,7 @@ public class VanillaRoleTracker
     {
         public HashSet<byte> Impostors = new();
         public HashSet<byte> Crewmates = new();
-        public RoleTypes MyRole { get; internal set; }
+        public RoleTypes MyRole { get; set; } // TODO: change privacy again
         private byte myPlayer;
 
         public TeamInfo(byte myPlayer)

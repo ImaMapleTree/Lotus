@@ -36,7 +36,7 @@ public class Debugger: CustomRole
         return "<size=1>ABC\nDEF\nGHI\nJKL\nMNO</size>";
     }
 
-    [RoleAction(RoleActionType.OnPet)]
+    [RoleAction(LotusActionType.OnPet)]
     private void OnPet()
     {
         VentLogger.Old("OnPet Called", "DebuggerCall");

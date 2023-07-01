@@ -22,7 +22,7 @@ public class TConditionalEnabledRoles: StringListConditionalUnit
             if (gameEnabledRoleCache.Contains(role)) return true;
             if (iterated) continue;
             // ReSharper disable once ForeachCanBePartlyConvertedToQueryUsingAnotherGetEnumerator
-            foreach (CustomRole customRole in CustomRoleManager.AllRoles)
+            foreach (CustomRole customRole in ProjectLotus.RoleManager.AllRoles)
             {
                 if (!customRole.IsEnabled()) continue;
                 gameEnabledRoleCache.Add(customRole.RoleName.ToLower());
