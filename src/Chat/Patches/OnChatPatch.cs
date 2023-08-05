@@ -10,7 +10,6 @@ using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Roles.Internals.Enums;
 using LotusTrigger.Options;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -19,13 +18,15 @@ namespace Lotus.Chat.Patches;
 [HarmonyPatch(typeof(ChatController), nameof(ChatController.AddChat))]
 public static class OnChatPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(OnChatPatch));
+
     internal static List<byte> UtilsSentList = new();
     public static bool EatMessage;
 
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal static bool Prefix(ChatController __instance, PlayerControl sourcePlayer, string chatText)
     {
-        VentLogger.Log(LogLevel.All, $"{sourcePlayer.name} => {chatText}");
+        log.Log(LogLevel.All, $"{sourcePlayer.name} => {chatText}");
         if (UtilsSentList.Contains(sourcePlayer.PlayerId))
         {
             UtilsSentList.RemoveAt(UtilsSentList.FindIndex(b => b == sourcePlayer.PlayerId));

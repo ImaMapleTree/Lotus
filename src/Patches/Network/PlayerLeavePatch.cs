@@ -6,7 +6,6 @@ using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 
 namespace Lotus.Patches.Network;
 
@@ -21,9 +20,11 @@ class OnDisconnectedPatch
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerLeft))]
 class OnPlayerLeftPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(OnPlayerLeftPatch));
+
     public static void Postfix(AmongUsClient __instance, [HarmonyArgument(0)] ClientData data, [HarmonyArgument(1)] DisconnectReasons reason)
     {
-        VentLogger.Debug($"{data.PlayerName} (ClientID={data.Id}) left the game. (Reason={reason})", "SessionEnd");
+        log.Debug($"{data.PlayerName} (ClientID={data.Id}) left the game. (Reason={reason})", "SessionEnd");
         if (Game.State is GameState.InLobby)
         {
             PlayerJoinPatch.CheckAutostart();

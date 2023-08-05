@@ -4,7 +4,6 @@ using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
@@ -12,6 +11,8 @@ namespace Lotus.API.Vanilla.Sabotages;
 
 public class DoorSabotage : ISabotage
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(DoorSabotage));
+
     public SystemTypes Room { get; }
     private Optional<int> doorIndex;
     private UnityOptional<PlayerControl> caller;
@@ -35,7 +36,7 @@ public class DoorSabotage : ISabotage
 
         return doorIndex.Transform(index => {
             if (index >= ShipStatus.Instance.AllDoors.Length) {
-                VentLogger.Warn($"Targeted door was out of range ({index})", "FixDoor");
+                log.Warn($"Targeted door was out of range ({index})", "FixDoor");
                 return false;
             }
             ShipStatus.Instance.AllDoors[index].SetDoorway(true);

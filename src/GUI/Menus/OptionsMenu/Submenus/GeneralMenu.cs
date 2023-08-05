@@ -1,10 +1,10 @@
 using System;
 using AmongUs.Data;
 using Lotus.GUI.Menus.OptionsMenu.Components;
+using Lotus.Options;
 using TMPro;
 using Lotus.Utilities;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
@@ -13,6 +13,8 @@ namespace Lotus.GUI.Menus.OptionsMenu.Submenus;
 [RegisterInIl2Cpp]
 public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(GeneralMenu));
+
     private TextMeshPro title;
     private TextMeshPro controlsText;
 
@@ -20,6 +22,7 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
     private MonoToggleButton friendInviteButton;
     private MonoToggleButton colorblindTextButton;
     private MonoToggleButton streamerModeButton;
+    private MonoToggleButton publicCompatabilityPatch;
 
     private MonoToggleButton mouseMovementButton;
     private MonoToggleButton changeKeyBindingButton;
@@ -84,6 +87,7 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         friendInviteButton.SetToggleOffAction(() => DataManager.Settings.Multiplayer.AllowFriendInvites = false);
         friendInviteButton.SetState(DataManager.Settings.Multiplayer.AllowFriendInvites);
         fIGameObject.transform.localPosition += new Vector3(0.5f, -1.25f);
+
 
         optionsMenuBehaviour.EnableFriendInvitesButton.gameObject.SetActive(false);
 
@@ -189,13 +193,23 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
             languageSetter.Open();
         });
         languageSetterExists = true;
+
+        GameObject publicCompatabilityObject = anchorObject.CreateChild("Public Compatability Patch Button", new Vector3(1f, -2.25f));
+        publicCompatabilityPatch = publicCompatabilityObject.AddComponent<MonoToggleButton>();
+        publicCompatabilityPatch.SetOnText("Public Compatability Patch: ON");
+        publicCompatabilityPatch.SetOffText("Public Compatability Patch: OFF");
+        publicCompatabilityPatch.SetToggleOnAction(() => ClientOptions.AdvancedOptions.PublicCompatability = true);
+        publicCompatabilityPatch.SetToggleOffAction(() => ClientOptions.AdvancedOptions.PublicCompatability = false);
+        publicCompatabilityPatch.SetState(ClientOptions.AdvancedOptions.PublicCompatability);
+
+
     }
 
 
 
     public void Open()
     {
-        VentLogger.Fatal("Opening!!");
+        log.Fatal("Opening!!");
         anchorObject.SetActive(true);
     }
 

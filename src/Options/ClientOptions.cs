@@ -7,4 +7,8 @@ namespace Lotus.Options;
 public class ClientOptions
 {
     public static VideoOptions VideoOptions = new VideoOptions();
+
+    public static AdvancedOptions AdvancedOptions = new AdvancedOptions();
+
+
 }

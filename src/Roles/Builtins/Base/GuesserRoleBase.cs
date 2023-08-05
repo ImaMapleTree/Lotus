@@ -14,7 +14,6 @@ using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Internals.Trackers;
 using Lotus.Victory;
 using VentLib.Localization.Attributes;
-using VentLib.Logging;
 using VentLib.Options.Game;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -24,6 +23,8 @@ namespace Lotus.Roles.Builtins.Base;
 
 public abstract class GuesserRoleBase: CustomRole
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(GuesserRoleBase));
+
     private MeetingPlayerSelector voteSelector = new();
 
     private int guessesPerMeeting;
@@ -62,14 +63,14 @@ public abstract class GuesserRoleBase: CustomRole
                 break;
             case VoteResultType.Selected:
                 guessingPlayer = result.Selected;
-                VentLogger.Trace($"Guesser selected: {Players.FindPlayerById(guessingPlayer)?.name}", "GuesserSelect");
+                log.Trace($"Guesser selected: {Players.FindPlayerById(guessingPlayer)?.name}", "GuesserSelect");
                 GuesserHandler(Translations.PickedPlayerText.Formatted(Players.FindPlayerById(result.Selected)?.name)).Send(MyPlayer);
                 break;
             case VoteResultType.Confirmed:
-                VentLogger.Trace("Guesser confirmed their selection.", "GuesserSelect");
+                log.Trace("Guesser confirmed their selection.", "GuesserSelect");
                 if (guessedRole == null)
                 {
-                    VentLogger.Trace($"Confirmed selection, but no guessed role, resetting guess", "GuesserSelect");
+                    log.Trace($"Confirmed selection, but no guessed role, resetting guess", "GuesserSelect");
                     voteSelector.Reset();
                     voteSelector.CastVote(player);
                 } else hasMadeGuess = true;

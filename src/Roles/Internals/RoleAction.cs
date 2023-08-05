@@ -3,7 +3,6 @@ using Lotus.API;
 using Lotus.API.Reactive.Actions;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities.Debug.Profiling;
 
 namespace Lotus.Roles.Internals;

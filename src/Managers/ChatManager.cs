@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using Lotus.API.Odyssey;
 using Lotus.Logging;
 using Lotus.Managers.Models;
-using VentLib.Logging;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -15,6 +14,8 @@ namespace Lotus.Managers;
 
 public class ChatManager
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ChatManager));
+
     private readonly FileInfo filterFile;
 
     private IDeserializer deserializer = new DeserializerBuilder()
@@ -42,7 +43,7 @@ public class ChatManager
         }
         catch (Exception e)
         {
-            VentLogger.Exception(e, "Error loading banned words list: ");
+            log.Exception("Error loading banned words list: ", e);
             globalBannedWords = new List<string>();
             lobbyBannedWords = new List<string>();
         }
@@ -66,7 +67,7 @@ public class ChatManager
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception, "Error loading banned words list");
+            log.Exception("Error loading banned words list", exception);
             return exception.ToString();
         }
     }

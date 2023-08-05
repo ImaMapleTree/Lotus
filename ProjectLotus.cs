@@ -15,9 +15,9 @@ using Lotus.GUI.Patches;
 using Lotus.Managers;
 using Lotus.Options;
 using Lotus.Roles;
+using Lotus.Server;
 using UnityEngine;
 using VentLib;
-using VentLib.Logging;
 using VentLib.Networking.Handshake;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
@@ -36,13 +36,15 @@ namespace Lotus;
 [BepInProcess("Among Us.exe")]
 public class ProjectLotus : BasePlugin, IGitVersionEmitter
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ProjectLotus));
+
     public const string PluginGuid = "com.tealeaf.Lotus";
     public const string CompileVersion = $"{MajorVersion}.{MinorVersion}.{PatchVersion}.{BuildNumber}";
 
     public const string MajorVersion = "1";
     public const string MinorVersion = "0"; // Update with each release
     public const string PatchVersion = "1";
-    public const string BuildNumber = "0620";
+    public const string BuildNumber = "0805";
 
     public static string PluginVersion = typeof(ProjectLotus).Assembly.GetName().Version!.ToString();
 
@@ -61,6 +63,9 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
     public static ModUpdater ModUpdater = null!;
 
     public static LotusRoleManager RoleManager = null!;
+
+
+    public static ServerPatchManager ServerPatchManager = new();
 
 
     public ProjectLotus()
@@ -112,8 +117,8 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         GameOptionController.Enable();
         GamemodeManager = new GamemodeManager();
 
-        VentLogger.Info($"{Application.version}", "AmongUs Version");
-        VentLogger.Info(CurrentVersion.ToString(), "GitVersion");
+        log.Info($"{Application.version}", "AmongUs Version");
+        log.Info(CurrentVersion.ToString(), "GitVersion");
 
         // Setup, order matters here
 
@@ -124,6 +129,8 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         RoleManager.Freeze();
         GamemodeManager.Setup();
         ShowerPages.InitPages();
+
+        ServerPatchManager.CreateAmalgamPatch();
     }
 
     public GitVersion Version() => CurrentVersion;

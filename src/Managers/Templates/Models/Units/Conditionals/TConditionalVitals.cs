@@ -1,16 +1,17 @@
 ﻿using System;
 using Lotus.Extensions;
-using VentLib.Logging;
 
 namespace Lotus.Managers.Templates.Models.Units.Conditionals;
 
 public class TConditionalVitals: CommonConditionalUnit
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TConditionalVitals));
+
     private PlayerVital playerVital;
 
     public TConditionalVitals(object input) : base(input)
     {
-        if (!Enum.TryParse(input as string, true, out PlayerVital status)) VentLogger.Warn($"Could not parse \"{input}\" as type \"{nameof(PlayerVital)}\"");
+        if (!Enum.TryParse(input as string, true, out PlayerVital status)) log.Warn($"Could not parse \"{input}\" as type \"{nameof(PlayerVital)}\"");
         else playerVital = status;
     }
 

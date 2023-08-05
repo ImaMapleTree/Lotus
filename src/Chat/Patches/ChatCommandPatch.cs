@@ -9,21 +9,21 @@ public class ChatUpdatePatch
 {
     public static void Postfix(ChatController __instance)
     {
-        __instance.TextArea.AllowPaste = true;
-        __instance.chatBubPool.Prefab.Cast<ChatBubble>().TextArea.overrideColorTags = false;
-        __instance.TimeSinceLastMessage = 3f;
+        __instance.freeChatField.textArea.AllowPaste = true;
+        __instance.chatBubblePool.Prefab.Cast<ChatBubble>().TextArea.overrideColorTags = false;
+        __instance.timeSinceLastMessage = 3f;
     }
 
-    [QuickPostfix(typeof(ChatController), nameof(ChatController.UpdateCharCount))]
-    public static void UpdateCharCount(ChatController __instance)
+    [QuickPostfix(typeof(FreeChatInputField), nameof(FreeChatInputField.UpdateCharCount))]
+    public static void UpdateCharCount(FreeChatInputField __instance)
     {
-        int length = __instance.TextArea.text.Length;
-        __instance.CharCount.text = $"{length}/{__instance.TextArea.characterLimit}";
+        int length = __instance.textArea.text.Length;
+        __instance.charCountText.text = $"{length}/{__instance.textArea.characterLimit}";
         if (length < (AmongUsClient.Instance.AmHost ? 1750 : 250))
-            __instance.CharCount.color = Color.black;
+            __instance.charCountText.color = Color.black;
         else if (length < (AmongUsClient.Instance.AmHost ? 2000 : 300))
-            __instance.CharCount.color = new Color(1f, 1f, 0.0f, 1f);
+            __instance.charCountText.color = new Color(1f, 1f, 0.0f, 1f);
         else
-            __instance.CharCount.color = Color.red;
+            __instance.charCountText.color = Color.red;
     }
 }

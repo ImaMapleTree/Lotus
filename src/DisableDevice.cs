@@ -123,7 +123,7 @@ class DisableDevice
             }
             catch (Exception ex)
             {
-                VentLogger.Error(ex.ToString(), "DisableDevice");
+                log.Exception(ex.ToString(), "DisableDevice");
             }
         }
     }

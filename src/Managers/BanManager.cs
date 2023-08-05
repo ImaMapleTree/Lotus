@@ -5,7 +5,6 @@ using System.Text;
 using InnerNet;
 using Lotus.Managers.Models;
 using VentLib.Localization;
-using VentLib.Logging;
 using VentLib.Utilities;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -59,7 +58,7 @@ public class BanManager
         if (!CheckBanList(player)) return;
 
         AmongUsClient.Instance.KickPlayer(player.Id, true);
-        VentLogger.SendInGame(string.Format(Localizer.Translate("Messages.BanedByBanList"), player.PlayerName));
+        StaticLogger.SendInGame(string.Format(Localizer.Translate("Messages.BanedByBanList"), player.PlayerName));
     }
 
     public bool CheckBanList(ClientData player)

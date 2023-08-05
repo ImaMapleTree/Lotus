@@ -18,9 +18,9 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
+using Lotus.Server;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
@@ -30,6 +30,8 @@ namespace Lotus.Extensions;
 
 public static class PlayerControlExtensions
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(PlayerControlExtensions));
+
     public static UniquePlayerId UniquePlayerId(this PlayerControl player) => API.Player.UniquePlayerId.From(player);
 
     public static void Trigger(this PlayerControl player, LotusActionType action, ref ActionHandle handle, params object[] parameters)
@@ -75,7 +77,7 @@ public static class PlayerControlExtensions
             }
             catch (Exception e)
             {
-                VentLogger.Exception(e, $"Failed to execute RoleAction {action}.");
+                log.Exception($"Failed to execute RoleAction {action}.", e);
             }
         }
     }
@@ -88,7 +90,7 @@ public static class PlayerControlExtensions
             var callerMethod = caller.GetMethod();
             string callerMethodName = callerMethod.Name;
             string? callerClassName = callerMethod.DeclaringType.FullName;
-            VentLogger.Warn(callerClassName + "." + callerMethodName + " Invalid Custom Role", "GetCustomRole");
+            log.Warn(callerClassName + "." + callerMethodName + " Invalid Custom Role", "GetCustomRole");
             return ProjectLotus.RoleManager.Default;
         }
 
@@ -141,27 +143,7 @@ public static class PlayerControlExtensions
         RpcV3.Immediate(player.NetId, RpcCalls.SetRole).Write((ushort)role).Send(clientId);
     }
 
-    public static void RpcMark(this PlayerControl killer, PlayerControl? target = null, int colorId = 0)
-    {
-        if (target == null) target = killer;
-        // In case of 7.11 comment out all below
-        MurderPatches.Lock(killer.PlayerId);
-
-        // Host
-        if (killer.AmOwner)
-        {
-            killer.ProtectPlayer(target, colorId);
-            killer.MurderPlayer(target);
-        }
-
-        // Other Clients
-        if (killer.PlayerId == 0) return;
-
-        RpcV3.Mass()
-            .Start(killer.NetId, RpcCalls.ProtectPlayer).Write(target).Write(colorId).End()
-            .Start(killer.NetId, RpcCalls.MurderPlayer).Write(target).End()
-            .Send(killer.GetClientId());
-    }
+    public static void RpcMark(this PlayerControl killer, PlayerControl? target = null, int colorId = 0) => ServerPatchManager.Patch.Execute(PatchedCode.RpcMark, killer, target, colorId);
 
     public static void SetKillCooldown(this PlayerControl player, float time)
     {
@@ -195,7 +177,7 @@ public static class PlayerControlExtensions
             killer.MurderPlayer(target);
         else
         {
-            MessageWriter messageWriter = AmongUsClient.Instance.StartRpcImmediately(killer.NetId, (byte)RpcCalls.MurderPlayer, SendOption.Reliable, killer.GetClientId());
+            MessageWriter messageWriter = AmongUsClient.Instance.StartRpcImmediately(killer.NetId, (byte)RpcCalls.MurderPlayer, SendOption.None, killer.GetClientId());
             messageWriter.WriteNetObject(target);
             AmongUsClient.Instance.FinishRpcImmediately(messageWriter);
         }
@@ -257,7 +239,7 @@ public static class PlayerControlExtensions
 
     public static void RpcExileV2(this PlayerControl player, bool reallyExiled, bool hookDeath = true)
     {
-        VentLogger.Trace($"Exiled (V2): {player.GetNameWithRole()}");
+        log.Trace($"Exiled (V2): {player.GetNameWithRole()}");
         player.Exiled();
         RpcV3.Immediate(player.NetId, RpcCalls.Exiled, SendOption.None);
 
@@ -278,7 +260,7 @@ public static class PlayerControlExtensions
     public static void RpcVaporize(this PlayerControl player, PlayerControl target, IDeathEvent? deathEvent = null)
     {
         if (player == null || target == null) return;
-        VentLogger.Trace($"{player.name} vaporize => {target.name}");
+        log.Trace($"{player.name} vaporize => {target.name}");
         target.RpcExileV2(false, false);
 
         MurderPatches.Lock(player.PlayerId);

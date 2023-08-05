@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
-using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Options.Game.Events;
@@ -15,6 +14,8 @@ namespace Lotus.Gamemodes;
 // As we move to the future we're going to try to use instances for managers rather than making everything static
 public class GamemodeManager
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(GamemodeManager));
+
     private const string GamemodeManagerStartHook = nameof(GamemodeManager);
 
     public List<IGamemode> Gamemodes = new();
@@ -41,7 +42,7 @@ public class GamemodeManager
     public void SetGamemode(int id)
     {
         CurrentGamemode = Gamemodes[id];
-        VentLogger.High($"Setting Gamemode {CurrentGamemode.Name}", "Gamemode");
+        log.High($"Setting Gamemode {CurrentGamemode.Name}", "Gamemode");
     }
 
     public void Setup()

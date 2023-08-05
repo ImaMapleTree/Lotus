@@ -30,7 +30,6 @@ using Lotus.Roles.Internals.Interfaces;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Localization;
-using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Options.Game;
 using VentLib.Options.IO;
@@ -44,6 +43,8 @@ namespace Lotus.Roles;
 // Some people hate using "Base" and "Abstract" in class names but I used both so now I'm a war-criminal :)
 public abstract class AbstractBaseRole
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(AbstractBaseRole));
+
     public PlayerControl MyPlayer { get; protected set; } = null!;
     public RoleEditor? Editor { get; set; }
     private static List<RoleEditor> _editors = new();
@@ -96,7 +97,7 @@ public abstract class AbstractBaseRole
     {
         DeclaringAssembly = this.GetType().Assembly;
         this.EnglishRoleName = this.GetType().Name.Replace("CRole", "").Replace("Role", "");
-        VentLogger.Debug($"Role Name: {EnglishRoleName}");
+        log.Debug($"Role Name: {EnglishRoleName}");
         CreateInstanceBasedVariables();
         RoleModifier _ = _editors.Aggregate(Modify(new RoleModifier(this)), (current, editor) => editor.HookModifier(current));
         LinkedRoles.ForEach(ProjectLotus.RoleManager.AddRole);
@@ -161,7 +162,7 @@ public abstract class AbstractBaseRole
     {
         List<RoleAction> currentActions = this.roleActions.GetValueOrDefault(action.ActionType, new List<RoleAction>());
 
-        VentLogger.Log(LogLevel.All, $"Registering Action {action.ActionType} => {action.Method.Name} (from: \"{action.Method.DeclaringType}\")", "RegisterAction");
+        log.Log(LogLevel.All, $"Registering Action {action.ActionType} => {action.Method.Name} (from: \"{action.Method.DeclaringType}\")", "RegisterAction");
         if (action.ActionType is LotusActionType.FixedUpdate &&
             currentActions.Count > 0)
             throw new ConstraintException("RoleActionType.FixedUpdate is limited to one per class. If you're inheriting a class that uses FixedUpdate you can add Override=METHOD_NAME to your annotation to override its Update method.");
@@ -215,7 +216,7 @@ public abstract class AbstractBaseRole
             }
             catch (Exception e)
             {
-                VentLogger.Exception(e, $"Failed to execute RoleAction {action}.");
+                log.Exception($"Failed to execute RoleAction {action}.", e);
             }
         }
         Profilers.Global.Sampler.Stop(id);
@@ -258,7 +259,7 @@ public abstract class AbstractBaseRole
             try {
                 newValue = AccessTools.CreateInstance(field.FieldType);
             } catch (Exception e) {
-                VentLogger.Exception(e);
+                log.Exception(e);
                 throw new ArgumentException($"Error during \"{nameof(NewOnSetup)}\" processing. Could not create instance with no-args constructor for type {field.FieldType}. (Field={field}, Role={EnglishRoleName})");
             }
         else
@@ -266,7 +267,7 @@ public abstract class AbstractBaseRole
                 newValue = cloneMethod.Invoke(currentValue, null)!;
             }
             catch (Exception e) {
-                VentLogger.Exception(e);
+                log.Exception(e);
                 throw new ArgumentException($"Error during \"{nameof(NewOnSetup)}\" processing. Could not clone original instance for type {field.FieldType}. (Field={field}, Role={EnglishRoleName})");
             }
         field.SetValue(this, newValue);

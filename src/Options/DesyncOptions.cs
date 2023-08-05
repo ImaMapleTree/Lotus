@@ -8,7 +8,6 @@ using Lotus.API;
 using Lotus.API.Player;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -16,6 +15,8 @@ namespace Lotus.Options;
 
 public static class DesyncOptions
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(DesyncOptions));
+
     public static void SyncToAll(IGameOptions options) => Players.GetPlayers().Do(p => SyncToPlayer(options, p));
 
     public static void SyncToPlayer(IGameOptions options, PlayerControl player)
@@ -28,7 +29,7 @@ public static class DesyncOptions
                 SyncToClient(options, player.GetClientId());
             }
             catch (Exception exception) {
-                VentLogger.Exception(exception, "Error syncing game options to client.");
+                log.Exception("Error syncing game options to client.", exception);
             }
             return;
         }

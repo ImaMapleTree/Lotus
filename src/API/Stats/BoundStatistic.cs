@@ -4,13 +4,14 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.API.Stats;
 
 internal class BoundStatistic<T> : Statistic<T>, IPersistentStatistic
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(BoundStatistic<>));
+
     private readonly string identifier;
     private Func<string> name;
     private List<Action<UniquePlayerId, Statistic<T>>> eventConsumers = new();
@@ -26,7 +27,7 @@ internal class BoundStatistic<T> : Statistic<T>, IPersistentStatistic
         this.name = name;
         this.DefaultValue = defaultValue;
         HookKey = $"Statistic::{identifier}";
-        VentLogger.Trace($"Binding Statistic: {HookKey}");
+        log.Trace($"Binding Statistic: {HookKey}");
         Hooks.GameStateHooks.GameStartHook.Bind(HookKey, _ => PlayerData.Clear());
     }
 

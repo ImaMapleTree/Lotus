@@ -9,7 +9,6 @@ using Lotus.Managers;
 using Lotus.Utilities;
 using LotusTrigger.Options;
 using LotusTrigger.Options.General;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Harmony.Attributes;
@@ -22,7 +21,9 @@ namespace Lotus.Patches.Network;
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerJoined))]
 public class PlayerJoinPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(PlayerJoinPatch));
     private static FixedUpdateLock _autostartLock = new(10f);
+
     static PlayerJoinPatch()
     {
         PluginDataManager.TemplateManager.RegisterTag("autostart", "Template triggered when the autostart timer begins.");
@@ -30,11 +31,11 @@ public class PlayerJoinPatch
 
     public static void Postfix(AmongUsClient __instance, [HarmonyArgument(0)] ClientData client)
     {
-        VentLogger.Trace($"{client.PlayerName} (ClientID={client.Id}) (Platform={client.PlatformData.PlatformName}) joined the game.", "Session");
+        log.Trace($"{client.PlayerName} (ClientID={client.Id}) (Platform={client.PlatformData.PlatformName}) joined the game.", "Session");
         if (DestroyableSingleton<FriendsListManager>.Instance.IsPlayerBlockedUsername(client.FriendCode) && AmongUsClient.Instance.AmHost)
         {
             AmongUsClient.Instance.KickPlayer(client.Id, true);
-            VentLogger.Old($"ブロック済みのプレイヤー{client?.PlayerName}({client.FriendCode})をBANしました。", "BAN");
+            log.Info($"ブロック済みのプレイヤー{client?.PlayerName}({client.FriendCode})をBANしました。", "BAN");
         }
 
         Hooks.NetworkHooks.ClientConnectHook.Propagate(new ClientConnectHookEvent(client));

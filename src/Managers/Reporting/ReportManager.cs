@@ -6,7 +6,6 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.Managers.Hotkeys;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Options.IO;
 using VentLib.Utilities.Attributes;
@@ -18,6 +17,8 @@ namespace Lotus.Managers.Reporting;
 [LoadStatic]
 public static class ReportManager
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ReportManager));
+
     private static readonly DirectoryInfo ReportingDirectory;
     private static readonly Dictionary<ReportTag, OrderedSet<IReportProducer>> ReportProducers = new();
     private static readonly LogLevel ReportLevel = LogLevel.High.Similar("REPORT", ConsoleColor.Green);
@@ -64,7 +65,7 @@ public static class ReportManager
         });
 
         if (reports.Count == 0) return;
-        VentLogger.Log(ReportLevel, $"Generating Report | Tags: [{tags.Join()}]");
+        log.Log(ReportLevel, $"Generating Report | Tags: [{tags.Join()}]");
 
         FileStream reportStream = File.Open(Path.Join(ReportingDirectory.FullName, "latest.zip"), FileMode.OpenOrCreate);
         ZipArchive archive = new(reportStream, ZipArchiveMode.Create);
@@ -85,7 +86,7 @@ public static class ReportManager
                 if (i.Header.SaveToFile) fileContent += infoContent;
             });
 
-            VentLogger.Log(ReportLevel, $"\nReport for {fileName}\n{content}");
+            log.Log(ReportLevel, $"\nReport for {fileName}\n{content}");
             ZipArchiveEntry entry = archive.CreateEntry(fileName);
             StreamWriter writer = new(entry.Open());
             writer.Write(fileContent);

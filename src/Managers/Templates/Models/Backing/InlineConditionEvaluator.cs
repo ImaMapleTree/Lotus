@@ -5,12 +5,13 @@ using System.Text.RegularExpressions;
 using Lotus.Logging;
 using Lotus.Managers.Templates.Models.Units;
 using Lotus.Utilities;
-using VentLib.Logging;
 
 namespace Lotus.Managers.Templates.Models.Backing;
 
 internal class InlineConditionEvaluator
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(InlineConditionEvaluator));
+
     private const string EQ = "==";
     private const string CEQ = "===";
     private const string NE = "!=";
@@ -70,7 +71,7 @@ internal class InlineConditionEvaluator
             case LTE:
                 break;
             default:
-                VentLogger.Warn($"Operator \"{middle}\" is not supported in Conditional Evaluate statements.");
+                log.Warn($"Operator \"{middle}\" is not supported in Conditional Evaluate statements.");
                 return true;
         }
 
@@ -97,7 +98,7 @@ internal class InlineConditionEvaluator
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception, $"Could not parse \"{input}\" to float.");
+            log.Exception($"Could not parse \"{input}\" to float.", exception);
             return false;
         }
     }
@@ -112,7 +113,7 @@ internal class InlineConditionEvaluator
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception, "Could not parse \"Evaluate\" condition");
+            log.Exception("Could not parse \"Evaluate\" condition", exception);
             return false;
         }
     }

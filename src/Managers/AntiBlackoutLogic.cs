@@ -3,7 +3,6 @@ using System.Linq;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
 using Lotus.Utilities;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -13,9 +12,11 @@ namespace Lotus.Managers;
 
 public static class AntiBlackoutLogic
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(AntiBlackoutLogic));
+
     public static HashSet<byte> PatchedData(byte exiledPlayer)
     {
-        VentLogger.Debug("Patching GameData", "AntiBlackout");
+        log.Debug("Patching GameData", "AntiBlackout");
         IEnumerable<PlayerControl> players = PlayerControl.AllPlayerControls.ToArray().Sorted(p => p.IsHost());
         VanillaRoleTracker roleTracker = Game.MatchData.VanillaRoleTracker;
 
@@ -26,17 +27,17 @@ public static class AntiBlackoutLogic
         foreach (PlayerControl player in players)
         {
             if (player.IsHost() || player.IsModded()) continue;
-            VentLogger.Trace($"Patching For: {player.name} ({player.GetCustomRole().RoleName})", "AntiBlackout");
+            log.Trace($"Patching For: {player.name} ({player.GetCustomRole().RoleName})", "AntiBlackout");
             ReviveEveryone(exiledPlayer);
 
             bool wasImpostor = roleTracker.GetAllImpostorIds(player.PlayerId).Contains(0);
             HashSet<byte> impostorIds = roleTracker.GetAllImpostorIds(player.PlayerId).Where(id => exiledPlayer != id && id != 0).ToHashSet();
             PlayerInfo[] impostorInfo = allPlayers.Where(info => impostorIds.Contains(info.PlayerId)).ToArray();
-            VentLogger.Trace($"Impostors: {impostorInfo.Select(i => i.Object).Where(o => o != null).Select(o => o.name).Fuse()}");
+            log.Trace($"Impostors: {impostorInfo.Select(i => i.Object).Where(o => o != null).Select(o => o.name).Fuse()}");
 
             HashSet<byte> crewIds = roleTracker.GetAllCrewmateIds(player.PlayerId).Where(id => exiledPlayer != id).ToHashSet();
             PlayerInfo[] crewInfo = allPlayers.Where(info => crewIds.Contains(info.PlayerId)).ToArray();
-            VentLogger.Trace($"Crew: {crewInfo.Select(i => i.Object).Where(o => o != null).Select(o => o.name).Fuse()}");
+            log.Trace($"Crew: {crewInfo.Select(i => i.Object).Where(o => o != null).Select(o => o.name).Fuse()}");
 
             int aliveImpostorCount = impostorInfo.Length;
             int aliveCrewCount = crewInfo.Length;
@@ -46,7 +47,7 @@ public static class AntiBlackoutLogic
             else if (player.IsAlive()) aliveCrewCount++;
             if (wasImpostor && PlayerControl.LocalPlayer.GetVanillaRole().IsImpostor() && PlayerControl.LocalPlayer.PlayerId != exiledPlayer) aliveImpostorCount++;
 
-            VentLogger.Trace($"Alive Crew: {aliveCrewCount} | Alive Impostors: {aliveImpostorCount}");
+            log.Trace($"Alive Crew: {aliveCrewCount} | Alive Impostors: {aliveImpostorCount}");
 
             bool IsFailure()
             {
@@ -63,7 +64,7 @@ public static class AntiBlackoutLogic
             {
                 if (aliveCrewCount > aliveImpostorCount) break;
                 PlayerInfo info = impostorInfo[index++];
-                if (info.Object != null) VentLogger.Trace($"Set {info.Object.name} => Disconnect = true | Impostors: {aliveImpostorCount - 1} | Crew: {aliveCrewCount}");
+                if (info.Object != null) log.Trace($"Set {info.Object.name} => Disconnect = true | Impostors: {aliveImpostorCount - 1} | Crew: {aliveCrewCount}");
                 info.Disconnected = true;
                 aliveImpostorCount--;
             }

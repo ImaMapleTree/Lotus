@@ -9,12 +9,13 @@ using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 
 namespace Lotus.Patches;
 
 static class ExileControllerWrapUpPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ExileControllerWrapUpPatch));
+
     [HarmonyPatch(typeof(ExileController), nameof(ExileController.WrapUp))]
     class BaseExileControllerPatch
     {
@@ -67,7 +68,7 @@ static class ExileControllerWrapUpPatch
         try
         {
             MeetingDelegate.Instance.BlackscreenResolver.ClearBlackscreen(BeginRoundStart);
-            VentLogger.Debug("Start Task Phase", "Phase");
+            log.Debug("Start Task Phase", "Phase");
         }
         catch
         {
@@ -86,12 +87,12 @@ static class ExileControllerWrapUpPatch
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception);
+            log.Exception(exception);
         }
 
         Game.State = GameState.Roaming;
         ActionHandle handle = ActionHandle.NoInit();
-        VentLogger.Debug("Triggering RoundStart Action!!", "Exile::BeginRoundStart");
+        log.Debug("Triggering RoundStart Action!!", "Exile::BeginRoundStart");
         Game.TriggerForAll(LotusActionType.RoundStart, ref handle, false);
         Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
         Game.SyncAll();

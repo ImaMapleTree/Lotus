@@ -12,7 +12,6 @@ using Lotus.Victory;
 using Lotus.Extensions;
 using Lotus.Logging;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -21,6 +20,8 @@ namespace Lotus.Managers;
 
 internal class BlackscreenResolver
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(BlackscreenResolver));
+
     private byte resetCameraPlayer = byte.MaxValue;
     private Vector2 resetCameraPosition;
     private MeetingDelegate meetingDelegate;
@@ -77,13 +78,13 @@ internal class BlackscreenResolver
             deferredTime = 0.1f;
         }
 
-        VentLogger.Debug($"Resetting player cameras using \"{deadPlayer.name}\" as camera player", "BlackscreenResolver");
+        log.Debug($"Resetting player cameras using \"{deadPlayer.name}\" as camera player", "BlackscreenResolver");
         Async.Schedule(() => PerformCameraReset(deadPlayer), deferredTime);
     }
 
     private void PerformCameraReset(PlayerControl deadPlayer)
     {
-        VentLogger.Debug("Performing Camera Reset", "BlackscreenResolver");
+        log.Debug("Performing Camera Reset", "BlackscreenResolver");
         if (deadPlayer == null) deadPlayer = EmergencyKillHost();
 
         unpatchable.Filter(b => Utils.PlayerById(b)).ForEach(p =>
@@ -105,7 +106,7 @@ internal class BlackscreenResolver
 
         playerStates = playerInfos.ToDict(i => i.PlayerId, i => (i.IsDead, i.Disconnected));
         HashSet<byte> unpatchablePlayers = SendPatchedData(meetingDelegate.ExiledPlayer?.PlayerId ?? byte.MaxValue);
-        VentLogger.Debug($"Unpatchable Players: {unpatchablePlayers.Filter(p => Utils.PlayerById(p)).Select(p => p.name).Fuse()}", "BlackscreenResolver");
+        log.Debug($"Unpatchable Players: {unpatchablePlayers.Filter(p => Utils.PlayerById(p)).Select(p => p.name).Fuse()}", "BlackscreenResolver");
         return unpatchablePlayers;
     }
 
@@ -154,7 +155,7 @@ internal class BlackscreenResolver
             StoreAndSendFallbackData();
             return;
         }
-        VentLogger.Trace($"Teleporting Camera \"{cameraPlayer.name}\"");
+        log.Trace($"Teleporting Camera \"{cameraPlayer.name}\"");
         resetCameraPosition = cameraPlayer.GetTruePosition();
         Utils.Teleport(cameraPlayer.NetTransform, new Vector2(100f, 100f));
     }
@@ -171,9 +172,9 @@ internal class BlackscreenResolver
     private PlayerControl EmergencyKillHost()
     {
         resetCameraPosition = PlayerControl.LocalPlayer.GetTruePosition();
-        VentLogger.SendInGame("Unable to get an eligible dead player for blackscreen patching. " +
+        StaticLogger.SendInGame("Unable to get an eligible dead player for blackscreen patching. " +
                               "Unfortunately there's nothing further we can do at this point other than killing (you) the host." +
-                              "The reasons for this are very complicated, but a lot of code went into preventing this from happening, but it's never guarantees this scenario won't occur.");
+                              "The reasons for this are very complicated, but a lot of code went into preventing this from happening, but it's never guarantees this scenario won't occur.", LogLevel.Fatal);
         PlayerControl.LocalPlayer.MurderPlayer(PlayerControl.LocalPlayer);
         Game.MatchData.UnreportableBodies.Add(PlayerControl.LocalPlayer.PlayerId);
         playerStates[0] = (true, false);

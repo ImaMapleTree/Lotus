@@ -4,6 +4,7 @@ using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.Chat.Patches;
 using Lotus.Factions.Neutrals;
+using Lotus.Logging;
 using Lotus.Managers;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
@@ -12,7 +13,6 @@ using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
 using VentLib.Localization.Attributes;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
@@ -66,12 +66,10 @@ public class BasicCommands: CommandTranslations
     }
 
     [Command(CommandFlag.HostOnly, "dump")]
-    public static void Dump(PlayerControl _)
+    public static void Dump(PlayerControl _, CommandContext context)
     {
-        VentLogger.SendInGame("Successfully dumped log. Check your logs folder for a \"dump.log!\"");
-        VentLogger.Dump();
-
-        OnChatPatch.EatMessage = true;
+        RpcSendChatPatch.EatCommand = true;
+        LogManager.WriteSessionLog(context.Join());
     }
 
     [Command(CommandFlag.LobbyOnly, "winner", "w")]

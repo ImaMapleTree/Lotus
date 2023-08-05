@@ -6,7 +6,6 @@ using Lotus.API.Odyssey;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Harmony.Attributes;
@@ -15,6 +14,8 @@ namespace Lotus.Patches.Actions;
 
 public class PetPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(PetPatch));
+
     public const float PetDelay = 0.4f;
     private const byte PetCallId = (byte)RpcCalls.Pet;
 
@@ -47,7 +48,7 @@ public class PetPatch
 
         Async.Schedule(() => ClearPetHold(player, timesPet), NetUtils.DeriveDelay(0.5f, 0.005f));
 
-        VentLogger.Trace($"{player.name} => Pet", "PetPatch");
+        log.Trace($"{player.name} => Pet", "PetPatch");
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(LotusActionType.AnyPet, ref handle, player);
         player.Trigger(LotusActionType.OnPet, ref handle, __instance);

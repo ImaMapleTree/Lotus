@@ -12,7 +12,6 @@ using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Extensions;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Networking.RPC.Interfaces;
 using VentLib.Utilities;
@@ -23,6 +22,8 @@ namespace Lotus.Utilities;
 
 public static class Utils
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(Utils));
+
     public static string GetNameWithRole(this GameData.PlayerInfo player)
     {
         return GetPlayerById(player.PlayerId)?.GetNameWithRole() ?? "";
@@ -94,8 +95,8 @@ public static class Utils
         }
         catch (Exception e)
         {
-            VentLogger.Error($"Error Loading Asset: \"{path}\"", "LoadImage");
-            VentLogger.Exception(e, "LoadImage");
+            log.Exception($"Error Loading Asset: \"{path}\"", "LoadImage");
+            log.Exception("LoadImage", e);
         }
 
         return sprite;

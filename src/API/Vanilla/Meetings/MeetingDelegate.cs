@@ -6,7 +6,6 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers;
 using Lotus.Extensions;
 using VentLib.Localization.Attributes;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -17,6 +16,8 @@ namespace Lotus.API.Vanilla.Meetings;
 [Localized("Meetings")]
 public class MeetingDelegate
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(MeetingDelegate));
+
     [Localized(nameof(RoleRevealText))]
     public static string RoleRevealText = "{0} was the {1}.";
 
@@ -46,7 +47,7 @@ public class MeetingDelegate
 
     public void CastVote(PlayerControl player, Optional<PlayerControl> target)
     {
-        VentLogger.Trace($"{player.GetNameWithRole()} casted vote for {target.Map(p => p.GetNameWithRole()).OrElse("No One")}");
+        log.Trace($"{player.GetNameWithRole()} casted vote for {target.Map(p => p.GetNameWithRole()).OrElse("No One")}");
         CastVote(player.PlayerId, target.Map(p => p.PlayerId));
     }
 
@@ -137,7 +138,7 @@ public class MeetingDelegate
         this.IsTie = isTie;
 
         string mostVotedPlayer = this.ExiledPlayer?.Object != null ? this.ExiledPlayer.Object.name : "Unknown";
-        VentLogger.Trace($"Calculated player votes. Player with most votes = {mostVotedPlayer}, isTie = {isTie}");
+        log.Trace($"Calculated player votes. Player with most votes = {mostVotedPlayer}, isTie = {isTie}");
 
         if (IsTie) this.ExiledPlayer = null;
     }

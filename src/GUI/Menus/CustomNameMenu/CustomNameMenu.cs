@@ -323,7 +323,7 @@ public class CustomNameMenu
         }
         catch (Exception e)
         {
-            VentLogger.Fatal("Please Evan for the love of god fix this", "CloseNameMenu");
+            log.Fatal("Please Evan for the love of god fix this", "CloseNameMenu");
         }
     }
 

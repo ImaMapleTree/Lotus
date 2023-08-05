@@ -2,7 +2,6 @@ using System;
 using HarmonyLib;
 using Lotus.Extensions;
 using UnityEngine;
-using VentLib.Logging;
 using Object = UnityEngine.Object;
 
 namespace Lotus.Patches;
@@ -10,10 +9,12 @@ namespace Lotus.Patches;
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CheckProtect))]
 class CheckProtectPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(CheckProtectPatch));
+
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
     {
         if (!AmongUsClient.Instance.AmHost) return false;
-        VentLogger.Trace($"Check Protect: {__instance.GetNameWithRole()} => {target.GetNameWithRole()}", "CheckProtect");
+        log.Trace($"Check Protect: {__instance.GetNameWithRole()} => {target.GetNameWithRole()}", "CheckProtect");
         return true;
     }
 }
@@ -31,6 +32,8 @@ class PlayerStartPatch
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ResetForMeeting))]
 public static class ResetForMeetingPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ResetForMeetingPatch));
+
     public static bool Prefix(PlayerControl __instance)
     {
         try
@@ -61,7 +64,7 @@ public static class ResetForMeetingPatch
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception);
+            log.Exception(exception);
         }
 
         return false;

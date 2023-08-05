@@ -6,7 +6,6 @@ using Lotus.API.Reactive;
 using Lotus.Victory;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -15,6 +14,8 @@ namespace Lotus.API.Vanilla.Meetings;
 
 public class MeetingPrep
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(MeetingPrep));
+
     internal static DateTime MeetingCalledTime = DateTime.Now;
     internal static GameData.PlayerInfo? Reported;
 
@@ -57,7 +58,7 @@ public class MeetingPrep
         Game.RenderAllForAll(GameState.InMeeting, true);
         Async.Schedule(FixChatNames, 5f);
 
-        VentLogger.Trace("Finished Prepping", "MeetingPrep");
+        log.Trace("Finished Prepping", "MeetingPrep");
         Prepped = true;
 
         CheckEndGamePatch.Deferred = true;

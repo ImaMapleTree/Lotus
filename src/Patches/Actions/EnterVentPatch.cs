@@ -8,7 +8,6 @@ using Lotus.API.Stats;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 
@@ -17,25 +16,27 @@ namespace Lotus.Patches.Actions;
 [HarmonyPatch(typeof(Vent), nameof(Vent.EnterVent))]
 class EnterVentPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(EnterVentPatch));
+
     internal static Dictionary<byte, Vector2?> LastVentLocation = new();
 
     public static void Postfix(Vent __instance, [HarmonyArgument(0)] PlayerControl pc)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        VentLogger.Trace($"{pc.GetNameWithRole()} Entered Vent (ID: {__instance.Id})", "CoEnterVent");
+        log.Trace($"{pc.GetNameWithRole()} Entered Vent (ID: {__instance.Id})", "CoEnterVent");
         CustomRole role = pc.GetCustomRole();
         ActionHandle vented = ActionHandle.NoInit();
         pc.Trigger(LotusActionType.MyEnterVent, ref vented, __instance);
 
         if (!role.CanVent())
         {
-            VentLogger.Trace($"{pc.GetNameWithRole()} cannot enter vent. Booting.");
+            log.Trace($"{pc.GetNameWithRole()} cannot enter vent. Booting.");
             Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.01f);
             return;
         }
 
         if (vented.IsCanceled) {
-            VentLogger.Trace($"{pc.GetNameWithRole()} vent action got canceled. Booting.");
+            log.Trace($"{pc.GetNameWithRole()} vent action got canceled. Booting.");
             Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.4f);
             return;
         }

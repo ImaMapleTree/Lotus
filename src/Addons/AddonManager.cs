@@ -8,7 +8,6 @@ using HarmonyLib;
 using Lotus.RPC;
 using Lotus.Extensions;
 using VentLib;
-using VentLib.Logging;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities;
 
@@ -16,6 +15,8 @@ namespace Lotus.Addons;
 
 public class AddonManager
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(AddonManager));
+
     public static LogLevel AddonLL = LogLevel.Info.Similar("ADDON", ConsoleColor.Magenta);
     public static List<LotusAddon> Addons = new();
 
@@ -25,6 +26,7 @@ public class AddonManager
         if (!addonDirectory.Exists)
             addonDirectory.Create();
         addonDirectory.EnumerateFiles().Do(LoadAddon);
+        Addons.ForEach(addon => addon.PostInitialize(new List<LotusAddon>(Addons)));
     }
 
     private static void LoadAddon(FileInfo file)
@@ -37,7 +39,7 @@ public class AddonManager
                 throw new ConstraintException($"Lotus Addons requires ONE class file that extends {nameof(LotusAddon)}");
             LotusAddon addon = (LotusAddon)AccessTools.Constructor(lotusType).Invoke(Array.Empty<object>());
 
-            VentLogger.Log(AddonLL,$"Loading Addon [{addon.Name} {addon.Version}]", "AddonManager");
+            log.Log(AddonLL,$"Loading Addon [{addon.Name} {addon.Version}]", "AddonManager");
             Vents.Register(assembly);
 
             Addons.Add(addon);
@@ -45,7 +47,7 @@ public class AddonManager
         }
         catch (Exception e)
         {
-            VentLogger.Exception(e, $"Exception encountered while loading addon: {file.Name}", "AddonManager");
+            log.Exception($"Exception encountered while loading addon: {file.Name}", e);
         }
     }
 
@@ -89,8 +91,8 @@ public class AddonManager
     public static void ReceiveAddonVerification(List<AddonInfo> addons)
     {
         if (addons.Count == 0) return;
-        VentLogger.Error(" Error Validating Addons. All CustomRPCs between the host and this client have been disabled.", "VerifyAddons");
-        VentLogger.Error(" -=-=-=-=-=-=-=-=-=[Errored Addons]=-=-=-=-=-=-=-=-=-", "VerifyAddons");
+        log.Exception(" Error Validating Addons. All CustomRPCs between the host and this client have been disabled.", "VerifyAddons");
+        log.Exception(" -=-=-=-=-=-=-=-=-=[Errored Addons]=-=-=-=-=-=-=-=-=-", "VerifyAddons");
         foreach (var rejectReason in addons.Where(info => info.Mismatches is not Mismatch.None).Select(addonInfo => (addonInfo.Mismatches)
              switch {
                  Mismatch.Version => $" {addonInfo.Name}:{addonInfo.Version} => Local version is not compatible with the host version of the addon",
@@ -98,6 +100,6 @@ public class AddonManager
                  Mismatch.HostMissingAddon => $" {addonInfo.Name}:{addonInfo.Version} => Host Missing Addon ",
                  _ => throw new ArgumentOutOfRangeException()
              }))
-            VentLogger.Error(rejectReason, "VerifyAddons");
+            log.Exception(rejectReason, "VerifyAddons");
     }
 }

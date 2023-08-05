@@ -1,10 +1,11 @@
 ﻿using Lotus.Managers.Templates.Models.Backing;
-using VentLib.Logging;
 
 namespace Lotus.Managers.Templates.Models.Units.Conditionals;
 
 public class TConditionalEvaluate: CommonConditionalUnit
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TConditionalEvaluate));
+
     private string inlineCondition;
 
     public TConditionalEvaluate(object input) : base(input)
@@ -12,7 +13,7 @@ public class TConditionalEvaluate: CommonConditionalUnit
         string? parsed = input.ToString();
         if (parsed == null)
         {
-            VentLogger.Warn("Error parsing \"Evaluate\" statement to string");
+            log.Warn("Error parsing \"Evaluate\" statement to string");
             parsed = "True == True";
         }
 

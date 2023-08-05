@@ -45,7 +45,6 @@ public class RpcSetTasksPatch
                 break;
         }
 
-        DevLogger.Log("Hello!!!");
         if (!hasTasks) return true;
 
         if (shortTaskCount == -1 || !overrideTasks) shortTaskCount = AUSettings.NumShortTasks();

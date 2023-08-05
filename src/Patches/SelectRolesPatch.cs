@@ -5,7 +5,6 @@ using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.Extensions;
 using LotusTrigger.Options;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -14,6 +13,8 @@ namespace Lotus.Patches;
 [HarmonyPatch(typeof(RoleManager), nameof(RoleManager.SelectRoles))]
 class SelectRolesPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(SelectRolesPatch));
+
     public static void Prefix()
     {
         if (!AmongUsClient.Instance.AmHost) return;
@@ -37,7 +38,7 @@ class SelectRolesPatch
         {
             textTable.AddEntry((object)p.PlayerId, ModConstants.ColorNames[p.cosmetics.ColorId], p.name, p.GetCustomRole().RoleName, p.GetSubroles().Fuse());
         });
-        VentLogger.Debug($"Role Assignments\n{textTable}", "RoleManager::SelectRoles~Postfix");
+        log.Debug($"Role Assignments\n{textTable}", "RoleManager::SelectRoles~Postfix");
         Game.RenderAllForAll(state: GameState.InIntro);
     }
 }

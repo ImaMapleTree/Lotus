@@ -44,9 +44,9 @@ public class WinnersMenu
         });
 
         HudManager.Instance.GameSettings.sortingOrder = -1;
-        chatParent.BackgroundImage.sortingOrder = -1;
+        chatParent.backgroundImage.sortingOrder = -1;
 
-        textMeshProPrefab = UnityOptional<TextMeshPro>.Of(Object.Instantiate(chatParent.TextArea.outputText, gameObject.transform));
+        textMeshProPrefab = UnityOptional<TextMeshPro>.Of(Object.Instantiate(chatParent.freeChatField.textArea.outputText, gameObject.transform));
         textMeshProPrefab.IfPresent(text =>
         {
 

@@ -5,7 +5,6 @@ using Lotus.Patches.Systems;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Optionals;
 
@@ -13,6 +12,8 @@ namespace Lotus.API.Vanilla.Sabotages;
 
 public class ElectricSabotage : ISabotage
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ElectricSabotage));
+
     private UnityOptional<PlayerControl> caller;
 
     public ElectricSabotage(PlayerControl? player = null)
@@ -31,7 +32,7 @@ public class ElectricSabotage : ISabotage
         SwitchSystem? electrical = systemInstance!.TryCast<SwitchSystem>();
         if (electrical == null)
         {
-            VentLogger.Warn($"Error Fixing Lights Sabotage. Invalid System Cast from {SabotageType()}.");
+            log.Warn($"Error Fixing Lights Sabotage. Invalid System Cast from {SabotageType()}.");
             return false;
         }
 

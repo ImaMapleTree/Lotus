@@ -3,23 +3,24 @@ using System.Collections;
 using System.Collections.Generic;
 using Lotus.Extensions;
 using Lotus.Logging;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Managers.Templates.Models.Units.Conditionals;
 
 public class TConditionalPlayerFlag: CommonConditionalUnit
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TConditionalPlayerFlag));
+
     private readonly HashSet<PlayerFlag> flags = new();
 
     public TConditionalPlayerFlag(object input) : base(input)
     {
         if (Input is ICollection collection)
             foreach (object o in collection)
-                if (!Enum.TryParse(o as string, true, out PlayerFlag state)) VentLogger.Warn($"Could not parse \"{o}\" as type \"{nameof(PlayerFlag)}\"");
+                if (!Enum.TryParse(o as string, true, out PlayerFlag state)) log.Warn($"Could not parse \"{o}\" as type \"{nameof(PlayerFlag)}\"");
                 else flags.Add(state);
 
-        else if (!Enum.TryParse(input as string, true, out PlayerFlag state)) VentLogger.Warn($"Could not parse \"{input}\" as type \"{nameof(PlayerFlag)}\"");
+        else if (!Enum.TryParse(input as string, true, out PlayerFlag state)) log.Warn($"Could not parse \"{input}\" as type \"{nameof(PlayerFlag)}\"");
         else flags.Add(state);
         DevLogger.Log($"Parsed input: {input}");
     }
@@ -50,7 +51,7 @@ public class TConditionalPlayerFlag: CommonConditionalUnit
                     if (!player.IsModded()) return true;
                     break;
                 default:
-                    VentLogger.Warn(
+                    log.Warn(
                         $"PlayerFlag {flag} is not properly setup and will not result in a proper conditional validation.",
                         "VerifyPlayerFlags");
                     break;

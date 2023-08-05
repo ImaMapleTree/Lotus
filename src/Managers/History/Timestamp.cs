@@ -9,12 +9,7 @@ namespace Lotus.Managers.History;
 /// </summary>
 public class Timestamp
 {
-    private TimeSpan time;
-
-    public Timestamp()
-    {
-        time = DateTime.Now.Subtract(Game.MatchData.StartTime);
-    }
+    private TimeSpan time = DateTime.Now.Subtract(Game.MatchData.StartTime);
 
     public bool IsBefore(Timestamp other) => time.CompareTo(other.time) < 0;
 

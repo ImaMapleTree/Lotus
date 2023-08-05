@@ -5,7 +5,6 @@ using Lotus.Roles;
 using Lotus.Extensions;
 using Lotus.Gamemodes;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using Version = VentLib.Version.Version;
 
@@ -13,6 +12,8 @@ namespace Lotus.Addons;
 
 public abstract class LotusAddon
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(LotusAddon));
+
     internal List<CustomRole>? ExportedRoles;
     internal readonly List<IFaction> Factions = new();
 
@@ -33,11 +34,15 @@ public abstract class LotusAddon
 
     public abstract void Initialize();
 
+    public virtual void PostInitialize(List<LotusAddon> addons)
+    {
+    }
+
     public void ExportRoles(IEnumerable<CustomRole> roles, LotusRoleType roleType)
     {
         roles.ForEach(r =>
         {
-            VentLogger.Trace($"Exporting Role: {r.EnglishRoleName}", "ExportRoles");
+            log.Trace($"Exporting Role: {r.EnglishRoleName}", "ExportRoles");
             ProjectLotus.RoleManager.AddRole(r, roleType);
         });
     }
@@ -46,7 +51,7 @@ public abstract class LotusAddon
     {
         foreach (IGamemode gamemode in gamemodes)
         {
-            VentLogger.Trace($"Exporting Gamemode: {gamemode.Name}", "ExportGamemodes");
+            log.Trace($"Exporting Gamemode: {gamemode.Name}", "ExportGamemodes");
             ProjectLotus.GamemodeManager.Gamemodes.Add(gamemode);
         }
     }

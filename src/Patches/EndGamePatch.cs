@@ -1,13 +1,14 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using Lotus.API.Odyssey;
-using VentLib.Logging;
 
 namespace Lotus.Patches;
 
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnGameEnd))]
 class EndGamePatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(EndGamePatch));
+
     public static Dictionary<byte, string> SummaryText = new();
 
     public static string KillLog = "";
@@ -33,6 +34,6 @@ class EndGamePatch
         }*/
 
         KillLog = "asdoksdoksadpsako";
-        VentLogger.Old("-----------ゲーム終了-----------", "Phase");
+        log.Info("-----------ゲーム終了-----------", "Phase");
     }
 }

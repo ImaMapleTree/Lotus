@@ -1,10 +1,11 @@
 ﻿using System;
-using VentLib.Logging;
 
 namespace Lotus.Managers.Templates.Models.Units.Actions;
 
 public abstract class NumericActionUnit: CommonActionUnit
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(NumericActionUnit));
+
     public NumericActionUnit(object input) : base(input)
     {
     }
@@ -24,7 +25,7 @@ public abstract class NumericActionUnit: CommonActionUnit
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception, $"Could not parse \"{input}\" to float.");
+            log.Exception($"Could not parse \"{input}\" to float.", exception);
             return 0;
         }
     }

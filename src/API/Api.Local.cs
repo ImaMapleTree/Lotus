@@ -1,6 +1,5 @@
 using System;
 using Lotus.API.Odyssey;
-using VentLib.Logging;
 
 namespace Lotus.API;
 
@@ -8,6 +7,8 @@ public partial class Api
 {
     public class Local
     {
+        private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(Local));
+
         public static void SetName(PlayerControl player, string name, bool send = false, GameState state = GameState.None)
         {
 
@@ -36,7 +37,7 @@ public partial class Api
             }
             catch (Exception exception)
             {
-                VentLogger.Exception(exception);
+                log.Exception(exception);
             }
         }
     }

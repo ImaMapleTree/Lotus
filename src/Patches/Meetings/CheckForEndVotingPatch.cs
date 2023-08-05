@@ -15,7 +15,6 @@ using Lotus.Logging;
 using Lotus.Options.LotusImpl;
 using Lotus.Roles.Internals.Enums;
 using LotusTrigger.Options;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
 using VentLib.Utilities.Optionals;
@@ -26,12 +25,14 @@ namespace Lotus.Patches.Meetings;
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CheckForEndVoting))]
 public class CheckForEndVotingPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(CheckForEndVotingPatch));
+
     public static bool Prefix(MeetingHud __instance)
     {
         if (!AmongUsClient.Instance.AmHost) return true;
         MeetingDelegate meetingDelegate = MeetingDelegate.Instance;
         if (!meetingDelegate.IsForceEnd() && __instance.playerStates.Any(ps => !ps.AmDead && !ps.DidVote)) return false;
-        VentLogger.Debug("Beginning End Voting", "CheckEndVotingPatch");
+        log.Debug("Beginning End Voting", "CheckEndVotingPatch");
 
 
         if (GeneralOptions.MeetingOptions.NoVoteMode is not (SkipVoteMode.None))
@@ -57,7 +58,7 @@ public class CheckForEndVotingPatch
 
 
         // Calculate the exiled player once so that we can send the voting complete signal
-        VentLogger.Trace($"End Vote Count: {meetingDelegate.CurrentVoteCount().Select(kv => $"{Utils.GetPlayerById(kv.Key).GetNameWithRole()}: {kv.Value}").Join()}");
+        log.Trace($"End Vote Count: {meetingDelegate.CurrentVoteCount().Select(kv => $"{Utils.GetPlayerById(kv.Key).GetNameWithRole()}: {kv.Value}").Join()}");
         meetingDelegate.CalculateExiledPlayer();
 
         byte exiledPlayer = meetingDelegate.ExiledPlayer?.PlayerId ?? 255;
@@ -100,7 +101,7 @@ public class CheckForEndVotingPatch
             kv.Value.ForEach(voted =>
             {
                 string votedName = voted.FlatMap(b => Utils.PlayerById(b)).Map(p => p.GetNameWithRole()).OrElse("No One");
-                player.IfPresent(p => VentLogger.Log(LogLevel.All,$"{p.GetNameWithRole()} voted for {votedName}"));
+                player.IfPresent(p => log.Log(LogLevel.All,$"{p.GetNameWithRole()} voted for {votedName}"));
                 votingStates.Add(new VoterState
                 {
                     VoterId = playerId,

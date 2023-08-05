@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Odyssey;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Managers.Hotkeys;
 
 public class Hotkey
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(Hotkey));
+
     public ulong TimesUsed { get; private set; }
 
     private readonly KeyCode[] keyCodes;
@@ -20,12 +21,12 @@ public class Hotkey
     {
         this.keyCodes = keyCodes;
     }
-    
+
     public static Hotkey When(params KeyCode[] keyCodes)
     {
         return new Hotkey(keyCodes);
     }
-    
+
 
     public Hotkey If(Func<bool> predicate)
     {
@@ -38,7 +39,7 @@ public class Hotkey
         predicates.Add(predicateBuilder(new PredicateBuilder()));
         return this;
     }
-    
+
     public Hotkey If(Func<PredicateBuilder, PredicateBuilder> predicateBuilder)
     {
         predicates.Add(predicateBuilder(new PredicateBuilder()).Build());
@@ -56,7 +57,7 @@ public class Hotkey
         if (!keyCodes.Any(Input.GetKeyDown)) return;
         if (!keyCodes.All(Input.GetKey)) return;
         if (!predicates.All(p => p())) return;
-        VentLogger.Trace($"HotKey Pressed ({keyCodes.Fuse()})", "HotKey::Update");
+        log.Trace($"HotKey Pressed ({keyCodes.Fuse()})", "HotKey::Update");
         actions.ForEach(a => a());
         TimesUsed++;
     }

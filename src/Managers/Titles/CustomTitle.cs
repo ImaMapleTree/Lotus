@@ -5,13 +5,14 @@ using System.Text.RegularExpressions;
 using Lotus.API.Odyssey;
 using Lotus.Extensions;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Utilities;
 
 namespace Lotus.Managers.Titles;
 
 public class CustomTitle
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(CustomTitle));
+
     private static Regex _commaRegex = new("( *, *)");
     private static Regex _tagRegex = new("(<([^>]*)(=?[^>]*?)>([^<]*)<\\/\\2>)");
 
@@ -60,7 +61,7 @@ public class CustomTitle
         {
             if (Text == null)
             {
-                VentLogger.Warn("Could not generate title component. Text for component cannot be null!", "CustomTitleGenerator");
+                log.Warn("Could not generate title component. Text for component cannot be null!", "CustomTitleGenerator");
                 return "";
             }
 
@@ -114,7 +115,7 @@ public class CustomTitle
         Color? c = input.ToColor();
         if (c != null) return c.Value;
 
-        VentLogger.Warn($"Could not parse to color {c}", "CustomTitleGenerator");
+        log.Warn($"Could not parse to color {c}", "CustomTitleGenerator");
         return Color.white;
 
     }

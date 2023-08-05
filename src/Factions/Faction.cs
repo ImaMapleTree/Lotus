@@ -16,27 +16,27 @@ public abstract class Faction<T> : IFaction<T> where T: IFaction<T>
     {
         if (other is not T self)
         {
-            //VentLogger.Info($"Other is not Self ({other} | {typeof(T)}");
+            //log.Info($"Other is not Self ({other} | {typeof(T)}");
             return RelationshipOther(other);
         }
 
-        //VentLogger.Info($"Other is self : {self}");
+        //log.Info($"Other is self : {self}");
 
         if (other is not ISubFaction<T> subFaction2)
         {
-            //VentLogger.Info($"Other is not subfaction {other}");
+            //log.Info($"Other is not subfaction {other}");
             if (this is ISubFaction<T> subFaction3) return subFaction3.MainFactionRelationship();
             return Relationship(self);
         }
 
-        //VentLogger.Info($"Other is subfaction: {subFaction2}");
+        //log.Info($"Other is subfaction: {subFaction2}");
         if (this is ISubFaction<T> subFaction)
         {
-            //VentLogger.Info($"This is sub faction: {subFaction}");
+            //log.Info($"This is sub faction: {subFaction}");
             return subFaction.Relationship(subFaction2);
         }
 
-        //VentLogger.Info($"this is not subfaction: {this}");
+        //log.Info($"this is not subfaction: {this}");
         return subFaction2.MainFactionRelationship();
     }
 

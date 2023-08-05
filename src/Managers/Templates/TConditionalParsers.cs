@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using Lotus.Managers.Templates.Models.Units;
 using Lotus.Managers.Templates.Models.Units.Conditionals;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Managers.Templates;
 
 public class TConditionalParsers
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TConditionalParsers));
+
     public static Dictionary<string, Func<object, IConditionalUnit>> units = new()
     {
         { "Statuses", value => new TConditionStatuses(value) },
@@ -43,7 +44,7 @@ public class TConditionalParsers
     {
         return units.GetOptional(yamlKey).Map(c => c(value)).OrElseGet(() =>
         {
-            VentLogger.Warn($"Could not find conditional for key: \"{yamlKey}\", returning default conditional.");
+            log.Warn($"Could not find conditional for key: \"{yamlKey}\", returning default conditional.");
             return new TConditionalDefault();
         });
     }

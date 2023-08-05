@@ -3,7 +3,6 @@ using System.IO;
 using Lotus.Managers.Friends;
 using Lotus.Managers.Templates;
 using Lotus.Managers.Titles;
-using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
@@ -13,6 +12,8 @@ namespace Lotus.Managers;
 [LoadStatic]
 public static class PluginDataManager
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(PluginDataManager));
+
     private const string LegacyDataDirectoryTOHPath = "./TOR_DATA";
     private const string ModifiableDataDirectoryPath = "./LOTUS_DATA";
     private const string ModifiableDataDirectoryPathOld = "./TOHTOR_DATA";
@@ -68,12 +69,12 @@ public static class PluginDataManager
     {
         try
         {
-            VentLogger.Trace($"Loading {name}", "PluginDataManager");
+            log.Trace($"Loading {name}", "PluginDataManager");
             return loadFunction();
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception, $"Failed to load {name}");
+            log.Exception( $"Failed to load {name}", exception);
             return default;
         }
     }

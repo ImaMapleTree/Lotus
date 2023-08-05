@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using VentLib.Logging;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
 
@@ -10,6 +9,8 @@ namespace Lotus.Managers.Templates.Models.Units.Conditionals;
 
 public class TRecursiveCondition: CommonConditionalUnit
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TRecursiveCondition));
+
     private IDeserializer deserializer = new DeserializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).IgnoreUnmatchedProperties().Build();
     private ISerializer serializer = new SerializerBuilder().WithNamingConvention(CamelCaseNamingConvention.Instance).Build();
 
@@ -34,7 +35,7 @@ public class TRecursiveCondition: CommonConditionalUnit
             }
             catch(Exception ex)
             {
-                VentLogger.Exception(ex, "Parsing failed");
+                log.Exception("Parsing failed", ex);
             }
         }
     }

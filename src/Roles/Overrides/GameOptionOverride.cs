@@ -4,12 +4,13 @@ using AmongUs.GameOptions;
 using Lotus.API;
 using Lotus.Logging;
 using UnityEngine;
-using VentLib.Logging;
 
 namespace Lotus.Roles.Overrides;
 
 public class GameOptionOverride
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(GameOptionOverride));
+
     public readonly Override Option;
     protected readonly Func<bool>? Condition;
     private readonly object? value;
@@ -90,7 +91,7 @@ public class GameOptionOverride
                 break;
             case Override.CanUseVent:
             default:
-                VentLogger.Warn($"Invalid Option Override: {this}", "ApplyOverride");
+                log.Warn($"Invalid Option Override: {this}", "ApplyOverride");
                 break;
         }
 

@@ -9,7 +9,6 @@ using Lotus.Roles.Internals;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -19,12 +18,14 @@ namespace Lotus.Patches.Meetings;
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.CastVote))]
 public class CastVotePatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(CastVotePatch));
+
     public static bool Prefix(MeetingHud __instance, byte srcPlayerId, byte suspectPlayerId)
     {
         if (!AmongUsClient.Instance.AmHost) return true;
         PlayerControl voter = Utils.GetPlayerById(srcPlayerId)!;
         Optional<PlayerControl> voted = Utils.PlayerById(suspectPlayerId);
-        VentLogger.Trace($"{voter.GetNameWithRole()} voted for {voted.Map(v => v.name)}");
+        log.Trace($"{voter.GetNameWithRole()} voted for {voted.Map(v => v.name)}");
 
         ActionHandle handle = ActionHandle.NoInit();
         voter.Trigger(LotusActionType.MyVote, ref handle,MeetingDelegate.Instance, voted);
@@ -39,7 +40,7 @@ public class CastVotePatch
 
         __instance.playerStates.ToArray().FirstOrDefault(state => state.TargetPlayerId == srcPlayerId)?.UnsetVote();
 
-        VentLogger.Debug($"Canceled Vote from {voter.GetNameWithRole()}");
+        log.Debug($"Canceled Vote from {voter.GetNameWithRole()}");
         Async.Schedule(() => ClearVote(__instance, voter), NetUtils.DeriveDelay(0.4f));
         Async.Schedule(() => ClearVote(__instance, voter), NetUtils.DeriveDelay(0.6f));
         return false;
@@ -47,7 +48,7 @@ public class CastVotePatch
 
     public static void ClearVote(MeetingHud hud, PlayerControl target)
     {
-        VentLogger.Trace($"Clearing vote for: {target.GetNameWithRole()}");
+        log.Trace($"Clearing vote for: {target.GetNameWithRole()}");
         hud.playerStates.Where(ps => ps.TargetPlayerId == target.PlayerId).ForEach(ps => ps.VotedFor = byte.MaxValue);
         MessageWriter writer = MessageWriter.Get(SendOption.Reliable);
         writer.StartMessage(6);

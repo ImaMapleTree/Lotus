@@ -5,12 +5,12 @@ using Lotus.Chat.Commands;
 using Lotus.Roles.Interactions;
 using Lotus.Extensions;
 using Lotus.GUI.Menus.OptionsMenu.Patches;
+using Lotus.Logging;
 using Lotus.Patches.Client;
 using Lotus.Roles;
 using LotusTrigger.Options;
 using UnityEngine;
 using VentLib.Localization;
-using VentLib.Logging;
 using VentLib.Options;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Debug.Profiling;
@@ -21,12 +21,15 @@ namespace Lotus.Managers.Hotkeys;
 [LoadStatic]
 public class ModKeybindings
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ModKeybindings));
+
     private static bool hudActive = true;
 
     static ModKeybindings()
     {
         // Dump Log
-        Bind(KeyCode.F1, KeyCode.LeftControl).Do(DumpLog);
+        Bind(KeyCode.F, KeyCode.LeftControl).Do(DumpLog);
+        Bind(KeyCode.D, KeyCode.LeftControl).Do(() => LogManager.WriteSessionLog(""));
 
         // Profile All
         Bind(KeyCode.F2).Do(ProfileAll);
@@ -43,12 +46,12 @@ public class ModKeybindings
 
         // Instant begin game
         Bind(KeyCode.LeftShift)
-            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown && !HudManager.Instance.Chat.IsOpen))
+            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown && !HudManager.Instance.Chat.IsOpenOrOpening))
             .Do(() => GameStartManager.Instance.countDownTimer = 0);
 
         // Restart countdown timer
         Bind(KeyCode.C)
-            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown && !HudManager.Instance.Chat.IsOpen))
+            .If(p => p.HostOnly().Predicate(() => MatchState.IsCountDown && !HudManager.Instance.Chat.IsOpenOrOpening))
             .Do(() =>
             {
                 GeneralOptions.AdminOptions.AutoStartMaxTime = -1;
@@ -89,7 +92,8 @@ public class ModKeybindings
 
     private static void DumpLog()
     {
-        BasicCommands.Dump(PlayerControl.LocalPlayer);
+        LogManager.OpenLogUI();
+        /*BasicCommands.Dump(PlayerControl.LocalPlayer);*/
     }
 
     private static void ProfileAll()
@@ -108,7 +112,7 @@ public class ModKeybindings
 
     private static void ResetGameOptions()
     {
-        VentLogger.High("Resetting Game Options", "ResetOptions");
+        log.High("Resetting Game Options", "ResetOptions");
         OptionManager.GetAllManagers().ForEach(m =>
         {
             m.GetOptions().ForEach(o =>
@@ -118,7 +122,7 @@ public class ModKeybindings
             });
             m.DelaySave(0);
         });
-        VentLogger.SendInGame("All options have been reset!");
+        StaticLogger.SendInGame("All options have been reset!");
     }
 
     private static void InstantReduceTimer()
@@ -128,8 +132,8 @@ public class ModKeybindings
 
     private static void ReloadTranslations()
     {
-        VentLogger.Trace("Reload Custom Translation File", "KeyCommand");
+        log.Trace("Reload Custom Translation File", "KeyCommand");
         Localizer.Reload();
-        VentLogger.SendInGame("Reloaded Custom Translation File");
+        StaticLogger.SendInGame("Reloaded Custom Translation File");
     }
 }

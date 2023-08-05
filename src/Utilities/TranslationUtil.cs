@@ -2,13 +2,14 @@ using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Utilities;
 
 namespace Lotus.Utilities;
 
 public class TranslationUtil
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TranslationUtil));
+
     private static Regex taggedStringRegex = new("(\\S*::\\d*)");
 
 
@@ -31,7 +32,7 @@ public class TranslationUtil
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception, "Error colorizing message!");
+            log.Exception("Error colorizing message!", exception);
         }
 
         return input;

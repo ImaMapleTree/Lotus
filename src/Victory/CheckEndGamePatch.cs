@@ -11,7 +11,6 @@ using Lotus.Utilities;
 using Lotus.Victory.Conditions;
 using LotusTrigger.Options;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
 
@@ -20,6 +19,8 @@ namespace Lotus.Victory;
 [HarmonyPatch(typeof(LogicGameFlowNormal), nameof(LogicGameFlowNormal.CheckEndCriteria))]
 public class CheckEndGamePatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(CheckEndGamePatch));
+
     public static bool BeginWin;
     public static bool Deferred;
     private static DateTime slowDown = DateTime.Now;
@@ -93,7 +94,7 @@ public class CheckEndGamePatch
     {
         Deferred = false;
         BeginWin = false;
-        VentLogger.Info("Ending Game", "DelayedWin");
+        log.Info("Ending Game", "DelayedWin");
         GameManager.Instance.RpcEndGame(reason, false);
         Async.Schedule(() => GameManager.Instance.EndGame(), 0.1f);
     }

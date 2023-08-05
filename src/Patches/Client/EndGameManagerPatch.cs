@@ -4,7 +4,6 @@ using LotusTrigger.Options;
 using TMPro;
 using UnityEngine;
 using VentLib.Localization.Attributes;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -13,6 +12,8 @@ namespace Lotus.Patches.Client;
 [HarmonyPatch(typeof(EndGameManager), nameof(EndGameManager.ShowButtons))]
 public class EndGameManagerPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(EndGameManagerPatch));
+
     public static bool IsRestarting { get; private set; }
     [Localized($"{ModConstants.Localization.Misc}.PlayAgainText")]
     private static string _playAgainText = "Restarting In: {0}";
@@ -26,7 +27,7 @@ public class EndGameManagerPatch
 
         Async.Schedule(() =>
         {
-            VentLogger.High("Beginning Auto Play Again Countdown!", "AutoPlayAgain");
+            log.High("Beginning Auto Play Again Countdown!", "AutoPlayAgain");
             IsRestarting = true;
             BeginAutoPlayAgainCountdown(__instance, 5);
         }, 0.5f);

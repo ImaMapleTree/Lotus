@@ -14,7 +14,6 @@ using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
 using LotusTrigger.Options;
-using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 
@@ -25,6 +24,8 @@ namespace Lotus.Patches.Meetings;
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.Start))]
 public class MeetingStartPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(MeetingStartPatch));
+
     static MeetingStartPatch()
     {
         PluginDataManager.TemplateManager.RegisterTag("meeting-first", "The template to show during the first meeting.");
@@ -35,7 +36,7 @@ public class MeetingStartPatch
     public static void Prefix(MeetingHud __instance)
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        VentLogger.Info("------------Meeting Start------------", "Phase");
+        log.Info("------------Meeting Start------------", "Phase");
 
         MeetingDelegate meetingDelegate = MeetingPrep.PrepMeeting()!;
         PlayerControl reporter = Utils.GetPlayerById(__instance.reporterId)!;
@@ -58,7 +59,7 @@ public class MeetingStartPatch
             }
             catch (Exception ex)
             {
-                VentLogger.Exception(ex, "Error Sending Template Information!");
+                log.Exception("Error Sending Template Information!", ex);
             }
             finally
             {

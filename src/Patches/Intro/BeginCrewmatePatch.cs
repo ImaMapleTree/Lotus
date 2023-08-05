@@ -8,13 +8,14 @@ using Lotus.Roles.Builtins;
 using Lotus.Roles.Internals.Enums;
 using UnityEngine;
 using VentLib.Localization;
-using VentLib.Logging;
 
 namespace Lotus.Patches.Intro;
 
 [HarmonyPatch(typeof(IntroCutscene), nameof(IntroCutscene.BeginCrewmate))]
 class BeginCrewmatePatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(BeginCrewmatePatch));
+
     public static void Postfix(IntroCutscene __instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> teamToDisplay)
     {
         //チーム表示変更
@@ -68,7 +69,7 @@ class BeginCrewmatePatch
             Color lerpingColor = Color.Lerp(start, end, time);
             if (__instance == null || milliseconds > 500)
             {
-                VentLogger.Trace("Exit The Loop (GTranslated)", "StartFadeIntro");
+                log.Trace("Exit The Loop (GTranslated)", "StartFadeIntro");
                 break;
             }
             __instance.BackgroundBar.material.color = lerpingColor;

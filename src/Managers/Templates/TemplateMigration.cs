@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Lotus.Extensions;
-using VentLib.Logging;
 
 namespace Lotus.Managers.Templates;
 
 public class TemplateMigration
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TemplateMigration));
+
     private readonly FileInfo lotusLegacyTemplateFile;
     private readonly FileInfo tohtorLegacyTemplateFile;
 
@@ -21,7 +22,7 @@ public class TemplateMigration
         LoadTemplates();
         LoadTOHTemplates();
         if (templates == null! || templates.Count == 0) return;
-        VentLogger.High($"Migrating {templates.Count} legacy templates to new system", "TemplateMigration");
+        log.High($"Migrating {templates.Count} legacy templates to new system", "TemplateMigration");
         templates.ForEach(t =>
         {
             try
@@ -30,10 +31,10 @@ public class TemplateMigration
             }
             catch (Exception exception)
             {
-                VentLogger.Exception(exception, "Error migrating template.");
+                log.Exception("Error migrating template.", exception);
             }
         });
-        VentLogger.High("Successfully migrated templates.", "TemplateMigration");
+        log.High("Successfully migrated templates.", "TemplateMigration");
         if (this.lotusLegacyTemplateFile.Exists)
             lotusLegacyTemplateFile.Rename("LEGACY_LotusTemplates.txt", true);
         if (this.tohtorLegacyTemplateFile.Exists)

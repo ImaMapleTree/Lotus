@@ -9,7 +9,6 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers.Hotkeys;
 using Lotus.Managers.Templates.Models;
 using Lotus.Managers.Templates.Models.Units;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -18,6 +17,8 @@ namespace Lotus.Managers.Templates;
 
 public class TemplateManager
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TemplateManager));
+
     public static int GlobalTriggerCount;
 
     public static IDeserializer TemplateDeserializer = new DeserializerBuilder()
@@ -119,7 +120,7 @@ public class TemplateManager
     public bool TryFormat(object? obj, string tag, out string formatted, bool ignoreWarning = true)
     {
         formatted = "";
-        if (!ignoreWarning && !registeredTags.ContainsKey(tag)) VentLogger.Warn($"Tag \"{tag}\" is not registered. Please ensure all template tags have been registered through TemplateManager.RegisterTag().", "TemplateManager");
+        if (!ignoreWarning && !registeredTags.ContainsKey(tag)) log.Warn($"Tag \"{tag}\" is not registered. Please ensure all template tags have been registered through TemplateManager.RegisterTag().", "TemplateManager");
         if (!templates!.ContainsKey(tag)) return false;
         formatted = templates.GetValueOrDefault(tag)?.Select(v => v.Format(obj).Replace("\\n", "\n")).Where(t => t != "").Fuse("\n") ?? "";
         return true;
@@ -129,7 +130,7 @@ public class TemplateManager
     {
         if (registeredTags.ContainsKey(tag) && registeredTags[tag] != description)
         {
-            VentLogger.Warn($"Could not register template tag \"{tag}\". A tag of the same name already exists.", "TemplateManager");
+            log.Warn($"Could not register template tag \"{tag}\". A tag of the same name already exists.", "TemplateManager");
             return false;
         }
 
@@ -170,7 +171,7 @@ public class TemplateManager
         }
         catch (Exception e)
         {
-            VentLogger.Exception(e);
+            log.Exception(e);
             return e.ToString();
         }
     }

@@ -9,6 +9,7 @@ using Lotus.Managers.History;
 using Lotus.Roles;
 using Lotus.Roles.Overrides;
 using Lotus.RPC;
+using Lotus.Server;
 using Lotus.Statuses;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities.Collections;
@@ -31,11 +32,8 @@ public class MatchData
     public int MeetingsCalled;
     public int EmergencyButtonsUsed;
 
-    /*private static readonly Func<RemoteList<GameOptionOverride>> OptionOverrideListSupplier =
-        () => AUSettings.ConfirmImpostor() ? new RemoteList<GameOptionOverride> { new(Override.ConfirmEjects, false), new(Override.GuardianAngelDuration, 1000f) } : new RemoteList<GameOptionOverride> {  new(Override.GuardianAngelDuration, 1000f) };*/
-
     private static readonly Func<RemoteList<GameOptionOverride>> OptionOverrideListSupplier =
-        () => AUSettings.ConfirmImpostor() ? new RemoteList<GameOptionOverride> { new(Override.ConfirmEjects, false) } : new RemoteList<GameOptionOverride>();
+        () => ServerPatchManager.Patch.ExecuteT<RemoteList<GameOptionOverride>>(PatchedCode.GlobalOverrides);
 
 
     public RoleData Roles = new();

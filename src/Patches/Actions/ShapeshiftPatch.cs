@@ -7,8 +7,8 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.Overrides;
 using Lotus.RPC;
-using VentLib.Logging;
 using VentLib.Utilities;
 using Priority = HarmonyLib.Priority;
 
@@ -17,14 +17,16 @@ namespace Lotus.Patches.Actions;
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.Shapeshift))]
 public static class ShapeshiftPatch
 {
-    public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ShapeshiftPatch));
+
+    public static void Prefix(PlayerControl __instance, [HarmonyArgument(0)] PlayerControl target)
     {
         string invokerName = new StackTrace(5)?.GetFrame(0)?.GetMethod()?.Name;
-        VentLogger.Debug($"Shapeshift Cause (Invoker): {invokerName}", "ShapeshiftEvent");
-        if (invokerName is "RpcShapeshiftV2" or "RpcRevertShapeshiftV2" or "<Shapeshift>b__0" or "<RevertShapeshift>b__0") return true;
-        if (invokerName is "CRpcShapeshift" or "CRpcRevertShapeshift" or "<Shapeshift>b__0" or "<RevertShapeshift>b__0") return true;
-        VentLogger.Info($"{__instance?.GetNameWithRole()} => {target?.GetNameWithRole()}", "Shapeshift");
-        if (!AmongUsClient.Instance.AmHost) return true;
+        log.Debug($"Shapeshift Cause (Invoker): {invokerName}", "ShapeshiftEvent");
+        if (invokerName is "RpcShapeshiftV2" or "RpcRevertShapeshiftV2" or "<Shapeshift>b__0" or "<RevertShapeshift>b__0") return;
+        if (invokerName is "CRpcShapeshift" or "CRpcRevertShapeshift" or "<Shapeshift>b__0" or "<RevertShapeshift>b__0") return;
+        log.Info($"{__instance?.GetNameWithRole()} => {target?.GetNameWithRole()}", "Shapeshift");
+        if (!AmongUsClient.Instance.AmHost) return;
 
         var shapeshifter = __instance;
         var shapeshifting = shapeshifter.PlayerId != target.PlayerId;
@@ -33,20 +35,13 @@ public static class ShapeshiftPatch
         ActionHandle handle = ActionHandle.NoInit();
         __instance.Trigger(shapeshifting ? LotusActionType.Shapeshift : LotusActionType.Unshapeshift, ref handle, target);
 
-        if (handle.IsCanceled)
-        {
-            Async.Schedule(() => __instance.CRpcShapeshift(__instance, false), NetUtils.DeriveDelay(1.2f));
-            return false;
-        }
+        if (handle.IsCanceled) return;
 
         Game.TriggerForAll(shapeshifting ? LotusActionType.AnyShapeshift : LotusActionType.AnyUnshapeshift, ref handle, __instance, target);
-        if (!handle.IsCanceled)
-        {
-            Hooks.PlayerHooks.PlayerShapeshiftHook.Propagate(new PlayerShapeshiftHookEvent(__instance, target.Data, !shapeshifting));
-            return true;
-        }
-        Async.Schedule(() => __instance.CRpcShapeshift(__instance, false), NetUtils.DeriveDelay(1.2f));
-        return false;
+
+        if (handle.IsCanceled) return;
+
+        Hooks.PlayerHooks.PlayerShapeshiftHook.Propagate(new PlayerShapeshiftHookEvent(__instance, target.Data, !shapeshifting));
     }
 }
 

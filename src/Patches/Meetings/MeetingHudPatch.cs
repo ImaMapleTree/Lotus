@@ -2,8 +2,8 @@ using HarmonyLib;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Vanilla.Meetings;
+using Lotus.Server;
 using LotusTrigger.Options;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -26,10 +26,12 @@ class SetHighlightedPatch
 [HarmonyPatch(typeof(MeetingHud), nameof(MeetingHud.OnDestroy))]
 class MeetingHudOnDestroyPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(MeetingHudOnDestroyPatch));
+
     public static void Postfix()
     {
         if (!AmongUsClient.Instance.AmHost) return;
-        VentLogger.Debug("------------End of Meeting------------", "Phase");
+        log.Debug("------------End of Meeting------------", "Phase");
         MeetingDelegate meetingDelegate = MeetingDelegate.Instance;
 
         if (meetingDelegate.ExiledPlayer != null && meetingDelegate.ExiledPlayer.Object != null)
@@ -48,12 +50,6 @@ class MeetingHudOnDestroyPatch
 
     private static void PostMeetingSetups()
     {
-        bool randomSpawn = GeneralOptions.MayhemOptions.RandomSpawn;
-
-        Players.GetPlayers().ForEach(p =>
-        {
-            /*p.RpcProtectPlayer(p, 0);*/ // Used for fixing the kill button with an authoritive model
-            if (randomSpawn) Game.RandomSpawn.Spawn(p);
-        });
+        ServerPatchManager.Patch.Execute(PatchedCode.PostMeeting);
     }
 }

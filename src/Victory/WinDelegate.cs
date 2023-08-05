@@ -4,13 +4,14 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.Victory.Conditions;
 using VentLib.Utilities.Extensions;
-using VentLib.Logging;
 using VentLib.Utilities.Collections;
 
 namespace Lotus.Victory;
 
 public class WinDelegate
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(WinDelegate));
+
     private readonly List<IWinCondition> winConditions = new() { new FallbackCondition() };
     private readonly RemoteList<Action<WinDelegate>> winNotifiers = new();
 
@@ -37,7 +38,7 @@ public class WinDelegate
     {
         if (forcedWin)
         {
-            VentLogger.Info($"Triggering Game Win by Force, winners={winners.Where(p => p != null).Select(p => p.name).Join()}, reason={winReason}", "WinCondition");
+            log.Info($"Triggering Game Win by Force, winners={winners.Where(p => p != null).Select(p => p.name).Join()}, reason={winReason}", "WinCondition");
             winNotifiers.ForEach(notify => notify(this));
             return true;
         }
@@ -46,7 +47,7 @@ public class WinDelegate
         if (condition == null) return false;
         if (winners == null!)
         {
-            VentLogger.Warn("The list of winners was null. Please do ensure that the winner list is not null if the win condition is actually met.");
+            log.Warn("The list of winners was null. Please do ensure that the winner list is not null if the win condition is actually met.");
             return false;
         }
 
@@ -61,7 +62,7 @@ public class WinDelegate
         }
 
         winReason = condition.GetWinReason();
-        VentLogger.Info($"Triggering Win by \"{condition.GetType()}\", winners={winners.Where(p => p != null).Select(p => p.name).StrJoin()}, reason={winReason}", "WinCondition");
+        log.Info($"Triggering Win by \"{condition.GetType()}\", winners={winners.Where(p => p != null).Select(p => p.name).StrJoin()}, reason={winReason}", "WinCondition");
         return true;
     }
 

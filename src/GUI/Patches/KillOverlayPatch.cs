@@ -11,10 +11,6 @@ public class KillOverlayPatch
 
     public static bool Prefix(KillOverlay __instance)
     {
-        if (!FixedUpdateLock.AcquireLock()) return false;
-
-        DevLogger.Log("Showing Kill Animation");
-
-        return true;
+        return FixedUpdateLock.AcquireLock();
     }
 }

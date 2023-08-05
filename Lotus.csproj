@@ -14,14 +14,14 @@
   </PropertyGroup>
   
   <PropertyGroup>
-    <debug>false</debug>
+    <debug>true</debug>
   </PropertyGroup>
   
   
   <ItemGroup>
     <!--<Reference Include="E:\SteamLibrary\steamapps\common\Among Us - LOTUS\dump\Assembly-CSharp-2023.6.13.dll" />-->
-    <PackageReference Include="AmongUs.GameLibs.Steam" Version="2023.6.13" />
-    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.668" PrivateAssets="all" />
+    <PackageReference Include="AmongUs.GameLibs.Steam" Version="2023.7.11" />
+    <PackageReference Include="BepInEx.Unity.IL2CPP" Version="6.0.0-be.671" PrivateAssets="all" />
     <PackageReference Include="JetBrains.Annotations" Version="2023.2.0-eap2">
       <Aliases>JBAnnotations</Aliases>
     </PackageReference>
@@ -50,18 +50,12 @@
   <ItemGroup>
     <ProjectReference Include="./SourceGenerators/RoleEditorGenerator/src/RoleEditorGenerator.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
   </ItemGroup>
-  
+    
   <ItemGroup>
     <None Remove="./SourceGenerators/**/*" />
     <Content Remove="./SourceGenerators/**/*" />
     <Compile Remove="./SourceGenerators/**/*" />
   </ItemGroup>
-  
-  <ItemGroup>
-    <Folder Include="src\Gamemodes\Attributes\" />
-    <Folder Include="src\Roles\Extra\" />
-  </ItemGroup>
-  
   
   
   
@@ -69,7 +63,8 @@
   
   
   <Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">
-    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" Condition="'$(Configuration)' == 'Debug'" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/BepInEx/plugins/" />
     <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs) - Copy/BepInEx/plugins/" Condition="'$(Configuration)' == 'Debug'" />
+    <Copy SourceFiles="$(OutputPath)$(AssemblyName).dll" DestinationFolder="$(AmongUs)/Release/" Condition="'$(Configuration)' == 'Release'"/>
   </Target>
 </Project>

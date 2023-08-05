@@ -7,7 +7,6 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers;
 using LotusTrigger.Options;
 using LotusTrigger.Options.General;
-using VentLib.Logging;
 using VentLib.Utilities;
 
 namespace Lotus.Patches.Network;
@@ -15,11 +14,12 @@ namespace Lotus.Patches.Network;
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnGameJoined))]
 class GameJoinPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(GameJoinPatch));
     private static int _lastGameId;
 
     public static void Postfix(AmongUsClient __instance)
     {
-        VentLogger.High($"Joining Lobby (GameID={__instance.GameId})", "GameJoin");
+        log.High($"Joining Lobby (GameID={__instance.GameId})", "GameJoin");
         SoundManager.Instance.ChangeMusicVolume(DataManager.Settings.Audio.MusicVolume);
 
         GameJoinHookEvent gameJoinHookEvent = new(_lastGameId != __instance.GameId);

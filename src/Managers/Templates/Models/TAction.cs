@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using Lotus.Managers.Templates.Models.Units;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using static Lotus.Managers.Templates.TemplateManager;
 
@@ -10,6 +9,8 @@ namespace Lotus.Managers.Templates.Models;
 
 public class TAction: Dictionary<string, object>
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TAction));
+
     public static string MetaVariable = "";
     public string? Input { get; set; }
     public List<TCondition> Conditions { get; set; } = new();
@@ -34,7 +35,7 @@ public class TAction: Dictionary<string, object>
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception, "Error running actions.");
+            log.Exception("Error running actions.", exception);
         }
     }
 

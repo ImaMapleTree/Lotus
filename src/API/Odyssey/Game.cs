@@ -12,13 +12,16 @@ using Lotus.Roles.Internals;
 using Lotus.Victory;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
+using VentLib.Logging.Appenders;
+using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.API.Odyssey;
 
 public static class Game
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(Game));
+
     private static readonly Dictionary<byte, ulong> GameIDs = new();
     private static ulong _gameID;
 
@@ -35,7 +38,7 @@ public static class Game
         Hooks.NetworkHooks.GameJoinHook.Bind("GameHook", ev =>
         {
             if (!ev.IsNewLobby) return;
-            VentLogger.Trace("Joined new lobby. Cleaning up old game states.", "GameCleanupCheck");
+            log.Trace("Joined new lobby. Cleaning up old game states.", "GameCleanupCheck");
             Cleanup(true);
         });
     }
@@ -93,7 +96,7 @@ public static class Game
             parameters = parameters.AddToArray(handle);
             List<(RoleAction, AbstractBaseRole)> actionList = allPlayers.SelectMany(p => p.GetCustomRole().GetActions(action)).ToList();
             actionList.AddRange(allPlayers.SelectMany(p => p.GetSubroles().SelectMany(r => r.GetActions(action))));
-            /*VentLogger.Debug($"All Actions: {actionList.Select(a => a.Item1.ToString()).Fuse()}");*/
+            /*log.Debug($"All Actions: {actionList.Select(a => a.Item1.ToString()).Fuse()}");*/
             foreach ((RoleAction roleAction, AbstractBaseRole role) in actionList.OrderBy(a1 => a1.Item1.Priority))
             {
                 if (role.MyPlayer == null || !role.MyPlayer.IsAlive() && !roleAction.TriggerWhenDead) return;

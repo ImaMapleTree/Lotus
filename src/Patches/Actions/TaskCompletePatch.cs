@@ -5,7 +5,6 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Patches.Actions;
@@ -13,13 +12,15 @@ namespace Lotus.Patches.Actions;
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.CompleteTask))]
 class TaskCompletePatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TaskCompletePatch));
+
     public static void Prefix(PlayerControl __instance, uint idx)
     {
         if (!AmongUsClient.Instance.AmHost) return;
         if (__instance == null) return;
         GameData.TaskInfo taskInfo = __instance.Data.FindTaskById(idx);
         NormalPlayerTask? npt = taskInfo == null! ? null : ShipStatus.Instance.GetTaskById(taskInfo!.TypeId);
-        VentLogger.Info($"Task Complete => {__instance.GetNameWithRole()} ({npt?.Length})", "CompleteTask");
+        log.Info($"Task Complete => {__instance.GetNameWithRole()} ({npt?.Length})", "CompleteTask");
 
         ActionHandle handle = ActionHandle.NoInit();
         Game.TriggerForAll(LotusActionType.TaskComplete, ref handle, __instance, Optional<NormalPlayerTask>.Of(npt));

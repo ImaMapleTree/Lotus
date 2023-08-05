@@ -4,6 +4,7 @@ using System.Data;
 using System.Linq;
 using Lotus.Roles.Builtins;
 using Lotus.Roles.Builtins.Vanilla;
+using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals.Enums;
 using VentLib.Options;
 using VentLib.Utilities.Collections;
@@ -22,6 +23,7 @@ public class LotusRoleManager
 
     private readonly OrderedDictionary<LotusRoleType, List<CustomRole>> roleTypeDictionary = new();
     private Dictionary<ulong, LotusRoleType> lotusRoleTypes = new();
+    private Dictionary<Type, RemoteList<IRoleInitializer>> roleInitializers = new();
 
     private bool frozen;
 
@@ -47,6 +49,13 @@ public class LotusRoleManager
     }
 
     internal void AddRole(CustomRole role) => AddRole(role, role.LotusRoleType);
+
+    public Remote<IRoleInitializer> AddRoleInitializers(Type type, IRoleInitializer roleInitializer)
+    {
+       return roleInitializers.GetOrCompute(type, () => new RemoteList<IRoleInitializer>()).Add(roleInitializer);
+    }
+
+    public RemoteList<IRoleInitializer> GetInitializersForType(Type type) => roleInitializers.GetOrCompute(type, () => new RemoteList<IRoleInitializer>());
 
     public CustomRole GetCleanRole(CustomRole role) => GetRole(GetIdentifier(role));
 

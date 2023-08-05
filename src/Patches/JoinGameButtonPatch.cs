@@ -1,21 +1,21 @@
 using System.Text.RegularExpressions;
 using HarmonyLib;
 using UnityEngine;
-using VentLib.Logging;
 
-namespace Lotus.Patches
+namespace Lotus.Patches;
+
+[HarmonyPatch(typeof(JoinGameButton), nameof(JoinGameButton.OnClick))]
+class JoinGameButtonPatch
 {
-    [HarmonyPatch(typeof(JoinGameButton), nameof(JoinGameButton.OnClick))]
-    class JoinGameButtonPatch
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(JoinGameButtonPatch));
+
+    public static void Prefix(JoinGameButton __instance)
     {
-        public static void Prefix(JoinGameButton __instance)
+        if (__instance.GameIdText == null) return;
+        if (__instance.GameIdText.text == "" && Regex.IsMatch(GUIUtility.systemCopyBuffer.Trim('\r', '\n'), @"^[A-Z]{6}$"))
         {
-            if (__instance.GameIdText == null) return;
-            if (__instance.GameIdText.text == "" && Regex.IsMatch(GUIUtility.systemCopyBuffer.Trim('\r', '\n'), @"^[A-Z]{6}$"))
-            {
-                VentLogger.Old($"{GUIUtility.systemCopyBuffer}", "ClipBoard");
-                __instance.GameIdText.SetText(GUIUtility.systemCopyBuffer.Trim('\r', '\n'));
-            }
+            log.Info($"{GUIUtility.systemCopyBuffer}", "ClipBoard");
+            __instance.GameIdText.SetText(GUIUtility.systemCopyBuffer.Trim('\r', '\n'));
         }
     }
 }

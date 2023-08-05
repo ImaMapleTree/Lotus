@@ -1,13 +1,14 @@
 ﻿using System.Reflection;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities.Debug.Profiling;
 
 namespace Lotus.API.Reactive.Actions;
 
 public class LotusAction
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(LotusAction));
+
     public LotusActionType ActionType { get; }
     public Priority Priority { get; }
 
@@ -25,7 +26,7 @@ public class LotusAction
 
     public virtual void Execute(object role, object[] args)
     {
-        VentLogger.Trace($"RoleAction(type={ActionType}, executer={Executer ?? role}, priority={Priority}, method={Method}))", "RoleAction::Execute");
+        log.Trace($"RoleAction(type={ActionType}, executer={Executer ?? role}, priority={Priority}, method={Method}))", "RoleAction::Execute");
         Profiler.Sample sample1 = Profilers.Global.Sampler.Sampled($"Action::{ActionType}");
         Profiler.Sample sample2 = Profilers.Global.Sampler.Sampled((Method.ReflectedType?.FullName ?? "") + "." + Method.Name);
         Method.InvokeAligned(Executer ?? role, args);

@@ -2,7 +2,6 @@ using System;
 using System.Collections.Generic;
 using Lotus.Utilities;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
@@ -12,6 +11,8 @@ namespace Lotus.GUI;
 [RegisterInIl2Cpp]
 internal class PersistentAssetLoader: MonoBehaviour
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(PersistentAssetLoader));
+
     private static Dictionary<string, SpriteRenderer> _spriteRenderers = new();
     private static readonly Dictionary<string, (string path, int pixelsPerUnit)> SpriteInfo = new();
     private static bool _initialized;
@@ -34,7 +35,7 @@ internal class PersistentAssetLoader: MonoBehaviour
 
     private void LoadSprite(string key, string path, int pixelsPerUnit)
     {
-        VentLogger.Debug($"Loading Persistent Sprite: {key} => {path}", "PersistentAssetLoader");
+        log.Debug($"Loading Persistent Sprite: {key} => {path}", "PersistentAssetLoader");
         GameObject anchor = gameObject.CreateChild("Anchor");
         anchors.Add(anchor);
         SpriteRenderer render = anchor.AddComponent<SpriteRenderer>();

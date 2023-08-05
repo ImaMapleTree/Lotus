@@ -6,7 +6,6 @@ using System.Reflection;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using YamlDotNet.Serialization;
 using YamlDotNet.Serialization.NamingConventions;
@@ -15,6 +14,8 @@ namespace Lotus.Managers.Titles;
 
 public class TitleManager
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TitleManager));
+
     private DirectoryInfo directory;
     private Dictionary<string, List<CustomTitle>> titles = null!;
 
@@ -84,7 +85,7 @@ public class TitleManager
         }
         catch (Exception exception)
         {
-            VentLogger.Exception(exception, "Error loading in manifest (global) titles.");
+            log.Exception("Error loading in manifest (global) titles.", exception);
             titles = new Dictionary<string, List<CustomTitle>>();
         }
 
@@ -100,7 +101,7 @@ public class TitleManager
                 }
                 catch (Exception exception)
                 {
-                    VentLogger.Exception(exception, $"Error loading title file: {f.Name}.");
+                    log.Exception($"Error loading title file: {f.Name}.", exception);
                     return (null!, new CustomTitle());
                 }
             })

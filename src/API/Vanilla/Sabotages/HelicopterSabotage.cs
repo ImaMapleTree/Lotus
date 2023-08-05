@@ -5,20 +5,21 @@ using Lotus.Extensions;
 using Lotus.Patches.Systems;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.API.Vanilla.Sabotages;
 
 public class HelicopterSabotage: ISabotage
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(HelicopterSabotage));
+
     private UnityOptional<PlayerControl> caller;
 
     public HelicopterSabotage(PlayerControl? player = null)
     {
         caller = player == null ? UnityOptional<PlayerControl>.Null() : UnityOptional<PlayerControl>.NonNull(player);
     }
-    
+
     public SabotageType SabotageType() => Sabotages.SabotageType.Helicopter;
 
     public bool Fix(PlayerControl? fixer = null)
@@ -28,11 +29,11 @@ public class HelicopterSabotage: ISabotage
         if (handle.IsCanceled) return false;
 
         if (!ShipStatus.Instance.TryGetSystem(SabotageType().ToSystemType(), out ISystemType? systemInstance)) return false;
-        VentLogger.Info($"System Instance: {systemInstance}");
+        log.Info($"System Instance: {systemInstance}");
         HeliSabotageSystem? helicopter = systemInstance!.TryCast<HeliSabotageSystem>();
         if (helicopter == null)
         {
-            VentLogger.Warn($"Error Fixing Reactor Sabotage. Invalid System Cast from {SabotageType()}.");
+            log.Warn($"Error Fixing Reactor Sabotage. Invalid System Cast from {SabotageType()}.");
             return false;
         }
 
@@ -43,7 +44,7 @@ public class HelicopterSabotage: ISabotage
     }
 
     public Optional<PlayerControl> Caller() => caller;
-    
+
     public void CallSabotage(PlayerControl sabotageCaller)
     {
         ActionHandle handle = ActionHandle.NoInit();

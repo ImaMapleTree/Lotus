@@ -1,7 +1,6 @@
 using HarmonyLib;
 using Lotus.API.Odyssey;
 using LotusTrigger.Options;
-using VentLib.Logging;
 
 namespace Lotus.Patches.Network;
 
@@ -20,9 +19,11 @@ class ShipFixedUpdatePatch
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.Start))]
 class StartPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(StartPatch));
+
     public static void Postfix()
     {
-        VentLogger.Old("-----------Start Game-----------", "Phase");
+        log.Info("-----------Start Game-----------", "Phase");
     }
 }
 

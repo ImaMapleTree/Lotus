@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
-using VentLib.Logging;
 using VentLib.Options.Processors;
 using VentLib.Utilities.Extensions;
 
@@ -11,6 +10,8 @@ namespace Lotus.API.Stats;
 
 internal class AccumulatingStatistic<T> : BoundStatistic<T>, IAccumulativeStatistic<T>, IJsonStats
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(AccumulatingStatistic<>));
+
     private Dictionary<string, T?> accumulatedData = new();
     private Func<T?, T?, T?> accumulator;
 
@@ -132,7 +133,7 @@ internal class AccumulatingStatistic<T> : BoundStatistic<T>, IAccumulativeStatis
             },
             _ => (t1, t2) =>
             {
-                VentLogger.Fatal($"Using Default Accumulator: T1 = {t1}, T2 = {t2}");
+                log.Fatal($"Using Default Accumulator: T1 = {t1}, T2 = {t2}");
                 return t1;
             }
         };

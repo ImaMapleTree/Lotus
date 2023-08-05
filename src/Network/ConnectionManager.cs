@@ -3,7 +3,6 @@ using Hazel;
 using Hazel.Udp;
 using InnerNet;
 using Lotus.Logging;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Harmony.Attributes;
 
@@ -11,6 +10,8 @@ namespace Lotus.Network;
 
 public class ConnectionManager
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ConnectionManager));
+
     private static readonly Dictionary<long, byte> IPAddressPlayerMapping = new();
 
 
@@ -20,11 +21,11 @@ public class ConnectionManager
         UnityUdpClientConnection connection = __instance.connection;
         Async.Schedule(() =>
         {
-            if (data.Character == null) VentLogger.Trace($"Unable to map connection to player \"{data.PlayerName}\".", "ClientBinding");
+            if (data.Character == null) log.Trace($"Unable to map connection to player \"{data.PlayerName}\".", "ClientBinding");
             else
             {
                 IPAddressPlayerMapping[connection.EndPoint.Address.Address] = data.Character.PlayerId;
-                VentLogger.Trace($"Successfully bound connection of \"{data.Character.name} (ID={data.Character.PlayerId})", "ClientBinding");
+                log.Trace($"Successfully bound connection of \"{data.Character.name} (ID={data.Character.PlayerId})", "ClientBinding");
             }
         }, 5f);
     }

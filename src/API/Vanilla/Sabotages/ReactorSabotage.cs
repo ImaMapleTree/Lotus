@@ -5,13 +5,14 @@ using Lotus.Patches.Systems;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.API.Vanilla.Sabotages;
 
 public class ReactorSabotage : ISabotage
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ReactorSabotage));
+
     private UnityOptional<PlayerControl> caller;
 
     public ReactorSabotage(PlayerControl? player = null)
@@ -28,11 +29,11 @@ public class ReactorSabotage : ISabotage
         if (handle.IsCanceled) return false;
 
         if (!ShipStatus.Instance.TryGetSystem(SabotageType().ToSystemType(), out ISystemType? systemInstance)) return false;
-        VentLogger.Info($"System Instance: {systemInstance}");
+        log.Info($"System Instance: {systemInstance}");
         ReactorSystemType? reactor = systemInstance!.TryCast<ReactorSystemType>();
         if (reactor == null)
         {
-            VentLogger.Warn($"Error Fixing Reactor Sabotage. Invalid System Cast from {SabotageType()}.");
+            log.Warn($"Error Fixing Reactor Sabotage. Invalid System Cast from {SabotageType()}.");
             return false;
         }
 

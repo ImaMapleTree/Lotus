@@ -175,9 +175,9 @@ class SplashPatch
     private static GameObject InitializeSplash()
     {
         GameObject splashArt = new("SplashArt");
-        splashArt.transform.position = new Vector3(0, 0.40f, 600f);
+        splashArt.transform.localPosition = new Vector3(0.3545f, -0.0455f, 600f);
         var spriteRenderer = splashArt.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = Utils.LoadSprite("Lotus.assets.TOHTORBackground.png", 200f);
+        spriteRenderer.sprite = Utils.LoadSprite("Lotus.assets.PLBackground-Upscale.png", 250f);
         return splashArt;
     }
 

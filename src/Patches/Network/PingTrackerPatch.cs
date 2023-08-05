@@ -1,10 +1,11 @@
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using Lotus.Options;
 using Lotus.Utilities;
 using LotusTrigger.Options;
 using UnityEngine;
 using VentLib.Localization;
-using VentLib.Logging;
+using VentLib.Utilities;
 
 
 namespace Lotus.Patches.Network;
@@ -12,8 +13,10 @@ namespace Lotus.Patches.Network;
 [HarmonyPatch(typeof(PingTracker), nameof(PingTracker.Update))]
 class PingTrackerPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(PingTrackerPatch));
     public static float deltaTime;
     private static bool dipped;
+
     static void Postfix(PingTracker __instance)
     {
         __instance.text.alignment = TMPro.TextAlignmentOptions.TopRight;
@@ -22,7 +25,7 @@ class PingTrackerPatch
         float fps = Mathf.Ceil(1.0f / deltaTime);
         if (fps < 30 && !dipped && Game.State is GameState.Roaming)
         {
-            VentLogger.High($"FPS Dipped Below 30 => {fps}");
+            log.High($"FPS Dipped Below 30 => {fps}");
             dipped = true;
         }
         else dipped = false;
@@ -35,10 +38,11 @@ class PingTrackerPatch
         if (GeneralOptions.DebugOptions.NoGameEnd) __instance.text.text += $"\r\n" + Utils.ColorString(Color.red, Localizer.Translate("StaticOptions.NoGameEnd"));
         __instance.text.text += $"\r\n" + Game.CurrentGamemode.Name;
 
+        if (ClientOptions.AdvancedOptions.PublicCompatability) __instance.text.text += $"\r\n{new Color(0.4f, 0.6f, 1f).Colorize("Public Compatability Patch")}";
 
 
         var offsetX = 1.2f; //右端からのオフセット
-        if (HudManager.InstanceExists && HudManager._instance.Chat.ChatButton.active) offsetX += 0.8f; //チャットボタンがある場合の追加オフセット
+        if (HudManager.InstanceExists && HudManager._instance.Chat.chatButton.active) offsetX += 0.8f; //チャットボタンがある場合の追加オフセット
         if (FriendsListManager.InstanceExists && FriendsListManager._instance.FriendsListButton.Button.active) offsetX += 0.8f; //フレンドリストボタンがある場合の追加オフセット
         __instance.GetComponent<AspectPosition>().DistanceFromEdge = new Vector3(offsetX, 0f, 0f);
     }

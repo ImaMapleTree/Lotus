@@ -14,7 +14,6 @@ using Lotus.Extensions;
 using Lotus.GUI.Name;
 using Lotus.Roles.Internals.Enums;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -24,6 +23,8 @@ namespace Lotus.Roles;
 
 public static class RoleUtils
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(RoleUtils));
+
     public static string Arrows = "→↗↑↖←↙↓↘・";
 
     public static string CalculateArrow(PlayerControl source, PlayerControl target, Color? color = null)
@@ -127,8 +128,8 @@ public static class RoleUtils
     {
         if (++Game.RecursiveCallCheck > ModConstants.RecursiveDepthLimit)
         {
-            VentLogger.Warn($"Infinite Recursion detected during interaction: {interaction}", "InfiniteRecursionDetection");
-            VentLogger.Trace($"Infinite Recursion Stack: {new StackTrace()}", "InfiniteRecursionDetection");
+            log.Warn($"Infinite Recursion detected during interaction: {interaction}", "InfiniteRecursionDetection");
+            log.Trace($"Infinite Recursion Stack: {new StackTrace()}", "InfiniteRecursionDetection");
             return InteractionResult.Halt;
         }
         ActionHandle handle = ActionHandle.NoInit();

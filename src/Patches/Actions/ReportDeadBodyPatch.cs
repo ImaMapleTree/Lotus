@@ -5,16 +5,17 @@ using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
 using Lotus.Utilities;
-using VentLib.Logging;
 
 namespace Lotus.Patches.Actions;
 
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.ReportDeadBody))]
 public class ReportDeadBodyPatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ReportDeadBodyPatch));
+
     public static bool Prefix(PlayerControl __instance, [HarmonyArgument(0)] GameData.PlayerInfo? target)
     {
-        VentLogger.Trace($"{__instance.GetNameWithRole()} => {target?.GetNameWithRole() ?? "null"}", "ReportDeadBody");
+        log.Trace($"{__instance.GetNameWithRole()} => {target?.GetNameWithRole() ?? "null"}", "ReportDeadBody");
         if (!AmongUsClient.Instance.AmHost) return true;
         if (__instance.Data.IsDead) return false;
 
@@ -29,14 +30,14 @@ public class ReportDeadBodyPatch
             Game.TriggerForAll(LotusActionType.AnyReportedBody, ref handle, __instance, target);
             if (handle.IsCanceled)
             {
-                VentLogger.Trace("Not Reporting Body - Cancelled by Any Report Action", "ReportDeadBody");
+                log.Trace("Not Reporting Body - Cancelled by Any Report Action", "ReportDeadBody");
                 return false;
             }
 
             __instance.Trigger(LotusActionType.SelfReportBody, ref handle, target);
             if (handle.IsCanceled)
             {
-                VentLogger.Trace("Not Reporting Body - Cancelled by Self Report Action", "ReportDeadBody");
+                log.Trace("Not Reporting Body - Cancelled by Self Report Action", "ReportDeadBody");
                 return false;
             }
         }

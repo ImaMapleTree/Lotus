@@ -1,16 +1,17 @@
 ﻿using System;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Managers.Templates.Models.Units.Conditionals;
 
 public class TConditionalUser: CommonConditionalUnit
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TConditionalUser));
+
     private UserType user;
 
     public TConditionalUser(object input) : base(input)
     {
-        if (!Enum.TryParse(input as string, true, out UserType status)) VentLogger.Warn($"Could not parse \"{input}\" as type \"{nameof(UserType)}\"");
+        if (!Enum.TryParse(input as string, true, out UserType status)) log.Warn($"Could not parse \"{input}\" as type \"{nameof(UserType)}\"");
         else user = status;
     }
 

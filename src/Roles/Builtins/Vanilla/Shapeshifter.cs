@@ -1,4 +1,5 @@
 using AmongUs.GameOptions;
+using Lotus.API;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Internals.Enums;
@@ -10,8 +11,8 @@ namespace Lotus.Roles.Builtins.Vanilla;
 
 public class Shapeshifter : Impostor
 {
-    protected float? ShapeshiftCooldown;
-    protected float? ShapeshiftDuration;
+    protected virtual float? ShapeshiftCooldown { get; set; }
+    protected virtual float? ShapeshiftDuration { get; set; }
 
     [RoleAction(LotusActionType.Attack, Subclassing = false)]
     public override bool TryKill(PlayerControl target) => base.TryKill(target);
@@ -34,6 +35,6 @@ public class Shapeshifter : Impostor
             .VanillaRole(RoleTypes.Shapeshifter)
             .RoleColor(Color.red)
             .CanVent(true)
-            .OptionOverride(Override.ShapeshiftCooldown, () => ShapeshiftCooldown)
-            .OptionOverride(Override.ShapeshiftDuration, () => ShapeshiftDuration);
+            .OptionOverride(Override.ShapeshiftCooldown, () => ShapeshiftCooldown ?? AUSettings.ShapeshifterCooldown())
+            .OptionOverride(Override.ShapeshiftDuration, () => ShapeshiftDuration ?? AUSettings.ShapeshifterDuration());
 }

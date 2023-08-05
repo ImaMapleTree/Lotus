@@ -9,7 +9,6 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.RPC;
-using VentLib.Logging;
 using VentLib.Networking.RPC;
 using VentLib.Utilities.Extensions;
 
@@ -19,13 +18,15 @@ namespace Lotus.Victory;
 
 public static class VictoryScreen
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(VictoryScreen));
+
     public static void ShowWinners(WinDelegate winDelegate, GameOverReason reason)
     {
         List<PlayerControl> winners = winDelegate.GetWinners();
         HashSet<byte> winningPlayerIds = winners.Select(p => p.PlayerId).ToHashSet();
         List<FrozenPlayer> winnerRoles = Game.MatchData.GameHistory.LastWinners = winners.Select(w => Game.MatchData.FrozenPlayers[w.GetGameID()]).Distinct().ToList();
         Game.MatchData.GameHistory.AdditionalWinners = winDelegate.GetAdditionalWinners().Select(w => Game.MatchData.FrozenPlayers[w.GetGameID()]).Distinct().ToList();
-        VentLogger.Info($"Setting Up Win Screen | Winners: {winnerRoles.Select(fp => $"{fp.Name} ({fp.Role.EnglishRoleName})").Fuse()}");
+        log.Info($"Setting Up Win Screen | Winners: {winnerRoles.Select(fp => $"{fp.Name} ({fp.Role.EnglishRoleName})").Fuse()}");
 
         bool impostorsWin = IsImpostorsWin(reason);
 

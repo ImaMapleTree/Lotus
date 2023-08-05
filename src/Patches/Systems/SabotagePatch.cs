@@ -12,7 +12,6 @@ using Lotus.API.Vanilla.Meetings;
 using Lotus.Extensions;
 using Lotus.Roles;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities.Attributes;
 
 namespace Lotus.Patches.Systems;
@@ -21,6 +20,8 @@ namespace Lotus.Patches.Systems;
 [HarmonyPatch(typeof(ShipStatus), nameof(ShipStatus.RepairSystem))]
 public static class SabotagePatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(SabotagePatch));
+
     public static float SabotageCountdown = -1;
     public static ISabotage? CurrentSabotage;
 
@@ -36,7 +37,7 @@ public static class SabotagePatch
     {
         ActionHandle handle = ActionHandle.NoInit();
         ISystemType systemInstance;
-        VentLogger.Trace($"Repair System: {systemType} | Player: {player.name} | Amount: {amount}");
+        log.Trace($"Repair System: {systemType} | Player: {player.name} | Amount: {amount}");
         switch (systemType)
         {
             case SystemTypes.Sabotage:
@@ -61,7 +62,7 @@ public static class SabotagePatch
                 else return false;
 
                 Hooks.SabotageHooks.SabotageCalledHook.Propagate(new SabotageHookEvent(sabo));
-                VentLogger.Debug($"Sabotage Started: {sabo}");
+                log.Debug($"Sabotage Started: {sabo}");
                 Game.SyncAll();
                 break;
             case SystemTypes.Electrical:
@@ -80,7 +81,7 @@ public static class SabotagePatch
                     Hooks.SabotageHooks.SabotagePartialFixHook.Propagate(new SabotageHookEvent(CurrentSabotage));
                     break;
                 }
-                VentLogger.Info($"Electrical Sabotage Fixed by {player.name}", "SabotageFix");
+                log.Info($"Electrical Sabotage Fixed by {player.name}", "SabotageFix");
                 Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
@@ -110,7 +111,7 @@ public static class SabotagePatch
                     CurrentSabotage = null;
                 }
                 if (CurrentSabotage == null)
-                    VentLogger.Info($"Communications Sabotage Fixed by {player.name}", "SabotageFix");
+                    log.Info($"Communications Sabotage Fixed by {player.name}", "SabotageFix");
                 break;
             case SystemTypes.LifeSupp:
                 if (CurrentSabotage?.SabotageType() != SabotageType.Oxygen) break;
@@ -124,7 +125,7 @@ public static class SabotagePatch
                 Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
-                VentLogger.Info($"Oxygen Sabotage Fixed by {player.name}", "SabotageFix");
+                log.Info($"Oxygen Sabotage Fixed by {player.name}", "SabotageFix");
                 break;
             case SystemTypes.Reactor when CurrentSabotage?.SabotageType() is SabotageType.Helicopter:
                 if (!__instance.TryGetSystem(systemType, out systemInstance)) break;
@@ -137,7 +138,7 @@ public static class SabotagePatch
                 Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
-                VentLogger.Info($"Helicopter Sabotage Fixed by {player.name}", "SabotageFix");
+                log.Info($"Helicopter Sabotage Fixed by {player.name}", "SabotageFix");
                 break;
             case SystemTypes.Laboratory:
             case SystemTypes.Reactor:
@@ -153,7 +154,7 @@ public static class SabotagePatch
                 Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, CurrentSabotage, player);
                 Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(player, CurrentSabotage));
                 CurrentSabotage = null;
-                VentLogger.Info($"Reactor Sabotage Fixed by {player.name}", "SabotageFix");
+                log.Info($"Reactor Sabotage Fixed by {player.name}", "SabotageFix");
                 break;
             case SystemTypes.Doors:
                 int doorIndex = amount & 31;

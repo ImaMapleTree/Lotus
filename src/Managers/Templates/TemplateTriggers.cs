@@ -7,7 +7,6 @@ using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Managers.Templates.Models;
 using Lotus.Roles.Interfaces;
-using VentLib.Logging;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -16,6 +15,8 @@ namespace Lotus.Managers.Templates;
 
 public class TemplateTriggers
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TemplateTriggers));
+
     public static Dictionary<string, TriggerBinder> TriggerHooks = new()
     {
         { "LobbyStart", (key, action) => Hooks.NetworkHooks.GameJoinHook.Bind(key, ev => Async.WaitUntil(() => { }, () => ev.Loaded, () =>
@@ -100,7 +101,7 @@ public class TemplateTriggers
             handler(TriggerResolvers.GetValueOrDefault(h.GetType())?.Invoke(h));
         }), () =>
         {
-            VentLogger.Warn($"Could not bind Trigger \"{key}.\" No such trigger exists!");
+            log.Warn($"Could not bind Trigger \"{key}.\" No such trigger exists!");
             return null!;
         });
     }

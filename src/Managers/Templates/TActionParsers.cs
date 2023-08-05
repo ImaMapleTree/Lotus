@@ -2,13 +2,14 @@
 using System.Collections.Generic;
 using Lotus.Managers.Templates.Models.Units;
 using Lotus.Managers.Templates.Models.Units.Actions;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.Managers.Templates;
 
 public class TActionParsers
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(TActionParsers));
+
     public static Dictionary<string, Func<object, IActionUnit>> units = new()
     {
         { "Store", value => new TActionStore(value) },
@@ -28,7 +29,7 @@ public class TActionParsers
     {
         return units.GetOptional(yamlKey).Map(c => c(value)).OrElseGet(() =>
         {
-            VentLogger.Warn($"Could not find action for key: \"{yamlKey}\", returning default action.");
+            log.Warn($"Could not find action for key: \"{yamlKey}\", returning default action.");
             return new TActionDefault();
         });
     }

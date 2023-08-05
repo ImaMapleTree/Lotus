@@ -5,13 +5,14 @@ using Lotus.Patches.Systems;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
-using VentLib.Logging;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.API.Vanilla.Sabotages;
 
 public class OxygenSabotage : ISabotage
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(OxygenSabotage));
+
     private UnityOptional<PlayerControl> caller;
 
     public OxygenSabotage(PlayerControl? player = null)
@@ -31,7 +32,7 @@ public class OxygenSabotage : ISabotage
         LifeSuppSystemType? oxygen = systemInstance!.TryCast<LifeSuppSystemType>();
         if (oxygen == null)
         {
-            VentLogger.Warn($"Error Fixing Oxygen Sabotage. Invalid System Cast from {SabotageType()}.");
+            log.Warn($"Error Fixing Oxygen Sabotage. Invalid System Cast from {SabotageType()}.");
             return false;
         }
 

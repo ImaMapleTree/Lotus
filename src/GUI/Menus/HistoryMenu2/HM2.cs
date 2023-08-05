@@ -57,11 +57,11 @@ public class HM2: MonoBehaviour
         // ===================
         // Set up Parent Menu
         // ===================
-        background = Instantiate(hudManager.Chat.BackgroundImage, anchorObject.transform);
+        background = Instantiate(hudManager.Chat.backgroundImage, anchorObject.transform);
         background.flipX = background.flipY = true;
         background.transform.localScale += new Vector3(0.3f, 0f);
 
-        PassiveButton parentButton = chatController.Content.FindChild<PassiveButton>("OpenKeyboardButton");
+        PassiveButton parentButton = chatController.openKeyboardButton.GetComponentInChildren<PassiveButton>();
 
         ResultsMenu = anchorObject.AddComponent<ResultsMenu>();
         ResultsMenu.PassHudManager(hudManager);

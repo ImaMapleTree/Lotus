@@ -26,7 +26,6 @@ using Lotus.Roles.Builtins.Base;
 using Lotus.Roles.Interfaces;
 using LotusTrigger.Options;
 using VentLib.Localization.Attributes;
-using VentLib.Logging;
 using VentLib.Networking;
 using VentLib.Networking.Interfaces;
 using VentLib.Networking.RPC;
@@ -39,6 +38,8 @@ namespace Lotus.Roles;
 [Localized("Roles")]
 public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(CustomRole));
+
     protected HashSet<Type> RelatedRoles = new();
 
     static CustomRole()
@@ -77,6 +78,11 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     public CustomRole Instantiate(PlayerControl player)
     {
         CustomRole cloned = Clone();
+
+        RemoteList<IRoleInitializer> roleInitializers = ProjectLotus.RoleManager.GetInitializersForType(this.GetType());
+        roleInitializers.ForEach(ri => ri.PreSetup(cloned));
+
+        RoleModifier roleModifier = cloned.Modify(new RoleModifier(cloned));
         cloned.RelatedRoles.Add(this.GetType());
         cloned.MyPlayer = player;
 
@@ -84,12 +90,16 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
             cloned.Editor = cloned.Editor.Instantiate(cloned, player);
 
         CreateInstanceBasedVariables();
+
+        roleInitializers.ForEach(ri => ri.PostModify(cloned, roleModifier));
+
         cloned.Setup(player);
         cloned.SetupUI2(player.NameModel());
         player.NameModel().Render(force: true);
 
         cloned.PostSetup();
-        return cloned;
+
+        return roleInitializers.Aggregate(cloned, (role, initializer) => initializer.PostSetup(role));
     }
 
     public CustomRole Clone()
@@ -98,7 +108,6 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         cloned.RoleSpecificGameOptionOverrides = new();
         cloned.currentOverrides = new();
         cloned.RelatedRoles = new HashSet<Type>(cloned.RelatedRoles);
-        cloned.Modify(new RoleModifier(cloned));
         return cloned;
     }
 
@@ -173,11 +182,11 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         }
 
 
-        VentLogger.Trace($"Setting {MyPlayer.name} Role => {RealRole} | IsStartGame = {isStartOfGame}", "CustomRole::Assign");
+        log.Trace($"Setting {MyPlayer.name} Role => {RealRole} | IsStartGame = {isStartOfGame}", "CustomRole::Assign");
         if (MyPlayer.IsHost()) MyPlayer.SetRole(RealRole);
         else RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetRole).Write((ushort)RealRole).Send(MyPlayer.GetClientId());
 
-        VentLogger.Debug($"Player {MyPlayer.GetNameWithRole()} Allies: [{alliedPlayers.Select(p => p.name).Fuse()}]");
+        log.Debug($"Player {MyPlayer.GetNameWithRole()} Allies: [{alliedPlayers.Select(p => p.name).Fuse()}]");
         HashSet<byte> alliedPlayerIds = alliedPlayers.Where(p => Faction.CanSeeRole(p)).Select(p => p.PlayerId).ToHashSet();
         int[] alliedPlayerClientIds = alliedPlayers.Where(p => Faction.CanSeeRole(p)).Select(p => p.GetClientId()).ToArray();
 
@@ -187,11 +196,11 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
             return p.GetVanillaRole().IsCrewmate();
         }).ToArray();
         int[] crewmateClientIds = crewmates.Select(p => p.GetClientId()).ToArray();
-        VentLogger.Trace($"Current Crewmates: [{crewmates.Select(p => p.name).Fuse()}]");
+        log.Trace($"Current Crewmates: [{crewmates.Select(p => p.name).Fuse()}]");
 
         PlayerControl[] nonAlliedImpostors = Players.GetPlayers().Where(p => p.GetVanillaRole().IsImpostor()).Where(p => !alliedPlayerIds.Contains(p.PlayerId) && p.PlayerId != MyPlayer.PlayerId).ToArray();
         int[] nonAlliedImpostorClientIds = nonAlliedImpostors.Select(p => p.GetClientId()).ToArray();
-        VentLogger.Trace($"Non Allied Impostors: [{nonAlliedImpostors.Select(p => p.name).Fuse()}]");
+        log.Trace($"Non Allied Impostors: [{nonAlliedImpostors.Select(p => p.name).Fuse()}]");
 
         RpcV3.Immediate(MyPlayer.NetId, RpcCalls.SetRole).Write((ushort)RealRole).SendInclusive(alliedPlayerClientIds);
         if (isStartOfGame) alliedPlayers.ForEach(p => p.GetTeamInfo().AddPlayer(MyPlayer.PlayerId, RealRole.IsImpostor()));
@@ -232,13 +241,13 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         RoleHolder roleHolder = MyPlayer.NameModel().GetComponentHolder<RoleHolder>();
         if (roleHolder.Count == 0)
         {
-            VentLogger.Warn("Error Showing Roles to Allies. Role Component does not exist.", "CustomRole::ShowRoleToTeammates");
+            log.Warn("Error Showing Roles to Allies. Role Component does not exist.", "CustomRole::ShowRoleToTeammates");
             return;
         }
         RoleComponent roleComponent = roleHolder[0];
         allies.Where(Faction.CanSeeRole).ForEach(a =>
         {
-            VentLogger.Trace($"Showing Role {EnglishRoleName} to {a.name}", "ShowRoleToTeammates");
+            log.Trace($"Showing Role {EnglishRoleName} to {a.name}", "ShowRoleToTeammates");
             roleComponent.AddViewer(a);
         });
     }
@@ -282,7 +291,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
                         break;
                     case UI.Cooldown:
                         if (value is not Cooldown cd) throw new ArgumentException($"Values for \"{nameof(UI.Cooldown)}\" must be {nameof(Cooldown)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
-                        VentLogger.Fatal($"Loading Cooldown Field: {cd} for {this}");
+                        log.Fatal($"Loading Cooldown Field: {cd} for {this}");
                         nameModel.GetComponentHolder<CooldownHolder>().Add(new CooldownComponent(cd, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
                     case UI.Counter:

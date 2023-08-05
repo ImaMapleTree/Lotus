@@ -8,7 +8,6 @@ using Lotus.API.Reactive.Actions;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
 using Lotus.Victory;
-using VentLib.Logging;
 using VentLib.Options.Game.Tabs;
 using VentLib.Utilities;
 
@@ -16,6 +15,8 @@ namespace Lotus.Gamemodes;
 
 public abstract class Gamemode: IGamemode
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(Gamemode));
+
     protected Dictionary<LotusActionType, List<LotusAction>> LotusActions = new();
 
     public Gamemode()
@@ -67,7 +68,7 @@ public abstract class Gamemode: IGamemode
     {
         List<LotusAction> currentActions = this.LotusActions.GetValueOrDefault(action.ActionType, new List<LotusAction>());
 
-        VentLogger.Log(LogLevel.All, $"Registering Action {action.ActionType} => {action.Method.Name} (from: \"{action.Method.DeclaringType}\")", "RegisterAction");
+        log.Log(LogLevel.All, $"Registering Action {action.ActionType} => {action.Method.Name} (from: \"{action.Method.DeclaringType}\")", "RegisterAction");
         if (action.ActionType is LotusActionType.FixedUpdate &&
             currentActions.Count > 0)
             throw new ConstraintException("RoleActionType.FixedUpdate is limited to one per class. If you're inheriting a class that uses FixedUpdate you can add Override=METHOD_NAME to your annotation to override its Update method.");

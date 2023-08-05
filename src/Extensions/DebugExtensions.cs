@@ -4,7 +4,6 @@ using System.Linq;
 using HarmonyLib;
 using Lotus.Logging;
 using UnityEngine;
-using VentLib.Logging;
 using VentLib.Utilities.Extensions;
 using Component = UnityEngine.Component;
 using Object = UnityEngine.Object;
@@ -13,17 +12,19 @@ namespace Lotus.Extensions;
 
 public static class DebugExtensions
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(DebugExtensions));
+
     public static void DebugLog(this object obj, string prefixText = "", string tag = "DebugLog", ConsoleColor color = ConsoleColor.DarkGray)
     {
         LogLevel tempLevel = new("OBJ", 0, color);
-        VentLogger.Log(tempLevel,$"{prefixText}{obj}", tag);
+        log.Log(tempLevel,$"{prefixText}{obj}", tag);
     }
 
     public static void Debug(this IEnumerable<Component> components)
     {
         DevLogger.Log(components.Select(c => (c.TypeName(), c.name)).Join());
     }
-    
+
     public static void Debug(this IEnumerable<Object> components)
     {
         DevLogger.Log(components.Select(c => (c.TypeName(), c.name)).Join());
