@@ -67,8 +67,7 @@ public class ProtectedRpc
             }
 
             RpcV3.Immediate(killer.NetId, RpcCalls.MurderPlayer, SendOption.None).Write(target).Send();
-
-            //if (AmongUsClient.Instance.AmHost) killer.MurderPlayer(target);
+            if (AmongUsClient.Instance.AmHost) killer.MurderPlayer(target);
 
             target.Data.IsDead = true;
         }

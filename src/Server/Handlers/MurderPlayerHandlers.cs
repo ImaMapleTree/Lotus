@@ -2,6 +2,7 @@
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Extensions;
+using Lotus.Managers.History;
 using Lotus.Managers.History.Events;
 using Lotus.Patches.Actions;
 using Lotus.Roles.Internals;
@@ -24,6 +25,8 @@ internal class MurderPlayerHandlers
         {
             if (!AmongUsClient.Instance.AmHost) return;
             if (!target.Data.IsDead) return;
+            if (Game.MatchData.GetFrozenPlayer(target)?.Status is not PlayerStatus.Alive) return;
+
             MurderPatches.Lock(__instance.PlayerId);
 
             log.Trace($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}{(target.protectedByGuardian ? "(Protected)" : "")}", "MurderPlayer");

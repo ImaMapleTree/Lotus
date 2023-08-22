@@ -25,6 +25,7 @@ public class MatchData
     public GameHistory GameHistory = new();
     public DateTime StartTime = DateTime.Now;
 
+
     public Dictionary<ulong, FrozenPlayer> FrozenPlayers = new();
     public VanillaRoleTracker VanillaRoleTracker = new();
 

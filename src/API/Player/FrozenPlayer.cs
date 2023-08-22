@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using Lotus.API.Odyssey;
 using Lotus.API.Reactive;
 using Lotus.Extensions;
+using Lotus.Managers.History;
 using Lotus.Managers.History.Events;
 using Lotus.Roles;
 using Lotus.Statuses;
@@ -25,6 +26,7 @@ public class FrozenPlayer
     public PlayerOutfit Outfit;
     public ulong GameID;
     public IDeathEvent? CauseOfDeath;
+    public PlayerStatus Status = PlayerStatus.Alive;
 
     public PlayerControl MyPlayer => NullablePlayer == null ? NullablePlayer ??= GetPlayer() : NullablePlayer;
 
@@ -46,7 +48,16 @@ public class FrozenPlayer
         {
             if (pd.Player == null || pd.Player.PlayerId != PlayerId) return;
             CauseOfDeath = pd.CauseOfDeath;
+            Status = PlayerStatus.Dead;
         }, true);
+
+        Hooks.PlayerHooks.PlayerDisconnectHook.Bind($"{nameof(FrozenPlayer)}-{PlayerId}", dc =>
+        {
+            if (dc.Player == null || dc.Player.PlayerId != PlayerId) return;
+            if (Status is not PlayerStatus.Alive) return;
+            Status = PlayerStatus.Disconnected;
+        }, true);
+
         this.NullablePlayer = player;
     }
 

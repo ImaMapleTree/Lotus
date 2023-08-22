@@ -45,42 +45,6 @@ public static class VictoryScreen
 
         GeneralRPC.SendGameData();
 
-
-
-
-
-
-        /*winners.Do(winner =>
-        {
-            bool isAlive = winner.IsAlive();
-            if (impostorsWin && !winner.Data.Role.IsImpostor) winner.CRpcSetRole(RoleTypes.ImpostorGhost);
-            if (!impostorsWin && winner.Data.Role.IsImpostor) winner.CRpcSetRole(RoleTypes.CrewmateGhost);
-            if (isAlive) winner.Data.IsDead = false;
-            losers.RemoveAll(p => p.PlayerId == winner.PlayerId);
-        });
-
-        if (winners.Any(p => p.IsHost())) winners.Do(p =>
-        {
-            bool isAlive = p.IsAlive();
-            p.SetRole(impostorsWin ? RoleTypes.ImpostorGhost : RoleTypes.CrewmateGhost);
-            if (isAlive) p.Data.IsDead = false;
-        });
-
-        losers.Do(loser =>
-        {
-            bool isAlive = loser.IsAlive();
-            if (impostorsWin && loser.Data.Role.IsImpostor) loser.CRpcSetRole(RoleTypes.CrewmateGhost);
-            if (!impostorsWin && !loser.Data.Role.IsImpostor) loser.CRpcSetRole(RoleTypes.ImpostorGhost);
-            if (isAlive) loser.Data.IsDead = false;
-        });
-
-        if (winners.Any(p => p.IsHost())) losers.Do(p =>
-        {
-            bool isAlive = p.IsAlive();
-            p.SetRole(impostorsWin ? RoleTypes.CrewmateGhost : RoleTypes.ImpostorGhost);
-            if (isAlive) p.Data.IsDead = false;
-        });*/
-
         Hooks.ResultHooks.WinnersHook.Propagate(new WinnersHookEvent(winnerRoles));
         Hooks.ResultHooks.LosersHook.Propagate(new LosersHookEvent(losers.Select(l => Game.MatchData.FrozenPlayers[l.GetGameID()]).ToList()));
         GeneralRPC.SendGameData();

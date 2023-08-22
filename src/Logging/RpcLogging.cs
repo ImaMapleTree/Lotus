@@ -1,4 +1,4 @@
-using VentLib.Networking.RPC;
+/*using VentLib.Networking.RPC;
 using VentLib.Utilities.Attributes;
 
 namespace Lotus.Logging;
@@ -18,4 +18,4 @@ public class RpcLogging
     {
         log.Log(RpcLevel, rpcMeta.ToString());
     }
-}
+}*/
