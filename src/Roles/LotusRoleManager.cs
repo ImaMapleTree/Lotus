@@ -14,6 +14,8 @@ namespace Lotus.Roles;
 
 public class LotusRoleManager
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(LotusRoleManager));
+
     public OptionManager RoleOptionManager = OptionManager.GetManager(file: "role_options.txt");
     public List<CustomRole> AllRoles = new();
 
@@ -52,7 +54,8 @@ public class LotusRoleManager
 
     public Remote<IRoleInitializer> AddRoleInitializers(Type type, IRoleInitializer roleInitializer)
     {
-       return roleInitializers.GetOrCompute(type, () => new RemoteList<IRoleInitializer>()).Add(roleInitializer);
+        log.Info($"Adding Role Initializer for {type}");
+        return roleInitializers.GetOrCompute(type, () => new RemoteList<IRoleInitializer>()).Add(roleInitializer);
     }
 
     public RemoteList<IRoleInitializer> GetInitializersForType(Type type) => roleInitializers.GetOrCompute(type, () => new RemoteList<IRoleInitializer>());

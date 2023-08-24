@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Lotus.API.Reactive;
 using Lotus.Server.Modifiers;
 using Lotus.Server.Patches;
 using VentLib.Utilities.Extensions;
@@ -17,8 +18,16 @@ public class ServerPatchManager
     private readonly List<IServerPatch> serverPatches = new() { new UnpatchedServerImplementation() };
     private readonly List<IPatchModifier> patchModifiers = new() { new PatchRoleInitializerModifier() };
 
+    private readonly List<IServerPatch> patchBuffer = new();
+
     public ServerPatchManager()
     {
+        Hooks.ModHooks.LotusInitializedHook.Bind(nameof(ServerPatchManager), () =>
+        {
+            patchBuffer.ForEach(AddPatch);
+            patchBuffer.Clear();
+            CreateAmalgamPatch();
+        });
         CreateAmalgamPatch();
     }
 
@@ -26,6 +35,12 @@ public class ServerPatchManager
 
     public void AddPatch(IServerPatch patch)
     {
+        if (!ProjectLotus.FinishedLoading)
+        {
+            patchBuffer.Add(patch);
+            return;
+        }
+
         log.Debug($"Enabling server patch {patch.GetType()} (Modifiers={patch.GetPatchHandlers().Select(p => p.GetType().Name).Fuse()})");
         serverPatches.Add(patchModifiers.OrderByDescending(p => p.Priority().Value).Aggregate(patch, (accumulate, modifier) => modifier.Modify(accumulate)));
         CreateAmalgamPatch();
@@ -46,7 +61,15 @@ public class ServerPatchManager
         CreateAmalgamPatch();
     }
 
-    public void AddPatchModifier(IPatchModifier patchModifier) => patchModifiers.Add(patchModifier);
+    public void AddPatchModifier(IPatchModifier patchModifier)
+    {
+        log.Debug($"Adding patch modifier {patchModifier}");
+        patchModifiers.Add(patchModifier);
+    }
 
-    public void RemovePatchModifier(IPatchModifier patchModifier) => patchModifiers.Remove(patchModifier);
+    public void RemovePatchModifier(IPatchModifier patchModifier)
+    {
+        log.Debug($"Removing patch modifier {patchModifier}");
+        patchModifiers.Remove(patchModifier);
+    }
 }

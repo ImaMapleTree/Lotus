@@ -2,5 +2,5 @@
 
 public class EmptyHookEvent: IHookEvent
 {
-    
+    public static readonly EmptyHookEvent Hook = new();
 }

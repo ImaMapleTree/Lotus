@@ -26,7 +26,11 @@ public class AddonManager
         if (!addonDirectory.Exists)
             addonDirectory.Create();
         addonDirectory.EnumerateFiles().Do(LoadAddon);
-        Addons.ForEach(addon => addon.PostInitialize(new List<LotusAddon>(Addons)));
+        Addons.ForEach(addon =>
+        {
+            log.Log(AddonLL, $"Calling Post Initialize for {addon.Name}");
+            addon.PostInitialize(new List<LotusAddon>(Addons));
+        });
     }
 
     private static void LoadAddon(FileInfo file)

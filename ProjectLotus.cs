@@ -66,6 +66,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
 
     public static ServerPatchManager ServerPatchManager = new();
+    public static bool FinishedLoading;
 
 
     public ProjectLotus()
@@ -130,7 +131,9 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
         GamemodeManager.Setup();
         ShowerPages.InitPages();
 
-        ServerPatchManager.CreateAmalgamPatch();
+        FinishedLoading = true;
+        log.High("Finished Initializing Project Lotus. Sending Post-Initialization Event");
+        Hooks.ModHooks.LotusInitializedHook.Propagate(EmptyHookEvent.Hook);
     }
 
     public GitVersion Version() => CurrentVersion;

@@ -276,8 +276,8 @@ public static class CustomRoleManager
         public Retributionist Retributionist = new Retributionist();
         public Glitch Glitch = new Glitch();
         public Werewolf Werewolf = new Werewolf();
-
-        public CustomRole NEUTRAL_PASSIVE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>❀ Neutral Passive ❀</size>").Color(ModConstants.Palette.PassiveColor).Tab(DefaultTabs.NeutralTab).Build());
+        public CustomRole NEUTRAL_PASSIVE_TITLE = new EnforceFunctionOrderingRole(() => new GameOptionTitleBuilder().Title("<size=2.3>❀ Neut
+ral Passive ❀</size>").Color(ModConstants.Palette.PassiveColor).Tab(DefaultTabs.NeutralTab).Build());
 
         public Amnesiac Amnesiac = new Amnesiac();
         /*public Archangel Archangel = new Archangel();#1#

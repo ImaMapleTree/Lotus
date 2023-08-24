@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using Lotus.Logging;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
 using Lotus.Server.Interfaces;
@@ -11,8 +12,11 @@ namespace Lotus.Server.Modifiers;
 
 internal class PatchRoleInitializerModifier: IPatchModifier
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(PatchRoleInitializerModifier));
+
     public IServerPatch Modify(IServerPatch initialPatch)
     {
+        DevLogger.Log("IServerPatch Modify Code");
         IRoleInitializerHandler? roleInitializerHandler = initialPatch.FindHandler<IRoleInitializerHandler>(PatchedCode.RoleInitializers);
         if (roleInitializerHandler?.RoleInitializers == null) return initialPatch;
 
@@ -21,6 +25,7 @@ internal class PatchRoleInitializerModifier: IPatchModifier
 
         List<IRoleInitializer> patchedRoleInitializers = new();
         PatchSyncedRoleInitializerHandler patchSyncHandler = new(patchedRoleInitializers);
+        log.Debug("Finished creating synced role initializer handler");
         patchedRoleInitializers.AddRange(roleInitializerHandler.RoleInitializers.Select(initializer => new PatchSyncedRoleInitializer(patchSyncHandler, initializer)));
 
         modifyableServerPatch.SetHandler(PatchedCode.RoleInitializers, patchSyncHandler);
@@ -78,6 +83,7 @@ internal class PatchRoleInitializerModifier: IPatchModifier
 
         public void OnEnable(IServerPatch patch)
         {
+            DevLogger.Log("ENABLIGN !Jksiaojoadsijosijdoisdajoiasdjioasdoi");
             initializerRemotes = RoleInitializers.Select(ri => (IRemote)ProjectLotus.RoleManager.AddRoleInitializers(ri.TargetType, ri)).ToList();
             IsEnabled = true;
         }

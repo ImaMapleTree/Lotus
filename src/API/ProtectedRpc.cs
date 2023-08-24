@@ -59,12 +59,7 @@ public class ProtectedRpc
                 return;
             }
 
-            if (target.protectedByGuardian)
-            {
-                target.RemoveProtection();
-                target.protectedByGuardian = false;
-                RpcV3.Immediate(killer.NetId, RpcCalls.MurderPlayer, SendOption.None).Write(target).Send();
-            }
+            if (target.protectedByGuardian) target.protectedByGuardian = false;
 
             RpcV3.Immediate(killer.NetId, RpcCalls.MurderPlayer, SendOption.None).Write(target).Send();
             if (AmongUsClient.Instance.AmHost) killer.MurderPlayer(target);

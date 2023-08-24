@@ -57,6 +57,7 @@ public class Hooks
 
     public static class ModHooks
     {
+        public static readonly Hook<EmptyHookEvent> LotusInitializedHook = new SimpleHook<EmptyHookEvent>();
         public static readonly Hook<PlayerStatusReceivedHook> StatusReceivedHook = new SimpleHook<PlayerStatusReceivedHook>();
         public static readonly Hook<CustomCommandHookEvent> CustomCommandHook = new SimpleHook<CustomCommandHookEvent>();
     }

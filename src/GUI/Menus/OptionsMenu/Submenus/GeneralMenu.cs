@@ -198,11 +198,9 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
         publicCompatabilityPatch = publicCompatabilityObject.AddComponent<MonoToggleButton>();
         publicCompatabilityPatch.SetOnText("Public Compatability Patch: ON");
         publicCompatabilityPatch.SetOffText("Public Compatability Patch: OFF");
+        publicCompatabilityPatch.SetState(ClientOptions.AdvancedOptions.PublicCompatability);
         publicCompatabilityPatch.SetToggleOnAction(() => ClientOptions.AdvancedOptions.PublicCompatability = true);
         publicCompatabilityPatch.SetToggleOffAction(() => ClientOptions.AdvancedOptions.PublicCompatability = false);
-        publicCompatabilityPatch.SetState(ClientOptions.AdvancedOptions.PublicCompatability);
-
-
     }
 
 
