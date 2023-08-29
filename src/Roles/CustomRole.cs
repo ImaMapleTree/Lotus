@@ -22,6 +22,7 @@ using Lotus.Extensions;
 using Lotus.Factions.Impostors;
 using Lotus.Logging;
 using Lotus.Options.LotusImpl.Roles;
+using Lotus.Patches.Actions;
 using Lotus.Roles.Builtins.Base;
 using Lotus.Roles.Interfaces;
 using LotusTrigger.Options;
@@ -229,10 +230,37 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         HudManager.Instance.SetHudActive(true);
     }
 
-    public void RefreshKillCooldown(PlayerControl target, bool syncOptions = true)
+    public virtual void RefreshKillCooldown(PlayerControl? target = null, float returnValue = -1)
     {
-        if (syncOptions) SyncOptions();
-        MyPlayer.RpcMark(target);
+        if (MyPlayer == null || !AmongUsClient.Instance.AmHost) return;
+        if (target == null) target = MyPlayer;
+        RemoveProtectionPatch.AddIgnoredInteraction(MyPlayer.PlayerId);
+
+        if (MyPlayer.IsHost())
+        {
+            SyncOptions();
+            MyPlayer.ProtectPlayer(target, 0);
+            MyPlayer.MurderPlayer(target);
+            MyPlayer.ProtectPlayer(target, 0);
+            return;
+        }
+
+        IEnumerable<GameOptionOverride> overrides = CurrentRoleOverrides();
+        IGameOptions modifiedOptions = DesyncOptions.GetModifiedOptions(overrides);
+        IGameOptions copiedOptions = modifiedOptions.DeepCopy();
+        copiedOptions.SetFloat(FloatOptionNames.KillCooldown, returnValue <= 0 ? 0.01f : returnValue);
+
+
+        DesyncOptions.SyncToPlayer(modifiedOptions, MyPlayer);
+
+        RpcV3.Mass()
+            .Start(MyPlayer.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).End()
+            .Start(MyPlayer.NetId, RpcCalls.MurderPlayer).Write(target).End()
+            .Start(MyPlayer.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).End()
+            /*.Start(PlayerControl.LocalPlayer.NetId, RpcCalls.SyncSettings).Write(copiedOptions).End()*/
+            .Send(MyPlayer.GetClientId());
+
+        Async.Schedule(() => DesyncOptions.SyncToPlayer(copiedOptions, MyPlayer), 0.1f);
     }
 
     private void ShowRoleToTeammates(IEnumerable<PlayerControl> allies)

@@ -10,6 +10,7 @@ using Lotus.Extensions;
 using Lotus.GUI;
 using Lotus.GUI.Name;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles.Overrides;
 using Lotus.Utilities;
 using UnityEngine;
 using VentLib.Options.Game;
@@ -22,13 +23,23 @@ public class Debugger: CustomRole
 {
     private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(Debugger));
 
+    private List<float> killCooldowns = new() { 100, 80, 50, 20, 0, 20, 50, 80 };
+
     private RoleTypes baseRole;
     private bool customSyncOptions;
     private HideAndSeekTimerBar timerBar;
     private int counter = 1;
 
+    private float killCooldown = 40f;
+
     private Component progressTracker;
 
+#if DEBUG
+    static Debugger()
+    {
+        ProjectLotus.RoleManager.AddRole(new Debugger(), LotusRoleType.Impostors);
+    }
+#endif
 
 
     [UIComponent(UI.Name)]
@@ -40,10 +51,13 @@ public class Debugger: CustomRole
     [RoleAction(LotusActionType.OnPet)]
     private void OnPet()
     {
-        log.Info("OnPet Called", "DebuggerCall");
-        LogStats();
-        counter++;
-        TestTest();
+        killCooldown = killCooldowns[counter++ % 8];
+        log.High($"OnPet Called {counter} | {killCooldown}", "DebuggerCall");
+        SyncOptions();
+        RefreshKillCooldown();
+
+        /*LogStats();
+        TestTest();*/
     }
 
     private void CustomWinTest()
@@ -78,8 +92,7 @@ public class Debugger: CustomRole
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         base.RegisterOptions(optionStream)
-            .Tab(DefaultTabs.HiddenTab)
-            .Name("<b><color=#FF0000>D</color><color=#FFBF00>e</color><color=#7FFF00>b</color><color=#00FF3F>u</color><color=#00FEFF>g</color><color=#003FFF>g</color><color=#7F00FF>e</color><color=#FF00BF>r</color></b>")
+            .Tab(DefaultTabs.ImpostorsTab)
             .SubOption(sub => sub
                 .Name("Base Role")
                 .Bind(v => baseRole = (RoleTypes)Convert.ToUInt16(v))
@@ -102,7 +115,7 @@ public class Debugger: CustomRole
     protected override RoleModifier Modify(RoleModifier roleModifier) =>
         roleModifier
             .RoleColor(new Color(0.84f, 1f, 0.64f))
-            .VanillaRole(RoleTypes.Crewmate)
-            .RoleFlags(RoleFlag.Hidden | RoleFlag.Unassignable | RoleFlag.DontRegisterOptions);
+            .VanillaRole(RoleTypes.Impostor)
+            .OptionOverride(Override.KillCooldown, () => killCooldown);
 
 }

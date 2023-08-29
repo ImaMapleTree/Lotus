@@ -8,6 +8,7 @@ using Lotus.API;
 using Lotus.API.Player;
 using Lotus.Roles.Overrides;
 using Lotus.Extensions;
+using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 
@@ -37,8 +38,7 @@ public static class DesyncOptions
         GameOptionsManager.Instance.currentGameOptions = options;
 
         var normalOptions = options.TryCast<NormalGameOptionsV07>();
-        if (normalOptions != null)
-            GameManager.Instance.LogicOptions.Cast<LogicOptionsNormal>().GameOptions = normalOptions;
+        if (normalOptions != null) GameManager.Instance.LogicOptions.Cast<LogicOptionsNormal>().GameOptions = normalOptions;
         GameOptionsManager.Instance.currentGameOptions = options;
     }
 

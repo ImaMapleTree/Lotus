@@ -1,4 +1,5 @@
-﻿using Lotus.Patches.Actions;
+﻿using Lotus.Extensions;
+using Lotus.Patches.Actions;
 using Lotus.Server.Interfaces;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
@@ -38,6 +39,7 @@ internal class RpcMarkHandlers
     {
         public void RpcMark(PlayerControl killer, PlayerControl? target, int colorId = 0)
         {
+            killer.GetCustomRole().RefreshKillCooldown(target);
         }
     }
 }
