@@ -14,7 +14,7 @@ internal class GlobalOptionHandlers
     {
         public virtual RemoteList<GameOptionOverride> GetGlobalOptions()
         {
-            RemoteList<GameOptionOverride> globalOverrides = new();
+            RemoteList<GameOptionOverride> globalOverrides = new() { new GameOptionOverride(Override.ShapeshiftCooldown, 0.1f) };
             if (AUSettings.ConfirmImpostor()) globalOverrides.Add(new GameOptionOverride(Override.ConfirmEjects, false));
             return globalOverrides;
         }

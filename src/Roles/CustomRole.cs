@@ -256,7 +256,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     {
         GameState[] gameStates = { GameState.InIntro, GameState.Roaming, GameState.InMeeting };
 
-        if (this is ISubrole subrole)
+        if (this is ISubrole subrole && this.RoleFlags.HasFlag(RoleFlag.IsSubrole))
         {
             if (subrole.Identifier() != null) nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(subrole, gameStates, viewers: MyPlayer));
             else nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(this, gameStates, ViewMode.Additive, MyPlayer));

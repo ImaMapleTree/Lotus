@@ -36,7 +36,10 @@ public class ProtectedRpc
                 return;
             }
 
+            // Suspicious call, perhaps figure out a better way to track if players are protected at all times
             if (AmongUsClient.Instance.AmHost) killer.MurderPlayer(target);
+
+
             RpcV3.Immediate(killer.NetId, RpcCalls.MurderPlayer).Write(target).Send();
             target.Data.IsDead = true;
         }
@@ -59,10 +62,11 @@ public class ProtectedRpc
                 return;
             }
 
-            if (target.protectedByGuardian) target.protectedByGuardian = false;
 
             RpcV3.Immediate(killer.NetId, RpcCalls.MurderPlayer, SendOption.None).Write(target).Send();
             if (AmongUsClient.Instance.AmHost) killer.MurderPlayer(target);
+
+            if (!target.Data.IsDead) killer.MurderPlayer(target);
 
             target.Data.IsDead = true;
         }
