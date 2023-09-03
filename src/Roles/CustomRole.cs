@@ -239,9 +239,8 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         if (MyPlayer.IsHost())
         {
             SyncOptions();
-            MyPlayer.ProtectPlayer(target, 0);
-            MyPlayer.MurderPlayer(target);
-            MyPlayer.ProtectPlayer(target, 0);
+            target.ShowFailedMurder();
+            MyPlayer.SetKillTimer(GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown) / 2f);
             return;
         }
 
