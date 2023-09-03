@@ -234,7 +234,7 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     {
         if (MyPlayer == null || !AmongUsClient.Instance.AmHost) return;
         if (target == null) target = MyPlayer;
-        RemoveProtectionPatch.AddIgnoredInteraction(MyPlayer.PlayerId);
+        RemoveProtectionPatch.AddIgnoredInteraction(MyPlayer.PlayerId, target.PlayerId);
 
         if (MyPlayer.IsHost())
         {

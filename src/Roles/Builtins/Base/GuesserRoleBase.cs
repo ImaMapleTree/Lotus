@@ -13,6 +13,7 @@ using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Internals.Trackers;
 using Lotus.Victory;
+using UnityEngine;
 using VentLib.Localization.Attributes;
 using VentLib.Options.Game;
 using VentLib.Utilities;
@@ -23,6 +24,7 @@ namespace Lotus.Roles.Builtins.Base;
 
 public abstract class GuesserRoleBase: CustomRole
 {
+    private static Color guesserColor = new(0.83f, 1f, 0.42f);
     private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(GuesserRoleBase));
 
     private MeetingPlayerSelector voteSelector = new();
@@ -159,7 +161,7 @@ public abstract class GuesserRoleBase: CustomRole
                 .BindInt(i => guessesPerMeeting = i)
                 .Build());
 
-    protected ChatHandler GuesserHandler(string message) => ChatHandler.Of(message, RoleColor.Colorize(Translations.GuesserTitle)).LeftAlign();
+    protected ChatHandler GuesserHandler(string message) => ChatHandler.Of(message, guesserColor.Colorize(Translations.GuesserTitle)).LeftAlign();
 
     [Localized(nameof(GuesserRoleBase))]
     private class Translations
