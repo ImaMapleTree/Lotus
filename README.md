@@ -1914,7 +1914,7 @@ The Crusader works like a living Guardian Angel from Vanilla Amoung Us. Use the 
 
 ## Demolitionist
 
-<img align="right" width="" height="200" src="https://cdn.discordapp.com/attachments/1108944832493277264/1118405947363184661/image.png">
+<img align="right" width="" height="200" src="https://cdn.discordapp.com/attachments/1108944832493277264/1118399746260869160/image.png?ex=651a49ee&is=6518f86e&hm=6afdc15270c7953c0f489b0c349244fe3dab562b553f36d3aca5faa534042779&">
 
 __Faction__: Crewmate<br>
 __Base__: Crewmate<br>
