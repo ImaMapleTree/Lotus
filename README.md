@@ -2982,7 +2982,7 @@ _The Global option for Gulp Cooldown means that this setting will be the same as
 
 ## Plague Bearer
 
-<img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1108944832493277264/1118403512104136734/image.png?width=1193&height=671">
+<img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1034687568643641354/1118606722244821022/image.png?width=1193&height=671">
 
 __Faction__: Neutral Killing <br>
 __Base__: Impostor<br>
@@ -2997,7 +2997,7 @@ Use the Kill button to infect everyone. Once everyone is infected, the Plague Be
 
 ### Pestilence
 
-<img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1034687568643641354/1118606722244821022/image.png?width=1193&height=671">
+<img align="right" width="" height="200" src="https://media.discordapp.net/attachments/1108944832493277264/1118403512104136734/image.png?width=1193&height=671">
 
 __Faction__: Neutral Killing<br>
 __Base__: Impostor<br>
