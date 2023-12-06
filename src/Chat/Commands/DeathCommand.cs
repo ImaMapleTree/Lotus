@@ -46,7 +46,7 @@ public class DeathCommand: CommandTranslations, ICommandReceiver
         }
 
         string death = deathEvent.InstigatorRole()
-            .Transform(r => Translations.DirectDeathString.Formatted(frozenPlayer.Name, $"{deathEvent.Instigator().Map(p => p.Name).OrElse("Unknown")} ({r.RoleName})", deathEvent.SimpleName()),
+            .Transform(r => Translations.DirectDeathString.Formatted(frozenPlayer.Name, $"{deathEvent.Instigator().Map(p => p.Name).OrElse("Unknown")} ({r.Name})", deathEvent.SimpleName()),
                 () => Translations.IndirectDeathString.Formatted(frozenPlayer.Name, deathEvent.SimpleName()));
         CHandler(death).Send(UnityOptional<PlayerControl>.Of(source));
     }

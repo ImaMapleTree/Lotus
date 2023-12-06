@@ -7,9 +7,11 @@ using System.Reflection;
 using HarmonyLib;
 using Lotus.RPC;
 using Lotus.Extensions;
+using Lotus.Roles2;
 using VentLib;
 using VentLib.Networking.RPC.Attributes;
 using VentLib.Utilities;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Addons;
 
@@ -31,6 +33,12 @@ public class AddonManager
             log.Log(AddonLL, $"Calling Post Initialize for {addon.Name}");
             addon.PostInitialize(new List<LotusAddon>(Addons));
         });
+
+        Addons.ForEach(addon =>
+        {
+            log.Info($"Found and registering {addon.ExportedDefinitions.Count} role definitions from {addon.Name}");
+            addon.ExportedDefinitions.ForEach(kvp => kvp.Value.ForEach(gm => gm.RoleManager.RegisterRole(ProjectLotus.DefinitionUnifier.Unify(kvp.Key))));
+        });
     }
 
     private static void LoadAddon(FileInfo file)
@@ -48,6 +56,7 @@ public class AddonManager
 
             Addons.Add(addon);
             addon.Initialize();
+            ProjectLotus.DefinitionUnifier.RegisterRoleComponents(assembly);
         }
         catch (Exception e)
         {

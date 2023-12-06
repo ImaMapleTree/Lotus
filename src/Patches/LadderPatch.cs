@@ -51,7 +51,7 @@ namespace Lotus.Patches
                         ushort num2 = (ushort)(NetHelpers.YRange.ReverseLerp(targetPos.y) * 65535f);
 
                         Utils.Teleport(player.NetTransform, new Vector2(num, num2));
-                        player.InteractWith(player, new UnblockedInteraction(new FatalIntent(), player.GetCustomRole()));
+                        player.InteractWith(player, new UnblockedInteraction(new FatalIntent(), player.PrimaryRole()));
                     }, 0.05f);
                 }
             }

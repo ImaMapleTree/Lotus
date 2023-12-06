@@ -12,7 +12,7 @@ class ShipFixedUpdatePatch
         //ここより上、全員が実行する
         if (!AmongUsClient.Instance.AmHost) return;
 
-        Game.CurrentGamemode.FixedUpdate();
+        Game.CurrentGameMode.FixedUpdate();
     }
 }
 

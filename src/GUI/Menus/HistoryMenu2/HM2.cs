@@ -49,7 +49,7 @@ public class HM2: MonoBehaviour
         DevLogger.Log("Setting up history button");
         hudManager.ReportButton.gameObject.SetActive(true);
         historyButton = Instantiate(hudManager.ReportButton, buttonObject.transform);
-        historyButton.graphic.sprite = Utils.LoadSprite("Lotus.assets.History.png", 800);
+        historyButton.graphic.sprite = AssetLoader.LoadSprite("Lotus.assets.History.png", 800);
         historyButton.GetComponentInChildren<PassiveButton>().Modify(ToggleMenu);
         historyButton.SetActive(true);
         Async.Schedule(() => historyButton.buttonLabelText.text = "History", 0.05f);

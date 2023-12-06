@@ -1,10 +1,13 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Lotus.Factions.Interfaces;
 using Lotus.Roles;
 using Lotus.Extensions;
-using Lotus.Gamemodes;
-using Lotus.Roles.Internals.Enums;
+using Lotus.GameModes;
+using Lotus.GameModes.Standard;
+using Lotus.Roles2;
 using VentLib.Utilities.Extensions;
 using Version = VentLib.Version.Version;
 
@@ -14,18 +17,19 @@ public abstract class LotusAddon
 {
     private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(LotusAddon));
 
-    internal List<CustomRole>? ExportedRoles;
+    internal Dictionary<RoleDefinition, HashSet<IGameMode>> ExportedDefinitions { get; } = new();
+
     internal readonly List<IFaction> Factions = new();
 
     internal readonly Assembly BundledAssembly = Assembly.GetCallingAssembly();
-    internal readonly ulong Uuid;
+    internal readonly ulong UUID;
 
     public abstract string Name { get; }
     public abstract Version Version { get; }
 
     public LotusAddon()
     {
-        Uuid = (BundledAssembly.GetIdentity(false)?.SemiConsistentHash() ?? 0ul + Name.SemiConsistentHash());
+        UUID = (ulong)HashCode.Combine(BundledAssembly.GetIdentity(false)?.SemiConsistentHash() ?? 0ul, Name.SemiConsistentHash());
     }
 
     internal string GetName(bool fullName = false) => !fullName
@@ -38,25 +42,32 @@ public abstract class LotusAddon
     {
     }
 
-    public void ExportRoles(IEnumerable<CustomRole> roles, LotusRoleType roleType)
+    public void ExportRoleDefinitions(IEnumerable<RoleDefinition> roleDefinitions, params Type[] baseGameModes)
     {
-        roles.ForEach(r =>
+        if (baseGameModes.Length == 0) ExportRoleDefinitions(roleDefinitions, StandardGameMode.Instance);
+        else ExportRoleDefinitions(roleDefinitions, baseGameModes.Select(gm => ProjectLotus.GameModeManager.GetGameMode(gm) ?? StandardGameMode.Instance).ToArray());
+    }
+
+    public void ExportRoleDefinitions(IEnumerable<RoleDefinition> roleDefinitions, params IGameMode[] baseGameModes)
+    {
+        IGameMode[] targetGameModes = ProjectLotus.GameModeManager.GameModes.Where(gm => baseGameModes.Any(bgm => bgm.GetType().IsInstanceOfType(gm))).ToArray();
+        roleDefinitions.ForEach(r =>
         {
-            log.Trace($"Exporting Role: {r.EnglishRoleName}", "ExportRoles");
-            ProjectLotus.RoleManager.AddRole(r, roleType);
+            r.Addon = this;
+            ExportedDefinitions.GetOrCompute(r, () => new HashSet<IGameMode>()).AddAll(targetGameModes);
         });
     }
 
-    public void ExportGamemodes(IEnumerable<IGamemode> gamemodes)
+    public void ExportGameModes(IEnumerable<IGameMode> gamemodes)
     {
-        foreach (IGamemode gamemode in gamemodes)
+        foreach (IGameMode gamemode in gamemodes)
         {
-            log.Trace($"Exporting Gamemode: {gamemode.Name}", "ExportGamemodes");
-            ProjectLotus.GamemodeManager.Gamemodes.Add(gamemode);
+            log.Trace($"Exporting GameMode: {gamemode.Name}", "ExportGameModes");
+            ProjectLotus.GameModeManager.GameModes.Add(gamemode);
         }
     }
 
-    public void ExportGamemodes(params IGamemode[] gamemodes) => ExportGamemodes((IEnumerable<IGamemode>)gamemodes);
+    public void ExportGameModes(params IGameMode[] gamemodes) => ExportGameModes((IEnumerable<IGameMode>)gamemodes);
 
     public override string ToString() => GetName(true);
 }

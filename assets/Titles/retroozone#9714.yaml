@@ -1,0 +1,20 @@
+UpperText:
+  Text: AMONG US STREAMER
+  Gradient: "#B055FF, #43FF32, #49FFF6" #Creates a gradient FROM Color 1 to Color 2 automatically
+  Size: 1.5 # Default AU size is 2, i belive this is exponential (so 100 would be terrible)
+
+Prefix:
+  Spaced: False # If there should be a space between the Suffix and the player's name (example: Akali ♥)
+  Text: 乂
+  Gradient: "#B055FF" #Creates a gradient FROM Color 1 to Color 2 automatically
+  Size: 1.5 # Default AU size is 2, i belive this is exponential (so 100 would be terrible)
+
+Suffix:
+  Spaced: False # If there should be a space between the Suffix and the player's name (example: Akali ♥)
+  Text: 乂
+  Gradient: "#B055FF" #Creates a gradient FROM Color 1 to Color 2 automatically
+  Size: 1.5 # Default AU size is 2, i belive this is exponential (so 100 would be terrible)
+
+Name:
+  Gradient: "#43FF32, #B055FF, #49FFF6, " #Creates a gradient FROM Color 1 to Color 2 automatically
+  Size: 1.5 # Default AU size is 2, i belive this is exponential (so 100 would be terrible)

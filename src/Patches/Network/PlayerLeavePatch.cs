@@ -6,21 +6,14 @@ using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 
 namespace Lotus.Patches.Network;
 
-[HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnDisconnected))]
-class OnDisconnectedPatch
-{
-    public static void Postfix(AmongUsClient __instance)
-    {
-    }
-}
-
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.OnPlayerLeft))]
-class OnPlayerLeftPatch
+class PlayerLeavePatch
 {
-    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(OnPlayerLeftPatch));
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(PlayerLeavePatch));
 
     public static void Postfix(AmongUsClient __instance, [HarmonyArgument(0)] ClientData data, [HarmonyArgument(1)] DisconnectReasons reason)
     {
@@ -34,10 +27,9 @@ class OnPlayerLeftPatch
 
         //Game.NameModels.Remove(data.Character.PlayerId);
 
-        ActionHandle uselessHandle = ActionHandle.NoInit();
         if (Game.State is not (GameState.InLobby or GameState.InIntro))
         {
-            Game.TriggerForAll(LotusActionType.Disconnect, ref uselessHandle, data.Character);
+            RoleOperations.Current.Trigger(LotusActionType.Disconnect, data.Character);
             Game.MatchData.Roles.MainRoles.GetValueOrDefault(data.Character.PlayerId)?.HandleDisconnect();
             Game.MatchData.Roles.SubRoles.GetValueOrDefault(data.Character.PlayerId)?.ForEach(r => r.HandleDisconnect());
         }

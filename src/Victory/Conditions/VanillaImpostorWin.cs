@@ -6,6 +6,7 @@ using Lotus.Factions;
 using Lotus.Factions.Interfaces;
 using Lotus.Roles;
 using Lotus.Extensions;
+using Lotus.Roles2;
 
 namespace Lotus.Victory.Conditions;
 
@@ -25,13 +26,13 @@ public class VanillaImpostorWin: IFactionWinCondition
         int aliveKillers = 0;
         int aliveOthers = 0;
 
-        foreach (CustomRole role in Players.GetPlayers(PlayerFilter.Alive).Select(p => p.GetCustomRole()))
+        foreach (UnifiedRoleDefinition role in Players.GetPlayers(PlayerFilter.Alive).Select(p => p.PrimaryRole()))
         {
             if (role.Faction.Relationship(FactionInstances.Impostors) is Relation.FullAllies or Relation.SharedWinners) aliveImpostors++;
             else
             {
                 aliveOthers++;
-                if (role.RoleFlags.HasFlag(RoleFlag.CannotWinAlone)) continue;
+                if (RoleProperties.CannotWinAlone(role)) continue;
                 if (role.Faction.Relationship(FactionInstances.Crewmates) is Relation.FullAllies) continue;
                 if (role.MyPlayer.GetVanillaRole().IsImpostor()) aliveKillers++;
             }

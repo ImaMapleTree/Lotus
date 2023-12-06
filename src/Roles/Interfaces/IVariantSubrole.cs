@@ -1,4 +1,4 @@
-using System.Diagnostics.CodeAnalysis;
+/*using System.Diagnostics.CodeAnalysis;
 using Lotus.Roles.Builtins.Base;
 
 namespace Lotus.Roles.Interfaces;
@@ -23,4 +23,4 @@ public interface IVariantSubrole
     /// </summary>
     /// <returns>true if the variation will be assigned, otherwise false</returns>
     public bool AssignVariation();
-}
+}*/

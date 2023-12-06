@@ -5,6 +5,7 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Patches.Actions;
@@ -22,8 +23,7 @@ class TaskCompletePatch
         NormalPlayerTask? npt = taskInfo == null! ? null : ShipStatus.Instance.GetTaskById(taskInfo!.TypeId);
         log.Info($"Task Complete => {__instance.GetNameWithRole()} ({npt?.Length})", "CompleteTask");
 
-        ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(LotusActionType.TaskComplete, ref handle, __instance, Optional<NormalPlayerTask>.Of(npt));
+        RoleOperations.Current.Trigger(LotusActionType.TaskComplete, __instance, Optional<NormalPlayerTask>.Of(npt));
         Hooks.PlayerHooks.PlayerTaskCompleteHook.Propagate(new PlayerTaskHookEvent(__instance, npt));
     }
 }

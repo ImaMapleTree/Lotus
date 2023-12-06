@@ -6,7 +6,7 @@ public enum ReasonType
     HostForceEnd,
     FactionLastStanding,
     TasksComplete,
-    GamemodeSpecificWin,
+    GameModeSpecificWin,
     Sabotage,
     RoleSpecificWin,
     /// <summary>

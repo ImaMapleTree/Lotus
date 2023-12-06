@@ -6,6 +6,7 @@ using Lotus.Patches.Systems;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.API.Vanilla.Sabotages;
@@ -25,7 +26,7 @@ public class CommsSabotage : ISabotage
     {
 
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, this, fixer == null ? PlayerControl.LocalPlayer : fixer);
+        RoleOperations.Current.TriggerForAll(LotusActionType.SabotageFixed, fixer == null ? PlayerControl.LocalPlayer : fixer, handle, this);
         if (handle.IsCanceled) return false;
         fixer = fixer == null ? PlayerControl.LocalPlayer : fixer;
 
@@ -55,7 +56,7 @@ public class CommsSabotage : ISabotage
     public void CallSabotage(PlayerControl sabotageCaller)
     {
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(LotusActionType.SabotageStarted, ref handle, this, sabotageCaller);
+        RoleOperations.Current.TriggerForAll(LotusActionType.SabotageStarted, sabotageCaller, handle, this);
         if (handle.IsCanceled) return;
 
         ShipStatus.Instance.RepairSystem(SabotageType().ToSystemType(), sabotageCaller, 128);

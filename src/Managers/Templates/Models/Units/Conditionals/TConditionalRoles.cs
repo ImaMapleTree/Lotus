@@ -2,6 +2,7 @@
 using System.Linq;
 using Lotus.Extensions;
 using Lotus.Roles;
+using Lotus.Roles2;
 
 namespace Lotus.Managers.Templates.Models.Units.Conditionals;
 
@@ -22,14 +23,11 @@ public class TConditionalRoles: StringListConditionalUnit
     {
         if (player == null) return true;
         rolesLower ??= Values.Select(r => r.ToLower()).ToHashSet();
-        return VerifyRole(player.GetCustomRole()) || player.GetSubroles().Any(VerifyRole);
+        return player.GetAllRoleDefinitions().Any(VerifyRole);
     }
 
-    public bool VerifyRole(CustomRole role)
+    public bool VerifyRole(UnifiedRoleDefinition roleDefinition)
     {
-        if (rolesLower == null) return true;
-        string englishRoleName = role.EnglishRoleName.ToLower();
-        string anyRoleName = role.RoleName.ToLower();
-        return rolesLower.Contains(englishRoleName) || rolesLower.Contains(anyRoleName);
+        return rolesLower == null || rolesLower.Contains(roleDefinition.Name);
     }
 }

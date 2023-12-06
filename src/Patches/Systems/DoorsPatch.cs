@@ -5,6 +5,7 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.API.Vanilla.Sabotages;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 
 namespace Lotus.Patches.Systems;
 
@@ -16,8 +17,7 @@ public class DoorsPatch
 
         ISabotage sabotage = new DoorSabotage(room);
 
-        ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(LotusActionType.SabotageStarted, ref handle, sabotage, PlayerControl.LocalPlayer);
+        ActionHandle handle = RoleOperations.Current.Trigger(LotusActionType.SabotageStarted, null, sabotage, PlayerControl.LocalPlayer);
         if (handle.IsCanceled) return false;
 
         Hooks.SabotageHooks.SabotageCalledHook.Propagate(new SabotageHookEvent(sabotage));

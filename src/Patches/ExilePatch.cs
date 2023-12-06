@@ -9,6 +9,7 @@ using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 
 namespace Lotus.Patches;
 
@@ -51,11 +52,7 @@ static class ExileControllerWrapUpPatch
 
         if (exiled == null) return;
 
-        ActionHandle selfExiledHandle = ActionHandle.NoInit();
-        ActionHandle otherExiledHandle = ActionHandle.NoInit();
-
-        exiled.Object!.Trigger(LotusActionType.SelfExiled, ref selfExiledHandle);
-        Game.TriggerForAll(LotusActionType.AnyExiled, ref otherExiledHandle, exiled);
+        RoleOperations.Current.Trigger(LotusActionType.Exiled, exiled.Object, exiled);
 
         Hooks.PlayerHooks.PlayerExiledHook.Propagate(new PlayerHookEvent(exiled.Object!));
         Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerDeathHookEvent(exiled.Object!, new ExiledEvent(exiled.Object!, new List<PlayerControl>(), new List<PlayerControl>())));
@@ -93,8 +90,8 @@ static class ExileControllerWrapUpPatch
         Game.State = GameState.Roaming;
         ActionHandle handle = ActionHandle.NoInit();
         log.Debug("Triggering RoundStart Action!!", "Exile::BeginRoundStart");
-        Game.TriggerForAll(LotusActionType.RoundStart, ref handle, false);
-        Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData));
+        RoleOperations.Current.TriggerForAll(LotusActionType.RoundStart, null, handle);
+        Hooks.GameStateHooks.RoundStartHook.Propagate(new GameStateHookEvent(Game.MatchData, ProjectLotus.GameModeManager.CurrentGameMode));
         Game.SyncAll();
     }
 }

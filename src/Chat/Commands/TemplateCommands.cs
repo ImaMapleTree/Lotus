@@ -34,12 +34,12 @@ public class TemplateCommands: CommandTranslations, ICommandReceiver
         SuccessMsg(tags).Send(source);
     }
 
-    [Command(CommandFlag.HostOnly, "variables", "v")]
+    /*[Command(CommandFlag.HostOnly, "variables", "v")]
     public static void ListVariables(PlayerControl source)
     {
-        string variables = TemplateLegacy.TemplateVariables.Select(t => $"<b>{t.Key}</b>: {t.Value}").Fuse("\n");
+        string variables = Template.TemplateVariables.Select(t => $"<b>{t.Key}</b>: {t.Value}").Fuse("\n");
         SuccessMsg(variables).Send(source);
-    }
+    }*/
 
     [Command(CommandFlag.HostOnly, "reload")]
     public static void Reload(PlayerControl source)

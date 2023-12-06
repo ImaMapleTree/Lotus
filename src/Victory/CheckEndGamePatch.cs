@@ -74,7 +74,7 @@ public class CheckEndGamePatch
             ReasonType.Sabotage => GameOverReason.ImpostorBySabotage,
             ReasonType.NoWinCondition => GameOverReason.ImpostorDisconnect,
             ReasonType.HostForceEnd => GameOverReason.ImpostorDisconnect,
-            ReasonType.GamemodeSpecificWin => GameOverReason.ImpostorByKill,
+            ReasonType.GameModeSpecificWin => GameOverReason.ImpostorByKill,
             ReasonType.SoloWinner => GameOverReason.ImpostorByKill,
         };
 

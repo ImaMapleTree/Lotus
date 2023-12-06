@@ -23,9 +23,12 @@ public partial class Api
 
             GameData.PlayerInfo playerData = player.Data;
 
-            if (playerData != null && state is GameState.InMeeting)
+            if (playerData != null)
             {
-                AmongUsClient.Instance.GetClientFromCharacter(playerData.Object)?.UpdatePlayerName(name);
+                GameData.PlayerOutfit defaultOutfit = playerData.DefaultOutfit;
+                string outfitName = state is GameState.InMeeting ? name : player.name;
+                defaultOutfit.PlayerName = outfitName;
+                AmongUsClient.Instance.GetClientFromCharacter(playerData.Object)?.UpdatePlayerName(outfitName);
             }
 
             try

@@ -8,6 +8,7 @@ using Lotus.Roles.Interfaces;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.Logging;
+using Lotus.Roles2;
 
 namespace Lotus.Patches.Systems;
 
@@ -20,7 +21,7 @@ public class RpcSetTasksPatch
     {
         if (!AmongUsClient.Instance.AmHost) return true;
 
-        CustomRole? role = Utils.GetPlayerById(playerId)?.GetCustomRole();
+        UnifiedRoleDefinition? role = Utils.GetPlayerById(playerId)?.PrimaryRole();
         // This function mostly deals with override, so if not overriding immediately exit
 
         TasksOverride? tasksOverride = TaskQueue.Count == 0 ? null : TaskQueue.Dequeue();
@@ -29,23 +30,18 @@ public class RpcSetTasksPatch
         int longTaskCount = -1;
         bool overrideTasks = false;
         bool hasCommonTasks = false;
-        bool hasTasks = tasksOverride != null;
 
-        switch (role)
+        TaskContainer taskContainer = role?.Metadata.GetOrDefault(TaskContainer.Key, TaskContainer.None) ?? TaskContainer.None;
+        if (!taskContainer.HasTasks) return true;
+
+        if (taskContainer.TasksOverrideDefaults)
         {
-            case IOverridenTaskHolderRole overridenTaskRole:
-                hasCommonTasks = overridenTaskRole.AssignCommonTasks();
-                shortTaskCount = overridenTaskRole.ShortTaskAmount();
-                longTaskCount = overridenTaskRole.LongTaskAmount();
-                overrideTasks = overridenTaskRole.OverrideTasks();
-                hasTasks = overridenTaskRole.HasTasks();
-                break;
-            case ITaskHolderRole holderRole:
-                hasTasks = holderRole.HasTasks();
-                break;
+            hasCommonTasks = taskContainer.HasCommonTasks;
+            shortTaskCount = taskContainer.ShortTasks;
+            longTaskCount = taskContainer.LongTasks;
+            overrideTasks = true;
         }
 
-        if (!hasTasks) return true;
 
         if (shortTaskCount == -1 || !overrideTasks) shortTaskCount = AUSettings.NumShortTasks();
         if (longTaskCount == -1 || !overrideTasks) longTaskCount = AUSettings.NumLongTasks();

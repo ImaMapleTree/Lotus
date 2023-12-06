@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using HarmonyLib;
 using Lotus.API.Odyssey;
+using VentLib.Utilities.Harmony.Attributes;
 
 namespace Lotus.Patches;
 
@@ -12,10 +13,10 @@ class EndGamePatch
     public static Dictionary<byte, string> SummaryText = new();
 
     public static string KillLog = "";
+
     public static void Postfix(AmongUsClient __instance, [HarmonyArgument(0)] ref EndGameResult endGameResult)
     {
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-        Game.State = GameState.InLobby;
         Game.Cleanup();
 
         SummaryText = new();

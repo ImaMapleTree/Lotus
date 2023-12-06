@@ -1,0 +1,15 @@
+UpperText:
+  Size: 1.8
+  Text: ♡★Artificial Intelligence★♡
+  Gradient: "#c195f2, #9b9be4, #c195f2"
+Name:
+  Gradient: "#c195f2, #9b9be4, #c195f2"
+Prefix:
+  Text: "♡♫"
+  Color: "#c195f2"
+  Spaced: false
+Suffix:
+  Text: "♫♡"
+  Color: "#c195f2"
+  Spaced: false
+  

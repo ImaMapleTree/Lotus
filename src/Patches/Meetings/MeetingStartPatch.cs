@@ -12,6 +12,7 @@ using Lotus.Managers;
 using Lotus.Options.LotusImpl;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using Lotus.Utilities;
 using LotusTrigger.Options;
 using VentLib.Utilities.Attributes;
@@ -63,12 +64,12 @@ public class MeetingStartPatch
             }
             finally
             {
-                p.Trigger(LotusActionType.RoundEnd, ref handle, meetingDelegate, false);
+                RoleOperations.Current.TriggerFor(p, LotusActionType.RoundEnd, null, handle, meetingDelegate, false);
             }
         });
 
         Hooks.MeetingHooks.MeetingCalledHook.Propagate(new MeetingHookEvent(reporter, MeetingPrep.Reported, meetingDelegate));
-        Hooks.GameStateHooks.RoundEndHook.Propagate(new GameStateHookEvent(Game.MatchData));
+        Hooks.GameStateHooks.RoundEndHook.Propagate(new GameStateHookEvent(Game.MatchData, ProjectLotus.GameModeManager.CurrentGameMode));
         Game.MatchData.MeetingsCalled++;
 
         Game.SyncAll(); // This syncs up all the cooldowns to fix doubling after meeting

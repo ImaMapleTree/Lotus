@@ -8,12 +8,14 @@ using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Roles.Interactions;
 
 public class FatalIntent : IFatalIntent
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(FatalIntent));
     private Func<IDeathEvent>? causeOfDeath;
     private bool ranged;
 
@@ -30,15 +32,14 @@ public class FatalIntent : IFatalIntent
     public virtual void Action(PlayerControl actor, PlayerControl target)
     {
         Optional<IDeathEvent> deathEvent = CauseOfDeath();
-        actor.GetCustomRole().SyncOptions();
+        actor.PrimaryRole().SyncOptions();
 
         deathEvent.IfPresent(ev => Game.MatchData.GameHistory.SetCauseOfDeath(target.PlayerId, ev));
         KillTarget(actor, target);
 
-        ActionHandle ignored = ActionHandle.NoInit();
         if (!target.IsAlive()) return;
-        DevLogger.Log("Target was still alive :O");
-        Game.TriggerForAll(LotusActionType.SuccessfulAngelProtect, ref ignored, target, actor);
+        log.Debug($"After executing the fatal action. The target \"{target.name}\" was still alive.");
+        RoleOperations.Current.Trigger(LotusActionType.SuccessfulAngelProtect, actor, target);
         Game.MatchData.GameHistory.ClearCauseOfDeath(target.PlayerId);
     }
 

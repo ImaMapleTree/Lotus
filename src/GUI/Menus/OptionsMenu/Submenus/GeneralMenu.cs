@@ -193,14 +193,6 @@ public class GeneralMenu : MonoBehaviour, IBaseOptionMenuComponent
             languageSetter.Open();
         });
         languageSetterExists = true;
-
-        GameObject publicCompatabilityObject = anchorObject.CreateChild("Public Compatability Patch Button", new Vector3(1f, -2.25f));
-        publicCompatabilityPatch = publicCompatabilityObject.AddComponent<MonoToggleButton>();
-        publicCompatabilityPatch.SetOnText("Public Compatability Patch: ON");
-        publicCompatabilityPatch.SetOffText("Public Compatability Patch: OFF");
-        publicCompatabilityPatch.SetState(ClientOptions.AdvancedOptions.PublicCompatability);
-        publicCompatabilityPatch.SetToggleOnAction(() => ClientOptions.AdvancedOptions.PublicCompatability = true);
-        publicCompatabilityPatch.SetToggleOffAction(() => ClientOptions.AdvancedOptions.PublicCompatability = false);
     }
 
 

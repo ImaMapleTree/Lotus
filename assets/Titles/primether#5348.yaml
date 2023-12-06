@@ -1,0 +1,16 @@
+UpperText:
+  Text: Youtuber
+  Color: "#FF0000"
+
+Prefix:
+  Spaced: True 
+  Text: ☆
+  Color: "#D7F2FF"
+  
+Suffix:
+  Spaced: True
+  Text: ☆
+  Color: "#5096F2"
+
+Name:
+  Gradient: "#D7F2FF, #5096F2"

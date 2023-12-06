@@ -50,6 +50,11 @@ class MeetingHudOnDestroyPatch
 
     private static void PostMeetingSetups()
     {
-        ServerPatchManager.Patch.Execute(PatchedCode.PostMeeting);
+        bool randomSpawn = GeneralOptions.MayhemOptions.RandomSpawn;
+
+        Players.GetPlayers().ForEach(p =>
+        {
+            if (randomSpawn) Game.RandomSpawn.Spawn(p);
+        });
     }
 }

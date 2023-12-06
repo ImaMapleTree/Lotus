@@ -16,7 +16,7 @@ public interface IFactionWinCondition: IWinCondition
         winners = null;
         if (!IsConditionMet(out List<IFaction> factions)) return false;
         winners = Players.GetPlayers()
-            .Where(p => factions.Any(f => f.Relationship(p.GetCustomRole().Faction) is Relation.SharedWinners or Relation.FullAllies))
+            .Where(p => factions.Any(f => f.Relationship(p.PrimaryRole().Faction) is Relation.SharedWinners or Relation.FullAllies))
             .ToList();
         return true;
     }

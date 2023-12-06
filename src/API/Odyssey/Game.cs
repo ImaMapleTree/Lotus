@@ -1,19 +1,13 @@
 using System.Collections.Generic;
-using System.Linq;
 using HarmonyLib;
 using Lotus.API.Player;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
-using Lotus.Gamemodes;
+using Lotus.GameModes;
 using Lotus.GUI.Name.Impl;
 using Lotus.GUI.Name.Interfaces;
-using Lotus.Roles;
-using Lotus.Roles.Internals;
 using Lotus.Victory;
 using Lotus.Extensions;
-using Lotus.Roles.Internals.Enums;
-using VentLib.Logging.Appenders;
-using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
 namespace Lotus.API.Odyssey;
@@ -25,11 +19,11 @@ public static class Game
     private static readonly Dictionary<byte, ulong> GameIDs = new();
     private static ulong _gameID;
 
-    public static MatchData MatchData = new();
+    public static MatchData MatchData => CurrentGameMode.MatchData;
     public static Dictionary<byte, INameModel> NameModels = new();
     public static RandomSpawn RandomSpawn = null!;
     public static int RecursiveCallCheck;
-    public static IGamemode CurrentGamemode => ProjectLotus.GamemodeManager.CurrentGamemode;
+    public static IGameMode CurrentGameMode => ProjectLotus.GameModeManager.CurrentGameMode;
     public static GameState State = GameState.InLobby;
     private static WinDelegate _winDelegate = new();
 
@@ -53,58 +47,6 @@ public static class Game
 
     public static void SyncAll() => Players.GetPlayers().Do(p => p.SyncAll());
 
-    public static void TriggerForAll(LotusActionType action, ref ActionHandle handle, params object[] parameters)
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-
-        if (action is not LotusActionType.FixedUpdate)
-        {
-            CurrentGamemode.Trigger(action, ref handle, parameters);
-            if (handle.Cancellation is not (ActionHandle.CancelType.Soft or ActionHandle.CancelType.None)) return;
-        }
-
-        foreach (PlayerControl player in PlayerControl.AllPlayerControls) player.Trigger(action, ref handle, parameters);
-    }
-
-    public static void TriggerForAll(this IEnumerable<PlayerControl> players, LotusActionType action, ref ActionHandle handle, params object[] parameters)
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-
-        if (action is not LotusActionType.FixedUpdate)
-        {
-            CurrentGamemode.Trigger(action, ref handle, parameters);
-            if (handle.Cancellation is not (ActionHandle.CancelType.Soft or ActionHandle.CancelType.Soft)) return;
-        }
-
-        foreach (PlayerControl player in players) player.Trigger(action, ref handle, parameters);
-    }
-
-    public static void TriggerOrdered(this IEnumerable<PlayerControl> players, LotusActionType action, ref ActionHandle handle, params object[] parameters)
-    {
-        if (!AmongUsClient.Instance.AmHost) return;
-
-        if (action is LotusActionType.FixedUpdate)
-            foreach (PlayerControl player in players) player.Trigger(action, ref handle, parameters);
-        // Using a new Trigger algorithm to deal with ordering of triggers
-        else
-        {
-            CurrentGamemode.Trigger(action, ref handle, parameters);
-            if (handle.Cancellation is not (ActionHandle.CancelType.Soft or ActionHandle.CancelType.Soft)) return;
-
-            List<PlayerControl> allPlayers = players.ToList();
-            handle.ActionType = action;
-            parameters = parameters.AddToArray(handle);
-            List<(RoleAction, AbstractBaseRole)> actionList = allPlayers.SelectMany(p => p.GetCustomRole().GetActions(action)).ToList();
-            actionList.AddRange(allPlayers.SelectMany(p => p.GetSubroles().SelectMany(r => r.GetActions(action))));
-            /*log.Debug($"All Actions: {actionList.Select(a => a.Item1.ToString()).Fuse()}");*/
-            foreach ((RoleAction roleAction, AbstractBaseRole role) in actionList.OrderBy(a1 => a1.Item1.Priority))
-            {
-                if (role.MyPlayer == null || !role.MyPlayer.IsAlive() && !roleAction.TriggerWhenDead) return;
-                roleAction.Execute(role, parameters);
-            }
-        }
-    }
-
     public static string GetName(PlayerControl player)
     {
         return player == null ? "Unknown" : player.name;
@@ -117,21 +59,21 @@ public static class Game
 
     public static void Setup()
     {
-        MatchData = new MatchData();
+        CurrentGameMode.MatchData = new MatchData();
         _winDelegate = new WinDelegate();
         RandomSpawn = new RandomSpawn();
         NameModels.Clear();
         Players.GetPlayers().Do(p => NameModels.Add(p.PlayerId, new SimpleNameModel(p)));
 
-        Hooks.GameStateHooks.GameStartHook.Propagate(new GameStateHookEvent(MatchData));
-        CurrentGamemode.SetupWinConditions(_winDelegate);
+        Hooks.GameStateHooks.GameStartHook.Propagate(new GameStateHookEvent(MatchData, CurrentGameMode));
+        ProjectLotus.GameModeManager.StartGame(_winDelegate);
     }
 
     public static void Cleanup(bool newLobby = false)
     {
         NameModels.Clear();
         if (newLobby) MatchData.Cleanup();
-        Hooks.GameStateHooks.GameEndHook.Propagate(new GameStateHookEvent(MatchData));
+        Hooks.GameStateHooks.GameEndHook.Propagate(new GameStateHookEvent(MatchData, CurrentGameMode));
         State = GameState.InLobby;
     }
 }

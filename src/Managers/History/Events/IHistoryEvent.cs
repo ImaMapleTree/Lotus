@@ -1,4 +1,4 @@
-using Lotus.Roles;
+using Lotus.Roles2;
 using VentLib.Utilities.Optionals;
 
 namespace Lotus.Managers.History.Events;
@@ -6,7 +6,7 @@ namespace Lotus.Managers.History.Events;
 public interface IHistoryEvent
 {
     public PlayerControl Player();
-    public Optional<CustomRole> RelatedRole();
+    public Optional<UnifiedRoleDefinition> RelatedRole();
     public Timestamp Timestamp();
 
     /// <summary>

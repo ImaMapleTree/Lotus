@@ -1,0 +1,20 @@
+UpperText:
+  Text: ♡The♡Amazing♡
+  Gradient: "#5be4ad, #e58eec, #f8f2d5"
+  Size: 2
+
+Name:
+  Gradient: "#f8f2d5, #e58eec, #5be4ad"
+  Size: 2
+
+Prefix:
+  Spaced: True
+  Text: ♡
+  Color: "#f8f2d5"
+  Size: 2
+
+Suffix:
+  Spaced: True
+  Text: ♡
+  Color: "#5be4ad"
+  Size: 2

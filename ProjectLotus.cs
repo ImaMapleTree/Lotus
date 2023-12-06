@@ -9,19 +9,18 @@ using Lotus.Addons;
 using Lotus.API;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
-using Lotus.Gamemodes;
+using Lotus.GameModes;
 using Lotus.GUI.Menus;
 using Lotus.GUI.Patches;
 using Lotus.Managers;
 using Lotus.Options;
-using Lotus.Roles;
-using Lotus.Server;
+using Lotus.Roles2;
+using Lotus.Roles2.Definitions.JanitorRole;
 using UnityEngine;
 using VentLib;
 using VentLib.Networking.Handshake;
 using VentLib.Networking.RPC;
 using VentLib.Options.Game;
-using VentLib.Utilities.Debug.Profiling;
 using VentLib.Utilities.Optionals;
 using VentLib.Version;
 using VentLib.Version.Git;
@@ -53,7 +52,7 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
     public static readonly string ModName = "Project Lotus";
     public static readonly string ModColor = "#4FF918";
 
-
+    public static DefinitionUnifier DefinitionUnifier = new();
     public static bool DevVersion = false;
     public static readonly string DevVersionStr = "Dev 18.06.2023";
 
@@ -62,10 +61,6 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
     public static ModUpdater ModUpdater = null!;
 
-    public static LotusRoleManager RoleManager = null!;
-
-
-    public static ServerPatchManager ServerPatchManager = new();
     public static bool FinishedLoading;
 
 
@@ -77,9 +72,6 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 #endif
         Instance = this;
         Vents.Initialize();
-
-        RoleManager = new LotusRoleManager();
-        RoleManager.Load();
 
         VersionControl versionControl = ModVersion.VersionControl = VersionControl.For(this);
         versionControl.AddVersionReceiver(ReceiveVersion);
@@ -109,14 +101,14 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
     public static List<byte> ResetCamPlayerList = null!;
 
-    public static GamemodeManager GamemodeManager;
+    public static GameModeManager GameModeManager;
     public static ProjectLotus Instance = null!;
 
     public override void Load()
     {
         //Profilers.Global.SetActive(false);
         GameOptionController.Enable();
-        GamemodeManager = new GamemodeManager();
+        GameModeManager = new GameModeManager();
 
         log.Info($"{Application.version}", "AmongUs Version");
         log.Info(CurrentVersion.ToString(), "GitVersion");
@@ -125,10 +117,14 @@ public class ProjectLotus : BasePlugin, IGitVersionEmitter
 
         /*StaticEditor.Register(Assembly.GetExecutingAssembly());*/
         Harmony.PatchAll(Assembly.GetExecutingAssembly());
+        DefinitionUnifier.RegisterRoleComponents(typeof(ProjectLotus).Assembly);
         AddonManager.ImportAddons();
 
-        RoleManager.Freeze();
-        GamemodeManager.Setup();
+        DefinitionUnifier unifier = new();
+        unifier.RegisterRoleComponents(this.GetType().Assembly);
+        UnifiedRoleDefinition unifiedRoleDefinition = unifier.Unify(new JanitorNew());
+
+        GameModeManager.Setup();
         ShowerPages.InitPages();
 
         FinishedLoading = true;

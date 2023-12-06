@@ -6,8 +6,11 @@ using Lotus.API.Reactive.HookEvents;
 using Lotus.Managers.History.Events;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
+using Lotus.Managers.History;
 using Lotus.Options;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Manager;
+using Lotus.Roles2.Operations;
 using Lotus.Server;
 using Lotus.Utilities;
 using VentLib.Utilities;
@@ -31,7 +34,7 @@ public static class MurderPatches
     [QuickPrefix(typeof(PlayerControl), nameof(PlayerControl.CheckMurder))]
     public static bool Prefix(PlayerControl __instance, PlayerControl target)
     {
-        if (ClientOptions.AdvancedOptions.PublicCompatability) return true;
+        //if (__instance.IsHost()) return true;
         if (!AmongUsClient.Instance.AmHost) return false;
         if (__instance == null || target == null) return false;
 
@@ -58,8 +61,7 @@ public static class MurderPatches
 
         if (!MurderLocks.GetOrCompute(__instance.PlayerId, TimeoutSupplier).IsUnlocked()) return false;
 
-        ActionHandle handle = ActionHandle.NoInit();
-        __instance.Trigger(LotusActionType.Attack, ref handle, target);
+        RoleOperations.Current.Trigger(LotusActionType.Attack, __instance, target);
         return false;
     }
 
@@ -70,5 +72,36 @@ public static class MurderPatches
     }
 
     [QuickPostfix(typeof(PlayerControl), nameof(PlayerControl.MurderPlayer))]
-    public static void MurderPlayer(PlayerControl __instance, PlayerControl target) => ServerPatchManager.Patch.Execute(PatchedCode.MurderPlayer, __instance, target);
+    public static void MurderPlayer(PlayerControl __instance, PlayerControl target)
+    {
+        if (!AmongUsClient.Instance.AmHost) return;
+        if (!target.Data.IsDead) return;
+        if (Game.MatchData.GetFrozenPlayer(target)?.Status is not PlayerStatus.Alive) return;
+
+        MurderPatches.Lock(__instance.PlayerId);
+
+        log.Trace($"{__instance.GetNameWithRole()} => {target.GetNameWithRole()}{(target.protectedByGuardian ? "(Protected)" : "")}", "MurderPlayer");
+
+        IDeathEvent deathEvent = Game.MatchData.GameHistory.GetCauseOfDeath(target.PlayerId)
+            .OrElseGet(() => __instance.PlayerId == target.PlayerId
+                ? new SuicideEvent(__instance)
+                : new DeathEvent(target, __instance)
+            );
+
+        Game.MatchData.GameHistory.AddEvent(deathEvent);
+        Game.MatchData.GameHistory.SetCauseOfDeath(target.PlayerId, deathEvent);
+
+
+        IRoleManager.Current.RoleOperations.TriggerForAll(LotusActionType.PlayerDeath, target, __instance, deathEvent.Instigator(), deathEvent);
+
+        PlayerControl killer = deathEvent.Instigator().FlatMap(k => new UnityOptional<PlayerControl>(k.MyPlayer)).OrElse(__instance);
+        PlayerMurderHookEvent playerMurderHookEvent = new(killer, target, deathEvent);
+        Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);
+        Hooks.PlayerHooks.PlayerDeathHook.Propagate(playerMurderHookEvent);
+
+        Async.Schedule(() =>
+        {
+            if (target != null) target.SetChatName(target.name);
+        }, 0.1f);
+    }
 }

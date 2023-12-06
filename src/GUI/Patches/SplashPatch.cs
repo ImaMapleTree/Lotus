@@ -88,19 +88,19 @@ class SplashPatch
         leftPanel.gameObject.FindChild<SpriteRenderer>("Divider").enabled = false;
         leftPanel.GetComponentsInChildren<SpriteRenderer>(true).Where(r => r.name == "Shine").ForEach(r => r.enabled = false);
 
-        PassiveButton inventoryButton = MakeIconButton(__instance.inventoryButton,new Vector3(0.25f, 1.15f, 1f), sprite: AssetLoader.LoadSprite("main_menu.InventoryIconRedone.png", 100));
+        PassiveButton inventoryButton = MakeIconButton(__instance.inventoryButton,new Vector3(0.25f, 1.15f, 1f), sprite: AssetLoader.LoadLotusSprite("main_menu.InventoryIconRedone.png", 100));
         inventoryButton.transform.localPosition = new Vector3(5.6f, -1.96f, 0f);
 
         PassiveButton discordButton = Object.Instantiate(inventoryButton, __instance.transform);
-        discordButton.inactiveSprites.GetComponent<SpriteRenderer>().sprite = AssetLoader.LoadSprite("main_menu.discord_button_icon.png", 100);
+        discordButton.inactiveSprites.GetComponent<SpriteRenderer>().sprite = AssetLoader.LoadLotusSprite("main_menu.discord_button_icon.png", 100);
         discordButton.transform.localPosition = new Vector3(0.34f, -2.4f, 0f);
         discordButton.transform.localScale = new Vector3(0.17f, 0.90f, 1f);
         discordButton.Modify(() => Application.OpenURL(ModConstants.DiscordInvite));
 
-        PassiveButton shopButton = MakeIconButton(__instance.shopButton, new Vector3(0.25f, 1.05f, 1f), sprite: AssetLoader.LoadSprite("main_menu.ShopIconRedone.png", 100));
+        PassiveButton shopButton = MakeIconButton(__instance.shopButton, new Vector3(0.25f, 1.05f, 1f), sprite: AssetLoader.LoadLotusSprite("main_menu.ShopIconRedone.png", 100));
         shopButton.transform.localPosition = new Vector3(6.75f, -1.975f, 0f);
 
-        PassiveButton newsButton = MakeIconButton(__instance.newsButton, new Vector3(0.22f, 1.44f, 1f), sprite: AssetLoader.LoadSprite("main_menu.AnnouncementIconRedone.png", 100));
+        PassiveButton newsButton = MakeIconButton(__instance.newsButton, new Vector3(0.22f, 1.44f, 1f), sprite: AssetLoader.LoadLotusSprite("main_menu.AnnouncementIconRedone.png", 100));
         newsButton.transform.localPosition = new Vector3(7.89f, -1.8675f, 0f);
 
         __instance.playButton.transform.localPosition -= new Vector3(0f, 1.4f);
@@ -121,8 +121,8 @@ class SplashPatch
         playLocalButton.transform.localPosition -= new Vector3(3.4f, 1.5f);
         playLocalButton.transform.localScale -= new Vector3(0.16f, 0.2f);
         playLocalButton.activeSprites.GetComponent<SpriteRenderer>().color = activeSpriteRender.color;
-        playLocalButton.inactiveSprites.FindChild<SpriteRenderer>("Icon", true).sprite = AssetLoader.LoadSprite("main_menu.LittleDudeIcon.png", 50);
-        playLocalButton.activeSprites.FindChild<SpriteRenderer>("Icon", true).sprite = AssetLoader.LoadSprite("main_menu.LittleDudeIcon.png", 50);
+        playLocalButton.inactiveSprites.FindChild<SpriteRenderer>("Icon", true).sprite = AssetLoader.LoadLotusSprite("main_menu.LittleDudeIcon.png", 50);
+        playLocalButton.activeSprites.FindChild<SpriteRenderer>("Icon", true).sprite = AssetLoader.LoadLotusSprite("main_menu.LittleDudeIcon.png", 50);
         playLocalButton.OnClick = __instance.playLocalButton.OnClick;
         Async.Schedule(() => playLocalButton.buttonText.text = "Play Local", 0.001f);
 
@@ -141,7 +141,7 @@ class SplashPatch
         tohLogo.transform.position = new Vector3(4.55f, -2.1f);
         tohLogo.transform.localScale = new Vector3(1f, 1f, 1f);
         var renderer = tohLogo.AddComponent<SpriteRenderer>();
-        renderer.sprite = Utils.LoadSprite("Lotus.assets.Lotus_Icon.png", 700f);
+        renderer.sprite = AssetLoader.LoadSprite("Lotus.assets.Lotus_Icon.png", 700f);
 
         _customSplash.OrElseSet(InitializeSplash);
         PlayerParticles particles = Object.FindObjectOfType<PlayerParticles>();
@@ -177,7 +177,7 @@ class SplashPatch
         GameObject splashArt = new("SplashArt");
         splashArt.transform.localPosition = new Vector3(0.3545f, -0.0455f, 600f);
         var spriteRenderer = splashArt.AddComponent<SpriteRenderer>();
-        spriteRenderer.sprite = Utils.LoadSprite("Lotus.assets.PLBackground-Upscale.png", 250f);
+        spriteRenderer.sprite = AssetLoader.LoadSprite("Lotus.assets.PLBackground-Upscale.png", 250f);
         return splashArt;
     }
 

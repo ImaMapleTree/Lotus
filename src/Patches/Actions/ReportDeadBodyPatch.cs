@@ -4,6 +4,7 @@ using Lotus.API.Vanilla.Meetings;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using Lotus.Utilities;
 
 namespace Lotus.Patches.Actions;
@@ -27,17 +28,10 @@ public class ReportDeadBodyPatch
             if (__instance.PlayerId == target.PlayerId) return false;
             if (Game.MatchData.UnreportableBodies.Contains(target.PlayerId)) return false;
 
-            Game.TriggerForAll(LotusActionType.AnyReportedBody, ref handle, __instance, target);
+            RoleOperations.Current.Trigger(LotusActionType.ReportBody, __instance, handle, target);
             if (handle.IsCanceled)
             {
                 log.Trace("Not Reporting Body - Cancelled by Any Report Action", "ReportDeadBody");
-                return false;
-            }
-
-            __instance.Trigger(LotusActionType.SelfReportBody, ref handle, target);
-            if (handle.IsCanceled)
-            {
-                log.Trace("Not Reporting Body - Cancelled by Self Report Action", "ReportDeadBody");
                 return false;
             }
         }

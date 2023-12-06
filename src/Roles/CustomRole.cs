@@ -22,12 +22,8 @@ using Lotus.Extensions;
 using Lotus.Factions.Impostors;
 using Lotus.Logging;
 using Lotus.Options.LotusImpl.Roles;
-using Lotus.Patches.Actions;
-using Lotus.Roles.Builtins.Base;
 using Lotus.Roles.Interfaces;
-using LotusTrigger.Options;
 using VentLib.Localization.Attributes;
-using VentLib.Networking;
 using VentLib.Networking.Interfaces;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
@@ -45,14 +41,14 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
 
     static CustomRole()
     {
-        AbstractConstructors.Register(typeof(CustomRole), r => ProjectLotus.RoleManager.GetRole(r.ReadString()));
+        //AbstractConstructors.Register(typeof(CustomRole), r => ProjectLotus.RoleManager.GetRole(r.ReadString()));
     }
 
     public virtual bool CanVent() => (BaseCanVent && !RoleAbilityFlags.HasFlag(RoleAbilityFlag.CannotVent));
 
     public virtual void HandleDisconnect() {}
 
-    public Relation Relationship(PlayerControl player) => Relationship(player.GetCustomRole());
+    public Relation Relationship(PlayerControl player) => Relation.None;//Relationship(player.GetCustomRole());
 
     public virtual Relation Relationship(CustomRole role)
     {
@@ -69,7 +65,6 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     }
 
     private RemoteList<GameOptionOverride> currentOverrides = new();
-    private List<RoleEditor> injections;
 
 
     /// <summary>
@@ -80,27 +75,18 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     {
         CustomRole cloned = Clone();
 
-        RemoteList<IRoleInitializer> roleInitializers = ProjectLotus.RoleManager.GetInitializersForType(this.GetType());
-        roleInitializers.ForEach(ri => ri.PreSetup(cloned));
-
-        RoleModifier roleModifier = cloned.Modify(new RoleModifier(cloned));
         cloned.RelatedRoles.Add(this.GetType());
         cloned.MyPlayer = player;
 
-        if (cloned.Editor != null)
-            cloned.Editor = cloned.Editor.Instantiate(cloned, player);
-
         CreateInstanceBasedVariables();
 
-        roleInitializers.ForEach(ri => ri.PostModify(cloned, roleModifier));
 
         cloned.Setup(player);
         cloned.SetupUI2(player.NameModel());
         player.NameModel().Render(force: true);
 
         cloned.PostSetup();
-
-        return roleInitializers.Aggregate(cloned, (role, initializer) => initializer.PostSetup(role));
+        return cloned;
     }
 
     public CustomRole Clone()
@@ -230,36 +216,23 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
         HudManager.Instance.SetHudActive(true);
     }
 
-    public virtual void RefreshKillCooldown(PlayerControl? target = null, float returnValue = -1)
+    public virtual void RefreshKillCooldown(PlayerControl? target = null, IEnumerable<GameOptionOverride>? overrides = null)
     {
         if (MyPlayer == null || !AmongUsClient.Instance.AmHost) return;
         if (target == null) target = MyPlayer;
-        RemoveProtectionPatch.AddIgnoredInteraction(MyPlayer.PlayerId, target.PlayerId);
 
+        SyncOptions(overrides);
         if (MyPlayer.IsHost())
         {
-            SyncOptions();
             target.ShowFailedMurder();
             MyPlayer.SetKillTimer(GameOptionsManager.Instance.CurrentGameOptions.GetFloat(FloatOptionNames.KillCooldown) / 2f);
             return;
         }
-
-        IEnumerable<GameOptionOverride> overrides = CurrentRoleOverrides();
-        IGameOptions modifiedOptions = DesyncOptions.GetModifiedOptions(overrides);
-        IGameOptions copiedOptions = modifiedOptions.DeepCopy();
-        copiedOptions.SetFloat(FloatOptionNames.KillCooldown, returnValue <= 0 ? 0.01f : returnValue);
-
-
-        DesyncOptions.SyncToPlayer(modifiedOptions, MyPlayer);
-
         RpcV3.Mass()
             .Start(MyPlayer.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).End()
             .Start(MyPlayer.NetId, RpcCalls.MurderPlayer).Write(target).End()
             .Start(MyPlayer.NetId, RpcCalls.ProtectPlayer).Write(target).Write(0).End()
-            /*.Start(PlayerControl.LocalPlayer.NetId, RpcCalls.SyncSettings).Write(copiedOptions).End()*/
             .Send(MyPlayer.GetClientId());
-
-        Async.Schedule(() => DesyncOptions.SyncToPlayer(copiedOptions, MyPlayer), 0.1f);
     }
 
     private void ShowRoleToTeammates(IEnumerable<PlayerControl> allies)
@@ -312,10 +285,10 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
                         if (value is not CustomRole cr) throw new ArgumentException($"Values for \"{nameof(UI.Role)}\" must be {nameof(CustomRole)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         nameModel.GetComponentHolder<RoleHolder>().Add(new RoleComponent(cr, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
                         break;
-                    case UI.Subrole:
+                    /*case UI.Subrole:
                         if (value is not Subrole sr) throw new ArgumentException($"Values for \"{nameof(UI.Subrole)}\" must be {nameof(Subrole)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         nameModel.GetComponentHolder<SubroleHolder>().Add(new SubroleComponent(sr, uiComponent.GameStates, uiComponent.ViewMode, viewers: MyPlayer));
-                        break;
+                        break;*/
                     case UI.Cooldown:
                         if (value is not Cooldown cd) throw new ArgumentException($"Values for \"{nameof(UI.Cooldown)}\" must be {nameof(Cooldown)}. (Got: {value?.GetType()}) in role: {EnglishRoleName}");
                         log.Fatal($"Loading Cooldown Field: {cd} for {this}");
@@ -394,14 +367,15 @@ public abstract class CustomRole : AbstractBaseRole, IRpcSendable<CustomRole>
     {
         string qualifier = reader.ReadString();
         DevLogger.Log($"Qualifier: {qualifier}");
-        return ProjectLotus.RoleManager.GetRole(qualifier);
+        return null;
+        //return ProjectLotus.RoleManager.GetRole(qualifier);
     }
 
     public void Write(MessageWriter writer)
     {
-        string qualifier = ProjectLotus.RoleManager.GetIdentifier(this);
+        /*string qualifier = ProjectLotus.RoleManager.GetIdentifier(this);
         DevLogger.Log($"Qualifier: {qualifier}");
-        writer.Write(qualifier);
+        writer.Write(qualifier);*/
     }
 
 

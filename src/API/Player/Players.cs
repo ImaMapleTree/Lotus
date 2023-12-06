@@ -9,6 +9,7 @@ using Lotus.Factions.Impostors;
 using Lotus.GUI.Name.Interfaces;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2;
 using Lotus.Utilities;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -21,13 +22,13 @@ public static class Players
     public static IEnumerable<PlayerControl> GetPlayers(PlayerFilter filter = PlayerFilter.None)
     {
         IEnumerable<PlayerControl> players = PlayerControl.AllPlayerControls.ToArray();
-        if (filter.HasFlag(PlayerFilter.NonPhantom)) players = players.Where(p => p.GetCustomRole() is not IPhantomRole pr || pr.IsCountedAsPlayer());
+        if (filter.HasFlag(PlayerFilter.NonPhantom)) players = players.Where(p => RoleProperties.IsApparition(p.PrimaryRole()));
         if (filter.HasFlag(PlayerFilter.Alive)) players = players.Where(p => p.IsAlive());
         if (filter.HasFlag(PlayerFilter.Dead)) players = players.Where(p => !p.IsAlive());
-        if (filter.HasFlag(PlayerFilter.Impostor)) players = players.Where(p => p.GetCustomRole().Faction.GetType() == typeof(ImpostorFaction));
-        if (filter.HasFlag(PlayerFilter.Crewmate)) players = players.Where(p => p.GetCustomRole().Faction is Crewmates);
-        if (filter.HasFlag(PlayerFilter.Neutral)) players = players.Where(p => p.GetCustomRole().SpecialType is SpecialType.Neutral);
-        if (filter.HasFlag(PlayerFilter.NeutralKilling)) players = players.Where(p => p.GetCustomRole().SpecialType is SpecialType.NeutralKilling);
+        if (filter.HasFlag(PlayerFilter.Impostor)) players = players.Where(p => p.PrimaryRole().RoleDefinition.Faction.GetType() == typeof(ImpostorFaction));
+        if (filter.HasFlag(PlayerFilter.Crewmate)) players = players.Where(p => p.PrimaryRole().RoleDefinition.Faction is Crewmates);
+        if (filter.HasFlag(PlayerFilter.Neutral)) players = players.Where(p => p.PrimaryRole().Metadata.Get(LotusKeys.AuxiliaryRoleType) is SpecialType.Neutral);
+        if (filter.HasFlag(PlayerFilter.NeutralKilling)) players = players.Where(p => p.PrimaryRole().Metadata.Get(LotusKeys.AuxiliaryRoleType) is SpecialType.NeutralKilling);
         return players;
     }
 

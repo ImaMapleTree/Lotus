@@ -10,12 +10,6 @@ public class ProtectionPatchedServerImplementation: AbstractServerPatch
 
     protected override Dictionary<PatchedCode, IServerPatchHandler> CodePatchHandlers { get; set; } = new()
     {
-        { PatchedCode.CheckMurder, CheckMurderHandlers.ProtectionPatchedHandler },
-        { PatchedCode.MurderPlayer, MurderPlayerHandlers.StandardHandler },
-        { PatchedCode.PreGameSetup, PreGameSetupHandlers.ProtectionPatchedHandler },
-        { PatchedCode.RemoveProtection, RemoveProtectHandlers.ProtectionPatchedHandler},
-        { PatchedCode.RpcMark, RpcMarkHandlers.ProtectionPatchedHandler },
-        { PatchedCode.PostMeeting, PostMeetingHandlers.ProtectionPatchedHandler },
         { PatchedCode.ServerVersion , ServerVersionHandlers.ProtectionPatchedHandler },
         { PatchedCode.GlobalOverrides , GlobalOptionHandlers.ProtectionPatchedHandler }
     };

@@ -22,5 +22,5 @@ public class LotusActionAttribute: Attribute
         Priority = priority;
     }
 
-    public override string ToString() => $"GamemodeAction(type={ActionType}, Priority={Priority})";
+    public override string ToString() => $"GameModeAction(type={ActionType}, Priority={Priority})";
 }

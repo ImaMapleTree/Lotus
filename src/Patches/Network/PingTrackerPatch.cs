@@ -36,10 +36,7 @@ class PingTrackerPatch
 
         __instance.text.text += ProjectLotus.CredentialsText;
         if (GeneralOptions.DebugOptions.NoGameEnd) __instance.text.text += $"\r\n" + Utils.ColorString(Color.red, Localizer.Translate("StaticOptions.NoGameEnd"));
-        __instance.text.text += $"\r\n" + Game.CurrentGamemode.Name;
-
-        if (ClientOptions.AdvancedOptions.PublicCompatability) __instance.text.text += $"\r\n{new Color(0.4f, 0.6f, 1f).Colorize("Public Compatability Patch")}";
-
+        __instance.text.text += $"\r\n" + Game.CurrentGameMode.Name;
 
         var offsetX = 1.2f; //右端からのオフセット
         if (HudManager.InstanceExists && HudManager._instance.Chat.chatButton.active) offsetX += 0.8f; //チャットボタンがある場合の追加オフセット

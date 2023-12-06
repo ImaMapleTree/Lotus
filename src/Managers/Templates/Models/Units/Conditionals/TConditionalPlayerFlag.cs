@@ -39,10 +39,10 @@ public class TConditionalPlayerFlag: CommonConditionalUnit
             switch (flag)
             {
                 case PlayerFlag.HasModifier:
-                    if (!player.GetSubroles().IsEmpty()) return true;
+                    if (!player.SecondaryRoles().IsEmpty()) return true;
                     break;
                 case PlayerFlag.HasNoModifier:
-                    if (player.GetSubroles().IsEmpty()) return true;
+                    if (player.SecondaryRoles().IsEmpty()) return true;
                     break;
                 case PlayerFlag.IsModded:
                     if (player.IsModded()) return true;

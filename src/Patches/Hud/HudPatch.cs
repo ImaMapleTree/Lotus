@@ -3,21 +3,13 @@ using Lotus.API.Odyssey;
 using Lotus.Extensions;
 using Lotus.Options;
 using UnityEngine;
+using VentLib.Utilities.Extensions;
 
 namespace Lotus.Patches.Hud;
 
 [HarmonyPatch(typeof(HudManager), nameof(HudManager.Update))]
 class HudManagerPatch
 {
-    public static bool ShowDebugText = false;
-    public static int LastCallNotifyRolesPerSecond = 0;
-    public static int NowCallNotifyRolesCount = 0;
-    public static int LastSetNameDesyncCount = 0;
-    public static int LastFPS = 0;
-    public static int NowFrameCount = 0;
-    public static float FrameRateTimer = 0.0f;
-    public static TMPro.TextMeshPro LowerInfoText;
-
     public static void Postfix(HudManager __instance)
     {
         var player = PlayerControl.LocalPlayer;
@@ -45,11 +37,14 @@ class HudManagerPatch
         else if (!PlayerControl.LocalPlayer.IsAlive()) __instance.ReportButton.Hide();
         else __instance.ReportButton.Show();
 
+        if (Game.State is GameState.InLobby)
+        {
+            __instance.GameSettings.text = OptionShower.GetOptionShower().GetPage();
+        }
 
-        __instance.GameSettings.text = OptionShower.GetOptionShower().GetPage();
-        //ゲーム中でなければ以下は実行されない
-        if (!AmongUsClient.Instance.IsGameStarted) return;
+        if (Game.State is not (GameState.Roaming or GameState.InMeeting)) return;
 
+        player.GetAllRoleDefinitions().ForEach(rd => rd.RoleDefinition.GUIProvider.Update());
     }
 }
 

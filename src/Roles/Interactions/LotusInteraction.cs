@@ -1,5 +1,6 @@
 using Lotus.Roles.Interactions.Interfaces;
 using Lotus.Extensions;
+using Lotus.Roles2;
 
 namespace Lotus.Roles.Interactions;
 
@@ -10,19 +11,25 @@ public class LotusInteraction : Interaction
     public static Stub NeutralInteraction = new(new NeutralIntent());
     public static Stub HelpfulInteraction = new(new HelpfulIntent());
 
-    private CustomRole role;
+    private UnifiedRoleDefinition unifiedRoleDefinition;
 
-    public LotusInteraction(Intent intent, CustomRole customRole)
+    public LotusInteraction(Intent intent, UnifiedRoleDefinition roleDefinition)
     {
         this.Intent = intent;
-        this.role = customRole;
+        this.unifiedRoleDefinition = roleDefinition;
     }
 
-    public CustomRole Emitter() => role;
+    public LotusInteraction(Intent intent, RoleDefinition roleDefinition)
+    {
+        this.Intent = intent;
+        this.unifiedRoleDefinition = roleDefinition.Handle;
+    }
+
+    public UnifiedRoleDefinition Emitter() => unifiedRoleDefinition;
     public Intent Intent { get; set; }
     public bool IsPromised { get; set; }
 
-    public virtual Interaction Modify(Intent intent) => new LotusInteraction(intent, role);
+    public virtual Interaction Modify(Intent intent) => new LotusInteraction(intent, unifiedRoleDefinition);
 
     public class Stub
     {
@@ -32,14 +39,19 @@ public class LotusInteraction : Interaction
             this.intent = intent;
         }
 
-        public LotusInteraction Create(CustomRole role)
+        public LotusInteraction Create(UnifiedRoleDefinition role)
         {
             return new LotusInteraction(intent, role);
         }
 
+        public LotusInteraction Create(RoleDefinition definition)
+        {
+            return new LotusInteraction(intent, definition);
+        }
+
         public LotusInteraction Create(PlayerControl player)
         {
-            return new LotusInteraction(intent, player.GetCustomRole());
+            return new LotusInteraction(intent, player.PrimaryRole());
         }
     }
 }

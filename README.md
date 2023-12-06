@@ -206,7 +206,7 @@ This table serves as a quick reference for the different variables that can be u
 | Death                 | ${Death}                  | A player's CoD                                                                                      |
 | Description           | ${Description}            | The player's role description                                                                       |
 | Faction               | ${Faction}                | The player's faction                                                                                |
-| Game Mode             | ${Gamemode}               | The current game mode selected                                                                      |
+| Game Mode             | ${GameMode}               | The current game mode selected                                                                      |
 | Host                  | ${Host}                   | The host's name                                                                                     |
 | ImpostorCount         | ${ImpostorCount}          | A count of all impostors                                                                            |
 | Impostors             | ${Impostors}              | All impostor names, separated by comma                                                              |

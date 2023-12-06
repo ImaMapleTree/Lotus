@@ -40,7 +40,7 @@ public class AddonInfo: IRpcSendable<AddonInfo>
     {
         return new AddonInfo
         {
-            UUID = addon.Uuid,
+            UUID = addon.UUID,
             AssemblyShortName = addon.BundledAssembly.GetName().Name,
             AssemblyFullName = addon.BundledAssembly.GetName().FullName,
             Name = addon.Name,

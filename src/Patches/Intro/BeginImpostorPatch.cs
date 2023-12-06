@@ -3,6 +3,8 @@ using Lotus.Factions.Crew;
 using Lotus.Extensions;
 using Lotus.Roles;
 using Lotus.Roles.Builtins;
+using Lotus.Roles2;
+using Lotus.Roles2.Definitions;
 
 namespace Lotus.Patches.Intro;
 
@@ -11,8 +13,8 @@ class BeginImpostorPatch
 {
     public static bool Prefix(IntroCutscene __instance, ref Il2CppSystem.Collections.Generic.List<PlayerControl> yourTeam)
     {
-        CustomRole role = PlayerControl.LocalPlayer.GetCustomRole();
-        if (role.Faction is not Crewmates || role is EmptyRole) return true;
+        UnifiedRoleDefinition role = PlayerControl.LocalPlayer.PrimaryRole();
+        if (role.Faction is not Crewmates || role is NoOpDefinition) return true;
 
         yourTeam = new Il2CppSystem.Collections.Generic.List<PlayerControl>();
         yourTeam.Add(PlayerControl.LocalPlayer);

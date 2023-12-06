@@ -26,7 +26,7 @@ public static class VictoryScreen
         HashSet<byte> winningPlayerIds = winners.Select(p => p.PlayerId).ToHashSet();
         List<FrozenPlayer> winnerRoles = Game.MatchData.GameHistory.LastWinners = winners.Select(w => Game.MatchData.FrozenPlayers[w.GetGameID()]).Distinct().ToList();
         Game.MatchData.GameHistory.AdditionalWinners = winDelegate.GetAdditionalWinners().Select(w => Game.MatchData.FrozenPlayers[w.GetGameID()]).Distinct().ToList();
-        log.Info($"Setting Up Win Screen | Winners: {winnerRoles.Select(fp => $"{fp.Name} ({fp.Role.EnglishRoleName})").Fuse()}");
+        log.Info($"Setting Up Win Screen | Winners: {winnerRoles.Select(fp => $"{fp.Name} ({fp.PrimaryRoleDefinition.Name})").Fuse()}");
 
         bool impostorsWin = IsImpostorsWin(reason);
 

@@ -6,6 +6,8 @@ using Lotus.Logging;
 using Lotus.Roles;
 using Lotus.Roles.Builtins;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2;
+using Lotus.Roles2.Manager;
 using Lotus.Utilities;
 using LotusTrigger.Options;
 using UnityEngine;
@@ -20,6 +22,8 @@ namespace Lotus.Options;
 [Localized("OptionShower")]
 public class ShowerPages
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(ShowerPages));
+
     [Localized("ActiveRolesList")]
     private static string ActiveRolesList = "Active Roles List";
 
@@ -44,14 +48,15 @@ public class ShowerPages
         return () =>
         {
             DevLogger.Log("Enabled Role Page");
-            string content = $"Gamemode: {Game.CurrentGamemode.Name}\n\n";
+            string content = $"GameMode: {Game.CurrentGameMode.Name}\n\n";
             content += $"{GameMaster.GMColor.Colorize("GM")}: {Utils.GetOnOffColored(GeneralOptions.AdminOptions.HostGM)}\n\n";
             content += ActiveRolesList + "\n";
 
-            ProjectLotus.RoleManager.Not(LotusRoleType.Internals).Where(role => role.IsEnabled()).ForEach(role =>
+            //TODO: Not(LotusRoleType.Internals)
+            IRoleManager.Current.RoleDefinitions().Where(role => role.IsEnabled()).ForEach(role =>
             {
                 Color color = role.RoleColor;
-                content += $"{color.Colorize(role.RoleName)}: {role.Chance}% x {role.Count}\n";
+                content += $"{color.Colorize(role.Name)}: {role.Chance}% x {role.Count}\n";
             });
             return content;
         };
@@ -63,9 +68,9 @@ public class ShowerPages
         {
             DevLogger.Log("Role Option Page");
             var content = "";
-            ProjectLotus.RoleManager.Not(LotusRoleType.Internals).Where(role => role.IsEnabled()).ForEach(role =>
+            IRoleManager.Current.RoleDefinitions().Where(role => role.IsEnabled()).ForEach(role =>
             {
-                var opt = role.RoleOptions;
+                var opt = role.OptionConsolidator.GetOption();
                 content += $"{opt.Name()}: {opt.GetValueText()}\n";
                 if (opt.Children.Matches(opt.GetValue()))
                     content = ShowChildren(opt, opt.Color, content);
@@ -84,7 +89,17 @@ public class ShowerPages
 
             optionManager.GetOptions().Where(opt => opt.GetType() == typeof(GameOption)).Cast<GameOption>().Do(opt =>
             {
-                CustomRole? matchingRole = ProjectLotus.RoleManager.AllRoles.FirstOrDefault(r => r.RoleOptions == opt);
+                UnifiedRoleDefinition? matchingRole = IRoleManager.Current.RoleDefinitions().FirstOrDefault(r =>
+                {
+                    try {
+                        return r.OptionConsolidator.GetOption() == opt;
+                    }
+                    catch (Exception e)
+                    {
+                        log.Exception(e);
+                        return false;
+                    }
+                });
 
                 if (matchingRole != null) return;
 

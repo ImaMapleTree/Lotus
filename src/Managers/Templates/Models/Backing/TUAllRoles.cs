@@ -1,11 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Lotus.API;
 using Lotus.Factions.Neutrals;
 using Lotus.Roles;
 using Lotus.Roles.Builtins;
 using Lotus.Roles.Builtins.Base;
 using Lotus.Roles.Debugger;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2;
+using Lotus.Roles2.Definitions;
+using Lotus.Roles2.Manager;
 using VentLib.Utilities.Collections;
 using VentLib.Utilities.Extensions;
 
@@ -18,26 +22,29 @@ internal class TUAllRoles
     {
         string? factionName = null;
 
-        OrderedDictionary<string, List<CustomRole>> rolesByFaction = new();
+        OrderedDictionary<string, List<UnifiedRoleDefinition>> rolesByFaction = new();
 
-        string FactionName(CustomRole role)
+        string FactionName(UnifiedRoleDefinition roleDefinition)
         {
-            if (role is Subrole || onlyModifiers) return "Modifiers";
-            if (role.Faction is not Neutral) return role.Faction.Name();
-            return role.SpecialType is SpecialType.NeutralKilling ? "Neutral Killers" : "Neutral";
+            if (roleDefinition.Metadata.GetOrEmpty(RoleProperties.Key).Compare(r => r.HasProperty(RoleProperty.IsModifier))) return "Modifiers";
+            if (roleDefinition.Faction is not Neutral) return roleDefinition.Faction.Name();
+
+            SpecialType specialType = roleDefinition.Metadata.GetOrDefault(LotusKeys.AuxiliaryRoleType, SpecialType.None);
+
+            return specialType is SpecialType.NeutralKilling ? "Neutral Killers" : "Neutral";
         }
 
-        bool Condition(CustomRole role)
+        bool Condition(UnifiedRoleDefinition role)
         {
-            if (role is Debugger or IllegalRole or EnforceFunctionOrderingRole) return false;
-            if (onlyModifiers && role.RoleFlags.HasFlag(RoleFlag.IsSubrole)) return true;
+            if (role is NoOpDefinition) return false;
+            if (onlyModifiers && RoleProperties.IsModifier(role)) return true;
             if (onlyModifiers) return false;
             if (allowSubroles) return true;
-            return !role.RoleFlags.HasFlag(RoleFlag.IsSubrole);
+            return !RoleProperties.IsModifier(role);
         }
 
 
-        ProjectLotus.RoleManager.AllRoles.ForEach(r => rolesByFaction.GetOrCompute(FactionName(r), () => new List<CustomRole>()).Add(r));
+        IRoleManager.Current.RoleDefinitions().ForEach(r => rolesByFaction.GetOrCompute(FactionName(r), () => new List<UnifiedRoleDefinition>()).Add(r));
 
         string text = "";
 
@@ -54,7 +61,7 @@ internal class TUAllRoles
                 factionName = fName;
             }
 
-            roleNames.Add(r.RoleName);
+            roleNames.Add(r.Name);
         });
 
         text += roleNames.Fuse();

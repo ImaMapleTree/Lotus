@@ -17,7 +17,7 @@ public class RecomputeTaskPatch
         __instance.CompletedTasks = 0;
         __instance.AllPlayers.ToArray()
             .Where(Utils.HasTasks)
-            .Where(p => p.GetCustomRole() is ITaskHolderRole taskHolder && taskHolder.TasksApplyToTotal())
+            .Where(p => p.GetPrimaryRole() is ITaskHolderRole taskHolder && taskHolder.TasksApplyToTotal())
             .SelectMany(p => p?.Tasks?.ToArray() ?? Array.Empty<GameData.TaskInfo>())
             .ForEach(task =>
             {

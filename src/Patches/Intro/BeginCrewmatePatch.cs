@@ -1,11 +1,12 @@
 using System.Linq;
 using AmongUs.GameOptions;
 using HarmonyLib;
-using Lotus.Roles;
+using Lotus.API;
 using Lotus.Extensions;
 using Lotus.Logging;
-using Lotus.Roles.Builtins;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2;
+using Lotus.Roles2.Definitions;
 using UnityEngine;
 using VentLib.Localization;
 
@@ -20,10 +21,10 @@ class BeginCrewmatePatch
     {
         //チーム表示変更
         DevLogger.Log("Begin Crewmate");
-        CustomRole role = PlayerControl.LocalPlayer.GetCustomRole();
-        if (role is EmptyRole) return;
+        UnifiedRoleDefinition role = PlayerControl.LocalPlayer.PrimaryRole();
+        if (role is NoOpDefinition) return;
 
-        switch (role.SpecialType)
+        switch (role.Metadata.GetOrDefault(LotusKeys.AuxiliaryRoleType, SpecialType.None))
         {
             case SpecialType.NeutralKilling:
             case SpecialType.Undead:
@@ -43,9 +44,9 @@ class BeginCrewmatePatch
                 break;
         }
 
-        if (role is not GameMaster) return;
+        if (role.RoleDefinition is not GameMaster) return;
 
-        __instance.TeamTitle.text = role.RoleName;
+        __instance.TeamTitle.text = role.Name;
         __instance.TeamTitle.color = role.RoleColor;
         __instance.BackgroundBar.material.color = role.RoleColor;
         __instance.ImpostorText.gameObject.SetActive(false);

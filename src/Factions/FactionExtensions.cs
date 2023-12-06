@@ -1,18 +1,15 @@
 using Lotus.Factions.Interfaces;
-using Lotus.Roles;
 using Lotus.Extensions;
+using Lotus.Roles2;
+using Lotus.Roles2.Operations;
 
 namespace Lotus.Factions;
 
 public static class FactionExtensions
 {
-    public static Relation Relationship(this PlayerControl player, PlayerControl other) => player.GetCustomRole().Relationship(other);
+    public static Relation Relationship(this PlayerControl player, PlayerControl other) => RoleOperations.Current.Relationship(player, other);
 
-    public static Relation Relationship(this PlayerControl player, CustomRole other) => player.Relationship(other.Faction);
+    public static Relation Relationship(this PlayerControl player, UnifiedRoleDefinition other) => RoleOperations.Current.Relationship(player.PrimaryRole(), other);
 
-    public static Relation Relationship(this PlayerControl player, IFaction faction) => player.GetCustomRole().Relationship(faction);
-
-    public static Relation Relationship(this CustomRole role, CustomRole other) => role.Relationship(other.Faction);
-
-    public static Relation Relationship(this CustomRole role, IFaction faction) => role.Faction.Relationship(faction);
+    public static Relation Relationship(this PlayerControl player, IFaction faction) => RoleOperations.Current.Relationship(player.PrimaryRole(), faction);
 }

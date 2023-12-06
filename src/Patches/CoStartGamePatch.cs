@@ -1,8 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using HarmonyLib;
 using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
+using Lotus.Managers;
+using Lotus.Roles2.Manager;
 using LotusTrigger.Options;
 using VentLib.Utilities.Extensions;
 
@@ -11,6 +14,8 @@ namespace Lotus.Patches;
 [HarmonyPatch(typeof(AmongUsClient), nameof(AmongUsClient.CoStartGame))]
 class CoStartGamePatch
 {
+    private static readonly StandardLogger log = LoggerFactory.GetLogger<StandardLogger>(typeof(CoStartGamePatch));
+
     public static void Prefix(AmongUsClient __instance)
     {
         if (GeneralOptions.MiscellaneousOptions.ColoredNameMode) Players.GetPlayers().ForEach(player =>
@@ -29,8 +34,16 @@ class CoStartGamePatch
         ProjectLotus.ResetCamPlayerList = new List<byte>();
         FallFromLadder.Reset();
 
-        Game.State = GameState.InIntro;
-        Players.GetPlayers().Do(p => Game.MatchData.Roles.MainRoles[p.PlayerId] = ProjectLotus.RoleManager.Default);
-        Game.CurrentGamemode.Setup();
+        try
+        {
+            Game.State = GameState.InIntro;
+            Players.GetPlayers().Do(p => Game.MatchData.Roles.PrimaryRoleDefinitions[p.PlayerId] = IRoleManager.Current.DefaultDefinition);
+            Game.CurrentGameMode.Setup();
+        }
+        catch (Exception exception)
+        {
+            FatalErrorHandler.ForceEnd(exception, "Setup Phase");
+        }
+
     }
 }

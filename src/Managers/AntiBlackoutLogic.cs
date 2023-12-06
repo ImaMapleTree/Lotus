@@ -27,7 +27,7 @@ public static class AntiBlackoutLogic
         foreach (PlayerControl player in players)
         {
             if (player.IsHost() || player.IsModded()) continue;
-            log.Trace($"Patching For: {player.name} ({player.GetCustomRole().RoleName})", "AntiBlackout");
+            log.Trace($"Patching For: {player.name} ({player.PrimaryRole().Name})", "AntiBlackout");
             ReviveEveryone(exiledPlayer);
 
             bool wasImpostor = roleTracker.GetAllImpostorIds(player.PlayerId).Contains(0);

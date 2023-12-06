@@ -4,6 +4,7 @@ using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
 
@@ -29,7 +30,7 @@ public class DoorSabotage : ISabotage
     public bool Fix(PlayerControl? fixer = null)
     {
         ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, this, fixer == null ? PlayerControl.LocalPlayer : fixer);
+        RoleOperations.Current.TriggerForAll(LotusActionType.SabotageFixed, fixer == null ? PlayerControl.LocalPlayer : fixer, handle, this);
         if (handle.IsCanceled) return false;
 
         Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
@@ -49,7 +50,7 @@ public class DoorSabotage : ISabotage
         if (sendAction)
         {
             ActionHandle handle = ActionHandle.NoInit();
-            Game.TriggerForAll(LotusActionType.SabotageFixed, ref handle, this, fixer == null ? PlayerControl.LocalPlayer : fixer);
+            RoleOperations.Current.TriggerForAll(LotusActionType.SabotageFixed, fixer == null ? PlayerControl.LocalPlayer : fixer, handle, this);
             Hooks.SabotageHooks.SabotageFixedHook.Propagate(new SabotageFixHookEvent(fixer, this));
             if (handle.IsCanceled) return false;
         }

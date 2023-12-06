@@ -41,7 +41,33 @@ public interface Hook<T>: Hook where T: IHookEvent
     /// <param name="replace">if a present binding should be replaced with the new binding</param>
     /// <param name="priority">the priority for this hook's execution. values closer to zero get executed sooner</param>
     /// <exception cref="ArgumentException">thrown if consumer already exists for key and replace is false</exception>
+    Hook<T> Bind(Type key, Action<T> eventConsumer, bool replace = false, Priority priority = Priority.Normal) => Bind(key.Name, eventConsumer, replace, priority);
+
+
+    /// <summary>
+    /// Binds an event consumer to the hook under the given key, if a consumer already exists under the given key, and replace is false
+    /// throws an exception
+    /// </summary>
+    /// <param name="key">key to bind consumer to</param>
+    /// <param name="eventConsumer">a function taking in a <see cref="IHookEvent"/></param>
+    /// <param name="replace">if a present binding should be replaced with the new binding</param>
+    /// <param name="priority">the priority for this hook's execution. values closer to zero get executed sooner</param>
+    /// <exception cref="ArgumentException">thrown if consumer already exists for key and replace is false</exception>
     Hook<T> Bind(string key, Action eventConsumer, bool replace = false, Priority priority = Priority.Normal)
+    {
+        return Bind(key, _ => eventConsumer(), replace, priority);
+    }
+
+    /// <summary>
+    /// Binds an event consumer to the hook under the given key, if a consumer already exists under the given key, and replace is false
+    /// throws an exception
+    /// </summary>
+    /// <param name="key">key to bind consumer to</param>
+    /// <param name="eventConsumer">a function taking in a <see cref="IHookEvent"/></param>
+    /// <param name="replace">if a present binding should be replaced with the new binding</param>
+    /// <param name="priority">the priority for this hook's execution. values closer to zero get executed sooner</param>
+    /// <exception cref="ArgumentException">thrown if consumer already exists for key and replace is false</exception>
+    Hook<T> Bind(Type key, Action eventConsumer, bool replace = false, Priority priority = Priority.Normal)
     {
         return Bind(key, _ => eventConsumer(), replace, priority);
     }

@@ -6,7 +6,7 @@ using Lotus.GUI.Name;
 
 namespace Lotus.GUI;
 
-[MeansImplicitUse]
+[UsedImplicitly]
 [AttributeUsage(AttributeTargets.Field | AttributeTargets.Method)]
 public class UIComponent: Attribute
 {

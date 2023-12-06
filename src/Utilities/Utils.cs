@@ -11,6 +11,7 @@ using Lotus.Roles.Interfaces;
 using Lotus.API.Reactive;
 using Lotus.API.Reactive.HookEvents;
 using Lotus.Extensions;
+using Lotus.Roles2;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Networking.RPC.Interfaces;
@@ -37,8 +38,9 @@ public static class Utils
 
     public static bool HasTasks(GameData.PlayerInfo p)
     {
-        if (p.GetCustomRole().RealRole.IsImpostor()) return false;
-        return p.GetCustomRole() is ITaskHolderRole taskHolderRole && taskHolderRole.HasTasks();
+        if (p.GetPrimaryRole()?.RoleDefinition.Role.IsImpostor() ?? true) return false;
+        UnifiedRoleDefinition? primaryDefinition = p.GetPrimaryRole();
+        return primaryDefinition != null && primaryDefinition.Metadata.GetOrEmpty(TaskContainer.Key).Compare(t => t.HasTasks);
     }
 
     public static void Teleport(CustomNetworkTransform nt, Vector2 location)
@@ -79,28 +81,6 @@ public static class Utils
 
 
     public static string RemoveHtmlTags(this string str) => Regex.Replace(str, "<[^>]*?>", "");
-
-    public static Sprite LoadSprite(string path, float pixelsPerUnit = 100f, bool linear = false, int mipMapLevel = 0)
-    {
-        Sprite sprite = null;
-        try
-        {
-            var stream = Assembly.GetCallingAssembly().GetManifestResourceStream(path);
-            var texture = new Texture2D(1, 1, TextureFormat.ARGB32, true, linear);
-            using MemoryStream ms = new();
-            stream.CopyTo(ms);
-            ImageConversion.LoadImage(texture, ms.ToArray());
-            sprite = Sprite.Create(texture, new Rect(0, 0, texture.width, texture.height), new Vector2(0.5f, 0.5f), pixelsPerUnit);
-            sprite.texture.requestedMipmapLevel = mipMapLevel;
-        }
-        catch (Exception e)
-        {
-            log.Exception($"Error Loading Asset: \"{path}\"", "LoadImage");
-            log.Exception("LoadImage", e);
-        }
-
-        return sprite;
-    }
 
     public static AudioClip LoadAudioClip(string path, string clipName = "UNNAMED_TOR_AUDIO_CLIP")
     {

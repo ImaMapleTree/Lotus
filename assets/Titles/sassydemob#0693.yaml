@@ -1,0 +1,14 @@
+UpperText:
+  Size: 1.6
+  Text: Let's Get Stabby
+  Gradient: "#ff0576, #fcff41"
+Prefix:
+  Text: ♡
+  Color: "#fcff41"
+  Spaced: true
+Suffix:
+  Text: ♡
+  Color: "#ff0576"
+  Spaced: true
+Name:
+  Gradient: "#ff0576, #fcff41"

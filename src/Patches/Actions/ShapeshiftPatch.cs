@@ -8,6 +8,7 @@ using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
+using Lotus.Roles2.Operations;
 using Lotus.RPC;
 using VentLib.Utilities;
 using Priority = HarmonyLib.Priority;
@@ -33,11 +34,7 @@ public static class ShapeshiftPatch
 
 
         ActionHandle handle = ActionHandle.NoInit();
-        __instance.Trigger(shapeshifting ? LotusActionType.Shapeshift : LotusActionType.Unshapeshift, ref handle, target);
-
-        if (handle.IsCanceled) return;
-
-        Game.TriggerForAll(shapeshifting ? LotusActionType.AnyShapeshift : LotusActionType.AnyUnshapeshift, ref handle, __instance, target);
+        RoleOperations.Current.Trigger(shapeshifting ? LotusActionType.Shapeshift : LotusActionType.Unshapeshift, __instance, handle, target);
 
         if (handle.IsCanceled) return;
 

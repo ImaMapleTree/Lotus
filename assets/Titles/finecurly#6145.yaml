@@ -1,0 +1,14 @@
+UpperText:
+ Text: ALWAYS SUS # This is the text that goes above your username
+ Gradient: "#C8FE2E , #9AFE2E , #80FF00 , #00FF00 , #64FE2E , #82FA58 , #64FE2E , #40FF00 , #00FF00  , #01DF01" # Creates a gradient FROM Color 1 to Color 2 automatically
+  
+Name: # This is the size and color/gradient attributed to your username. Leave this line blank and fill in the options below 
+ Gradient: "#01DF01 , #00FF00 , #40FF00 , #64FE2E , #82FA58 , #64FE2E , #00FF00 , #80FF00 , #9AFE2E , #C8FE2E" # Creates a gradient from Color 1 to Color 2 automatically. For gradient enter "[hex 1], [hex 2]" (refer to examples above)
+
+Prefix: # This is the size, color, and text that goes before your username. Leave this line blank and fill in the options below
+ Spaced: True # This field is either True or False and used if there should be a space between the Suffix and the player's username (example: ♥ shiftyrose)
+ Text: 😅 # Add the text you'd like to go before your username here   
+
+Suffix: # This is the size, color, and text that goes after your username. Leave this line blank and fill in the options below
+ Spaced: True # This field is either True or False and used if there should be a space between the Suffix and the player's username (example: shiftyrose ♥)
+ Text: 😅 # Add the text you'd like to go before your username here   

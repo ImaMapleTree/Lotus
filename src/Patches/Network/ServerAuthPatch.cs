@@ -7,18 +7,16 @@ namespace Lotus.Patches.Network;
 
 public class ServerAuthPatch
 {
+    public static bool IsLocal;
     private static Queue<byte> _ignoreBroadcastQueue = new();
 
 
     [QuickPostfix(typeof(Constants), nameof(Constants.GetBroadcastVersion))]
     public static void ConstantVersionPatch(ref int __result)
     {
-        bool isLocal = _ignoreBroadcastQueue.TryDequeue(out byte _);
-
-        IServerVersionHandler versionHandler = ServerPatchManager.Patch.FindHandler<IServerVersionHandler>(PatchedCode.ServerVersion)!;
-        if (!versionHandler.GetBroadcastVersion(isLocal, out int serverVersion)) return;
-
-        __result = serverVersion;
+        // ReSharper disable once AssignmentInConditionalExpression
+        if (IsLocal = _ignoreBroadcastQueue.TryDequeue(out _)) return;
+        __result += 25;
     }
 
 

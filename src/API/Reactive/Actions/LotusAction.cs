@@ -14,7 +14,7 @@ public class LotusAction
 
     internal LotusActionAttribute Attribute;
     internal MethodInfo Method;
-    internal object? Executer;
+    internal object Executer = null!;
 
     public LotusAction(LotusActionAttribute attribute, MethodInfo method)
     {
@@ -24,17 +24,17 @@ public class LotusAction
         this.Attribute = attribute;
     }
 
-    public virtual void Execute(object role, object[] args)
+    public virtual void Execute(object[] args)
     {
-        log.Trace($"RoleAction(type={ActionType}, executer={Executer ?? role}, priority={Priority}, method={Method}))", "RoleAction::Execute");
+        log.Trace($"RoleAction(type={ActionType}, executer={Executer}, priority={Priority}, method={Method}))", "RoleAction::Execute");
         Profiler.Sample sample1 = Profilers.Global.Sampler.Sampled($"Action::{ActionType}");
         Profiler.Sample sample2 = Profilers.Global.Sampler.Sampled((Method.ReflectedType?.FullName ?? "") + "." + Method.Name);
-        Method.InvokeAligned(Executer ?? role, args);
+        Method.InvokeAligned(Executer, args);
         sample1.Stop();
         sample2.Stop();
     }
 
-    public virtual void ExecuteFixed(object role)
+    public virtual void ExecuteFixed(object? role = null)
     {
         Method.Invoke(Executer ?? role, null);
     }

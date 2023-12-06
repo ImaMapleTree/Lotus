@@ -7,6 +7,8 @@ using Lotus.Roles.Internals;
 using Lotus.API.Stats;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2;
+using Lotus.Roles2.Operations;
 using UnityEngine;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
@@ -24,9 +26,8 @@ class EnterVentPatch
     {
         if (!AmongUsClient.Instance.AmHost) return;
         log.Trace($"{pc.GetNameWithRole()} Entered Vent (ID: {__instance.Id})", "CoEnterVent");
-        CustomRole role = pc.GetCustomRole();
+        UnifiedRoleDefinition role = pc.PrimaryRole();
         ActionHandle vented = ActionHandle.NoInit();
-        pc.Trigger(LotusActionType.MyEnterVent, ref vented, __instance);
 
         if (!role.CanVent())
         {
@@ -42,7 +43,7 @@ class EnterVentPatch
         }
 
         vented = ActionHandle.NoInit();
-        Game.TriggerForAll(LotusActionType.AnyEnterVent, ref vented, __instance, pc);
+        RoleOperations.Current.Trigger(LotusActionType.VentEntered, pc, vented, __instance);
         if (vented.IsCanceled) Async.Schedule(() => pc.MyPhysics.RpcBootFromVent(__instance.Id), 0.4f);
         else VanillaStatistics.TimesVented.Update(pc.PlayerId, i => i + 1);
     }
@@ -55,7 +56,7 @@ class ExitVentPatch
     {
         if (!AmongUsClient.Instance.AmHost) return;
         ActionHandle exitVent = ActionHandle.NoInit();
-        pc.Trigger(LotusActionType.VentExit, ref exitVent, __instance);
+        RoleOperations.Current.Trigger(LotusActionType.VentExit, pc, exitVent, __instance);
         if (exitVent.IsCanceled) Async.Schedule(() => RpcV3.Immediate(pc.MyPhysics.NetId, RpcCalls.EnterVent, SendOption.None).WritePacked(__instance.Id).Send(), 0.5f);
         else EnterVentPatch.LastVentLocation.Remove(pc.PlayerId);
     }

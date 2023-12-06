@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using Il2CppSystem;
 using Lotus.Utilities;
 using TMPro;
@@ -26,7 +27,11 @@ public class LogUI: MonoBehaviour
 
     public void PassRequirements(HudManager hudManager)
     {
-        chatInputField = Instantiate(hudManager.Chat.chatScreen.GetComponentInChildren<FreeChatInputField>(), anchorObject.transform);
+        object i = 0;
+        int c = 200;
+        bool truth = (int)c > (int)i;
+
+               chatInputField = Instantiate(hudManager.Chat.chatScreen.GetComponentInChildren<FreeChatInputField>(), anchorObject.transform);
         chatInputField.charCountText.transform.localPosition += new Vector3(0f, 100f, 0f);
         chatInputField.OnSubmitEvent = (Action)Submit;
         chatInputField.gameObject.transform.localPosition = new Vector3(-0.24f, -2.08f, -5f);

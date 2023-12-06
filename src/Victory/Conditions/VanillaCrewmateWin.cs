@@ -7,6 +7,7 @@ using Lotus.Factions.Interfaces;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
 using Lotus.Extensions;
+using Lotus.Roles2;
 using VentLib.Localization.Attributes;
 
 namespace Lotus.Victory.Conditions;
@@ -36,9 +37,10 @@ public class VanillaCrewmateWin: IFactionWinCondition
 
         bool hasAliveEnemy = false;
         bool hasOneTaskDoer = false;
-        foreach (CustomRole role in Players.GetPlayers().Select(p => p.GetCustomRole()))
+        foreach (UnifiedRoleDefinition role in Players.GetPlayers().Select(p => p.PrimaryRole()))
         {
-            if (role is ITaskHolderRole taskHolder && taskHolder.TasksApplyToTotal() && taskHolder.HasTasks()) hasOneTaskDoer = true;
+            TaskContainer taskContainer = role.Metadata.GetOrDefault(TaskContainer.Key, TaskContainer.None);
+            if (taskContainer is { TasksApplyToTotal: true, HasTasks: true }) hasOneTaskDoer = true;
             if (IsEligibleEnemy(role)) hasAliveEnemy = true;
             if (hasOneTaskDoer && hasAliveEnemy) break;
         }
@@ -50,12 +52,12 @@ public class VanillaCrewmateWin: IFactionWinCondition
     }
 
     // Determines if the given role is an "enemy role"
-    private static bool IsEligibleEnemy(AbstractBaseRole role)
+    private static bool IsEligibleEnemy(UnifiedRoleDefinition roleDefinition)
     {
-        PlayerControl player = role.MyPlayer;
+        PlayerControl player = roleDefinition.MyPlayer;
         if (!player.IsAlive()) return false;
-        if (role.Faction.Relationship(FactionInstances.Crewmates) is not Relation.None) return false;
-        return (player.GetVanillaRole().IsImpostor() || role.RoleAbilityFlags.HasFlag(RoleAbilityFlag.IsAbleToKill)) && !role.RoleFlags.HasFlag(RoleFlag.CannotWinAlone);
+        if (roleDefinition.Faction.Relationship(FactionInstances.Crewmates) is not Relation.None) return false;
+        return (player.GetVanillaRole().IsImpostor() || RoleProperties.IsAbleToKill(roleDefinition)) && !RoleProperties.CannotWinAlone(roleDefinition);
     }
 
     private static bool CheckTaskCompletion()

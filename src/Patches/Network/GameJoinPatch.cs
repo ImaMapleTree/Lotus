@@ -22,7 +22,7 @@ class GameJoinPatch
         log.High($"Joining Lobby (GameID={__instance.GameId})", "GameJoin");
         SoundManager.Instance.ChangeMusicVolume(DataManager.Settings.Audio.MusicVolume);
 
-        GameJoinHookEvent gameJoinHookEvent = new(_lastGameId != __instance.GameId);
+        GameJoinHookEvent gameJoinHookEvent = new(_lastGameId != __instance.GameId || ServerAuthPatch.IsLocal);
         Hooks.NetworkHooks.GameJoinHook.Propagate(gameJoinHookEvent);
         _lastGameId = __instance.GameId;
 

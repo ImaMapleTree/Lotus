@@ -10,11 +10,10 @@ public enum LotusActionType
     /// Any action specifically taken by a player
     /// Parameters: (PlayerControl source, RoleAction action, object[] parameters)
     /// </summary>
-    AnyPlayerAction,
+    PlayerAction,
     /// <summary>
-    /// Triggers when any player pets
+    /// Triggers when a player pets
     /// </summary>
-    AnyPet,
     OnPet,
     /// <summary>
     /// Triggers when the pet button is held down. This gets sent every 0.4 seconds if the button is held down. The
@@ -34,12 +33,7 @@ public enum LotusActionType
     /// Triggers whenever the player enters a vent (this INCLUDES vent activation)
     /// Parameters: (Vent vent)
     /// </summary>
-    MyEnterVent,
-    /// <summary>
-    /// Triggered when a player ACTUALLY enters a vent (not just Vent activation)
-    /// Parameters: (Vent vent, PlayerControl venter)
-    /// </summary>
-    AnyEnterVent,
+    VentEntered,
     VentExit,
     SuccessfulAngelProtect,
     SabotageStarted,
@@ -49,9 +43,7 @@ public enum LotusActionType
     /// </summary>
     SabotagePartialFix,
     SabotageFixed,
-    AnyShapeshift,
     Shapeshift,
-    AnyUnshapeshift,
     Unshapeshift,
     /// <summary>
     /// Triggered when my player attacks another player<br/>
@@ -59,28 +51,28 @@ public enum LotusActionType
     /// </summary>
     Attack,
     /// <summary>
-    /// Triggered when my player dies. This action <b>CANNOT</b> be canceled. <br/>
+    /// Triggers when a player dies. This cannot be canceled
     /// </summary>
-    /// <param name="killer"><see cref="PlayerControl"/> the killer</param>
-    /// <param name="realKiller"><see cref="Optional{T}"/> the OPTIONAl real killer (exists if killed indirectly)</param>
-    MyDeath,
-    SelfExiled,
+    /// <param name="victim"><b>(GLOBAL ONLY)</b> <see cref="PlayerControl"/> the dead player</param>
+    /// <param name="killer"><see cref="PlayerControl"/> the killing player</param>
+    /// <param name="deathEvent"><see cref="Lotus.Managers.History.Events.IDeathEvent"/> the related death event </param>
+    PlayerDeath,
     /// <summary>
     /// Triggers when any player gets exiled (by being voted out)
     /// </summary>
+    /// <param name="victim"><b>(GLOBAL ONLY)</b> <see cref="PlayerControl"/> the exiled player</param>
     /// <param name="exiled"><see cref="GameData.PlayerInfo"/> the exiled player</param>
-    AnyExiled,
+    Exiled,
     /// <summary>
     /// Triggers on Round Start (end of meetings, and start of game)
     /// Parameters: (bool isRoundOne)
     /// </summary>
     RoundStart,
     RoundEnd,
-    SelfReportBody,
     /// <summary>
     /// Triggers when any player reports a body. <br></br>Parameters: (PlayerControl reporter, PlayerInfo reported)
     /// </summary>
-    AnyReportedBody,
+    ReportBody,
     /// <summary>
     /// Triggers when any player completes a task. This cannot be canceled (Currently)
     /// </summary>
@@ -90,38 +82,19 @@ public enum LotusActionType
     TaskComplete,
     FixedUpdate,
     /// <summary>
-    /// Triggers when any player dies. This cannot be canceled
-    /// </summary>
-    /// <param name="victim"><see cref="PlayerControl"/> the dead player</param>
-    /// <param name="killer"><see cref="PlayerControl"/> the killing player</param>
-    /// <param name="deathEvent"><see cref="Lotus.Managers.History.Events.IDeathEvent"/> the related death event </param>
-    AnyDeath,
-    /// <summary>
     /// Triggers when my player votes for someone (or skips)
     /// </summary>
+    /// <param name="voter"><b>(GLOBAL ONLY)</b> <see cref="PlayerControl"/> the player voting</param>
     /// <param name="voted"><see cref="PlayerControl"/> the player voted for, or null if skipped</param>
     /// <param name="delegate"><see cref="MeetingDelegate"/> the meeting delegate for the current meeting</param>
-    MyVote,
-    /// <summary>
-    /// Triggers when any player votes for someone (or skips)
-    /// </summary>
-    /// <param name="voter"><see cref="PlayerControl"/> the player voting</param>
-    /// <param name="voted"><see cref="PlayerControl"/> the player voted for, or null if skipped</param>
-    /// <param name="delegate"><see cref="MeetingDelegate"/> the meeting delegate for the current meeting</param>
-    AnyVote,
+    Vote,
     /// <summary>
     /// Triggers whenever another player interacts with THIS role
     /// </summary>
+    /// <param name="target"><b>(GLOBAL ONLY)</b> <see cref="PlayerControl"/> the player being interacted with</param>
     /// <param name="interactor"><see cref="PlayerControl"/> the player starting the interaction</param>
     /// <param name="interaction"><see cref="Interaction"/> the interaction</param>
     Interaction,
-    /// <summary>
-    /// Triggers whenever another player interacts with any other player
-    /// </summary>
-    /// <param name="interactor"><see cref="PlayerControl"/> the player starting the interaction</param>
-    /// <param name="target"><see cref="PlayerControl"/> the player being interacted with</param>
-    /// <param name="interaction"><see cref="Interaction"/> the interaction</param>
-    AnyInteraction,
     /// <summary>
     /// Triggers whenever a player sends a chat message. This action cannot be canceled.
     /// </summary>

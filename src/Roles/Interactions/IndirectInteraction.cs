@@ -1,10 +1,14 @@
+extern alias JBAnnotations;
+using JBAnnotations::JetBrains.Annotations;
 using Lotus.Roles.Interactions.Interfaces;
+using Lotus.Roles2;
 
 namespace Lotus.Roles.Interactions;
 
+[UsedImplicitly]
 public class IndirectInteraction : LotusInteraction, IIndirectInteraction
 {
-    public IndirectInteraction(Intent intent, CustomRole? customRole = null) : base(intent, customRole)
+    public IndirectInteraction(Intent intent, UnifiedRoleDefinition? roleDefinition = null) : base(intent, roleDefinition)
     {
     }
 

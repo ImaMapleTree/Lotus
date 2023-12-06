@@ -10,10 +10,12 @@ using Lotus.Roles.Internals.Enums;
 
 namespace Lotus.Roles.Internals.Attributes;
 
+[UsedImplicitly]
 [MeansImplicitUse]
 [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = false)] // Inherited = false because inheritance is managed through Subclassing, DO NOT WORRY!
 public class RoleActionAttribute: LotusActionAttribute
 {
+    public ActionFlag ActionFlags { get; }
     public bool WorksAfterDeath { get; }
     public bool Blockable { set; get; }
     /// <summary>
@@ -21,10 +23,11 @@ public class RoleActionAttribute: LotusActionAttribute
     /// </summary>
     public String? Override;
 
-    public RoleActionAttribute(LotusActionType actionType, bool triggerAfterDeath = false, bool blockable = true, Priority priority = Priority.Normal): base(actionType, priority)
+    public RoleActionAttribute(LotusActionType actionType, ActionFlag actionFlags = ActionFlag.None, Priority priority = Priority.Normal): base(actionType, priority)
     {
-        this.WorksAfterDeath = triggerAfterDeath || actionType is LotusActionType.MyDeath or LotusActionType.SelfExiled;
-        this.Blockable = blockable && actionType is not LotusActionType.MyVote;
+        this.ActionFlags = actionFlags;
+        this.WorksAfterDeath = actionFlags.HasFlag(ActionFlag.WorksAfterDeath) || actionType is LotusActionType.PlayerDeath or LotusActionType.Exiled;
+        this.Blockable = !actionFlags.HasFlag(ActionFlag.Unblockable) && actionType is not LotusActionType.Vote;
     }
 
     public override string ToString() => $"RoleAction(type={ActionType}, Priority={Priority}, Blockable={Blockable}, Subclassing={Subclassing}, Override={Override})";
@@ -40,10 +43,9 @@ public static class RoleActionTypeMethods
         return actionType switch
         {
             LotusActionType.None => false,
-            LotusActionType.AnyPlayerAction => false,
+            LotusActionType.PlayerAction => false,
             LotusActionType.OnPet => true,
-            LotusActionType.MyEnterVent => true,
-            LotusActionType.AnyEnterVent => true,
+            LotusActionType.VentEntered => true,
             LotusActionType.VentExit => true,
             LotusActionType.SuccessfulAngelProtect => false,
             LotusActionType.SabotageStarted => true,
@@ -52,24 +54,17 @@ public static class RoleActionTypeMethods
             LotusActionType.Shapeshift => true,
             LotusActionType.Unshapeshift => true,
             LotusActionType.Attack => true,
-            LotusActionType.MyDeath => false,
-            LotusActionType.SelfExiled => false,
-            LotusActionType.AnyExiled => false,
+            LotusActionType.PlayerDeath => false,
+            LotusActionType.Exiled => false,
             LotusActionType.RoundStart => false,
             LotusActionType.RoundEnd => false,
-            LotusActionType.SelfReportBody => true,
-            LotusActionType.AnyReportedBody => false,
+            LotusActionType.ReportBody => true,
             LotusActionType.TaskComplete => false,
             LotusActionType.FixedUpdate => false,
-            LotusActionType.AnyDeath => false,
-            LotusActionType.MyVote => true,
-            LotusActionType.AnyVote => false,
+            LotusActionType.Vote => true,
             LotusActionType.Interaction => false,
-            LotusActionType.AnyInteraction => false,
             LotusActionType.OnHoldPet => false,
             LotusActionType.OnPetRelease => false,
-            LotusActionType.AnyShapeshift => false,
-            LotusActionType.AnyUnshapeshift => false,
             LotusActionType.Chat => false,
             LotusActionType.Disconnect => false,
             LotusActionType.VotingComplete => false,

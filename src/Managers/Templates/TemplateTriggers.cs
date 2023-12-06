@@ -7,6 +7,7 @@ using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Managers.Templates.Models;
 using Lotus.Roles.Interfaces;
+using Lotus.Roles2;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -69,7 +70,7 @@ public class TemplateTriggers
 
     public static ResolvedTrigger ResultFromPlayerTaskHook(PlayerTaskHookEvent playerHookEvent)
     {
-        return new ResolvedTrigger { Player = playerHookEvent.Player, Data =(playerHookEvent.Player.GetCustomRole() is ITaskHolderRole holderRole ? holderRole.CompleteTasks : -1).ToString() };
+        return new ResolvedTrigger { Player = playerHookEvent.Player, Data =(playerHookEvent.Player.PrimaryRole().Metadata.GetOrDefault(TaskContainer.Key, TaskContainer.None).TasksComplete).ToString() };
     }
 
     public static ResolvedTrigger ResultFromCustomCommandHook(CustomCommandHookEvent commandHookEvent)

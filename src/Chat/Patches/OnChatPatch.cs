@@ -9,6 +9,7 @@ using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using LotusTrigger.Options;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
@@ -40,7 +41,7 @@ public static class OnChatPatch
             EatMessage = false;
             if (Game.State is GameState.InLobby) return !eat;
             ActionHandle handle = ActionHandle.NoInit();
-            Game.TriggerForAll(LotusActionType.Chat, ref handle, sourcePlayer, chatText, Game.State, sourcePlayer.IsAlive());
+            RoleOperations.Current.TriggerForAll(LotusActionType.Chat, sourcePlayer, handle, chatText, Game.State, sourcePlayer.IsAlive());
             return !eat;
         }
         AmongUsClient.Instance.KickPlayer(sourcePlayer.GetClientId(), false);

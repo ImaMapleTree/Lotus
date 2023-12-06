@@ -1,0 +1,15 @@
+UpperText:
+  Text: Cereal Killer
+  Gradient: "#7400b8, #80ffdb" 
+
+Prefix:
+  Text: ☆
+  Gradient: "#7400b8" 
+
+
+Suffix:
+  Text: ☆
+  Gradient: "#80ffdb"  
+
+Name:
+  Gradient: "#7400b8, #80ffdb" 

@@ -14,6 +14,7 @@ using Lotus.Extensions;
 using Lotus.Logging;
 using Lotus.Options.LotusImpl;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using LotusTrigger.Options;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Harmony.Attributes;
@@ -63,9 +64,7 @@ public class CheckForEndVotingPatch
 
         byte exiledPlayer = meetingDelegate.ExiledPlayer?.PlayerId ?? 255;
 
-
-        ActionHandle handle = ActionHandle.NoInit();
-        Players.GetPlayers().TriggerOrdered(LotusActionType.VotingComplete, ref handle, meetingDelegate);
+        RoleOperations.Current.Trigger(LotusActionType.VotingComplete, null, meetingDelegate);
 
         // WE DO NOT RECALCULATE THE EXILED PLAYER!
         // This means its up to roles that modify the meeting delegate to properly update the exiled player
@@ -120,9 +119,10 @@ public class CheckForEndVotingPatch
         MeetingDelegate meetingDelegate = MeetingDelegate.Instance;
         meetingDelegate.ExiledPlayer = playerInfo;
 
-        ActionHandle noCancel = ActionHandle.NoInit();
-        Game.TriggerForAll(LotusActionType.MeetingEnd, ref noCancel, Optional<GameData.PlayerInfo>.Of(playerInfo),
-            meetingDelegate.IsTie, new Dictionary<byte, int>(meetingDelegate.CurrentVoteCount()), new Dictionary<byte, List<Optional<byte>>>(meetingDelegate.CurrentVotes()));
+        RoleOperations.Current.Trigger(LotusActionType.MeetingEnd, null,
+            Optional<GameData.PlayerInfo>.Of(playerInfo), meetingDelegate.IsTie,
+            new Dictionary<byte, int>(meetingDelegate.CurrentVoteCount()),
+            new Dictionary<byte, List<Optional<byte>>>(meetingDelegate.CurrentVotes()));
         DevLogger.GameInfo();
     }
 }

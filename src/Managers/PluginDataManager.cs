@@ -34,8 +34,6 @@ public static class PluginDataManager
     public static readonly DirectoryInfo ModifiableDataDirectory;
     public static readonly DirectoryInfo HiddenDataDirectory;
 
-    public static TemplateCommandMigrator TemplateCommandMigrator;
-    private static TemplateMigration _templateMigration;
     public static TemplateManager TemplateManager;
 
     public static ChatManager ChatManager;
@@ -57,10 +55,8 @@ public static class PluginDataManager
 
         TemplateManager = TryLoad(() => new TemplateManager(ModifiableDataDirectory.GetFile(TemplateFile2)), "Template Manager")!;
 
-        _templateMigration = TryLoad(() => new TemplateMigration(ModifiableDataDirectory.GetFile(TemplateFile), LegacyDataDirectoryTOH.GetFile(TOHTemplateFile)), "Template Migrator")!;
         ChatManager = TryLoad(() => new ChatManager(ModifiableDataDirectory.GetFile(WordListFile)), "Chat Manager")!;
         FriendManager = TryLoad(() => new FriendManager(ModifiableDataDirectory.GetFile(FriendListFile)), "Friend Manager")!;
-        TemplateCommandMigrator = TryLoad(() => new TemplateCommandMigrator(ModifiableDataDirectory.GetFile(TemplateCommandFile)), "Template Command Migrator")!;
         TitleManager = TryLoad(() => new TitleManager(ModifiableDataDirectory.GetDirectory(TitleDirectory)), "Title Manager")!;
         BanManager = TryLoad(() => new BanManager(ModifiableDataDirectory.GetFile(BannedPlayerFile)), "Ban Manager")!;
     }

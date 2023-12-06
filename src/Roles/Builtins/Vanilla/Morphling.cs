@@ -1,4 +1,4 @@
-using Lotus.Roles.Internals.Attributes;
+/*using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Internals.Enums;
 using VentLib.Options.Game;
 
@@ -11,4 +11,4 @@ public class Morphling : Shapeshifter
 
     protected override GameOptionBuilder RegisterOptions(GameOptionBuilder optionStream) =>
         AddShapeshiftOptions(base.RegisterOptions(optionStream));
-}
+}*/

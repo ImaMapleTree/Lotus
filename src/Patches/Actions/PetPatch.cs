@@ -6,6 +6,7 @@ using Lotus.API.Odyssey;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using VentLib.Networking.RPC;
 using VentLib.Utilities;
 using VentLib.Utilities.Harmony.Attributes;
@@ -49,13 +50,8 @@ public class PetPatch
         Async.Schedule(() => ClearPetHold(player, timesPet), NetUtils.DeriveDelay(0.5f, 0.005f));
 
         log.Trace($"{player.name} => Pet", "PetPatch");
-        ActionHandle handle = ActionHandle.NoInit();
-        Game.TriggerForAll(LotusActionType.AnyPet, ref handle, player);
-        player.Trigger(LotusActionType.OnPet, ref handle, __instance);
-
-        handle = ActionHandle.NoInit();
-        player.Trigger(LotusActionType.OnHoldPet, ref handle, __instance, timesPet);
-
+        RoleOperations.Current.Trigger(LotusActionType.OnPet, player, __instance);
+        RoleOperations.Current.Trigger(LotusActionType.OnHoldPet, player, __instance, timesPet);
     }
 
     private static void ClearPetHold(PlayerControl player, int currentTimes)
@@ -64,7 +60,6 @@ public class PetPatch
         if (timesHeld != currentTimes) return;
 
         TimesPet[player.PlayerId] = 0;
-        ActionHandle handle = ActionHandle.NoInit();
-        player.Trigger(LotusActionType.OnPetRelease, ref handle, timesHeld);
+        RoleOperations.Current.Trigger(LotusActionType.OnPetRelease, player, timesHeld);
     }
 }

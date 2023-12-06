@@ -1,9 +1,7 @@
 #nullable enable
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using AmongUs.GameOptions;
-using HarmonyLib;
 using Hazel;
 using InnerNet;
 using Lotus.API.Odyssey;
@@ -15,10 +13,11 @@ using Lotus.Managers.History.Events;
 using Lotus.Patches.Actions;
 using Lotus.Roles;
 using Lotus.Roles.Internals;
-using Lotus.Roles.Internals.Attributes;
 using Lotus.Roles.Internals.Enums;
 using Lotus.Roles.Overrides;
-using Lotus.Server;
+using Lotus.Roles2;
+using Lotus.Roles2.Manager;
+using Lotus.Roles2.Operations;
 using UnityEngine;
 using VentLib.Utilities.Extensions;
 using VentLib.Networking.RPC;
@@ -34,55 +33,7 @@ public static class PlayerControlExtensions
 
     public static UniquePlayerId UniquePlayerId(this PlayerControl player) => API.Player.UniquePlayerId.From(player);
 
-    public static void Trigger(this PlayerControl player, LotusActionType action, ref ActionHandle handle, params object[] parameters)
-    {
-        if (player == null) return;
-        CustomRole role = player.GetCustomRole();
-        List<CustomRole> subroles = player.GetSubroles();
-        if (action is LotusActionType.FixedUpdate)
-        {
-            role.Trigger(action, ref handle, parameters);
-            if (handle is { IsCanceled: true }) return;
-            foreach (CustomRole subrole in subroles)
-            {
-                subrole.Trigger(action, ref handle, parameters);
-                if (handle is { IsCanceled: true }) return;
-            }
-            return;
-        }
-
-        handle.ActionType = action;
-        parameters = parameters.AddToArray(handle);
-
-        foreach ((RoleAction? roleAction, AbstractBaseRole? abstractBaseRole) in role.GetActions(action).Concat(subroles.SelectMany(sr => sr.GetActions(action))).OrderBy(a => a.Item1.Priority))
-        {
-            DevLogger.Log(roleAction);
-            PlayerControl myPlayer = abstractBaseRole.MyPlayer;
-            if (handle.Cancellation is not (ActionHandle.CancelType.None or ActionHandle.CancelType.Soft)) continue;
-            if (myPlayer == null || !myPlayer.IsAlive() && !roleAction.TriggerWhenDead) continue;
-
-            try
-            {
-                if (action.IsPlayerAction())
-                {
-                    Hooks.PlayerHooks.PlayerActionHook.Propagate(new PlayerActionHookEvent(myPlayer, roleAction, parameters));
-                    Game.TriggerForAll(LotusActionType.AnyPlayerAction, ref handle, myPlayer, roleAction, parameters);
-                }
-
-                handle.ActionType = action;
-
-                if (handle.Cancellation is not (ActionHandle.CancelType.None or ActionHandle.CancelType.Soft)) continue;
-
-                roleAction.Execute(abstractBaseRole, parameters);
-            }
-            catch (Exception e)
-            {
-                log.Exception($"Failed to execute RoleAction {action}.", e);
-            }
-        }
-    }
-
-    public static CustomRole GetCustomRole(this PlayerControl player)
+    public static UnifiedRoleDefinition PrimaryRole(this PlayerControl player)
     {
         if (player == null)
         {
@@ -91,19 +42,15 @@ public static class PlayerControlExtensions
             string callerMethodName = callerMethod.Name;
             string? callerClassName = callerMethod.DeclaringType.FullName;
             log.Warn(callerClassName + "." + callerMethodName + " Invalid Custom Role", "GetCustomRole");
-            return ProjectLotus.RoleManager.Default;
+            return ProjectLotus.GameModeManager.CurrentGameMode.RoleManager.DefaultDefinition;
         }
-
-        CustomRole? role = Game.MatchData.Roles.MainRoles.GetValueOrDefault(player.PlayerId);
-        return role ?? ProjectLotus.RoleManager.Default;
+        UnifiedRoleDefinition? role = Game.MatchData.Roles.PrimaryRoleDefinitions.GetValueOrDefault(player.PlayerId);
+        return role ?? IRoleManager.Current.DefaultDefinition;
     }
 
-    public static CustomRole? GetCustomRoleSafe(this PlayerControl player)
+    public static UnifiedRoleDefinition? GetCustomRoleSafe(this PlayerControl player)
     {
-        if (player == null) return null;
-
-        CustomRole? role = Game.MatchData.Roles.MainRoles.GetValueOrDefault(player.PlayerId);
-        return role ?? ProjectLotus.RoleManager.Default;
+        return player == null ? null : Game.MatchData.Roles.PrimaryRoleDefinitions.GetValueOrDefault(player.PlayerId);
     }
 
     public static CustomRole? GetSubrole(this PlayerControl player)
@@ -113,22 +60,12 @@ public static class PlayerControlExtensions
         return role[0];
     }
 
-    public static T? GetSubrole<T>(this PlayerControl player) where T: CustomRole
-    {
-        return player.GetSubrole() as T;
-    }
-
-    public static List<CustomRole> GetSubroles(this PlayerControl player)
-    {
-        return Game.MatchData.Roles.SubRoles.GetOrCompute(player.PlayerId, () => new List<CustomRole>());
-    }
+    public static List<UnifiedRoleDefinition> SecondaryRoles(this PlayerControl player) => Game.MatchData.Roles.GetSecondaryRoles(player.PlayerId);
 
     public static void SyncAll(this PlayerControl player)
     {
         if (player == null) return;
-        CustomRole playerRole = player.GetCustomRole();
-        IEnumerable<GameOptionOverride> overrides = playerRole.CurrentRoleOverrides().Concat(player.GetSubroles().SelectMany(sr => sr.CurrentRoleOverrides()));
-        playerRole.SyncOptions(overrides, parameterOverridesAreAbsolute: true);
+        IRoleManager.Current.RoleOperations.SyncOptions(player);
     }
 
     public static void RpcSetRoleDesync(this PlayerControl player, RoleTypes role, int clientId)
@@ -143,7 +80,26 @@ public static class PlayerControlExtensions
         RpcV3.Immediate(player.NetId, RpcCalls.SetRole).Write((ushort)role).Send(clientId);
     }
 
-    public static void RpcMark(this PlayerControl killer, PlayerControl? target = null, int colorId = 0) => ServerPatchManager.Patch.Execute(PatchedCode.RpcMark, killer, target, colorId);
+    public static void RpcMark(this PlayerControl killer, PlayerControl? target = null, int colorId = 0)
+    {
+        if (target == null) target = killer;
+        MurderPatches.Lock(killer.PlayerId);
+
+        // Host
+        if (killer.AmOwner)
+        {
+            killer.ProtectPlayer(target, colorId);
+            killer.MurderPlayer(target);
+        }
+
+        // Other Clients
+        if (killer.PlayerId == 0) return;
+
+        RpcV3.Mass()
+            .Start(killer.NetId, RpcCalls.ProtectPlayer).Write(target).Write(colorId).End()
+            .Start(killer.NetId, RpcCalls.MurderPlayer).Write(target).End()
+            .Send(killer.GetClientId());
+    }
 
     public static void SetKillCooldown(this PlayerControl player, float time)
     {
@@ -156,16 +112,15 @@ public static class PlayerControlExtensions
         else
         {
             // IMPORTANT: This could be a possible "issue" area
-            CustomRole playerRole = player.GetCustomRole();
-            Remote<GameOptionOverride> remote = playerRole.AddOverride(new GameOptionOverride(Override.KillCooldown, time * 2));
-            playerRole.SyncOptions();
-
-            Async.Schedule(() => player.RpcMark(), NetUtils.DeriveDelay(0.5f));
+            // Maybe implement Consumable Coroutine?
+            UnifiedRoleDefinition roleDefinition = player.PrimaryRole();
+            IRemote remote = Game.CurrentGameMode.AddOverride(player.PlayerId, new GameOptionOverride(Override.KillCooldown, time * 2));
+            roleDefinition.SyncOptions();
 
             Async.Schedule(() =>
             {
                 remote.Delete();
-                playerRole.SyncOptions();
+                roleDefinition.SyncOptions();
             }, time);
         }
     }
@@ -192,16 +147,11 @@ public static class PlayerControlExtensions
         AmongUsClient.Instance.FinishRpcImmediately(messageWriter);
     }
 
-    public static T? GetCustomRole<T>(this PlayerControl player) where T : CustomRole
-    {
-        return (player.GetCustomRole() as T) ?? player.GetSubrole<T>();
-    }
-
     public static string? GetAllRoleName(this PlayerControl player)
     {
         if (!player) return null;
-        var text = player.GetCustomRole().RoleName;
-        List<CustomRole> subroles = player.GetSubroles();
+        var text = player.PrimaryRole().Name;
+        List<UnifiedRoleDefinition> subroles = player.SecondaryRoles();
         if (subroles.Count == 0) return text;
 
         text += subroles.StrJoin().Replace("[", " (").Replace("]", ")");
@@ -216,7 +166,7 @@ public static class PlayerControlExtensions
 
     public static Color GetRoleColor(this PlayerControl player)
     {
-        return player.GetCustomRole().RoleColor;
+        return player.PrimaryRole().RoleColor;
     }
 
     public static void ResetPlayerCam(this PlayerControl pc, float delay = 0f, PlayerControl? target = null)
@@ -250,8 +200,7 @@ public static class PlayerControlExtensions
         }
 
         ActionHandle uselessHandle = ActionHandle.NoInit();
-        player.Trigger(LotusActionType.SelfExiled, ref uselessHandle);
-        Game.TriggerForAll(LotusActionType.AnyExiled, ref uselessHandle, player);
+        RoleOperations.Current.TriggerForAll(LotusActionType.Exiled, player, uselessHandle);
 
         Hooks.PlayerHooks.PlayerExiledHook.Propagate(new PlayerHookEvent(player));
         Hooks.PlayerHooks.PlayerDeathHook.Propagate(new PlayerDeathHookEvent(player, new ExiledEvent(player, new List<PlayerControl>(), new List<PlayerControl>())));
@@ -269,8 +218,7 @@ public static class PlayerControlExtensions
 
         ActionHandle ignored = ActionHandle.NoInit();
         Optional<FrozenPlayer> fp = Optional<FrozenPlayer>.Of(Game.MatchData.GetFrozenPlayer(player));
-        target.Trigger(LotusActionType.MyDeath, ref ignored, player, fp, deathEvent);
-        Game.TriggerForAll(LotusActionType.AnyDeath, ref ignored, target, player, fp, deathEvent);
+        RoleOperations.Current.TriggerForAll(LotusActionType.PlayerDeath, target, ignored, player, fp, deathEvent);
 
         PlayerMurderHookEvent playerMurderHookEvent = new(player, target, deathEvent);
         Hooks.PlayerHooks.PlayerMurderHook.Propagate(playerMurderHookEvent);
@@ -282,11 +230,7 @@ public static class PlayerControlExtensions
         }, 0.1f);
     }
 
-    public static CustomRole GetCustomRole(this GameData.PlayerInfo? playerInfo)
-    {
-        if (playerInfo == null) return ProjectLotus.RoleManager.Default;
-        return Game.MatchData.Roles.GetMainRole(playerInfo.PlayerId);
-    }
+
 
     ///<summary>
     ///プレイヤーのRoleBehaviourのGetPlayersInAbilityRangeSortedを実行し、戻り値を返します。

@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
+using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.Chat.Patches;
@@ -9,6 +10,8 @@ using Lotus.Managers;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2;
+using Lotus.Roles2.Manager;
 using UnityEngine;
 using VentLib.Commands;
 using VentLib.Commands.Attributes;
@@ -32,18 +35,21 @@ public class BasicCommands: CommandTranslations
         string? factionName = null;
         string text = $"{HostOptionTranslations.CurrentRoles}:\n";
 
-        OrderedDictionary<string, List<CustomRole>> rolesByFaction = new();
+        OrderedDictionary<string, List<UnifiedRoleDefinition>> defsByFactions = new();
 
-        string FactionName(CustomRole role)
+        string FactionName(UnifiedRoleDefinition roleDefinition)
         {
-            if (role is ISubrole) return "Modifiers";
-            if (role.Faction is not Neutral) return role.Faction.Name();
-            return role.SpecialType is SpecialType.NeutralKilling ? "Neutral Killers" : "Neutral";
+            if (roleDefinition.Metadata.GetOrEmpty(RoleProperties.Key).Compare(r => r.HasProperty(RoleProperty.IsModifier))) return "Modifiers";
+            if (roleDefinition.Faction is not Neutral) return roleDefinition.Faction.Name();
+
+            SpecialType specialType = roleDefinition.Metadata.GetOrDefault(LotusKeys.AuxiliaryRoleType, SpecialType.None);
+
+            return specialType is SpecialType.NeutralKilling ? "Neutral Killers" : "Neutral";
         }
 
-        ProjectLotus.RoleManager.AllRoles.ForEach(r => rolesByFaction.GetOrCompute(FactionName(r), () => new List<CustomRole>()).Add(r));
+        IRoleManager.Current.RoleDefinitions().ForEach(r => defsByFactions.GetOrCompute(FactionName(r), () => new List<UnifiedRoleDefinition>()).Add(r));
 
-        rolesByFaction.GetValues().SelectMany(s => s).ForEach(r =>
+        defsByFactions.GetValues().SelectMany(s => s).ForEach(r =>
         {
 
             if (r.Count == 0 || r.Chance == 0) return;
@@ -57,7 +63,7 @@ public class BasicCommands: CommandTranslations
             }
 
 
-            text += $"{r.RoleName}: {r.Count} × {r.Chance}%";
+            text += $"{r.Name}: {r.Count} × {r.Chance}%";
             if (r.Count > 1) text += $" (+ {r.AdditionalChance}%)\n";
             else text += "\n";
         });
@@ -82,7 +88,7 @@ public class BasicCommands: CommandTranslations
             .Send(source);
         else
         {
-            string winnerText = Game.MatchData.GameHistory.LastWinners.Select(w => $"• {w.Name} ({w.Role.RoleName})").Fuse("\n");
+            string winnerText = Game.MatchData.GameHistory.LastWinners.Select(w => $"• {w.Name} ({w.PrimaryRoleDefinition.Name})").Fuse("\n");
             ChatHandler.Of(winnerText, ModConstants.Palette.WinnerColor.Colorize(Winners)).LeftAlign().Send(source);
         }
 

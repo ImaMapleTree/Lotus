@@ -6,6 +6,7 @@ using Lotus.API.Odyssey;
 using Lotus.API.Stats;
 using Lotus.Managers.History;
 using Lotus.Roles;
+using Lotus.Roles2;
 using TMPro;
 using UnityEngine;
 using VentLib.Utilities;
@@ -95,7 +96,7 @@ public class WinnersMenu
         for (int index = 0; index < allPlayers.Count; index++)
         {
             PlayerHistory playerHistory = allPlayers[index];
-            CustomRole role = playerHistory.Role;
+            UnifiedRoleDefinition role = playerHistory.PrimaryRoleDefinition;
             PoolablePlayer newPlayer = prefabPlayer;//Object.Instantiate(prefabPlayer, prefabPlayer.transform.parent);
             newPlayer.gameObject.SetActive(true);
             newPlayer.UpdateFromPlayerOutfit(playerHistory.Outfit, PlayerMaterial.MaskType.ComplexUI, false, false);
@@ -112,7 +113,7 @@ public class WinnersMenu
                 .Map(stat => $"{stat.Name()}: {stat.GetGenericValue(playerHistory.UniquePlayerId)}")
                 .OrElse("");
 
-            string name = playerHistory.Name + "\n" + role.RoleColor.Colorize(role.RoleName) + "\n" + bestStat;
+            string name = playerHistory.Name + "\n" + role.RoleColor.Colorize(role.Name) + "\n" + bestStat;
             newPlayer.SetName(name);
 
             TextMeshPro aboveNameTmp = Object.Instantiate(newPlayer.cosmetics.nameText, newPlayer.transform);

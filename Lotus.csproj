@@ -11,12 +11,12 @@
     <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <Deterministic>false</Deterministic>
+    <DefineConstants>JETBRAINS_ANNOTATIONS</DefineConstants>
   </PropertyGroup>
   
   <PropertyGroup>
     <debug>true</debug>
   </PropertyGroup>
-  
   
   <ItemGroup>
     <!--<Reference Include="E:\SteamLibrary\steamapps\common\Among Us - LOTUS\dump\Assembly-CSharp-2023.6.13.dll" />-->
@@ -56,10 +56,6 @@
     <Content Remove="./SourceGenerators/**/*" />
     <Compile Remove="./SourceGenerators/**/*" />
   </ItemGroup>
-  
-  
-  
-  
   
   
   <Target Name="Copy" AfterTargets="Build" Condition="'$(AmongUs)' != ''">

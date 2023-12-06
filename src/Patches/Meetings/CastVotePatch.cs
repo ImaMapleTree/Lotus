@@ -9,6 +9,7 @@ using Lotus.Roles.Internals;
 using Lotus.Utilities;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -27,9 +28,7 @@ public class CastVotePatch
         Optional<PlayerControl> voted = Utils.PlayerById(suspectPlayerId);
         log.Trace($"{voter.GetNameWithRole()} voted for {voted.Map(v => v.name)}");
 
-        ActionHandle handle = ActionHandle.NoInit();
-        voter.Trigger(LotusActionType.MyVote, ref handle,MeetingDelegate.Instance, voted);
-        Game.TriggerForAll(LotusActionType.AnyVote, ref handle, MeetingDelegate.Instance, voter, voted);
+        ActionHandle handle = RoleOperations.Current.Trigger(LotusActionType.Vote, voter, MeetingDelegate.Instance, voted);
 
         if (!handle.IsCanceled)
         {

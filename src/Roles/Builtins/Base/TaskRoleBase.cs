@@ -40,7 +40,7 @@ public abstract class TaskRoleBase: CustomRole, IOverridenTaskHolderRole
     [UIComponent(UI.Counter, ViewMode.Overriden, GameState.InMeeting, GameState.Roaming)]
     protected string TaskTracker() => RealRole.IsImpostor() ? "" : RoleUtils.Counter(TasksComplete, TotalTasks);
 
-    [RoleAction(LotusActionType.RoundStart, blockable: false, triggerAfterDeath: true)]
+    [RoleAction(LotusActionType.RoundStart, ActionFlag.WorksAfterDeath | ActionFlag.Unblockable)]
     protected void SetTaskTotal(bool gameStart)
     {
         if (!gameStart) return;
@@ -48,14 +48,13 @@ public abstract class TaskRoleBase: CustomRole, IOverridenTaskHolderRole
         tasks = taskSupplier?.Invoke() ?? 0;
     }
 
-    [RoleAction(LotusActionType.TaskComplete, triggerAfterDeath: true, blockable: false)]
+    [RoleAction(LotusActionType.TaskComplete, ActionFlag.WorksAfterDeath | ActionFlag.Unblockable)]
     protected void InternalTaskComplete(PlayerControl player, Optional<NormalPlayerTask> task)
     {
         DevLogger.Log("TRask complete");
         if (player.PlayerId != MyPlayer.PlayerId) return;
         TasksComplete++;
         if (player.IsAlive()) this.OnTaskComplete(task);
-        Game.MatchData.GameHistory.AddEvent(new TaskCompleteEvent(player));
     }
 
     public bool AssignCommonTasks() => HasCommonTasks;

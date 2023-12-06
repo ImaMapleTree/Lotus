@@ -39,7 +39,7 @@ internal class PersistentAssetLoader: MonoBehaviour
         GameObject anchor = gameObject.CreateChild("Anchor");
         anchors.Add(anchor);
         SpriteRenderer render = anchor.AddComponent<SpriteRenderer>();
-        render.sprite = Utils.LoadSprite(path, pixelsPerUnit);
+        render.sprite = AssetLoader.LoadSprite(path, pixelsPerUnit);
         render.enabled = false;
         _spriteRenderers[key] = render;
     }

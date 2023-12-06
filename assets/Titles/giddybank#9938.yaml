@@ -1,0 +1,17 @@
+﻿UpperText:
+  Text: THE AWESOME
+  Color: "#FFDD00"
+  Size: 1.9
+Name:
+  Size: 3
+  Gradient: "#CC1010,#F58D00,#FFDD00,#C5F700,#16C5F5,#BB00FF" #Creates a gradient FROM Color 1 to Color 2 automatically
+
+Prefix:
+  Text: ★
+  Spaced: true
+  Color: "#FFDD00"
+
+Suffix:
+  Text: ★
+  Spaced: true
+  Color: "#FFDD00"

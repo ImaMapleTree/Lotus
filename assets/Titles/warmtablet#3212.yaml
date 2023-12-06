@@ -1,0 +1,17 @@
+Name:
+  Gradient: "#3BCFD4, #FC9305, #F20094"
+
+UpperText:
+  Size: 1.925
+  Text: ♡ Tipsy ♡
+  Gradient: "#3BCFD4,#F20094, #F74B4B, #FC9305,#96B373, #3BCFD4,#F20094"
+
+Prefix:
+  Text: ♥
+  Spaced: true
+  Color: "#F20094"
+
+Suffix:
+  Text: ♥
+  Spaced: true
+  Color: "#3BCFD4"

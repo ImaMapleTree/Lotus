@@ -1,0 +1,15 @@
+UpperText:
+  Text: DragonTamer
+  Gradient: "#00CF37, #C91717"   
+
+Prefix: 
+  Text: "☁"
+  Color: "#FFFFFF"
+
+
+Suffix:
+  Text: "☁"
+  Color: "#FFFFFF"    
+
+Name:
+  Gradient: "#C51212,#DD7215,#E2DB15,#44DA12,#18DFA3,#086CAA,#791CC6" 

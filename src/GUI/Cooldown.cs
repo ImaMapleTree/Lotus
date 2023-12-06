@@ -1,22 +1,33 @@
 using System;
 using System.Globalization;
+using Lotus.Managers;
 using Lotus.Roles.Internals.Interfaces;
+using Lotus.Roles2.Attributes;
+using Lotus.Roles2.Interfaces;
 using UnityEngine;
 
 namespace Lotus.GUI;
 
+[SetupInjected(useCloneIfPresent: true), InstantiateOnSetup(true)]
 public class Cooldown: ICloneOnSetup<Cooldown>
 {
     public float Duration;
+    public bool IsCoroutine;
     private float remaining;
     private DateTime lastTick = DateTime.Now;
     private Action? action;
 
     public Cooldown() {}
 
-    public Cooldown(float duration)
+    public Cooldown(float duration, bool isCoroutine = false)
     {
         this.Duration = duration;
+        this.IsCoroutine = isCoroutine;
+    }
+
+    public Cooldown(bool isCoroutine)
+    {
+        this.IsCoroutine = true;
     }
 
     public bool NotReady() => TimeRemaining() > 0;
@@ -25,6 +36,7 @@ public class Cooldown: ICloneOnSetup<Cooldown>
     {
         remaining = duration == float.MinValue ? Duration : duration;
         lastTick = DateTime.Now;
+        if (IsCoroutine) CooldownManager.SubmitCooldown(this);
     }
 
     public void Finish()

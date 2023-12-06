@@ -1,4 +1,4 @@
-using AmongUs.GameOptions;
+/*using AmongUs.GameOptions;
 using Lotus.API;
 using Lotus.Options;
 using Lotus.Roles.Internals.Attributes;
@@ -37,4 +37,4 @@ public class Shapeshifter : Impostor
             .CanVent(true)
             .OptionOverride(Override.ShapeshiftCooldown, () => ShapeshiftCooldown ?? AUSettings.ShapeshifterCooldown())
             .OptionOverride(Override.ShapeshiftDuration, () => ShapeshiftDuration ?? AUSettings.ShapeshifterDuration());
-}
+}*/

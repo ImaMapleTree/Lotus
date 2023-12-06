@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using AmongUs.Data;
 using InnerNet;
+using Lotus.API;
 using Lotus.API.Odyssey;
 using Lotus.API.Player;
 using Lotus.Chat;
@@ -14,6 +15,7 @@ using Lotus.Managers.Templates.Models.Backing;
 using Lotus.Managers.Templates.Models.Units.Actions;
 using Lotus.Roles;
 using Lotus.Roles.Interfaces;
+using Lotus.Roles2;
 using Lotus.Utilities;
 using VentLib.Options;
 using VentLib.Options.Game;
@@ -66,7 +68,7 @@ public class TemplateUnit
         { "ModName" , _ => ProjectLotus.ModName },
         { "ModVersion", _ => ProjectLotus.PluginVersion + (ProjectLotus.DevVersion ? " " + ProjectLotus.DevVersionStr : "") },
         { "Map", _ => Constants.MapNames[GameOptionsManager.Instance.CurrentGameOptions.MapId] },
-        { "Gamemode", _ => Game.CurrentGamemode.Name },
+        { "GameMode", _ => Game.CurrentGameMode.Name },
         { "Date", _ => DateTime.Now.ToShortDateString() },
         { "Time", _ => DateTime.Now.ToShortTimeString() },
         { "Players", _ => PlayerControl.AllPlayerControls.ToArray().Select(p => p.name).Fuse() },
@@ -98,26 +100,26 @@ public class TemplateUnit
         { "Name", player => ((PlayerControl) player).name },
         { "Level", player => ((PlayerControl) player).Data.PlayerLevel.ToString() },
         { "Color", player => ModConstants.ColorNames[((PlayerControl) player).cosmetics.bodyMatProperties.ColorId] },
-        { "Role", player =>((PlayerControl)player).GetCustomRole().ColoredRoleName() },
-        { "Blurb", player => ((PlayerControl) player).GetCustomRole().Blurb },
-        { "Description", player => ((PlayerControl) player).GetCustomRole().Description },
+        { "Role", player =>((PlayerControl)player).PrimaryRole().ColoredRoleName() },
+        { "Blurb", player => ((PlayerControl) player).PrimaryRole().Blurb },
+        { "Description", player => ((PlayerControl) player).PrimaryRole().Description },
         { "Status", player => Optional<FrozenPlayer>.Of(Game.MatchData.GetFrozenPlayer((PlayerControl)player)).Map(StatusCommand.GetPlayerStatus).OrElse("")},
         { "Death", player => Game.MatchData.GameHistory.GetCauseOfDeath(((PlayerControl)player).PlayerId).Map(c => c.SimpleName()).OrElse("Unknown") },
         { "Killer", player => Game.MatchData.GameHistory.GetCauseOfDeath(((PlayerControl)player).PlayerId).FlatMap(c => c.Instigator()).Map(p => p.Name).OrElse("Unknown") },
-        { "Options", player => OptionUtils.OptionText(((PlayerControl) player).GetCustomRole().RoleOptions) },
+        { "Options", player => OptionUtils.OptionText(((PlayerControl) player).PrimaryRole().OptionConsolidator.GetOption()) },
         { "Faction", player =>
             {
-                IFaction faction = ((PlayerControl)player).GetCustomRole().Faction;
+                IFaction faction = ((PlayerControl)player).PrimaryRole().Faction;
                 return faction.Color.Colorize(faction.Name());
             }
         },
         { "Modifiers", ShowModifiers },
         { "Mods", ShowModifiers },
         { "ModsDescriptive", ModifierText },
-        { "MyRole", player => MyRoleCommand.GenerateMyRoleText(((PlayerControl)player).GetCustomRole()) },
-        { "TasksComplete", QW(p => (p.GetCustomRole() is ITaskHolderRole tr ? tr.CompleteTasks : -1).ToString() )},
-        { "TotalTasks", QW(p => (p.GetCustomRole() is ITaskHolderRole tr ? tr.TotalTasks : -1).ToString() )},
-        { "TasksRemaining", QW(p => (p.GetCustomRole() is ITaskHolderRole tr ? tr.TotalTasks - tr.CompleteTasks : -1).ToString())},
+        { "MyRole", player => MyRoleCommand.GenerateMyRoleText(((PlayerControl)player).PrimaryRole()) },
+        { "TasksComplete", QW(p => (GetTaskContainer(p).TasksComplete).ToString() )},
+        { "TotalTasks", QW(p => (GetTaskContainer(p).TotalTasks).ToString() )},
+        { "TasksRemaining", QW(p => (GetTaskContainer(p).TotalTasks - GetTaskContainer(p).TasksComplete).ToString())},
 
         { "Role_Name", role => ((CustomRole) role).RoleName },
         { "Role_Description", role => ((CustomRole) role).Description },
@@ -132,9 +134,11 @@ public class TemplateUnit
         {"Arguments", _ => Arguments.Fuse(" ")}
     };
 
+    private static TaskContainer GetTaskContainer(PlayerControl player) => player.PrimaryRole().Metadata.GetOrDefault(TaskContainer.Key, TaskContainer.None);
+
     private static string ShowModifiers(object obj)
     {
-        return ((PlayerControl) obj).GetSubroles().OrderBy(r => r.RoleName).Select(r => r.ColoredRoleName()).Fuse();
+        return ((PlayerControl) obj).SecondaryRoles().OrderBy(r => r.Name).Select(r => r.ColoredRoleName()).Fuse();
     }
 
     public static readonly Dictionary<string, TFormat> VariableValues = new()
@@ -170,14 +174,14 @@ public class TemplateUnit
     private static string ModifierText(object obj)
     {
         PlayerControl player = (PlayerControl)obj;
-        IEnumerable<CustomRole> subroles = player.GetSubroles().OrderBy(r => r.RoleName);
+        IEnumerable<UnifiedRoleDefinition> subroles = player.SecondaryRoles().OrderBy(r => r.Name);
         if (PluginDataManager.TemplateManager.HasTemplate("modifier-info"))
             return subroles.Select(sr => !PluginDataManager.TemplateManager.TryFormat(sr, "modifier-info", out string text) ? "" : text).Fuse("\n\n");
 
         return subroles.Select(sr =>
         {
-            string identifierText = sr is ISubrole subrole ? sr.RoleColor.Colorize(subrole.Identifier() ?? "") + " " : "";
-            return $"{identifierText}{sr.RoleColor.Colorize(sr.RoleName)}\n{sr.Description}";
+            string symbol = sr.Metadata.GetOrEmpty(LotusKeys.ModifierSymbol).Map(s => sr.RoleColor.Colorize(s) + " ").OrElse("");
+            return $"{symbol}{sr.RoleColor.Colorize(sr.Name)}\n{sr.Description}";
         }).Fuse("\n\n");
     }
 

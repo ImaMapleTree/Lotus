@@ -8,6 +8,9 @@ using Lotus.Extensions;
 using Lotus.Managers.History;
 using Lotus.Roles;
 using Lotus.Roles.Overrides;
+using Lotus.Roles2;
+using Lotus.Roles2.Manager;
+using Lotus.Roles2.Operations;
 using Lotus.RPC;
 using Lotus.Server;
 using Lotus.Statuses;
@@ -33,8 +36,7 @@ public class MatchData
     public int MeetingsCalled;
     public int EmergencyButtonsUsed;
 
-    private static readonly Func<RemoteList<GameOptionOverride>> OptionOverrideListSupplier =
-        () => ServerPatchManager.Patch.ExecuteT<RemoteList<GameOptionOverride>>(PatchedCode.GlobalOverrides);
+    private static readonly Func<RemoteList<GameOptionOverride>> OptionOverrideListSupplier = GetGlobalOptions;
 
 
     public RoleData Roles = new();
@@ -52,6 +54,10 @@ public class MatchData
 
     public class RoleData
     {
+        public Dictionary<byte, UnifiedRoleDefinition> PrimaryRoleDefinitions { get; } = new();
+        public Dictionary<byte, List<UnifiedRoleDefinition>> SecondaryRoleDefinitions { get; } = new();
+
+
         public Dictionary<byte, CustomRole> MainRoles = new();
         public Dictionary<byte, List<CustomRole>> SubRoles = new();
 
@@ -68,29 +74,35 @@ public class MatchData
             return rolePersistentOverrides.GetOrCompute(playerId, OptionOverrideListSupplier);
         }
 
-        public CustomRole AddMainRole(byte playerId, CustomRole role) => MainRoles[playerId] = role;
-        public void AddSubrole(byte playerId, CustomRole subrole) => SubRoles.GetOrCompute(playerId, () => new List<CustomRole>()).Add(subrole);
+        public IEnumerable<UnifiedRoleDefinition> GetRoleDefinitions(byte playerId)
+        {
+            UnifiedRoleDefinition primaryRoleDefinition = GetPrimaryRole(playerId);
+            return new Singleton<UnifiedRoleDefinition>(primaryRoleDefinition).Concat(SecondaryRoleDefinitions.GetOrCompute(playerId, () => new List<UnifiedRoleDefinition>()));
+        }
 
-        public CustomRole GetMainRole(byte playerId) => MainRoles.GetValueOrDefault(playerId, ProjectLotus.RoleManager.Default);
-        public List<CustomRole> GetSubroles(byte playerId) => SubRoles.GetOrCompute(playerId, () => new List<CustomRole>());
+        public UnifiedRoleDefinition SetPrimaryRoleDefinition(byte playerId, UnifiedRoleDefinition roleDefinition) => PrimaryRoleDefinitions[playerId] = roleDefinition;
+        public void AddSecondaryRoleDefinition(byte playerId, UnifiedRoleDefinition secondaryRoleDefinition) => SecondaryRoleDefinitions.GetOrCompute(playerId, () => new List<UnifiedRoleDefinition>()).Add(secondaryRoleDefinition);
+
+        public UnifiedRoleDefinition GetPrimaryRole(byte playerId) => PrimaryRoleDefinitions.GetOptional(playerId).OrElseGet(() => throw new NoSuchRoleException($"Player ID ({playerId}) does not have a primary role."));
+        public List<UnifiedRoleDefinition> GetSecondaryRoles(byte playerId) => SecondaryRoleDefinitions.GetOrCompute(playerId, () => new List<UnifiedRoleDefinition>());
     }
 
 
-    [ModRPC((uint) ModCalls.SetCustomRole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
-    public static void AssignRole(PlayerControl player, CustomRole role, bool sendToClient = false)
+    [ModRPC(ModCalls.SetPrimaryRole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
+    public static void AssignRole(PlayerControl player, UnifiedRoleDefinition roleDefinition, bool sendToClient = false)
     {
-        CustomRole assigned = Game.MatchData.Roles.AddMainRole(player.PlayerId, role = role.Instantiate(player));
-        Game.MatchData.FrozenPlayers.GetOptional(player.GetGameID()).IfPresent(fp => fp.Role = assigned);
-        if (Game.State is GameState.InLobby or GameState.InIntro) player.GetTeamInfo().MyRole = role.RealRole;
-        if (sendToClient) assigned.Assign();
+        UnifiedRoleDefinition assigned = Game.MatchData.Roles.SetPrimaryRoleDefinition(player.PlayerId, roleDefinition = roleDefinition.Instantiate(player));
+        Game.MatchData.FrozenPlayers.GetOptional(player.GetGameID()).IfPresent(fp => fp.PrimaryRoleDefinition = assigned);
+        if (Game.State is GameState.InLobby or GameState.InIntro) player.GetTeamInfo().MyRole = roleDefinition.RoleDefinition.Role;
+        if (sendToClient) RoleOperations.Current.Assign(roleDefinition, player);
     }
 
-    [ModRPC((uint) ModCalls.SetSubrole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
-    public static void AssignSubrole(PlayerControl player, CustomRole role, bool sendToClient = false)
+    [ModRPC(ModCalls.SetSecondaryRole, RpcActors.Host, RpcActors.NonHosts, MethodInvocation.ExecuteBefore)]
+    public static void AssignSecondaryRole(PlayerControl player, UnifiedRoleDefinition role, bool sendToClient = false)
     {
-        CustomRole instantiated = role.Instantiate(player);
-        Game.MatchData.Roles.AddSubrole(player.PlayerId, instantiated);
-        if (sendToClient) role.Assign();
+        UnifiedRoleDefinition instantiated = role.Instantiate(player);
+        Game.MatchData.Roles.AddSecondaryRoleDefinition(player.PlayerId, instantiated);
+        if (sendToClient) RoleOperations.Current.Assign(role, player);
     }
 
     public static RemoteList<IStatus>? GetStatuses(PlayerControl player)
@@ -107,5 +119,13 @@ public class MatchData
             Hooks.ModHooks.StatusReceivedHook.Propagate(new PlayerStatusReceivedHook(player, status, infector));
             return remote;
         }, () =>  null!);
+    }
+
+    // TODO make way better
+    public static RemoteList<GameOptionOverride> GetGlobalOptions()
+    {
+        RemoteList<GameOptionOverride> globalOverrides = new() { new GameOptionOverride(Override.ShapeshiftCooldown, 0.1f) };
+        if (AUSettings.ConfirmImpostor()) globalOverrides.Add(new GameOptionOverride(Override.ConfirmEjects, false));
+        return globalOverrides;
     }
 }

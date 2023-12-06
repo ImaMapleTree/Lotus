@@ -1,6 +1,7 @@
 using HarmonyLib;
 using Lotus.Extensions;
 using Lotus.Roles;
+using Lotus.Roles2;
 using UnityEngine;
 using VentLib.Utilities.Harmony.Attributes;
 
@@ -16,13 +17,13 @@ public class HighlightPatches
     {
         var player = PlayerControl.LocalPlayer;
         if (player.Data.IsDead) return;
-        __instance.cosmetics.currentBodySprite.BodySprite.material.SetColor(OutlineColor, player.GetCustomRole().RoleColor);
+        __instance.cosmetics.currentBodySprite.BodySprite.material.SetColor(OutlineColor, player.PrimaryRole().RoleColor);
     }
 
     [QuickPostfix(typeof(Vent), nameof(Vent.SetOutline))]
     public static void SetVentOutline(Vent __instance, [HarmonyArgument(1)] ref bool mainTarget)
     {
-        CustomRole role = PlayerControl.LocalPlayer.GetCustomRole();
+        UnifiedRoleDefinition role = PlayerControl.LocalPlayer.PrimaryRole();
 
         __instance.myRend.material.SetColor(OutlineColor, role.RoleColor);
         __instance.myRend.material.SetColor(AddColor, mainTarget ? role.RoleColor : Color.clear);

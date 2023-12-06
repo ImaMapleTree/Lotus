@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+/*using System.Collections.Generic;
 using AmongUs.GameOptions;
 using Lotus.API;
 using Lotus.API.Odyssey;
@@ -78,4 +78,4 @@ public class Impostor : CustomRole, ISabotagerRole
             .RoleAbilityFlags(RoleAbilityFlag.IsAbleToKill);
 
     public override List<Statistic> Statistics() => new() { VanillaStatistics.Kills };
-}
+}*/

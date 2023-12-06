@@ -3,6 +3,7 @@ using Lotus.API.Odyssey;
 using Lotus.Roles.Internals;
 using Lotus.Extensions;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using LotusTrigger.Options;
 using VentLib.Utilities;
 using VentLib.Utilities.Debug.Profiling;
@@ -13,6 +14,7 @@ namespace Lotus.Patches.Actions;
 [HarmonyPatch(typeof(PlayerControl), nameof(PlayerControl.FixedUpdate))]
 static class FixedUpdatePatch
 {
+    private static readonly ActionHandle FixedUpdateHandle = ActionHandle.NoInit();
     private static void Postfix(PlayerControl __instance)
     {
         Game.RecursiveCallCheck = 0;
@@ -27,8 +29,7 @@ static class FixedUpdatePatch
         uint id = Profilers.Global.Sampler.Start("Fixed Update Patch");
 
         var player = __instance;
-        ActionHandle handle = null;
-        __instance.Trigger(LotusActionType.FixedUpdate, ref handle);
+        RoleOperations.Current.Trigger(LotusActionType.FixedUpdate, null, FixedUpdateHandle);
 
         if (player.IsAlive() && GeneralOptions.GameplayOptions.EnableLadderDeath) FallFromLadder.FixedUpdate(player);
         Profilers.Global.Sampler.Stop(id);

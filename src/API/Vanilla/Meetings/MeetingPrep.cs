@@ -6,6 +6,7 @@ using Lotus.API.Reactive;
 using Lotus.Victory;
 using Lotus.Roles.Internals;
 using Lotus.Roles.Internals.Enums;
+using Lotus.Roles2.Operations;
 using VentLib.Utilities;
 using VentLib.Utilities.Extensions;
 using VentLib.Utilities.Optionals;
@@ -41,7 +42,7 @@ public class MeetingPrep
         if (!Prepped) _meetingDelegate = new MeetingDelegate();
         if (Prepped || !AmongUsClient.Instance.AmHost) return _meetingDelegate;
         ActionHandle handle = ActionHandle.NoInit();
-        if (reporter != null) Game.TriggerForAll(LotusActionType.MeetingCalled, ref handle, reporter, Optional<GameData.PlayerInfo>.Of(deadBody));
+        if (reporter != null) RoleOperations.Current.TriggerForAll(LotusActionType.MeetingCalled, reporter, handle, Optional<GameData.PlayerInfo>.Of(deadBody));
         if (handle.IsCanceled) return null;
 
         Game.State = GameState.InMeeting;

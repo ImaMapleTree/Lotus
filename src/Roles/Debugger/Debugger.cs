@@ -37,7 +37,7 @@ public class Debugger: CustomRole
 #if DEBUG
     static Debugger()
     {
-        ProjectLotus.RoleManager.AddRole(new Debugger(), LotusRoleType.Impostors);
+        //ProjectLotus.RoleManager.AddRole(new Debugger(), LotusRoleType.Impostors);
     }
 #endif
 
@@ -80,11 +80,11 @@ public class Debugger: CustomRole
 
     private void LogStats()
     {
-        log.Info($"{MyPlayer.GetNameWithRole()} | Dead? {MyPlayer.Data.IsDead} | AURole: {MyPlayer.Data.Role.name} | Custom Role: {MyPlayer.GetCustomRole().RoleName.RemoveHtmlTags()} | Subrole: {MyPlayer.GetSubrole()?.RoleName}", "DebuggerStats");
+        log.Info($"{MyPlayer.GetNameWithRole()} | Dead? {MyPlayer.Data.IsDead} | AURole: {MyPlayer.Data.Role.name} | Custom Role: {MyPlayer.PrimaryRole().Name.RemoveHtmlTags()} | Subrole: {MyPlayer.GetSubrole()?.RoleName}", "DebuggerStats");
         log.Info($"Stats | Total Players: {Players.GetPlayers().Count()} | Alive Players: {Players.GetPlayers(PlayerFilter.Alive).Count()}", "DebuggerStats");
         log.Info("-=-=-=-=-=-=-=-=-=-=-=-= Other Players =-=-=-=-=-=-=-=-=-=-=-=-", "DebuggerStats");
         foreach (PlayerControl player in Players.GetPlayers().Where(p => p.PlayerId != MyPlayer.PlayerId))
-            log.Info($"{player.GetNameWithRole()} | Dead? {player.Data.IsDead} | AURole: {player.Data.Role.name} | Custom Role: {player.GetCustomRole().RoleName.RemoveHtmlTags()} | Subrole: {player.GetSubrole()?.RoleName}", "DebuggerStats");
+            log.Info($"{player.GetNameWithRole()} | Dead? {player.Data.IsDead} | AURole: {player.Data.Role.name} | Custom Role: {player.PrimaryRole().Name.RemoveHtmlTags()} | Subrole: {player.GetSubrole()?.RoleName}", "DebuggerStats");
 
         log.Info("-=-=-=-=-=-=-=-= End Of Debugger =-=-=-=-=-=-=-=-", "DebuggerStats");
     }

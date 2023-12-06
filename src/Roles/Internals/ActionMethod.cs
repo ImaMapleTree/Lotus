@@ -16,6 +16,7 @@ public static class MethodInfoExtension
         {
             return info.Invoke(obj, BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance, null, AlignFunctionParameters(info, parameters), null);
         }
+        catch (TargetException) { throw; }
         catch (Exception e)
         {
             string fullName = $"{info.ReflectedType?.FullName}.{info.Name}({string.Join(",", info.GetParameters().Select(o => $"{o.ParameterType} {o.Name}").ToArray())})";
