@@ -325,13 +325,13 @@ Templates: #This is necessary for the file, do not remove this line!
 ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 #### Default lobby-join Template
-![lobby-join](https://cdn.discordapp.com/attachments/1117632307487064145/1117942315974135868/image.png)
+![lobby-join](./Images/welcomemessage.png)
 
 #### Default meeting-first Template
-![meeting-first](https://cdn.discordapp.com/attachments/1117632307487064145/1117919318538211429/image.png)
+![meeting-first](./Images/roleinfo.png)
 
 #### Default meeting-start Template
-![meeting-start](https://cdn.discordapp.com/attachments/1117632307487064145/1117913469526749255/Standard_Meeting-Start_.png)
+![meeting-start](./Images/helpfulcommands.png)
 
 #### Useful Templates Not Included With Defaults
 
@@ -548,7 +548,7 @@ Suffix:<br>
 
   
 __Output__:<br>
-![Alt text](https://cdn.discordapp.com/attachments/Neutral/1117295347434266674/image.png)
+![Alt text](./Images/tagexample1.png)
 
 #### Example 2
 
@@ -571,7 +571,7 @@ Suffix:<br>
 > Color: "#3BCFD4"<br>
 
 __Output__:<br>
-![Alt text](./Images/RoleImages/1109172438006235278/1116595347293220894/Screenshot_2023-05-31_181524.png)
+![Alt text](./Images/tagexample2.png)
 
 # General Settings
 
